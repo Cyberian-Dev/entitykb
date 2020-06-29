@@ -46,7 +46,8 @@ class Config:
 
     @classmethod
     def construct(cls, *, file_path: str, data: dict) -> "Config":
-        data = {k: v for k, v in data.items() if k in fields(cls)}
+        field_names = {class_field.name for class_field in fields(cls)}
+        data = {k: v for k, v in data.items() if k in field_names}
         config = Config(file_path=file_path, **data)
         return config
 
