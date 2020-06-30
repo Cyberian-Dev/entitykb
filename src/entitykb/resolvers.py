@@ -2,7 +2,7 @@ from typing import Optional, Union, Type, List
 
 from entitykb import (
     Doc,
-    MergeEntityFilterer,
+    KeepLongestByKey,
     DocEntity,
     DocToken,
     FindResult,
@@ -72,8 +72,7 @@ class Resolver(object):
         self, doc_entities: List[DocEntity]
     ) -> List[DocEntity]:
 
-        doc_entities = MergeEntityFilterer().filter(doc_entities)
-        doc_entities = sorted(doc_entities, key=lambda de: de.offset)
+        doc_entities = KeepLongestByKey().filter(doc_entities)
         self.clean_doc_tokens(doc_entities)
         return doc_entities
 
@@ -106,16 +105,6 @@ class Resolver(object):
             resolver = (resolver or DefaultResolver)(**kwargs)
 
         return resolver
-
-    @classmethod
-    def find_longest_only(cls):
-        """
-        Certain resolver/filter strategies, may require substring entities to
-        be resolved to work properly. But default is to find longest only.
-
-        See: entitykb.extractors.TokenHandler#handle_token
-        """
-        return True
 
     def create_handler(self, doc: Doc, label_set: LabelSet):
         return TokenHandler(resolver=self, doc=doc, label_set=label_set)

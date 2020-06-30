@@ -23,16 +23,6 @@ class FuzzyResolver(DefaultResolver):
         self.min_ratio = min_ratio
         super().__init__(**kwargs)
 
-    @classmethod
-    def find_longest_only(cls):
-        """
-        Fuzzy resolver should try to find all entities, not just longest one
-        since there can be comma-separated items.
-
-        See: entitykb.extractors.TokenHandler#handle_token
-        """
-        return False
-
     def do_resolve(
         self, doc, doc_tokens, prefix, label_set
     ) -> List[DocEntity]:

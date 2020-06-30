@@ -27,13 +27,10 @@ class TokenHandler(object):
         for (prefix, prefix_tokens) in self.prefixes.items():
             candidate = prefix + doc_token.token
 
-            was_prefix = False
             if self.resolver.is_prefix(term=candidate):
                 new_prefixes[candidate] = prefix_tokens + [doc_token]
-                was_prefix = True
 
-            if not was_prefix or not self.resolver.find_longest_only():
-                self.resolve_entity(prefix, prefix_tokens)
+            self.resolve_entity(prefix, prefix_tokens)
 
         # do resolve and is_prefix for just this doc_token
         if self.resolver.is_prefix(

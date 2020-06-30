@@ -2,10 +2,13 @@ from entitykb import (
     Doc,
     DocToken,
     Token,
-    MergeEntityFilterer,
+    KeepLongestOnly,
+    KeepLongestByKey,
+    KeepLongestByLabel,
     DocEntity,
     ExactOnlyFilterer,
     Filterer,
+    Entity,
 )
 
 
@@ -13,9 +16,9 @@ def test_construct():
     assert isinstance(
         Filterer.create("entitykb.ExactOnlyFilterer"), ExactOnlyFilterer
     )
-    assert isinstance(MergeEntityFilterer.create(), MergeEntityFilterer)
+    assert isinstance(KeepLongestByKey.create(), KeepLongestByKey)
 
-    filterer = MergeEntityFilterer()
+    filterer = KeepLongestByKey()
     assert Filterer.create(filterer) == filterer
 
 
@@ -24,12 +27,38 @@ def test_merge_filterer():
     tokens = [DocToken(doc=doc, token=Token("a"), offset=0)]
 
     doc_entities = [
-        DocEntity(text="0", doc=doc, entity_key="0|A", tokens=tokens),
-        DocEntity(text="0", doc=doc, entity_key="0|A", tokens=tokens),
-        DocEntity(text="0", doc=doc, entity_key="1|A", tokens=tokens),
-        DocEntity(text="0", doc=doc, entity_key="0|B", tokens=tokens),
+        DocEntity(
+            text="0",
+            doc=doc,
+            entity=Entity(name="0", label="A"),
+            tokens=tokens,
+        ),
+        DocEntity(
+            text="0",
+            doc=doc,
+            entity=Entity(name="0", label="A"),
+            tokens=tokens,
+        ),
+        DocEntity(
+            text="0",
+            doc=doc,
+            entity=Entity(name="1", label="A"),
+            tokens=tokens,
+        ),
+        DocEntity(
+            text="0",
+            doc=doc,
+            entity=Entity(name="0", label="B"),
+            tokens=tokens,
+        ),
     ]
     assert 4 == len(doc_entities)
 
-    doc_entities = MergeEntityFilterer().filter(doc_entities=doc_entities)
+    doc_entities = KeepLongestByKey().filter(doc_entities=doc_entities)
     assert 3 == len(doc_entities)
+
+    doc_entities = KeepLongestByLabel().filter(doc_entities=doc_entities)
+    assert 2 == len(doc_entities)
+
+    doc_entities = KeepLongestOnly().filter(doc_entities=doc_entities)
+    assert 1 == len(doc_entities)

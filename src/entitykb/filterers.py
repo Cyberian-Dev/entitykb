@@ -25,12 +25,9 @@ class ExactOnlyFilterer(Filterer):
         return list(it)
 
 
-class DefaultFilterer(Filterer):
+class BaseUniqueFilterer(Filterer):
     def filter_key(self, doc_entity: DocEntity, offset: int):
-        return doc_entity.label, offset
-
-    def is_valid(self, doc_entity: DocEntity):
-        return True
+        raise NotImplementedError
 
     def sort_key(self, doc_entity: DocEntity):
         return doc_entity.sort_order
@@ -48,15 +45,30 @@ class DefaultFilterer(Filterer):
         is_unique = partial(self.is_unique, set())
 
         sorted_entities = sorted(doc_entities, key=self.sort_key)
-        valid_entities = filter(self.is_valid, sorted_entities)
-        unique_entities = filter(is_unique, valid_entities)
+        unique_entities = filter(is_unique, sorted_entities)
 
         return sorted(unique_entities, key=lambda d: d.offset)
 
 
-class MergeEntityFilterer(DefaultFilterer):
+class KeepLongestByKey(BaseUniqueFilterer):
+    """ Keeps longest overlapping DocEntity when sharing same entity key. """
+
     def filter_key(self, doc_entity: DocEntity, offset: int):
         return doc_entity.entity_key, offset
+
+
+class KeepLongestByLabel(BaseUniqueFilterer):
+    """ Keeps longest overlapping DocEntity when sharing same label. """
+
+    def filter_key(self, doc_entity: DocEntity, offset: int):
+        return doc_entity.label, offset
+
+
+class KeepLongestOnly(BaseUniqueFilterer):
+    """ Keeps only longest overlapping DocEntity. """
+
+    def filter_key(self, doc_entity: DocEntity, offset: int):
+        return offset
 
 
 FiltererType = Optional[Union[Type[Filterer], Filterer, str]]
