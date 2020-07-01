@@ -31,7 +31,7 @@ def render_table(doc: Doc):
 
     if values:
         output = tabulate.tabulate(
-            values, headers="keys", tablefmt="pretty", colalign=("left",) * 5,
+            values, headers="keys", tablefmt="pretty", colalign=("left",) * 3,
         )
     else:
         output = "No entities found."
@@ -43,16 +43,16 @@ def iter_values(doc: Doc, is_table: bool) -> List[Dict]:
     for doc_ent in doc.entities:
 
         if is_table:
-            meta_items = (doc_ent.meta or {}).items()
+            # meta_items = (doc_ent.meta or {}).items()
             record = {
                 "text": doc_ent.text,
                 "tokens": ", ".join(
                     map(lambda t: str(t.offset), doc_ent.tokens)
                 ),
                 "key": doc_ent.entity_key,
-                "name": doc_ent.name,
-                "meta": "\n".join(map(lambda k: ": ".join(k), meta_items)),
-                "synonyms": "\n".join(doc_ent.entity.synonyms),
+                # "name": doc_ent.name,
+                # "meta": "\n".join(map(lambda k: ": ".join(k), meta_items)),
+                # "synonyms": "\n".join(doc_ent.entity.synonyms),
             }
         else:
             record = doc_ent.dict()

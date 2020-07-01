@@ -1,8 +1,7 @@
-import gzip
 import os
 import pickle
 import time
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Set
 
 import ahocorasick
 
@@ -15,7 +14,9 @@ class TermEntities(object):
     __slots__ = ("term_entity_ids",)
 
     def __init__(self, entity_id: EID):
-        self.term_entity_ids = (entity_id,) if entity_id else ()
+        self.term_entity_ids: Set = set()
+        if entity_id is not None:
+            self.term_entity_ids.add(entity_id)
 
     def __str__(self):
         return f"<TermEntities: {self.term_entity_ids}>"
@@ -26,7 +27,7 @@ class TermEntities(object):
 
     def add_term_entity_id(self, entity_id):
         if entity_id not in self.term_entity_ids:
-            self.term_entity_ids += (entity_id,)
+            self.term_entity_ids.add(entity_id)
 
 
 class Store(object):
@@ -95,7 +96,7 @@ class DefaultStore(Store):
 
     def load(self):
         if self.exists:
-            with gzip.open(self.index_path, "rb") as fp:
+            with open(self.index_path, "rb") as fp:
                 data = fp.read()
                 try:
                     self._trie = pickle.loads(data)

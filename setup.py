@@ -22,7 +22,7 @@ extras_requires = {
 
 setup(
     name="entitykb",
-    version="0.1.0",
+    version="0.1.3",
     author="Ian Maurer",
     author_email="ian@genomoncology.com",
     packages=find_packages("src/"),
@@ -32,6 +32,8 @@ setup(
     entry_points={"console_scripts": ["entitykb=entitykb.cli:main"]},
     install_requires=install_requires,
     extras_require=extras_requires,
+    description="Rules-based Named Entity Recognition and Linking",
+    long_description="Rules-based Named Entity Recognition and Linking",
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Development Status :: 4 - Beta",

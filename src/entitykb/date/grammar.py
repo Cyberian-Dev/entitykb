@@ -4,15 +4,24 @@ from lark.lark import Lark, Tree
 from dateutil import parser
 import os
 
-fp = os.path.join(os.path.dirname(__file__), "date.lark")
-grammar = open(fp, "r").read()
-lark_parser = Lark(grammar, parser="lalr")
+
+class Parser(object):
+    _instance = None
+
+    @classmethod
+    def instance(cls):
+        if cls._instance is None:
+            fp = os.path.join(os.path.dirname(__file__), "date.lark")
+            grammar = open(fp, "r").read()
+            cls._instance = Lark(grammar, parser="lalr")
+
+        return cls._instance
 
 
 # noinspection PyBroadException
 def get_tree(text: str) -> Optional[str]:
     try:
-        tree = lark_parser.parse(text)
+        tree = Parser.instance().parse(text)
         if isinstance(tree.children[0], Tree):
             return tree.children[0].data
     except:

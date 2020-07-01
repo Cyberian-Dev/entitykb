@@ -1,3 +1,4 @@
+from typing import Optional, Set
 from entitykb import DefaultStore, LabelSet, FindResult
 from entitykb.store import EID, TermEntities
 
@@ -7,16 +8,15 @@ class TermEditEntities(TermEntities):
 
     def __init__(self, current: TermEntities = None):
         super().__init__(None)
-        self.edit_entity_ids = None
-        self.edit_distance = 9
+        self.edit_entity_ids: Optional[Set] = None
+        self.edit_distance: int = 9
         if current:
             self.term_entity_ids = current.term_entity_ids
 
     def __str__(self):
-        details = ", ".join(
-            [self.term_entity_ids, self.edit_entity_ids, self.edit_distance]
-        )
-        return f"<TermEditEntities: {details}>"
+        attr = [self.term_entity_ids, self.edit_entity_ids, self.edit_distance]
+        attr = ", ".join(map(str, attr))
+        return f"<TermEditEntities: {attr}>"
 
     def __iter__(self):
         if self.term_entity_ids:
@@ -43,15 +43,15 @@ class TermEditEntities(TermEntities):
         return current
 
     def do_add_edit_entity_id(self, entity_id, distance):
-        if entity_id not in (self.edit_entity_ids or ()):
+        if not self.edit_entity_ids or entity_id not in self.edit_entity_ids:
             if distance < self.edit_distance:
-                self.edit_entity_ids = (entity_id,)
+                self.edit_entity_ids = {entity_id}
                 self.edit_distance = distance
             elif distance == self.edit_distance:
                 if self.edit_entity_ids:
-                    self.edit_entity_ids += (entity_id,)
+                    self.edit_entity_ids.add(entity_id)
                 else:
-                    self.edit_entity_ids = (entity_id,)
+                    self.edit_entity_ids = {entity_id}
 
     def add_term_entity_id(self, entity_id):
         super(TermEditEntities, self).add_term_entity_id(entity_id)

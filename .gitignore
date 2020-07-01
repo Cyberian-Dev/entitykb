@@ -14,4 +14,4 @@ __pycache__
 htmlcov/*
 build
 dist
-demo/
+temp/

@@ -1,5 +1,4 @@
 import sys
-import gzip
 import datetime
 import functools
 import os
@@ -66,11 +65,8 @@ def safe_write(path: str, data: bytes):
     # https://stackoverflow.com/a/57015098/1946790
     dir_path = os.path.dirname(path)
     with tempfile.NamedTemporaryFile(dir=dir_path, mode="w+b") as tf:
-        gf = gzip.GzipFile(mode="wb", fileobj=tf)
-        gf.write(data)
-        gf.close()
-
-        os.link(gf.name, path)
+        tf.write(data)
+        os.link(tf.name, path)
 
 
 def generate_edits(token: str, max_token_distance: int):

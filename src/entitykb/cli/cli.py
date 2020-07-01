@@ -1,6 +1,5 @@
 import os
 import sys
-from json import dumps
 from typing import List
 
 import click
@@ -189,9 +188,14 @@ def load_data(
     it = etl.iterate_entities(
         in_file, dialect, multi, sep, label, name, synonyms, key_format, ignore
     )
+    preview = []
+
     for entity in it:
         if dry_run:
-            print(dumps(entity.dict(), indent=4))
+            d = entity.dict()
+            d.pop("key", None)
+            d.pop("meta", None)
+            preview.append(d)
             if count > 10:
                 break
         else:
@@ -202,7 +206,12 @@ def load_data(
         kb.commit()
         print(f"Loaded {count} records.")
     else:
-        print("Dry run complete. Loaded 0 records.")
+        output = tabulate.tabulate(
+            preview, headers="keys", tablefmt="pretty", colalign=("left",) * 3,
+        )
+        click.echo(output)
+
+        click.echo("Dry run complete. Loaded 0 records.")
 
 
 @cli.command()
