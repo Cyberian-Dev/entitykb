@@ -64,9 +64,9 @@
         },
         "lark-parser": {
             "hashes": [
-                "sha256:78915e9e59c7a3068830fd2d2cd733f7ab0cbea2d7928ebfaac4f8df10e4e989"
+                "sha256:9e7589365d6b6de1cca40b0eaec31104a3fb96a37a11a9dfd5098e95b50aa6cd"
             ],
-            "version": "==0.8.9"
+            "version": "==0.9.0"
         },
         "pyahocorasick": {
             "hashes": [
@@ -494,11 +494,11 @@
         },
         "tox": {
             "hashes": [
-                "sha256:a0d36849e59ac4a28664e80951a634b0e920d88047ce3fa8fa7b45216e573f30",
-                "sha256:db12b48359ba2cbc8c8f7ab712706ee67d59f8f9e8e0c795dcc45349b8784e48"
+                "sha256:60c3793f8ab194097ec75b5a9866138444f63742b0f664ec80be1222a40687c5",
+                "sha256:9a746cda9cadb9e1e05c7ab99f98cfcea355140d2ecac5f97520be94657c3bc7"
             ],
             "index": "pypi",
-            "version": "==3.16.0"
+            "version": "==3.16.1"
         },
         "traitlets": {
             "hashes": [

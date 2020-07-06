@@ -12,7 +12,7 @@ tox = "*"
 ipython = "*"
 
 [packages]
-entitykb = {editable = true,path = "./",extras=["api"]}
+entitykb = {editable = true,path = "./",extras = ["api"]}
 
 [requires]
 python_version = "3.9"

@@ -31,7 +31,7 @@ pytest-mccabe==1.0
 pytest==5.4.3
 six==1.15.0
 toml==0.10.1
-tox==3.16.0
+tox==3.16.1
 traitlets==4.3.3
 virtualenv==20.0.25
 wcwidth==0.2.5
