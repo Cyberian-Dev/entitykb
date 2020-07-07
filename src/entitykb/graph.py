@@ -1,22 +1,12 @@
-import enum
 import time
 from collections import defaultdict
 from itertools import chain
+from typing import Union, Dict, Generator, Iterable, Set
 
-from typing import Union, Dict, Set, Generator, List
-
-from . import Entity, Relationship, Tag, logger, Label
+from . import Entity, Relationship, Tag, logger
 
 ER = Union[Entity, Relationship]
-
-IS_A = Tag.IS_A
-CONTAINS = Tag.CONTAINS
-
-
-class Direction(enum.Enum):
-    IN = "IN"
-    OUT = "OUT"
-    BOTH = "BOTH"
+RelationshipGenerator = Generator[Relationship, None, None]
 
 
 class Graph(object):
@@ -27,20 +17,14 @@ class Graph(object):
         self.in_relationships = defaultdict(set)
 
     def __repr__(self):
-        n0 = f"{self.num_entities} entities"
-        n1 = f"{self.num_relationships} relationships"
-        return f"<Graph: ({n0}, {n1})>"
+        return f"<Graph: ({len(self)} entities)>"
 
-    @property
-    def num_entities(self):
+    def __len__(self):
         return len(self.entity_to_id)
 
     @property
-    def num_relationships(self):
-        return len(self.out_relationships)
-
-    def q(self, *args) -> "Query":
-        return Query(self, *args)
+    def q(self) -> "Query":
+        return Query(self)
 
     def add(self, *items: ER):
         for item in chain(items):
@@ -66,102 +50,100 @@ class Graph(object):
         self.out_relationships[rel.entity_a].add(rel)
         self.in_relationships[rel.entity_b].add(rel)
 
-    def iterate_relationships(
-        self, entity: Entity, direction: Direction
-    ) -> Generator[Relationship, None, None]:
-        direction = direction or Direction.OUT
-
-        if direction in {Direction.OUT, Direction.BOTH}:
-            yield from self.out_relationships.get(entity, ())
-
-        if direction in {Direction.IN, Direction.BOTH}:
-            yield from self.in_relationships.get(entity, ())
+    def gen_in_relationships(self, entity: Entity) -> RelationshipGenerator:
+        yield from self.in_relationships.get(entity, ())
 
 
 class TagFilter(object):
-    def __init__(self, tags: Set[Tag]):
-        self.tags = tags
-        self.no_tags = len(tags) == 1
+    def __init__(self, tag: Tag):
+        self.tag = tag
 
     def __call__(self, relationship: Relationship):
-        ok = self.no_tags or relationship.tag in self.tags
+        ok = self.tag == relationship.tag
         return ok
 
 
 class EntityFilter(object):
-    def __init__(self, entity: Entity, others: List[Entity]):
-        self.entity = entity
-        self.others = set(others)
-        self.no_others = len(self.others)
+    def __init__(self, others: Iterable[Entity]):
+        if others is None:
+            self.others = None
+            self.is_origin = True
+        else:
+            self.others = set(others)
+            self.is_origin = False
 
-    def __call__(self, rel: Relationship):
-        ok = self.no_others or (rel.other(entity=self.entity) in self.others)
+    def __call__(self, entity: Entity):
+        ok = self.is_origin or (entity in self.others)
         return ok
 
 
+class InGenerator(object):
+    def __init__(
+        self,
+        graph: Graph,
+        entities: Iterable[Entity],
+        tag: Tag,
+        seen: Set[Entity] = None,
+    ):
+        self.graph = graph
+        self.entities = entities
+        self.tag = tag
+        self.seen = seen or set()
+
+    def __iter__(self):
+        next_round = set()
+
+        for entity in self.entities:
+            for rel in self.graph.gen_in_relationships(entity=entity):
+                if rel.tag == self.tag:
+                    entity = rel.entity_a
+
+                    if entity not in self.seen:
+                        self.seen.add(entity)
+                        next_round.add(entity)
+                        yield entity
+
+        if next_round:
+            yield from InGenerator(
+                graph=self.graph,
+                entities=next_round,
+                tag=self.tag,
+                seen=self.seen,
+            )
+
+
 class Query(object):
-    def __init__(self, *args):
-        self.graphs = []
-        self.entities = []
-        self.relationships = []
-        self.tags = set()
-        self.directions = set()
-        self.labels = []
-        self.separate_args(*args)
+    def __init__(self, graph: Graph):
+        self.graph = graph
+        self.tag = None
+        self.batches = []
 
     def __getattr__(self, tag_name: str):
-        tag = Tag.convert(tag_name)
-        self.separate_args(tag)
+        self.tag = Tag.convert(tag_name)
         return self
 
     def __call__(self, *args):
-        self.separate_args(*args)
-        return self.execute()
+        in_gen = InGenerator(graph=self.graph, entities=args, tag=self.tag)
+        self.batches.append(in_gen)
+        return self
 
     def __len__(self):
         return len(self.execute())
 
-    def get_direction(self) -> Direction:
-        if len(self.directions) == 0:
-            return Direction.OUT
-        elif len(self.directions) == 1:
-            return next(iter(self.directions))
-        else:
-            return Direction.BOTH
+    def __iter__(self):
+        yield from self.execute()
 
     def execute(self):
-        direction = self.get_direction()
-        result = ()
+        others = None
+        for entity_it in self.batches:
+            next_others = set()
 
-        for graph in self.graphs:
-            if self.entities:
-                entity, others = self.entities[0], self.entities[1:]
-                rel_it = graph.iterate_relationships(entity, direction)
-                rel_it = filter(TagFilter(self.tags), rel_it)
-                rel_it = filter(EntityFilter(entity, others), rel_it)
-                result = set(rel_it)
+            entity_filter = EntityFilter(others=others)
+            entity_it = filter(entity_filter, entity_it)
 
-        return result
+            for entity in entity_it:
+                next_others.add(entity)
 
-    def separate_args(self, *args):
-        for arg in args:
-            if isinstance(arg, Graph):
-                self.graphs.append(arg)
+            others = next_others
 
-            elif isinstance(arg, Entity):
-                self.entities.append(arg)
-
-            elif isinstance(arg, Relationship):
-                self.relationships.append(arg)
-
-            elif isinstance(arg, (str, Tag)):
-                self.tags.add(Tag.convert(arg))
-
-            elif isinstance(arg, Direction):
-                self.directions.add(arg)
-
-            elif isinstance(arg, Label):
-                self.labels.append(arg)
-
-            else:
-                logger.warning(f"Unknown argument to query: {arg}")
+        return others

@@ -484,7 +484,7 @@ class LabelSet(object):
         return {"allow_any": self.allow_any, "labels": sorted(self.labels)}
 
     @classmethod
-    def create(cls, item=None) -> "LabelSet":  # pragma: no mccabe
+    def create(cls, item=None) -> "LabelSet":
         if isinstance(item, LabelSet):
             return item
 
