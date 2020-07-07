@@ -15,4 +15,4 @@ ipython = "*"
 entitykb = {editable = true,path = "./",extras = ["api"]}
 
 [requires]
-python_version = "3.9"
+python_version = "3.7"

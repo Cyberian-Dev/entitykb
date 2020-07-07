@@ -54,6 +54,29 @@ class Correction(BaseModel):
         return value
 
 
+class LabelType(type):
+    def __getattr__(self, label_name: str):
+        return Label(label_name)
+
+
+class Label(str, metaclass=LabelType):
+    def __new__(cls, string):
+        string = string.upper()
+        obj = super(Label, cls).__new__(cls, string)
+        return obj
+
+    @classmethod
+    def convert(cls, value):
+        if isinstance(value, Label):
+            return value
+        elif isinstance(value, str):
+            return Label(value)
+        elif value is None:
+            return None
+        else:
+            return Label(str(value))
+
+
 class Entity(BaseModel):
 
     __slots__ = ("name", "key", "label", "synonyms", "meta")
@@ -63,12 +86,12 @@ class Entity(BaseModel):
         *,
         name: str,
         key: str = None,
-        label: str = None,
+        label: Label = None,
         synonyms: Tuple[str, ...] = None,
         meta: dict = None,
     ):
         self.name = name
-        self.label = label or self.__class__.__name__.upper()
+        self.label = Label.convert(label or self.__class__.__name__.upper())
         self.key = key or f"{self.name}|{self.label}"
         self.synonyms = tupilify(synonyms)
         self.meta = meta
@@ -480,6 +503,55 @@ class LabelSet(object):
             kwargs["labels"] = item
 
         return LabelSet(**kwargs)
+
+
+class TagType(type):
+    def __getattr__(self, tag_name: str):
+        return Tag(tag_name)
+
+
+class Tag(str, metaclass=TagType):
+    def __new__(cls, string):
+        string = string.upper()
+        obj = super(Tag, cls).__new__(cls, string)
+        return obj
+
+    @classmethod
+    def convert(cls, value):
+        if isinstance(value, Tag):
+            return value
+        elif isinstance(value, str):
+            return Tag(value)
+        elif value is None:
+            return None
+        else:
+            return Tag(str(value))
+
+
+class Relationship(BaseModel):
+
+    __slots__ = ("entity_a", "tag", "entity_b")
+
+    def __init__(self, a: Entity, tag: Tag, b: Entity):
+        self.entity_a = a
+        self.tag = Tag.convert(tag)
+        self.entity_b = b
+
+    def __repr__(self):
+        if self.tag:
+            return f"({self.entity_a})-{self.tag}->({self.entity_b})"
+        else:
+            return f"({self.entity_a})->({self.entity_b})"
+
+    def __hash__(self):
+        return hash((self.entity_a, self.entity_b, self.tag))
+
+    def other(self, entity: Entity):
+        if entity == self.entity_a:
+            return self.entity_b
+
+        if entity == self.entity_b:
+            return self.entity_a
 
 
 EntityValue = Union[Entity, dict]
