@@ -13,6 +13,7 @@ ipython = "*"
 
 [packages]
 entitykb = {editable = true,path = "./",extras = ["api"]}
+pytest = "*"
 
 [requires]
 python_version = "3.7"

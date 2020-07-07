@@ -1,11 +1,10 @@
 import os
 import pickle
-import time
-from typing import Dict, List, Optional, Any, Set
+from typing import List, Optional, Any, Set
 
 import ahocorasick
 
-from . import Entity, FindResult, LabelSet, utils, logger
+from . import Entity, FindResult, LabelSet, utils, logger, Graph
 
 EID = Any
 
@@ -79,16 +78,13 @@ class Store(object):
 
 class DefaultStore(Store):
 
-    ENTITY_KEY_PREFIX = "\x00"
-    ENTITY_MAP_KEY = "\x00\x01"
-
     def __init__(self, root_dir: str):
         self.root_dir = root_dir
         self._trie = None
-        self._entity_map = None
+        self._graph = None
 
     def __len__(self):
-        return len(self.entity_map)
+        return len(self.graph)
 
     @property
     def exists(self):
@@ -103,28 +99,26 @@ class DefaultStore(Store):
                 except AttributeError:
                     logger.error("Failed to load index: " + self.index_path)
 
+            with open(self.graph_path, "rb") as fp:
+                data = fp.read()
+                try:
+                    self._graph = pickle.loads(data)
+                except AttributeError:
+                    logger.error("Failed to load graph: " + self.graph_path)
+
     def commit(self):
         data = pickle.dumps(self._trie)
         utils.safe_write(self.index_path, data)
-        return self.index_path
+
+        data = pickle.dumps(self._graph)
+        utils.safe_write(self.graph_path, data)
 
     def reset(self):
-        self._entity_map = None
+        self._graph = None
         self._trie = None
 
     def upsert_entity(self, entity: Entity) -> EID:
-        trie_entity_key = self.ENTITY_KEY_PREFIX + entity.key
-        entity_id = self.trie.get(trie_entity_key, None)
-
-        if entity_id:
-            self.entity_map[entity_id] = entity
-        else:
-            while entity_id is None:
-                timestamp = time.time()
-                if entity == self.entity_map.setdefault(timestamp, entity):
-                    entity_id = timestamp
-                    self.trie.add_word(trie_entity_key, entity_id)
-
+        entity_id = self.graph.add_entity(entity)
         return entity_id
 
     def upsert_term(self, term: str, entity_id: EID, label: str):
@@ -137,11 +131,8 @@ class DefaultStore(Store):
             term_entities.add_term_entity_id(entity_id)
 
     def get_entity(self, entity_key: str) -> Optional[Entity]:
-        trie_entity_key = self.ENTITY_KEY_PREFIX + entity_key
-        entity_id = self.trie.get(trie_entity_key, None)
-        if entity_id:
-            entity = self.entity_map.get(entity_id)
-            return entity
+        entity = self.graph.get_entity(entity_key)
+        return entity
 
     def is_prefix(self, prefix: str, label_set: LabelSet = None) -> bool:
         is_prefix = False
@@ -150,7 +141,7 @@ class DefaultStore(Store):
             label_set = LabelSet.create(label_set)
             for term_entities in self.trie.values(prefix):
                 for entity_id in term_entities:
-                    entity = self.entity_map.get(entity_id)
+                    entity = self.graph.get_entity(entity_id)
                     if label_set.is_allowed(entity.label):
                         is_prefix = True
                         break
@@ -171,7 +162,7 @@ class DefaultStore(Store):
         if term_entities:
             label_set = LabelSet.create(label_set)
             for entity_id in term_entities.term_entity_ids:
-                entity = self.entity_map.get(entity_id)
+                entity = self.graph.get_entity(entity_id)
                 if label_set is None or label_set.is_allowed(entity.label):
                     entities += (entity,)
 
@@ -187,7 +178,7 @@ class DefaultStore(Store):
 
         for suggestion, term_entities in self.trie.items(term):
             for entity_id in term_entities:
-                entity = self.entity_map.get(entity_id)
+                entity = self.graph.get_entity(entity_id)
                 if label_set.is_allowed(entity.label):
                     suggestions.add(suggestion)
                     continue
@@ -200,7 +191,7 @@ class DefaultStore(Store):
 
     def info(self) -> dict:
         info = self.trie.get_stats()
-        info["entity_count"] = len(self.entity_map)
+        info["entity_count"] = len(self.graph)
         info["path"] = self.index_path
         info["disk_space"] = utils.sizeof(self.index_path)
         info["in_memory"] = utils.sizeof(self.trie)
@@ -228,15 +219,15 @@ class DefaultStore(Store):
         if self.root_dir:
             return os.path.join(self.root_dir, "index.db")
 
-    # entities
+    # graph
 
     @property
-    def entity_map(self) -> Dict[float, Entity]:
-        if self._entity_map is None:
-            self._entity_map = self.trie.get(self.ENTITY_MAP_KEY, None)
+    def graph(self) -> Graph:
+        if self._graph is None:
+            self._graph: Graph = Graph()
+        return self._graph
 
-            if self._entity_map is None:
-                self._entity_map = {}
-                self.trie.add_word(self.ENTITY_MAP_KEY, self._entity_map)
-
-        return self._entity_map
+    @property
+    def graph_path(self):
+        if self.root_dir:
+            return os.path.join(self.root_dir, "graph.db")

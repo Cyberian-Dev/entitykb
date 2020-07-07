@@ -150,5 +150,5 @@ def test_fuzzy(apple):
     assert index.is_prefix("Apple and")
     assert index.is_prefix("apple,")
 
-    # keys (2 names, 2 synonyms, 2 keys, map, and 7 edits)
-    assert 11 == len(index.store.trie), str(list(index.store.trie.keys()))
+    # keys (2 names, 2 synonyms, and 7 edits)
+    assert 8 == len(index.store.trie), str(list(index.store.trie.keys()))

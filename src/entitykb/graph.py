@@ -5,13 +5,14 @@ from typing import Union, Dict, Generator, Iterable, Set
 
 from . import Entity, Relationship, Tag, logger
 
+KEY_OR_ID = Union[str, float]
 ER = Union[Entity, Relationship]
 RelationshipGenerator = Generator[Relationship, None, None]
 
 
 class Graph(object):
     def __init__(self):
-        self.id_to_entity: Dict[float, Entity] = dict()
+        self.key_or_id_to_entity: Dict[KEY_OR_ID, Entity] = dict()
         self.entity_to_id: Dict[Entity, float] = dict()
         self.out_relationships = defaultdict(set)
         self.in_relationships = defaultdict(set)
@@ -37,11 +38,12 @@ class Graph(object):
 
     def add_entity(self, entity: Entity):
         entity_id = self.entity_to_id.setdefault(entity, time.time())
-        self.id_to_entity[entity_id] = entity
+        self.key_or_id_to_entity[entity_id] = entity
+        self.key_or_id_to_entity[entity.key] = entity
         return entity_id
 
-    def get_entity(self, entity_id: float):
-        return self.id_to_entity.get(entity_id)
+    def get_entity(self, key_or_id: KEY_OR_ID):
+        return self.key_or_id_to_entity.get(key_or_id)
 
     def get_entity_id(self, entity: Entity):
         return self.entity_to_id.get(entity)

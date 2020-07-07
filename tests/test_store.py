@@ -18,11 +18,11 @@ def test_not_fuzzy(apple):
     # add and re-add
     index.add(apple)
     assert 1 == len(index)
-    assert 5 == len(index.store.trie), str(list(index.store.trie.keys()))
+    assert 3 == len(index.store.trie), str(list(index.store.trie.keys()))
 
     index.add(apple)
     assert 1 == len(index)
-    assert 5 == len(index.store.trie), str(list(index.store.trie.keys()))
+    assert 3 == len(index.store.trie), str(list(index.store.trie.keys()))
 
     # reference
     ref = index.store.trie.get("apple")

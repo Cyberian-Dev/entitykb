@@ -76,7 +76,7 @@ class FuzzyStore(DefaultStore):
         if reference:
             for entity_id in reference:
                 distance = TermEditEntities.distance(reference)
-                entity = self.entity_map.get(entity_id)
+                entity = self.graph.get_entity(entity_id)
                 if label_set is None or label_set.is_allowed(entity.label):
                     entities += (entity,)
 

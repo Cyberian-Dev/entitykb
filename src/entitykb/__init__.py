@@ -30,11 +30,11 @@ from .filterers import (
     KeepLongestByLabel,
     KeepLongestOnly,
 )
+from .graph import Graph, Query
 
 # (3) depends on tokenizers, normalizer
 from .store import Store, DefaultStore
 from .index import Index, DefaultIndex
-from .graph import Graph, Query
 
 # (4) depends on index
 from .handlers import TokenHandler
