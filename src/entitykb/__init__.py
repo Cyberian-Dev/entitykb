@@ -10,7 +10,10 @@ from .model import (
     DocToken,
     Entity,
     FindResult,
+    Label,
     LabelSet,
+    Relationship,
+    Tag,
     Token,
 )
 
@@ -31,6 +34,7 @@ from .filterers import (
 # (3) depends on tokenizers, normalizer
 from .store import Store, DefaultStore
 from .index import Index, DefaultIndex
+from .graph import Graph, Query
 
 # (4) depends on index
 from .handlers import TokenHandler
@@ -74,6 +78,7 @@ __all__ = (
     "Filterer",
     "FiltererType",
     "FindResult",
+    "Graph",
     "Index",
     "KB",
     "KeepLongestByKey",
@@ -83,9 +88,11 @@ __all__ = (
     "Normalizer",
     "NormalizerType",
     "Pipeline",
+    "Relationship",
     "Resolver",
     "ResolverType",
     "Store",
+    "Tag",
     "Token",
     "TokenHandler",
     "Tokenizer",
