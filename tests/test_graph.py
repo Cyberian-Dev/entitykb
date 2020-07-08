@@ -60,6 +60,9 @@ def test_graph_create_and_query():
 
     assert set() == set(graph(Q.is_a(food).has_a(granny_smith)))
 
+    assert 8 == len(set(graph(Q.is_a(food))))
+    assert 2 == len(set(graph(Q.is_a(food, hops=1))))
+
 
 def test_model_query():
     assert Q.is_a == Q(tags=["IS_A"])

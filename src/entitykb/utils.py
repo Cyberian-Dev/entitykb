@@ -82,3 +82,13 @@ def generate_edits(token: str, max_token_distance: int):
             if pair not in pairs:
                 pairs.add(pair)
                 yield pair
+
+
+def first_nn(*items):
+    """ Returns first not None item. Lazy creates list, set, tuple, dict. """
+    for item in items:
+        if item is not None:
+            if item in {list, set, tuple, dict}:
+                return item()
+            else:
+                return item

@@ -4,7 +4,7 @@ from typing import List, Optional, Any, Set
 
 import ahocorasick
 
-from . import Entity, FindResult, LabelSet, utils, logger, Graph
+from . import Entity, Relationship, FindResult, LabelSet, utils, logger, Graph
 
 EID = Any
 
@@ -115,6 +115,9 @@ class DefaultStore(Store):
     def reset(self):
         self._graph = None
         self._trie = None
+
+    def add_rel(self, relationship: Relationship):
+        self.graph.add_relationship(relationship)
 
     def upsert_entity(self, entity: Entity) -> EID:
         entity_id = self.graph.add_entity(entity)

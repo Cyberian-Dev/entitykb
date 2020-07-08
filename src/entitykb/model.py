@@ -1,6 +1,6 @@
 from typing import Tuple, Union, Optional, Set, Iterable
 
-from .utils import get_class_from_name, tupilify
+from .utils import get_class_from_name, tupilify, first_nn
 
 
 class BaseModel(object):
@@ -582,19 +582,19 @@ class Q(BaseModel, metaclass=QType):
     __slots__ = ("tags", "entities", "incoming", "hops", "parent")
 
     def __init__(
-        self, tags=None, entities=None, incoming=True, hops=5, parent=None
+        self, tags=None, entities=None, incoming=None, hops=None, parent=None
     ):
         self.tags = frozenset(tags or ())
         self.entities = frozenset(entities or ())
-        self.incoming = incoming
-        self.hops = hops
+        self.incoming = first_nn(incoming, True)
+        self.hops = first_nn(hops, -1)
         self.parent = parent
 
     def __call__(self, *entities, incoming=None, hops=None, parent=None):
         self.entities = self.entities | frozenset(entities or ())
-        self.incoming = incoming if incoming is not None else self.incoming
-        self.hops = hops if hops is not None else self.hops
-        self.parent = parent if parent is not None else self.parent
+        self.incoming = first_nn(incoming, self.incoming)
+        self.hops = first_nn(hops, self.hops)
+        self.parent = first_nn(parent, self.parent)
         return self
 
     def __repr__(self):
@@ -649,3 +649,4 @@ class Query(BaseModel):
 
 QueryType = Union[Q, Query]
 EntityValue = Union[Entity, dict]
+ER = Union[Entity, Relationship]

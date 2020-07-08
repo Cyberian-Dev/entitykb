@@ -89,8 +89,11 @@ class Pipeline(object):
     def commit(self):
         self.index.commit()
 
-    # entities
+    # entities/relationships
 
-    def add(self, *entities: entitykb.Entity):
-        for entity in entities:
-            self.index.add(entity)
+    def add(self, *ent_rels: entitykb.ER):
+        for er in ent_rels:
+            if isinstance(er, entitykb.Entity):
+                self.index.add(er)
+            else:
+                self.index.add_rel(er)

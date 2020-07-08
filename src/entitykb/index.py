@@ -6,6 +6,7 @@ from . import (
     Tokenizer,
     Normalizer,
     Entity,
+    Relationship,
     FindResult,
     LabelSet,
     utils,
@@ -57,6 +58,9 @@ class DefaultIndex(Index):
 
         for term in entity.terms:
             self.add_term(entity, entity_id, term)
+
+    def add_rel(self, relationship: Relationship):
+        self.store.add_rel(relationship)
 
     def add_term(self, entity, entity_id, term):
         normalized = self.normalizer(term)

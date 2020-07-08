@@ -3,10 +3,10 @@ from collections import defaultdict
 from itertools import chain
 from typing import Union, Dict, Generator, Iterable, Set
 
-from . import Entity, Relationship, Tag, QueryType, Query, Q, logger
+from . import Entity, Relationship, ER, Tag, QueryType, Query, Q, logger
+from .utils import first_nn
 
 KEY_OR_ID = Union[str, float]
-ER = Union[Entity, Relationship]
 RelationshipGenerator = Generator[Relationship, None, None]
 
 
@@ -100,16 +100,6 @@ class EntityFilter(object):
         return ok
 
 
-def first_nn(*items):
-    """ Returns first not none argument. """
-    for item in items:
-        if item is not None:
-            if item in {list, set, tuple, dict}:
-                return item()
-            else:
-                return item
-
-
 class NodeGenerator(object):
 
     EMPTY_Q = Q()
@@ -146,12 +136,14 @@ class NodeGenerator(object):
                         next_round.add(e1)
                         yield e1
 
-        if next_round:
+        next_hops = self.hops - 1
+
+        if next_round and next_hops != 0:
             yield from NodeGenerator(
                 graph=self.graph,
                 tags=self.tags,
                 starts=next_round,
                 seen=self.seen,
                 incoming=self.incoming,
-                hops=self.hops - 1,
+                hops=next_hops,
             )
