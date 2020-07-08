@@ -1,5 +1,6 @@
-from entitykb import Entity, Graph, Relationship, Tag, Q, Query
 import pickle
+
+from entitykb import Entity, Graph, Q, Query
 
 food = Entity(name="Food")
 fruit = Entity(name="Fruit")
@@ -22,14 +23,14 @@ entities = [
 ]
 
 relationships = [
-    Relationship(fruit, Tag.IS_A, food),
-    Relationship(apple, Tag.IS_A, fruit),
-    Relationship(granny_smith, Tag.IS_A, apple),
-    Relationship(honeycrisp, Tag.IS_A, apple),
-    Relationship(dessert, Tag.IS_A, food),
-    Relationship(pie, Tag.IS_A, dessert),
-    Relationship(apple_pie, Tag.IS_A, pie),
-    Relationship(apple_pie, Tag.HAS_A, apple),
+    fruit.rel.is_a(food),
+    apple.rel.is_a(fruit),
+    granny_smith.rel.is_a(apple),
+    honeycrisp.rel.is_a(apple),
+    dessert.rel.is_a(food),
+    pie.rel.is_a(dessert),
+    apple_pie.rel.is_a(pie),
+    apple_pie.rel.has_a(apple),
 ]
 
 
@@ -37,8 +38,7 @@ def test_graph_create_and_query():
     graph = Graph()
     assert "<Graph: (0 entities)>" == repr(graph)
 
-    graph.add(*entities)
-    graph.add(*relationships)
+    graph.add(relationships, entities)
     assert "<Graph: (8 entities)>" == repr(graph)
 
     data = pickle.dumps(graph)

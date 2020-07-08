@@ -1,5 +1,6 @@
 import time
 from collections import defaultdict
+from itertools import chain
 from typing import Union, Dict, Generator, Iterable, Set
 
 from . import Entity, Relationship, Tag, QueryType, Query, Q, logger
@@ -26,10 +27,7 @@ class Graph(object):
         return self.find(query)
 
     def add(self, *items: ER):
-        if len(items) == 1 and isinstance(items[0], Iterable):
-            items = items[0]
-
-        for item in items:
+        for item in chain(*items):
             if isinstance(item, Entity):
                 self.add_entity(item)
             elif isinstance(item, Relationship):

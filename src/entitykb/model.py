@@ -108,6 +108,10 @@ class Entity(BaseModel):
         for synonym in self.synonyms or []:
             yield synonym
 
+    @property
+    def rel(self):
+        return RelationshipBuilder(self)
+
     def dict(self) -> dict:
         return dict(
             name=self.name,
@@ -526,6 +530,19 @@ class Tag(str, metaclass=TagType):
             return None
         else:
             return Tag(str(value))
+
+
+class RelationshipBuilder(object):
+    def __init__(self, a: Entity):
+        self.rel = Relationship(a, None, None)
+
+    def __getattr__(self, tag_name):
+        self.rel.tag = Tag.convert(tag_name)
+        return self
+
+    def __call__(self, b: Entity):
+        self.rel.entity_b = b
+        return self.rel
 
 
 class Relationship(BaseModel):
