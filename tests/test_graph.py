@@ -10,6 +10,7 @@ honeycrisp = Entity(name="Honeycrisp")
 dessert = Entity(name="Dessert")
 pie = Entity(name="Pie")
 apple_pie = Entity(name="Apple Pie")
+apple_sauce = Entity(name="Apple Sauce")
 
 entities = [
     food,
@@ -20,6 +21,7 @@ entities = [
     dessert,
     pie,
     apple_pie,
+    apple_sauce,
 ]
 
 relationships = [
@@ -31,6 +33,8 @@ relationships = [
     pie.rel.is_a(dessert),
     apple_pie.rel.is_a(pie),
     apple_pie.rel.has_a(apple),
+    apple_sauce.rel.is_a(dessert),
+    apple_sauce.rel.has_a(apple),
 ]
 
 
@@ -39,18 +43,21 @@ def test_graph_create_and_query():
     assert "<Graph: (0 entities)>" == repr(graph)
 
     graph.add(relationships, entities)
-    assert "<Graph: (8 entities)>" == repr(graph)
+    assert "<Graph: (9 entities)>" == repr(graph)
 
     data = pickle.dumps(graph)
     graph = pickle.loads(data)
 
     # example node queries
     assert {granny_smith, honeycrisp} == set(graph(Q.is_a(apple)))
-    assert {apple_pie} == set(graph(Q.is_a(pie).has_a(apple)))
-    assert {apple_pie} == set(graph(Q.has_a(apple).is_a(pie)))
     assert {apple, granny_smith, honeycrisp} == set(graph(Q.is_a(fruit)))
-    assert {apple_pie} == set(graph(Q.is_a(dessert).has_a(apple)))
-    assert {apple_pie} == set(graph(Q.is_a(food).has_a(apple)))
+
+    assert {apple_pie} == set(graph(Q.has_a(apple).is_a(pie)))
+    assert {apple_pie} == set(graph(Q.is_a(pie).has_a(apple)))
+
+    assert {apple_pie, apple_sauce} == set(graph(Q.is_a(dessert).has_a(apple)))
+    assert {apple_pie, apple_sauce} == set(graph(Q.is_a(food).has_a(apple)))
+
     assert set() == set(graph(Q.is_a(food).has_a(granny_smith)))
 
 
