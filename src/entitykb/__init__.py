@@ -12,6 +12,9 @@ from .model import (
     FindResult,
     Label,
     LabelSet,
+    Q,
+    Query,
+    QueryType,
     Relationship,
     Tag,
     Token,
@@ -30,7 +33,7 @@ from .filterers import (
     KeepLongestByLabel,
     KeepLongestOnly,
 )
-from .graph import Graph, Query
+from .graph import Graph
 
 # (3) depends on tokenizers, normalizer
 from .store import Store, DefaultStore
@@ -89,7 +92,9 @@ __all__ = (
     "Normalizer",
     "NormalizerType",
     "Pipeline",
+    "Q",
     "Query",
+    "QueryType",
     "Relationship",
     "Resolver",
     "ResolverType",

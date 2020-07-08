@@ -1,9 +1,8 @@
 import time
 from collections import defaultdict
-from itertools import chain
 from typing import Union, Dict, Generator, Iterable, Set
 
-from . import Entity, Relationship, Tag, logger
+from . import Entity, Relationship, Tag, QueryType, Query, Q, logger
 
 KEY_OR_ID = Union[str, float]
 ER = Union[Entity, Relationship]
@@ -23,12 +22,14 @@ class Graph(object):
     def __len__(self):
         return len(self.entity_to_id)
 
-    @property
-    def q(self) -> "Query":
-        return Query(self)
+    def __call__(self, query: QueryType):
+        return self.find(query)
 
     def add(self, *items: ER):
-        for item in chain(items):
+        if len(items) == 1 and isinstance(items[0], Iterable):
+            items = items[0]
+
+        for item in items:
             if isinstance(item, Entity):
                 self.add_entity(item)
             elif isinstance(item, Relationship):
@@ -52,8 +53,30 @@ class Graph(object):
         self.out_relationships[rel.entity_a].add(rel)
         self.in_relationships[rel.entity_b].add(rel)
 
-    def gen_in_relationships(self, entity: Entity) -> RelationshipGenerator:
-        yield from self.in_relationships.get(entity, ())
+    def rel_it(self, entity: Entity, incoming: bool) -> RelationshipGenerator:
+        if incoming:
+            yield from self.in_relationships.get(entity, ())
+        else:
+            yield from self.out_relationships.get(entity, ())
+
+    def find(self, query: QueryType):
+        query = Query.convert(query)
+
+        entities = None
+
+        for q in query:
+            entity_filter = EntityFilter(entities=entities)
+            entity_it = NodeGenerator(graph=self, q=q)
+            entity_it = filter(entity_filter, entity_it)
+
+            next_entities = set()
+
+            for entity in entity_it:
+                next_entities.add(entity)
+
+            entities = next_entities
+
+        return entities
 
 
 class TagFilter(object):
@@ -66,86 +89,71 @@ class TagFilter(object):
 
 
 class EntityFilter(object):
-    def __init__(self, others: Iterable[Entity]):
-        if others is None:
-            self.others = None
+    def __init__(self, entities: Iterable[Entity]):
+        if entities is None:
+            self.entities = None
             self.is_origin = True
         else:
-            self.others = set(others)
+            self.entities = set(entities)
             self.is_origin = False
 
     def __call__(self, entity: Entity):
-        ok = self.is_origin or (entity in self.others)
+        ok = self.is_origin or (entity in self.entities)
         return ok
 
 
-class InGenerator(object):
+def first_nn(*items):
+    """ Returns first not none argument. """
+    for item in items:
+        if item is not None:
+            if item in {list, set, tuple, dict}:
+                return item()
+            else:
+                return item
+
+
+class NodeGenerator(object):
+
+    EMPTY_Q = Q()
+
     def __init__(
         self,
         graph: Graph,
-        entities: Iterable[Entity],
-        tag: Tag,
+        q: Q = None,
+        tags: Set[Tag] = None,
+        starts: Set[Entity] = None,
         seen: Set[Entity] = None,
+        incoming: bool = None,
+        hops: int = None,
     ):
+        q = first_nn(q, NodeGenerator.EMPTY_Q)
+
         self.graph = graph
-        self.entities = entities
-        self.tag = tag
-        self.seen = seen or set()
+        self.tags = first_nn(tags, q.tags)
+        self.starts = first_nn(starts, q.entities)
+        self.seen = first_nn(seen, set)
+        self.hops = first_nn(hops, q.hops)
+        self.incoming = first_nn(incoming, q.incoming)
 
     def __iter__(self):
         next_round = set()
 
-        for entity in self.entities:
-            for rel in self.graph.gen_in_relationships(entity=entity):
-                if rel.tag == self.tag:
-                    entity = rel.entity_a
+        for e0 in self.starts:
+            for rel in self.graph.rel_it(entity=e0, incoming=self.incoming):
+                if rel.tag in self.tags:
+                    e1 = rel.entity_a if self.incoming else rel.entity_b
 
-                    if entity not in self.seen:
-                        self.seen.add(entity)
-                        next_round.add(entity)
-                        yield entity
+                    if e1 not in self.seen:
+                        self.seen.add(e1)
+                        next_round.add(e1)
+                        yield e1
 
         if next_round:
-            yield from InGenerator(
+            yield from NodeGenerator(
                 graph=self.graph,
-                entities=next_round,
-                tag=self.tag,
+                tags=self.tags,
+                starts=next_round,
                 seen=self.seen,
+                incoming=self.incoming,
+                hops=self.hops - 1,
             )
-
-
-class Query(object):
-    def __init__(self, graph: Graph):
-        self.graph = graph
-        self.tag = None
-        self.batches = []
-
-    def __getattr__(self, tag_name: str):
-        self.tag = Tag.convert(tag_name)
-        return self
-
-    def __call__(self, *args):
-        in_gen = InGenerator(graph=self.graph, entities=args, tag=self.tag)
-        self.batches.append(in_gen)
-        return self
-
-    def __len__(self):
-        return len(self.execute())
-
-    def __iter__(self):
-        yield from self.execute()
-
-    def execute(self):
-        others = None
-        for entity_it in self.batches:
-            next_others = set()
-
-            entity_filter = EntityFilter(others=others)
-            entity_it = filter(entity_filter, entity_it)
-
-            for entity in entity_it:
-                next_others.add(entity)
-
-            others = next_others
-
-        return others

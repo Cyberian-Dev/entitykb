@@ -77,7 +77,6 @@ class Store(object):
 
 
 class DefaultStore(Store):
-
     def __init__(self, root_dir: str):
         self.root_dir = root_dir
         self._trie = None

@@ -554,4 +554,81 @@ class Relationship(BaseModel):
             return self.entity_a
 
 
+class QType(type):
+    def __getattr__(self, tag_name: str):
+        tag = Tag(tag_name)
+        return self(tags=[tag])
+
+
+class Q(BaseModel, metaclass=QType):
+
+    __slots__ = ("tags", "entities", "incoming", "hops", "parent")
+
+    def __init__(
+        self, tags=None, entities=None, incoming=True, hops=5, parent=None
+    ):
+        self.tags = frozenset(tags or ())
+        self.entities = frozenset(entities or ())
+        self.incoming = incoming
+        self.hops = hops
+        self.parent = parent
+
+    def __call__(self, *entities, incoming=None, hops=None, parent=None):
+        self.entities = self.entities | frozenset(entities or ())
+        self.incoming = incoming if incoming is not None else self.incoming
+        self.hops = hops if hops is not None else self.hops
+        self.parent = parent if parent is not None else self.parent
+        return self
+
+    def __repr__(self):
+        return "<Q: " + repr(self.dict()) + ">"
+
+    def __hash__(self):
+        return hash((self.tags, self.entities, self.incoming, self.hops))
+
+    def __getattr__(self, tag_name: str):
+        tag = Tag(tag_name)
+        return Q(tags=[tag], parent=self)
+
+    def __len__(self):
+        return len(tuple(item for item in self))
+
+    def __iter__(self):
+        if self.parent:
+            yield from self.parent
+        yield self
+
+    def dict(self):
+        return dict(
+            tags=list(self.tags),
+            entities=list(self.entities),
+            incoming=self.incoming,
+            hops=self.hops,
+            parent=self.parent,
+        )
+
+
+class Query(BaseModel):
+    def __init__(self, *q_list: Q):
+        self.qs = []
+        for q in q_list:
+            self.qs += list(q)
+
+    def __hash__(self):
+        return hash(tuple(self.qs))
+
+    def __repr__(self):
+        return "<Query: " + repr(self.qs) + ">"
+
+    def __iter__(self):
+        return iter(self.qs)
+
+    @classmethod
+    def convert(cls, q):
+        if isinstance(q, Q):
+            return Query(q)
+        return q
+
+
+QueryType = Union[Q, Query]
 EntityValue = Union[Entity, dict]

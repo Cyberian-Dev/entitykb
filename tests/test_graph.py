@@ -1,4 +1,4 @@
-from entitykb import Entity, Graph, Relationship, Tag
+from entitykb import Entity, Graph, Relationship, Tag, Q, Query
 import pickle
 
 food = Entity(name="Food")
@@ -29,7 +29,7 @@ relationships = [
     Relationship(dessert, Tag.IS_A, food),
     Relationship(pie, Tag.IS_A, dessert),
     Relationship(apple_pie, Tag.IS_A, pie),
-    Relationship(apple_pie, Tag.HAS, apple),
+    Relationship(apple_pie, Tag.HAS_A, apple),
 ]
 
 
@@ -45,10 +45,24 @@ def test_graph_create_and_query():
     graph = pickle.loads(data)
 
     # example node queries
-    assert {granny_smith, honeycrisp} == set(graph.q.is_a(apple))
-    assert {apple_pie} == set(graph.q.is_a(pie).has(apple))
-    assert {apple_pie} == set(graph.q.has(apple).is_a(pie))
-    assert {apple, granny_smith, honeycrisp} == set(graph.q.is_a(fruit))
-    assert {apple_pie} == set(graph.q.is_a(dessert).has(apple))
-    assert {apple_pie} == set(graph.q.is_a(food).has(apple))
-    assert set() == set(graph.q.is_a(food).has(granny_smith))
+    assert {granny_smith, honeycrisp} == set(graph(Q.is_a(apple)))
+    assert {apple_pie} == set(graph(Q.is_a(pie).has_a(apple)))
+    assert {apple_pie} == set(graph(Q.has_a(apple).is_a(pie)))
+    assert {apple, granny_smith, honeycrisp} == set(graph(Q.is_a(fruit)))
+    assert {apple_pie} == set(graph(Q.is_a(dessert).has_a(apple)))
+    assert {apple_pie} == set(graph(Q.is_a(food).has_a(apple)))
+    assert set() == set(graph(Q.is_a(food).has_a(granny_smith)))
+
+
+def test_model_query():
+    assert Q.is_a == Q(tags=["IS_A"])
+    assert Q.is_a(apple) == Q(tags=["IS_A"], entities=[apple])
+    assert Q.is_a(apple, incoming=False) == Q(
+        tags=["IS_A"], entities=[apple], incoming=False
+    )
+    assert Q.is_a(apple, hops=2) == Q(tags=["IS_A"], entities=[apple], hops=2)
+    assert 1 == len(Q.is_a(apple))
+
+    q = Q.is_a(pie).has_a(apple)
+    assert Query(q) == Query(Q.is_a(pie), Q.has_a(apple))
+    assert Query(q) == Query.convert(q)
