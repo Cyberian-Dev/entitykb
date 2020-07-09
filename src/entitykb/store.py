@@ -86,35 +86,16 @@ class DefaultStore(Store):
         return len(self.graph)
 
     @property
-    def exists(self):
-        return self.index_path and os.path.exists(self.index_path)
+    def trie(self) -> ahocorasick.Automaton:
+        if self._trie is None:
+            self._trie: ahocorasick.Automaton = ahocorasick.Automaton()
+        return self._trie
 
-    def load(self):
-        if self.exists:
-            with open(self.index_path, "rb") as fp:
-                data = fp.read()
-                try:
-                    self._trie = pickle.loads(data)
-                except AttributeError:
-                    logger.error("Failed to load index: " + self.index_path)
-
-            with open(self.graph_path, "rb") as fp:
-                data = fp.read()
-                try:
-                    self._graph = pickle.loads(data)
-                except AttributeError:
-                    logger.error("Failed to load graph: " + self.graph_path)
-
-    def commit(self):
-        data = pickle.dumps(self._trie)
-        utils.safe_write(self.index_path, data)
-
-        data = pickle.dumps(self._graph)
-        utils.safe_write(self.graph_path, data)
-
-    def reset(self):
-        self._graph = None
-        self._trie = None
+    @property
+    def graph(self) -> Graph:
+        if self._graph is None:
+            self._graph: Graph = Graph()
+        return self._graph
 
     def add_rel(self, relationship: Relationship):
         self.graph.add_relationship(relationship)
@@ -200,36 +181,37 @@ class DefaultStore(Store):
         info["last_commit"] = utils.file_updated(self.index_path)
         return info
 
-    def archive(self, backup_dir: str):
-        for path in (self.index_path, self.graph_path):
-            update_time = utils.file_updated(path)
-            file_name = os.path.basename(path)
-            file_name += update_time.strftime(".%d-%m-%Y_%I-%M-%S_%p")
-            backup_path = os.path.join(backup_dir, file_name)
-            os.rename(path, backup_path)
-
     # trie
-
-    @property
-    def trie(self) -> ahocorasick.Automaton:
-        if self._trie is None:
-            self._trie: ahocorasick.Automaton = ahocorasick.Automaton()
-        return self._trie
-
     @property
     def index_path(self):
         if self.root_dir:
             return os.path.join(self.root_dir, "index.db")
 
-    # graph
-
     @property
-    def graph(self) -> Graph:
-        if self._graph is None:
-            self._graph: Graph = Graph()
-        return self._graph
+    def exists(self):
+        return self.index_path and os.path.exists(self.index_path)
 
-    @property
-    def graph_path(self):
-        if self.root_dir:
-            return os.path.join(self.root_dir, "graph.db")
+    def load(self):
+        if self.exists:
+            with open(self.index_path, "rb") as fp:
+                data = fp.read()
+                try:
+                    self._trie, self._graph = pickle.loads(data)
+                except AttributeError:
+                    logger.error("Failed to load index: " + self.index_path)
+
+    def commit(self):
+        data = pickle.dumps((self._trie, self._graph))
+        utils.safe_write(self.index_path, data)
+
+    def reset(self):
+        self._graph = None
+        self._trie = None
+
+    def archive(self, backup_dir: str):
+        path = self.index_path
+        update_time = utils.file_updated(path)
+        file_name = os.path.basename(path)
+        file_name += update_time.strftime(".%d-%m-%Y_%I-%M-%S_%p")
+        backup_path = os.path.join(backup_dir, file_name)
+        os.rename(path, backup_path)

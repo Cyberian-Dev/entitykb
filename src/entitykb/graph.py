@@ -1,4 +1,5 @@
 import time
+from collections import defaultdict
 from itertools import chain
 from typing import Union, Dict, Generator, Iterable, Set
 
@@ -16,13 +17,20 @@ from . import (
 from .utils import first_nn
 
 ENTITY_VAL = Union[Entity, DocEntity, str, float]
+HAS_LABEL = "HAS_LABEL"
 RelationshipGenerator = Generator[Relationship, None, None]
+
+
+def generate_new_id():
+    new_id = time.time()
+    time.sleep(0.0)
+    return new_id
 
 
 class Graph(object):
     def __init__(self):
         self.entity_by_id: Dict[float, Entity] = dict()
-        self.entity_key_to_id: Dict[str, float] = dict()
+        self.entity_key_to_id: Dict[str, float] = defaultdict(generate_new_id)
 
         # Tag -> Direction -> Entity A ID -> Entity B ID
         self.relationships = {}
@@ -46,9 +54,12 @@ class Graph(object):
                 logger.warning(f"Invalid type: {type(item)}: {item}")
 
     def add_entity(self, entity: Entity):
-        entity_id = self.entity_key_to_id.setdefault(entity.key, time.time())
+        entity_id = self.entity_key_to_id[entity.key]
         self.entity_by_id[entity_id] = entity
-        time.sleep(0.0)
+        label_id = self.entity_key_to_id[entity.label]
+
+        self.add_rel_using_ids(entity_id, HAS_LABEL, label_id)
+
         return entity_id
 
     def get_entity(self, val: ENTITY_VAL):
@@ -75,9 +86,12 @@ class Graph(object):
     def add_relationship(self, rel: Relationship):
         id_a = self.get_entity_id(rel.entity_a)
         id_b = self.get_entity_id(rel.entity_b)
-        assert id_a and id_b and rel.tag, f"Invalid: {rel}"
+        self.add_rel_using_ids(id_a, rel.tag, id_b)
 
-        top = self.relationships.setdefault(rel.tag, {})
+    def add_rel_using_ids(self, id_a: float, tag: str, id_b: float):
+        assert id_a and id_b and tag, f"Invalid: {id_a}, {tag}, {id_b}"
+
+        top = self.relationships.setdefault(tag, {})
 
         rel_in = top.setdefault(False, {})
         rel_in.setdefault(id_a, set()).add(id_b)
