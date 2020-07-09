@@ -1,6 +1,6 @@
 from typing import Tuple, Union, Optional, Set, Iterable
 
-from .utils import get_class_from_name, tupilify, first_nn
+from .utils import get_class_from_name, tupilify, first_nn, hybrid_method
 
 
 class BaseModel(object):
@@ -573,8 +573,7 @@ class Relationship(BaseModel):
 
 class QType(type):
     def __getattr__(self, tag_name: str):
-        tag = Tag(tag_name)
-        return self(tags=[tag])
+        return Q.has_rel(tag_name)
 
 
 class Q(BaseModel, metaclass=QType):
@@ -598,24 +597,42 @@ class Q(BaseModel, metaclass=QType):
         self.hops = first_nn(hops, -1)
         self.parent = parent
 
-    def __call__(self, *entities, incoming=None, hops=None, parent=None):
-        self.entities = self.entities | frozenset(entities or ())
+    def update(
+        self,
+        entities=None,
+        tags=None,
+        incoming=None,
+        labels=None,
+        hops=None,
+        parent=None,
+    ):
+        if entities:
+            self.entities |= frozenset(entities)
+
         self.incoming = first_nn(incoming, self.incoming)
+
+        if tags:
+            self.tags |= frozenset(tags)
+
+        if labels:
+            self.labels |= frozenset(labels)
+
         self.hops = first_nn(hops, self.hops)
         self.parent = first_nn(parent, self.parent)
+
         return self
+
+    def __call__(self, *entities, **kwargs):
+        return self.update(entities=entities, **kwargs)
 
     def __repr__(self):
         return "<Q: " + repr(self.dict()) + ">"
 
     def __hash__(self):
-        return hash(
-            (self.entities, self.tags, self.labels, self.incoming, self.hops)
-        )
+        return hash(self.dict().values())
 
     def __getattr__(self, tag_name: str):
-        tag = Tag(tag_name)
-        return Q(tags=[tag], parent=self)
+        return self.has_rel(tag_name)
 
     def __len__(self):
         return len(tuple(item for item in self))
@@ -625,12 +642,17 @@ class Q(BaseModel, metaclass=QType):
             yield from self.parent
         yield self
 
-    def has_label(self, *labels):
-        if isinstance(self, str):
-            return Q(labels=[self] + list(labels))
-        else:
-            self.labels = self.labels | frozenset(labels or ())
-            return self
+    @hybrid_method
+    def has_rel(self_or_cls, *tags, incoming=None):
+        tags = [Tag.convert(tag) for tag in tags]
+        parent = None if isinstance(self_or_cls, type) else self_or_cls
+        return Q(tags=tags, incoming=incoming, parent=parent)
+
+    @hybrid_method
+    def has_label(self_or_cls, *labels):
+        labels = [Label.convert(label) for label in labels]
+        parent = None if isinstance(self_or_cls, type) else self_or_cls
+        return Q(labels=list(labels), parent=parent)
 
     def dict(self):
         data = {}

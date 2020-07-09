@@ -91,20 +91,20 @@ class Graph(object):
         entity_ids = None
 
         for q in query:
-            entity_it = NodeGenerator(graph=self, q=q)
-
-            if entity_ids is not None:
-                entity_filter = EntityFilter(entity_ids=entity_ids)
-                entity_it = filter(entity_filter, entity_it)
-
             if q.labels:
                 labels_filter = LabelsFilter(graph=self, labels=q.labels)
-                entity_it = filter(labels_filter, entity_it)
+                entity_it = filter(labels_filter, entity_ids)
+            else:
+                entity_it = NodeGenerator(graph=self, q=q)
+
+                if entity_ids is not None:
+                    entity_filter = EntityFilter(entity_ids=entity_ids)
+                    entity_it = filter(entity_filter, entity_it)
 
             next_entity_ids = set()
 
-            for entity in entity_it:
-                next_entity_ids.add(entity)
+            for entity_id in entity_it:
+                next_entity_ids.add(entity_id)
 
             entity_ids = next_entity_ids
 
@@ -163,7 +163,7 @@ class NodeGenerator(object):
                     curr = self.graph.relationships.setdefault(tag, None)
                     curr = curr and curr.setdefault(self.incoming, None)
                     curr = curr and curr.setdefault(e0, None)
-                    for e1 in (curr or ()):
+                    for e1 in curr or ():
                         if e1 and e1 not in self.seen:
                             self.seen.add(e1)
                             next_round.add(e1)

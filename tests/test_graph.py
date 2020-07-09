@@ -55,7 +55,7 @@ def test_pickle_load(graph):
     assert "<Graph: (9 entities)>" == repr(graph)
 
 
-def test_graph_create_and_query(graph):
+def test_query_is_a(graph):
     # example node queries
     assert {granny_smith, honeycrisp} == set(graph(Q.is_a(apple)))
     assert {apple, granny_smith, honeycrisp} == set(graph(Q.is_a(fruit)))
@@ -63,28 +63,34 @@ def test_graph_create_and_query(graph):
     assert {apple_pie} == set(graph(Q.has_a(apple).is_a(pie)))
     assert {apple_pie} == set(graph(Q.is_a(pie).has_a(apple)))
 
+
+def test_query_is_a_and_has_a(graph):
     assert {apple_pie, apple_sauce} == set(graph(Q.is_a(dessert).has_a(apple)))
     assert {apple_pie, apple_sauce} == set(graph(Q.is_a(food).has_a(apple)))
+    assert set() == set(graph(Q.is_a(food).has_a(granny_smith)))
 
+
+def test_query_with_label(graph):
+    assert {apple_sauce} == set(graph(Q.is_a(food).has_label("SAUCE")))
     assert {apple_sauce} == set(
         graph(Q.is_a(food).has_a(apple).has_label("SAUCE"))
     )
 
-    assert set() == set(graph(Q.is_a(food).has_a(granny_smith)))
 
+def test_query_limit_hops(graph):
     assert 8 == len(set(graph(Q.is_a(food))))
     assert 2 == len(set(graph(Q.is_a(food, hops=1))))
 
-    # alternate inputs (key, doc ent)
+
+def test_entity_ids_keys_and_doc_entities(graph):
     assert {granny_smith, honeycrisp} == set(graph(Q.is_a("Apple|ENTITY")))
     assert {granny_smith, honeycrisp} == set(
         graph(Q.is_a(DocEntity(text=None, doc=None, entity=apple)))
     )
+    assert {apple} == set(graph(Q(entities=[graph.get_entity_id(apple)])))
 
-    apple_id = graph.get_entity_id(apple)
-    assert {apple} == set(graph(Q(entities=[apple_id])))
 
-    # outcoming
+def test_is_outcoming_direction(graph):
     assert {fruit, food} == set(graph(Q.is_a(apple, incoming=False)))
     assert {fruit} == set(graph(Q.is_a(apple, incoming=False).is_a(food)))
 

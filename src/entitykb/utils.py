@@ -92,3 +92,11 @@ def first_nn(*items):
                 return item()
             else:
                 return item
+
+
+# noinspection PyPep8Naming,PyMethodOverriding,PyUnresolvedReferences
+class hybrid_method(classmethod):
+    # ref: https://stackoverflow.com/a/28238047/1946790
+    def __get__(self, instance, type_):
+        d_get = super().__get__ if instance is None else self.__func__.__get__
+        return d_get(instance, type_)
