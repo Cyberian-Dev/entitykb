@@ -1,4 +1,4 @@
-import os
+from dataclasses import dataclass
 from typing import List, Optional, Any, Type, Union
 
 from . import (
@@ -16,7 +16,37 @@ from . import (
 EID = Any
 
 
+@dataclass
 class Index(object):
+    tokenizer: Tokenizer
+    normalizer: Normalizer
+    root_dir: str = None
+    store: Store = None
+
+    def __len__(self):
+        return len(self.store)
+
+    def __repr__(self):
+        return f"<Index: {self.root_dir}>"
+
+    def info(self) -> dict:
+        raise NotImplementedError
+
+    def load(self):
+        raise NotImplementedError
+
+    def commit(self):
+        raise NotImplementedError
+
+    def reset(self):
+        raise NotImplementedError
+
+    def add_entity(self, entity: Entity):
+        raise NotImplementedError
+
+    def add_relationship(self, relationship: Relationship):
+        raise NotImplementedError
+
     @classmethod
     def create(cls, index: "DefaultIndexType" = None, **kwargs):
         if isinstance(index, str):
@@ -26,45 +56,35 @@ class Index(object):
         return index
 
 
+@dataclass
 class DefaultIndex(Index):
-    def __init__(
-        self,
-        *,
-        root_dir: str = None,
-        tokenizer: Tokenizer,
-        normalizer: Normalizer,
-        max_backups=6,
-        store: Store = None,
-    ):
-        self.root_dir = root_dir
-        self.tokenizer = tokenizer
-        self.normalizer = normalizer
-        self.max_backups = max(0, max_backups)
-        self.store = DefaultStore(self.root_dir) if store is None else store
+    def __post_init__(self):
+        self.store = self.store or DefaultStore(self.root_dir)
 
-    def __len__(self):
-        return len(self.store)
+    def info(self) -> dict:
+        return self.store.info()
 
-    @property
-    def exists(self):
-        return bool(self.store is not None and self.store.exists)
+    def load(self):
+        self.store.load()
 
-    @property
-    def index_path(self):
-        return self.store is not None and self.store.index_path
+    def commit(self):
+        self.store.commit()
 
-    def add(self, entity: Entity):
-        entity_id = self.store.upsert_entity(entity)
+    def reset(self):
+        self.store.reset()
+
+    def add_entity(self, entity: Entity):
+        entity_id = self.store.add_entity(entity)
 
         for term in entity.terms:
             self.add_term(entity, entity_id, term)
 
-    def add_rel(self, relationship: Relationship):
-        self.store.add_rel(relationship)
+    def add_relationship(self, relationship: Relationship):
+        self.store.add_relationship(relationship)
 
     def add_term(self, entity, entity_id, term):
         normalized = self.normalizer(term)
-        self.store.upsert_term(normalized, entity_id, entity.label)
+        self.store.add_term(normalized, entity_id)
         return normalized
 
     def get(self, entity_key: str) -> Entity:
@@ -86,47 +106,6 @@ class DefaultIndex(Index):
         return self.store.suggest(
             term=normalized, label_set=label_set, limit=limit
         )
-
-    def info(self) -> dict:
-        return self.store.info()
-
-    def load(self):
-        self.store.load()
-
-    def commit(self):
-        self.backup_index()
-        self.store.commit()
-
-    def reset(self):
-        self.store.reset()
-
-    # backups
-
-    @property
-    def backup_dir(self):
-        backup_dir = os.path.join(self.root_dir, "backups")
-        if not os.path.exists(backup_dir):
-            os.makedirs(backup_dir, exist_ok=True)
-        return backup_dir
-
-    def backup_index(self) -> Optional[str]:
-        if self.exists and self.max_backups:
-            backup_path = self.store.archive(self.backup_dir)
-            self.clean_backups()
-            return backup_path
-
-    def get_backups(self):
-        paths = [f"{self.backup_dir}/{x}" for x in os.listdir(self.backup_dir)]
-        paths = sorted(paths, key=os.path.getctime)
-        return paths
-
-    def clean_backups(self) -> Optional[str]:
-        backups = self.get_backups()
-
-        if len(backups) >= self.max_backups:
-            oldest = backups[0]
-            os.remove(oldest)
-            return oldest
 
 
 DefaultIndexType = Optional[Union[Type[DefaultIndex], DefaultIndex, str]]

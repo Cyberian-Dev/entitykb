@@ -31,8 +31,6 @@ class Graph(object):
     def __init__(self):
         self.entity_by_id: Dict[float, Entity] = dict()
         self.entity_key_to_id: Dict[str, float] = defaultdict(generate_new_id)
-
-        # Tag -> Direction -> Entity A ID -> Entity B ID
         self.relationships = {}
 
     def __repr__(self):
@@ -44,23 +42,11 @@ class Graph(object):
     def __call__(self, query: QueryType):
         return self.find(query)
 
-    def add(self, *items: ER):
-        for item in chain(*items):
-            if isinstance(item, Entity):
-                self.add_entity(item)
-            elif isinstance(item, Relationship):
-                self.add_relationship(item)
-            else:
-                logger.warning(f"Invalid type: {type(item)}: {item}")
-
-    def add_entity(self, entity: Entity):
-        entity_id = self.entity_key_to_id[entity.key]
-        self.entity_by_id[entity_id] = entity
-        label_id = self.entity_key_to_id[entity.label]
-
-        self.add_rel_using_ids(entity_id, HAS_LABEL, label_id)
-
-        return entity_id
+    def __getitem__(self, item):
+        if isinstance(item, Entity):
+            return self.get_entity_id(item)
+        else:
+            return self.get_entity(item)
 
     def get_entity(self, val: ENTITY_VAL):
         if isinstance(val, float):
@@ -82,6 +68,22 @@ class Graph(object):
             return self.entity_key_to_id.get(val)
         if isinstance(val, float):
             return val
+
+    def add(self, *items: ER):
+        for item in chain(*items):
+            if isinstance(item, Entity):
+                self.add_entity(item)
+            elif isinstance(item, Relationship):
+                self.add_relationship(item)
+            else:
+                logger.warning(f"Invalid type: {type(item)}: {item}")
+
+    def add_entity(self, entity: Entity):
+        entity_id = self.entity_key_to_id[entity.key]
+        self.entity_by_id[entity_id] = entity
+        label_id = self.entity_key_to_id[entity.label]
+        self.add_rel_using_ids(entity_id, HAS_LABEL, label_id)
+        return entity_id
 
     def add_relationship(self, rel: Relationship):
         id_a = self.get_entity_id(rel.entity_a)

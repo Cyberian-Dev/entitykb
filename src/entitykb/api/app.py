@@ -36,7 +36,7 @@ def shutdown_event():
     kb = Instance.get()
 
     if kb.is_dirty:
-        logger.info(f"Changes found. Commit started: {kb.index.index_path}")
+        logger.info("Changes found. Commit started.")
         kb.commit()
         logger.info("KB commit complete.")
     else:

@@ -126,7 +126,7 @@ def test_default_resolver(apple):
         normalizer=normalizer,
         index=index,
     )
-    resolver.index.add(apple)
+    resolver.index.add_entity(apple)
 
     assert resolver.is_prefix("a")
     assert resolver.is_prefix("apple")

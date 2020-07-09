@@ -30,6 +30,8 @@ class TermEntities(object):
 
 
 class Store(object):
+    max_backups = 5
+
     def __len__(self):
         raise NotImplementedError
 
@@ -46,10 +48,13 @@ class Store(object):
     def reset(self):
         raise NotImplementedError
 
-    def upsert_entity(self, entity: Entity) -> EID:
+    def add_entity(self, entity: Entity) -> EID:
         raise NotImplementedError
 
-    def upsert_term(self, term: str, entity_id: EID, label: str):
+    def add_relationship(self, relationship: Relationship):
+        raise NotImplementedError
+
+    def add_term(self, term: str, entity_id: EID):
         raise NotImplementedError
 
     def get_entity(self, entity_key: str) -> Entity:
@@ -72,7 +77,7 @@ class Store(object):
     def info(self) -> dict:
         raise NotImplementedError
 
-    def archive(self, backup_dir: str) -> str:
+    def archive(self):
         raise NotImplementedError
 
 
@@ -97,14 +102,13 @@ class DefaultStore(Store):
             self._graph: Graph = Graph()
         return self._graph
 
-    def add_rel(self, relationship: Relationship):
-        self.graph.add_relationship(relationship)
+    def add_entity(self, entity: Entity) -> EID:
+        return self.graph.add_entity(entity)
 
-    def upsert_entity(self, entity: Entity) -> EID:
-        entity_id = self.graph.add_entity(entity)
-        return entity_id
+    def add_relationship(self, relationship: Relationship):
+        return self.graph.add_relationship(relationship)
 
-    def upsert_term(self, term: str, entity_id: EID, label: str):
+    def add_term(self, term: str, entity_id: EID):
         term_entities = self.trie.get(term, None)
 
         if term_entities is None:
@@ -208,10 +212,31 @@ class DefaultStore(Store):
         self._graph = None
         self._trie = None
 
-    def archive(self, backup_dir: str):
-        path = self.index_path
-        update_time = utils.file_updated(path)
-        file_name = os.path.basename(path)
-        file_name += update_time.strftime(".%d-%m-%Y_%I-%M-%S_%p")
-        backup_path = os.path.join(backup_dir, file_name)
-        os.rename(path, backup_path)
+    # backups
+
+    @property
+    def backup_dir(self):
+        backup_dir = os.path.join(self.root_dir, "backups")
+        if not os.path.exists(backup_dir):
+            os.makedirs(backup_dir, exist_ok=True)
+        return backup_dir
+
+    def archive(self):
+        if self.exists and self.max_backups:
+            path = self.index_path
+            update_time = utils.file_updated(path)
+            file_name = os.path.basename(path)
+            file_name += update_time.strftime(".%d-%m-%Y_%I-%M-%S_%p")
+            backup_path = os.path.join(self.backup_dir, file_name)
+            os.rename(path, backup_path)
+
+            self.clean_backups()
+
+    def clean_backups(self) -> Optional[str]:
+        paths = [f"{self.backup_dir}/{x}" for x in os.listdir(self.backup_dir)]
+        paths = sorted(paths, key=os.path.getctime)
+
+        if len(paths) >= self.max_backups:
+            oldest = paths[0]
+            os.remove(oldest)
+            return oldest

@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import string
 
 from entitykb import (
@@ -8,26 +9,23 @@ from entitykb import (
 from .store import FuzzyStore
 
 FUZZ_BLOCK_TOKEN = set(string.punctuation)
-MAX_TOKEN_DISTANCE = 5
+DEFAULT_LABEL_SET = LabelSet.create(None)
 
 
+@dataclass
 class FuzzyIndex(DefaultIndex):
+    max_token_distance: int = 5
 
-    label_set = LabelSet.create(None)
+    def __post_init__(self):
+        self.store: FuzzyStore = self.store or FuzzyStore(self.root_dir)
 
-    def __init__(
-        self,
-        *,
-        root_dir: str = None,
-        conjunctions=None,
-        max_token_distance=2,
-        **kwargs,
-    ):
-        store = FuzzyStore(root_dir)
-        super().__init__(root_dir=root_dir, store=store, **kwargs)
+    @property
+    def label_set(self):
+        return DEFAULT_LABEL_SET
 
-        self.conjunctions = conjunctions or DEFAULT_CONJUNCTIONS
-        self.max_token_distance = max_token_distance
+    @property
+    def conjunctions(self):
+        return DEFAULT_CONJUNCTIONS
 
     def add_term(self, entity, entity_id, term):
         normalized = super(FuzzyIndex, self).add_term(entity, entity_id, term)
@@ -79,7 +77,7 @@ class FuzzyIndex(DefaultIndex):
                 for entity in find_result.entities:
                     entity_dist = find_result.distance + edit_dist
                     threshold = min(threshold, entity_dist)
-                    current = candidates.get(entity, MAX_TOKEN_DISTANCE)
+                    current = candidates.get(entity, self.max_token_distance)
                     candidates[entity] = min(entity_dist, current)
             else:
                 break

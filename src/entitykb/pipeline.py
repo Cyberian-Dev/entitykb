@@ -10,7 +10,7 @@ class Pipeline(object):
     normalizer: entitykb.Normalizer
 
     config: entitykb.Config = None
-    index: entitykb.DefaultIndex = None
+    index: entitykb.Index = None
     extractor: entitykb.Extractor = None
     filterers: Tuple[entitykb.Filterer, ...] = tuple
     resolvers: Tuple[entitykb.Resolver, ...] = tuple
@@ -94,6 +94,6 @@ class Pipeline(object):
     def add(self, *ent_rels: entitykb.ER):
         for er in ent_rels:
             if isinstance(er, entitykb.Entity):
-                self.index.add(er)
+                self.index.add_entity(er)
             else:
-                self.index.add_rel(er)
+                self.index.add_relationship(er)
