@@ -34,10 +34,8 @@ from .filterers import (
     KeepLongestByLabel,
     KeepLongestOnly,
 )
-from .graph import Graph
 
 # (3) depends on tokenizers, normalizer
-from .store import Store, DefaultStore
 from .index import Index, DefaultIndex
 
 # (4) depends on index
@@ -70,7 +68,6 @@ __all__ = (
     "DefaultIndex",
     "DefaultNormalizer",
     "DefaultResolver",
-    "DefaultStore",
     "DefaultTokenizer",
     "Doc",
     "DocEntity",
@@ -83,7 +80,6 @@ __all__ = (
     "Filterer",
     "FiltererType",
     "FindResult",
-    "Graph",
     "Index",
     "KB",
     "KeepLongestByKey",
@@ -100,7 +96,6 @@ __all__ = (
     "Relationship",
     "Resolver",
     "ResolverType",
-    "Store",
     "Tag",
     "Token",
     "TokenHandler",

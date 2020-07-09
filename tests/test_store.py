@@ -5,7 +5,7 @@ from entitykb import (
     FindResult,
 )
 
-from entitykb.store import TermEntities
+from entitykb.index.store import TermEntities
 
 
 def test_not_fuzzy(apple):

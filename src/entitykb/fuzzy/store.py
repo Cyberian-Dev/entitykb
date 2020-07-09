@@ -1,6 +1,6 @@
 from typing import Optional, Set
-from entitykb import DefaultStore, LabelSet, FindResult
-from entitykb.store import EID, TermEntities
+from entitykb import LabelSet, FindResult
+from entitykb.index.store import EID, DefaultStore, TermEntities
 
 
 class TermEditEntities(TermEntities):
@@ -13,7 +13,7 @@ class TermEditEntities(TermEntities):
         if current:
             self.term_entity_ids = current.term_entity_ids
 
-    def __str__(self):
+    def __repr__(self):
         attr = [self.term_entity_ids, self.edit_entity_ids, self.edit_distance]
         attr = ", ".join(map(str, attr))
         return f"<TermEditEntities: {attr}>"

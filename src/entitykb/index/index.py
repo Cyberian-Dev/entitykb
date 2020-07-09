@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Optional, Any, Type, Union
 
-from . import (
-    Store,
+from entitykb import (
     Tokenizer,
     Normalizer,
     Entity,
@@ -10,8 +9,9 @@ from . import (
     FindResult,
     LabelSet,
     utils,
-    DefaultStore,
 )
+
+from . import Store, DefaultStore
 
 EID = Any
 

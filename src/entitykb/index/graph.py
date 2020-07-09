@@ -3,7 +3,7 @@ from collections import defaultdict
 from itertools import chain
 from typing import Union, Dict, Generator, Iterable, Set
 
-from . import (
+from entitykb import (
     DocEntity,
     Entity,
     Relationship,
@@ -13,8 +13,8 @@ from . import (
     Query,
     Q,
     logger,
+    utils,
 )
-from .utils import first_nn
 
 ENTITY_VAL = Union[Entity, DocEntity, str, float]
 HAS_LABEL = "HAS_LABEL"
@@ -159,14 +159,14 @@ class NodeGenerator(object):
         incoming: bool = None,
         hops: int = None,
     ):
-        q = first_nn(q, NodeGenerator.EMPTY_Q)
+        q = utils.first_nn(q, NodeGenerator.EMPTY_Q)
 
         self.graph = graph
-        self.tags = first_nn(tags, q.tags)
-        self.starts = first_nn(starts, q.entities)
-        self.seen = first_nn(seen, set)
-        self.hops = first_nn(hops, q.hops)
-        self.incoming = first_nn(incoming, q.incoming)
+        self.tags = utils.first_nn(tags, q.tags)
+        self.starts = utils.first_nn(starts, q.entities)
+        self.seen = utils.first_nn(seen, set)
+        self.hops = utils.first_nn(hops, q.hops)
+        self.incoming = utils.first_nn(incoming, q.incoming)
 
     def __iter__(self):
         next_round = set()

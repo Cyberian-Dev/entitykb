@@ -4,7 +4,8 @@ from typing import List, Optional, Any, Set
 
 import ahocorasick
 
-from . import Entity, Relationship, FindResult, LabelSet, utils, logger, Graph
+from entitykb import Entity, Relationship, FindResult, LabelSet, utils, logger
+from . import Graph
 
 EID = Any
 
@@ -17,7 +18,7 @@ class TermEntities(object):
         if entity_id is not None:
             self.term_entity_ids.add(entity_id)
 
-    def __str__(self):
+    def __repr__(self):
         return f"<TermEntities: {self.term_entity_ids}>"
 
     def __iter__(self):

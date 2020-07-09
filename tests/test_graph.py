@@ -1,7 +1,8 @@
 import pytest
 import pickle
 
-from entitykb import Entity, Graph, Q, Query, DocEntity
+from entitykb import Entity, Q, Query, DocEntity
+from entitykb.index import Graph
 
 food = Entity(name="Food")
 fruit = Entity(name="Fruit")
