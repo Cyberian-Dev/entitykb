@@ -54,13 +54,8 @@ def reset(root_dir: str):
         f"Are you sure you want to remove: {kb.index.index_path}?", abort=True,
     )
 
-    backup_path = kb.index.backup_index()
-    if backup_path:
-        click.echo(f"Backed up current index to: {backup_path}")
-
-    cleaned_path = kb.index.clean_backups()
-    if cleaned_path:
-        click.echo(f"Removed oldest backup: {cleaned_path}")
+    kb.index.backup_index()
+    kb.index.clean_backups()
 
     kb.index.reset()
     index_path = kb.index.commit()

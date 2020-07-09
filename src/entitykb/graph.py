@@ -3,7 +3,17 @@ from collections import defaultdict
 from itertools import chain
 from typing import Union, Dict, Generator, Iterable, Set
 
-from . import Entity, Relationship, ER, Tag, QueryType, Query, Q, logger
+from . import (
+    DocEntity,
+    Entity,
+    Relationship,
+    ER,
+    Tag,
+    QueryType,
+    Query,
+    Q,
+    logger,
+)
 from .utils import first_nn
 
 KEY_OR_ID = Union[str, float]
@@ -41,8 +51,13 @@ class Graph(object):
         self.key_or_id_to_entity[entity.key] = entity
         return entity_id
 
-    def get_entity(self, key_or_id: KEY_OR_ID):
-        return self.key_or_id_to_entity.get(key_or_id)
+    def get_entity(self, val):
+        if isinstance(val, Entity):
+            return val
+        elif isinstance(val, DocEntity):
+            return val.entity
+        else:
+            return self.key_or_id_to_entity.get(val)
 
     def get_entity_id(self, entity: Entity):
         return self.entity_to_id.get(entity)
@@ -63,9 +78,16 @@ class Graph(object):
         entities = None
 
         for q in query:
-            entity_filter = EntityFilter(entities=entities)
             entity_it = NodeGenerator(graph=self, q=q)
-            entity_it = filter(entity_filter, entity_it)
+
+            if entities is not None:
+                entities = (self.get_entity(e) for e in entities)
+                entity_filter = EntityFilter(entities=entities)
+                entity_it = filter(entity_filter, entity_it)
+
+            if q.labels:
+                labels_filter = LabelsFilter(labels=q.labels)
+                entity_it = filter(labels_filter, entity_it)
 
             next_entities = set()
 
@@ -77,27 +99,20 @@ class Graph(object):
         return entities
 
 
-class TagFilter(object):
-    def __init__(self, tag: Tag):
-        self.tag = tag
+class LabelsFilter(object):
+    def __init__(self, labels: frozenset):
+        self.labels = labels
 
-    def __call__(self, relationship: Relationship):
-        ok = self.tag == relationship.tag
-        return ok
+    def __call__(self, entity: Entity):
+        return entity.label in self.labels
 
 
 class EntityFilter(object):
     def __init__(self, entities: Iterable[Entity]):
-        if entities is None:
-            self.entities = None
-            self.is_origin = True
-        else:
-            self.entities = set(entities)
-            self.is_origin = False
+        self.entities = set(entities)
 
     def __call__(self, entity: Entity):
-        ok = self.is_origin or (entity in self.entities)
-        return ok
+        return entity in self.entities
 
 
 class NodeGenerator(object):
@@ -127,14 +142,18 @@ class NodeGenerator(object):
         next_round = set()
 
         for e0 in self.starts:
-            for rel in self.graph.rel_it(entity=e0, incoming=self.incoming):
-                if rel.tag in self.tags:
-                    e1 = rel.entity_a if self.incoming else rel.entity_b
+            e0 = self.graph.get_entity(e0)
+            if self.tags:
+                for rel in self.graph.rel_it(e0, self.incoming):
+                    if rel.tag in self.tags:
+                        e1 = rel.entity_a if self.incoming else rel.entity_b
 
-                    if e1 not in self.seen:
-                        self.seen.add(e1)
-                        next_round.add(e1)
-                        yield e1
+                        if e1 not in self.seen:
+                            self.seen.add(e1)
+                            next_round.add(e1)
+                            yield e1
+            else:
+                yield e0
 
         next_hops = self.hops - 1
 

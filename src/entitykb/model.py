@@ -582,10 +582,18 @@ class Q(BaseModel, metaclass=QType):
     __slots__ = ("tags", "entities", "incoming", "hops", "parent")
 
     def __init__(
-        self, tags=None, entities=None, incoming=None, hops=None, parent=None
+        self,
+        entities=None,
+        *,
+        tags=None,
+        labels=None,
+        incoming=None,
+        hops=None,
+        parent=None,
     ):
-        self.tags = frozenset(tags or ())
         self.entities = frozenset(entities or ())
+        self.tags = frozenset(tags or ())
+        self.labels = frozenset(labels or ())
         self.incoming = first_nn(incoming, True)
         self.hops = first_nn(hops, -1)
         self.parent = parent
@@ -601,7 +609,9 @@ class Q(BaseModel, metaclass=QType):
         return "<Q: " + repr(self.dict()) + ">"
 
     def __hash__(self):
-        return hash((self.tags, self.entities, self.incoming, self.hops))
+        return hash(
+            (self.entities, self.tags, self.labels, self.incoming, self.hops)
+        )
 
     def __getattr__(self, tag_name: str):
         tag = Tag(tag_name)
@@ -615,10 +625,15 @@ class Q(BaseModel, metaclass=QType):
             yield from self.parent
         yield self
 
+    def has_label(self, *labels):
+        self.labels = self.labels | frozenset(labels or ())
+        return self
+
     def dict(self):
         return dict(
-            tags=list(self.tags),
             entities=list(self.entities),
+            tags=list(self.tags),
+            labels=self.labels,
             incoming=self.incoming,
             hops=self.hops,
             parent=self.parent,

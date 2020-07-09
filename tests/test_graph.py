@@ -1,6 +1,6 @@
 import pickle
 
-from entitykb import Entity, Graph, Q, Query
+from entitykb import Entity, Graph, Q, Query, DocEntity
 
 food = Entity(name="Food")
 fruit = Entity(name="Fruit")
@@ -10,7 +10,7 @@ honeycrisp = Entity(name="Honeycrisp")
 dessert = Entity(name="Dessert")
 pie = Entity(name="Pie")
 apple_pie = Entity(name="Apple Pie")
-apple_sauce = Entity(name="Apple Sauce")
+apple_sauce = Entity(name="Apple Sauce", label="SAUCE")
 
 entities = [
     food,
@@ -58,10 +58,27 @@ def test_graph_create_and_query():
     assert {apple_pie, apple_sauce} == set(graph(Q.is_a(dessert).has_a(apple)))
     assert {apple_pie, apple_sauce} == set(graph(Q.is_a(food).has_a(apple)))
 
+    assert {apple_sauce} == set(
+        graph(Q.is_a(food).has_a(apple).has_label("SAUCE"))
+    )
+
     assert set() == set(graph(Q.is_a(food).has_a(granny_smith)))
 
     assert 8 == len(set(graph(Q.is_a(food))))
     assert 2 == len(set(graph(Q.is_a(food, hops=1))))
+
+    # alternate inputs (key, doc ent)
+    assert {granny_smith, honeycrisp} == set(graph(Q.is_a("Apple|ENTITY")))
+    assert {granny_smith, honeycrisp} == set(
+        graph(Q.is_a(DocEntity(text=None, doc=None, entity=apple)))
+    )
+
+    apple_id = graph.get_entity_id(apple)
+    assert {apple} == set(graph(Q(entities=[apple_id])))
+
+    # outcoming
+    assert {fruit, food} == set(graph(Q.is_a(apple, incoming=False)))
+    assert {fruit} == set(graph(Q.is_a(apple, incoming=False).is_a(food)))
 
 
 def test_model_query():

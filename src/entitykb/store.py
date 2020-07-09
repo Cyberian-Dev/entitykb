@@ -201,12 +201,12 @@ class DefaultStore(Store):
         return info
 
     def archive(self, backup_dir: str):
-        update_time = utils.file_updated(self.index_path)
-        file_name = os.path.basename(self.index_path)
-        file_name += update_time.strftime(".%d-%m-%Y_%I-%M-%S_%p")
-        backup_path = os.path.join(backup_dir, file_name)
-        os.rename(self.index_path, backup_path)
-        return backup_path
+        for path in (self.index_path, self.graph_path):
+            update_time = utils.file_updated(path)
+            file_name = os.path.basename(path)
+            file_name += update_time.strftime(".%d-%m-%Y_%I-%M-%S_%p")
+            backup_path = os.path.join(backup_dir, file_name)
+            os.rename(path, backup_path)
 
     # trie
 

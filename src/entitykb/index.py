@@ -33,7 +33,7 @@ class DefaultIndex(Index):
         root_dir: str = None,
         tokenizer: Tokenizer,
         normalizer: Normalizer,
-        max_backups=5,
+        max_backups=6,
         store: Store = None,
     ):
         self.root_dir = root_dir
