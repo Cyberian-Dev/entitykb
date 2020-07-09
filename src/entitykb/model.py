@@ -102,6 +102,9 @@ class Entity(BaseModel):
     def __hash__(self):
         return hash(("Entity", self.key))
 
+    def __lt__(self, other):
+        return self.name < other.name
+
     @property
     def terms(self):
         yield self.name
@@ -555,10 +558,7 @@ class Relationship(BaseModel):
         self.entity_b = b
 
     def __repr__(self):
-        if self.tag:
-            return f"({self.entity_a})-{self.tag}->({self.entity_b})"
-        else:
-            return f"({self.entity_a})->({self.entity_b})"
+        return f"({self.entity_a})-{self.tag}->({self.entity_b})"
 
     def __hash__(self):
         return hash((self.entity_a, self.entity_b, self.tag))
@@ -626,18 +626,32 @@ class Q(BaseModel, metaclass=QType):
         yield self
 
     def has_label(self, *labels):
-        self.labels = self.labels | frozenset(labels or ())
-        return self
+        if isinstance(self, str):
+            return Q(labels=[self] + list(labels))
+        else:
+            self.labels = self.labels | frozenset(labels or ())
+            return self
 
     def dict(self):
-        return dict(
-            entities=list(self.entities),
-            tags=list(self.tags),
-            labels=self.labels,
-            incoming=self.incoming,
-            hops=self.hops,
-            parent=self.parent,
-        )
+        data = {}
+
+        if self.entities:
+            data["entities"] = list(self.entities)
+
+        if self.tags:
+            data["tags"] = list(self.tags)
+            data["incoming"] = self.incoming
+
+        if self.labels:
+            data["labels"] = list(self.labels)
+
+        if self.hops > 0:
+            data["hops"] = self.hops
+
+        return data
+
+    def to_query(self):
+        return Query.convert(self)
 
 
 class Query(BaseModel):
@@ -654,6 +668,9 @@ class Query(BaseModel):
 
     def __iter__(self):
         return iter(self.qs)
+
+    def list(self):
+        return [q.dict() for q in self.qs]
 
     @classmethod
     def convert(cls, q):

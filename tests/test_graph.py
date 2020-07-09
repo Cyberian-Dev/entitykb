@@ -1,3 +1,4 @@
+import pytest
 import pickle
 
 from entitykb import Entity, Graph, Q, Query, DocEntity
@@ -38,16 +39,23 @@ relationships = [
 ]
 
 
-def test_graph_create_and_query():
+@pytest.fixture(scope="session")
+def graph():
     graph = Graph()
     assert "<Graph: (0 entities)>" == repr(graph)
 
-    graph.add(relationships, entities)
+    graph.add(entities, relationships)
     assert "<Graph: (9 entities)>" == repr(graph)
+    return graph
 
+
+def test_pickle_load(graph):
     data = pickle.dumps(graph)
     graph = pickle.loads(data)
+    assert "<Graph: (9 entities)>" == repr(graph)
 
+
+def test_graph_create_and_query(graph):
     # example node queries
     assert {granny_smith, honeycrisp} == set(graph(Q.is_a(apple)))
     assert {apple, granny_smith, honeycrisp} == set(graph(Q.is_a(fruit)))
@@ -93,3 +101,5 @@ def test_model_query():
     q = Q.is_a(pie).has_a(apple)
     assert Query(q) == Query(Q.is_a(pie), Q.has_a(apple))
     assert Query(q) == Query.convert(q)
+
+    assert Q.has_label("ENTITY") == Q(labels=["ENTITY"])

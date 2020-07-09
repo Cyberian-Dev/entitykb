@@ -1,5 +1,4 @@
 import time
-from collections import defaultdict
 from itertools import chain
 from typing import Union, Dict, Generator, Iterable, Set
 
@@ -16,22 +15,23 @@ from . import (
 )
 from .utils import first_nn
 
-KEY_OR_ID = Union[str, float]
+ENTITY_VAL = Union[Entity, DocEntity, str, float]
 RelationshipGenerator = Generator[Relationship, None, None]
 
 
 class Graph(object):
     def __init__(self):
-        self.key_or_id_to_entity: Dict[KEY_OR_ID, Entity] = dict()
-        self.entity_to_id: Dict[Entity, float] = dict()
-        self.out_relationships = defaultdict(set)
-        self.in_relationships = defaultdict(set)
+        self.entity_by_id: Dict[float, Entity] = dict()
+        self.entity_key_to_id: Dict[str, float] = dict()
+
+        # Tag -> Direction -> Entity A ID -> Entity B ID
+        self.relationships = {}
 
     def __repr__(self):
         return f"<Graph: ({len(self)} entities)>"
 
     def __len__(self):
-        return len(self.entity_to_id)
+        return len(self.entity_by_id)
 
     def __call__(self, query: QueryType):
         return self.find(query)
@@ -46,73 +46,87 @@ class Graph(object):
                 logger.warning(f"Invalid type: {type(item)}: {item}")
 
     def add_entity(self, entity: Entity):
-        entity_id = self.entity_to_id.setdefault(entity, time.time())
-        self.key_or_id_to_entity[entity_id] = entity
-        self.key_or_id_to_entity[entity.key] = entity
+        entity_id = self.entity_key_to_id.setdefault(entity.key, time.time())
+        self.entity_by_id[entity_id] = entity
+        time.sleep(0.0)
         return entity_id
 
-    def get_entity(self, val):
+    def get_entity(self, val: ENTITY_VAL):
+        if isinstance(val, float):
+            return self.entity_by_id.get(val)
+        if isinstance(val, str):
+            entity_id = self.entity_key_to_id.get(val)
+            return self.entity_by_id.get(entity_id)
+        if isinstance(val, DocEntity):
+            return val.entity
         if isinstance(val, Entity):
             return val
-        elif isinstance(val, DocEntity):
-            return val.entity
-        else:
-            return self.key_or_id_to_entity.get(val)
 
-    def get_entity_id(self, entity: Entity):
-        return self.entity_to_id.get(entity)
+    def get_entity_id(self, val: ENTITY_VAL):
+        if isinstance(val, Entity):
+            return self.entity_key_to_id.get(val.key)
+        if isinstance(val, DocEntity):
+            return self.entity_key_to_id.get(val.entity_key)
+        if isinstance(val, str):
+            return self.entity_key_to_id.get(val)
+        if isinstance(val, float):
+            return val
 
     def add_relationship(self, rel: Relationship):
-        self.out_relationships[rel.entity_a].add(rel)
-        self.in_relationships[rel.entity_b].add(rel)
+        id_a = self.get_entity_id(rel.entity_a)
+        id_b = self.get_entity_id(rel.entity_b)
+        assert id_a and id_b and rel.tag, f"Invalid: {rel}"
 
-    def rel_it(self, entity: Entity, incoming: bool) -> RelationshipGenerator:
-        if incoming:
-            yield from self.in_relationships.get(entity, ())
-        else:
-            yield from self.out_relationships.get(entity, ())
+        top = self.relationships.setdefault(rel.tag, {})
+
+        rel_in = top.setdefault(False, {})
+        rel_in.setdefault(id_a, set()).add(id_b)
+
+        rel_out = top.setdefault(True, {})
+        rel_out.setdefault(id_b, set()).add(id_a)
 
     def find(self, query: QueryType):
         query = Query.convert(query)
 
-        entities = None
+        entity_ids = None
 
         for q in query:
             entity_it = NodeGenerator(graph=self, q=q)
 
-            if entities is not None:
-                entities = (self.get_entity(e) for e in entities)
-                entity_filter = EntityFilter(entities=entities)
+            if entity_ids is not None:
+                entity_filter = EntityFilter(entity_ids=entity_ids)
                 entity_it = filter(entity_filter, entity_it)
 
             if q.labels:
-                labels_filter = LabelsFilter(labels=q.labels)
+                labels_filter = LabelsFilter(graph=self, labels=q.labels)
                 entity_it = filter(labels_filter, entity_it)
 
-            next_entities = set()
+            next_entity_ids = set()
 
             for entity in entity_it:
-                next_entities.add(entity)
+                next_entity_ids.add(entity)
 
-            entities = next_entities
+            entity_ids = next_entity_ids
 
-        return entities
+        return [self.get_entity(val) for val in entity_ids]
 
 
 class LabelsFilter(object):
-    def __init__(self, labels: frozenset):
+    def __init__(self, graph: Graph, labels: frozenset):
+        self.graph = graph
         self.labels = labels
 
-    def __call__(self, entity: Entity):
+    def __call__(self, entity_id: float):
+        entity = self.graph.get_entity(entity_id)
         return entity.label in self.labels
 
 
 class EntityFilter(object):
-    def __init__(self, entities: Iterable[Entity]):
-        self.entities = set(entities)
+    def __init__(self, entity_ids: Iterable[float]):
+        self.entity_ids = set(entity_ids)
 
-    def __call__(self, entity: Entity):
-        return entity in self.entities
+    def __call__(self, entity_id: float):
+        return entity_id in self.entity_ids
 
 
 class NodeGenerator(object):
@@ -142,13 +156,15 @@ class NodeGenerator(object):
         next_round = set()
 
         for e0 in self.starts:
-            e0 = self.graph.get_entity(e0)
-            if self.tags:
-                for rel in self.graph.rel_it(e0, self.incoming):
-                    if rel.tag in self.tags:
-                        e1 = rel.entity_a if self.incoming else rel.entity_b
+            e0 = self.graph.get_entity_id(e0)
 
-                        if e1 not in self.seen:
+            if self.tags:
+                for tag in self.tags:
+                    curr = self.graph.relationships.setdefault(tag, None)
+                    curr = curr and curr.setdefault(self.incoming, None)
+                    curr = curr and curr.setdefault(e0, None)
+                    for e1 in (curr or ()):
+                        if e1 and e1 not in self.seen:
                             self.seen.add(e1)
                             next_round.add(e1)
                             yield e1
