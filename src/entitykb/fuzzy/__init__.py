@@ -1,9 +1,9 @@
-from .store import FuzzyStore
+from .terms import FuzzyTerms
 from .index import FuzzyIndex
 from .resolvers import FuzzyResolver
 
 __all__ = (
-    "FuzzyStore",
+    "FuzzyTerms",
     "FuzzyIndex",
     "FuzzyResolver",
 )

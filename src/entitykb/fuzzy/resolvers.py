@@ -15,7 +15,7 @@ from typing import List
 
 from rapidfuzz import fuzz
 
-from entitykb import DefaultResolver, DocEntity, Correction, LabelSet
+from entitykb import DefaultResolver, DocEntity, Correction
 
 
 class FuzzyResolver(DefaultResolver):
@@ -31,15 +31,11 @@ class FuzzyResolver(DefaultResolver):
         )
 
         if not doc_entities:
-            doc_entities = self.fuzzy_resolve(
-                doc=doc, doc_tokens=doc_tokens, label_set=label_set
-            )
+            doc_entities = self.fuzzy_resolve(doc=doc, doc_tokens=doc_tokens)
 
         return doc_entities
 
-    def fuzzy_resolve(
-        self, *, doc, doc_tokens, label_set: LabelSet
-    ) -> List[DocEntity]:
+    def fuzzy_resolve(self, *, doc, doc_tokens) -> List[DocEntity]:
         doc_entities = []
         distances_by_entity = defaultdict(int)
         doc_tokens_by_entity = defaultdict(list)
@@ -51,7 +47,7 @@ class FuzzyResolver(DefaultResolver):
                 conjunctions.append(doc_token)
 
             else:
-                candidates = self.index.find_candidates(token, label_set)
+                candidates = self.index.find_candidates(token)
                 for entity, distance in candidates.items():
                     distances_by_entity[entity] += distance
                     doc_tokens_by_entity[entity].append(doc_token)

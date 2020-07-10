@@ -88,7 +88,7 @@ def first_nn(*items):
     """ Returns first not None item. Lazy creates list, set, tuple, dict. """
     for item in items:
         if item is not None:
-            if item in {list, set, tuple, dict}:
+            if isinstance(item, type):
                 return item()
             else:
                 return item

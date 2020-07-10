@@ -290,7 +290,7 @@ class DocEntity(HasTokens):
 
         self.doc = doc
         self.entity = Entity.convert(entity)
-        self.entity_key = entity_key or repr(self.entity)
+        self.entity_key = entity_key or self.entity.key
         self.correction = Correction.convert(correction)
         self._sort_order = None
 
@@ -397,31 +397,21 @@ class FindResult(BaseModel):
         self, term: str, entities=None, distance=None,
     ):
         self.term = term
-        self.entities = entities or tuple()
+        self.entities = entities or ()
         self.distance = distance
 
     def __hash__(self):
-        return hash(("FindResult", self.term, self.entity_keys))
-
-    def __str__(self):
-        return f"{self.term} [{','.join(self.entity_keys)}]"
+        return hash((self.term, frozenset(self.entities), self.distance))
 
     def __repr__(self):
-        return f"{self.term} [{','.join(self.entity_keys)}]"
+        keys = ", ".join(map(str, self.entities))
+        return f"{self.term} [{keys}]"
 
     def __len__(self):
         return len(self.entities)
 
-    def __bool__(self):
-        return len(self.entities) > 0
-
     def __iter__(self):
-        for entity in self.entities:
-            yield entity.key, entity
-
-    @property
-    def entity_keys(self):
-        return tuple(entity.key for entity in self.entities)
+        return iter(self.entities)
 
 
 class LabelSet(object):
@@ -578,38 +568,38 @@ class QType(type):
 
 class Q(BaseModel, metaclass=QType):
 
-    __slots__ = ("tags", "entities", "incoming", "hops", "parent")
+    __slots__ = ("tags", "others", "incoming", "labels", "hops", "prior_q")
 
     def __init__(
         self,
-        entities=None,
         *,
         tags=None,
-        labels=None,
+        others: Iterable = None,
         incoming=None,
+        labels=None,
         hops=None,
-        parent=None,
+        prior_q=None,
     ):
-        self.entities = frozenset(entities or ())
         self.tags = frozenset(tags or ())
-        self.labels = frozenset(labels or ())
+        self.others = frozenset(others or ())
         self.incoming = first_nn(incoming, True)
+        self.labels = frozenset(labels or ())
         self.hops = first_nn(hops, -1)
-        self.parent = parent
+        self.prior_q = prior_q
 
     def update(
         self,
-        entities=None,
         tags=None,
+        others=None,
         incoming=None,
         labels=None,
         hops=None,
-        parent=None,
+        prior_q=None,
     ):
-        if entities:
-            self.entities |= frozenset(entities)
-
         self.incoming = first_nn(incoming, self.incoming)
+
+        if others:
+            self.others |= frozenset(others)
 
         if tags:
             self.tags |= frozenset(tags)
@@ -618,18 +608,18 @@ class Q(BaseModel, metaclass=QType):
             self.labels |= frozenset(labels)
 
         self.hops = first_nn(hops, self.hops)
-        self.parent = first_nn(parent, self.parent)
+        self.prior_q = first_nn(prior_q, self.prior_q)
 
         return self
 
-    def __call__(self, *entities, **kwargs):
-        return self.update(entities=entities, **kwargs)
+    def __call__(self, *others, **kwargs):
+        return self.update(others=others, **kwargs)
 
     def __repr__(self):
         return "<Q: " + repr(self.dict()) + ">"
 
     def __hash__(self):
-        return hash(self.dict().values())
+        return hash(tuple(self.dict().items()))
 
     def __getattr__(self, tag_name: str):
         return self.has_rel(tag_name)
@@ -638,34 +628,33 @@ class Q(BaseModel, metaclass=QType):
         return len(tuple(item for item in self))
 
     def __iter__(self):
-        if self.parent:
-            yield from self.parent
+        if self.prior_q:
+            yield from self.prior_q
         yield self
 
     @hybrid_method
     def has_rel(self_or_cls, *tags, incoming=None):
         tags = [Tag.convert(tag) for tag in tags]
-        parent = None if isinstance(self_or_cls, type) else self_or_cls
-        return Q(tags=tags, incoming=incoming, parent=parent)
+        prior_q = None if isinstance(self_or_cls, type) else self_or_cls
+        return Q(tags=tags, incoming=incoming, prior_q=prior_q)
 
     @hybrid_method
     def has_label(self_or_cls, *labels):
         labels = [Label.convert(label) for label in labels]
-        parent = None if isinstance(self_or_cls, type) else self_or_cls
-        return Q(labels=list(labels), parent=parent)
+        prior_q = None if isinstance(self_or_cls, type) else self_or_cls
+        return Q(labels=labels, prior_q=prior_q)
 
     def dict(self):
         data = {}
 
-        if self.entities:
-            data["entities"] = list(self.entities)
-
         if self.tags:
-            data["tags"] = list(self.tags)
+            data["others"] = frozenset(self.others)
+            data["tags"] = frozenset(self.tags)
             data["incoming"] = self.incoming
 
         if self.labels:
-            data["labels"] = list(self.labels)
+            self.labels = frozenset(self.labels)
+            data["labels"] = self.labels
 
         if self.hops > 0:
             data["hops"] = self.hops
@@ -677,10 +666,10 @@ class Q(BaseModel, metaclass=QType):
 
 
 class Query(BaseModel):
-    def __init__(self, *q_list: Q):
-        self.qs = []
+    def __init__(self, *q_list: Q, qs=None):
+        self.qs = qs or []
         for q in q_list:
-            self.qs += list(q)
+            self.add(q)
 
     def __hash__(self):
         return hash(tuple(self.qs))
@@ -691,16 +680,27 @@ class Query(BaseModel):
     def __iter__(self):
         return iter(self.qs)
 
+    def add(self, q: Q):
+        self.qs += list(q)
+
     def list(self):
         return [q.dict() for q in self.qs]
 
     @classmethod
-    def convert(cls, q):
-        if isinstance(q, Q):
-            return Query(q)
-        return q
+    def convert(cls, *parts: Union[Q, "Query"], labels: Iterable[str] = None):
+        collect_qs = []
+
+        for part in parts:
+            if isinstance(part, Q):
+                collect_qs += list(part)
+            elif isinstance(part, Query):
+                collect_qs += part.qs
+
+        if labels:
+            collect_qs.append(Q.has_label(*labels))
+
+        return Query(qs=collect_qs)
 
 
-QueryType = Union[Q, Query]
 EntityValue = Union[Entity, dict]
 ER = Union[Entity, Relationship]

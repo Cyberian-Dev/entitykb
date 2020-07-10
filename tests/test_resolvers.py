@@ -82,7 +82,6 @@ def test_date_resolver_find_valid():
 
     result = resolver.find("2019-01-01")
     assert result
-    assert result.entity_keys == ("2019-01-01|DATE",)
     assert result.entities[0] == Date(year=2019, month=1, day=1)
 
     result = resolver.find("Jan 1st, 2019")
