@@ -1,6 +1,6 @@
 from typing import Tuple, Union, Optional, Set, Iterable
 
-from .utils import get_class_from_name, tupilify
+from .utils import get_class_from_name, tupilify, first_nn, hybrid_method
 
 
 class BaseModel(object):
@@ -54,6 +54,29 @@ class Correction(BaseModel):
         return value
 
 
+class LabelType(type):
+    def __getattr__(self, label_name: str):
+        return Label(label_name)
+
+
+class Label(str, metaclass=LabelType):
+    def __new__(cls, string):
+        string = string.upper()
+        obj = super(Label, cls).__new__(cls, string)
+        return obj
+
+    @classmethod
+    def convert(cls, value):
+        if isinstance(value, Label):
+            return value
+        elif isinstance(value, str):
+            return Label(value)
+        elif value is None:
+            return None
+        else:
+            return Label(str(value))
+
+
 class Entity(BaseModel):
 
     __slots__ = ("name", "key", "label", "synonyms", "meta")
@@ -63,12 +86,12 @@ class Entity(BaseModel):
         *,
         name: str,
         key: str = None,
-        label: str = None,
+        label: Label = None,
         synonyms: Tuple[str, ...] = None,
         meta: dict = None,
     ):
         self.name = name
-        self.label = label or self.__class__.__name__.upper()
+        self.label = Label.convert(label or self.__class__.__name__.upper())
         self.key = key or f"{self.name}|{self.label}"
         self.synonyms = tupilify(synonyms)
         self.meta = meta
@@ -79,11 +102,18 @@ class Entity(BaseModel):
     def __hash__(self):
         return hash(("Entity", self.key))
 
+    def __lt__(self, other):
+        return self.name < other.name
+
     @property
     def terms(self):
         yield self.name
         for synonym in self.synonyms or []:
             yield synonym
+
+    @property
+    def rel(self):
+        return RelationshipBuilder(self)
 
     def dict(self) -> dict:
         return dict(
@@ -260,7 +290,7 @@ class DocEntity(HasTokens):
 
         self.doc = doc
         self.entity = Entity.convert(entity)
-        self.entity_key = entity_key or repr(self.entity)
+        self.entity_key = entity_key or self.entity.key
         self.correction = Correction.convert(correction)
         self._sort_order = None
 
@@ -367,31 +397,21 @@ class FindResult(BaseModel):
         self, term: str, entities=None, distance=None,
     ):
         self.term = term
-        self.entities = entities or tuple()
+        self.entities = entities or ()
         self.distance = distance
 
     def __hash__(self):
-        return hash(("FindResult", self.term, self.entity_keys))
-
-    def __str__(self):
-        return f"{self.term} [{','.join(self.entity_keys)}]"
+        return hash((self.term, frozenset(self.entities), self.distance))
 
     def __repr__(self):
-        return f"{self.term} [{','.join(self.entity_keys)}]"
+        keys = ", ".join(map(str, self.entities))
+        return f"{self.term} [{keys}]"
 
     def __len__(self):
         return len(self.entities)
 
-    def __bool__(self):
-        return len(self.entities) > 0
-
     def __iter__(self):
-        for entity in self.entities:
-            yield entity.key, entity
-
-    @property
-    def entity_keys(self):
-        return tuple(entity.key for entity in self.entities)
+        return iter(self.entities)
 
 
 class LabelSet(object):
@@ -461,7 +481,7 @@ class LabelSet(object):
         return {"allow_any": self.allow_any, "labels": sorted(self.labels)}
 
     @classmethod
-    def create(cls, item=None) -> "LabelSet":  # pragma: no mccabe
+    def create(cls, item=None) -> "LabelSet":
         if isinstance(item, LabelSet):
             return item
 
@@ -482,4 +502,205 @@ class LabelSet(object):
         return LabelSet(**kwargs)
 
 
+class TagType(type):
+    def __getattr__(self, tag_name: str):
+        return Tag(tag_name)
+
+
+class Tag(str, metaclass=TagType):
+    def __new__(cls, string):
+        string = string.upper()
+        obj = super(Tag, cls).__new__(cls, string)
+        return obj
+
+    @classmethod
+    def convert(cls, value):
+        if isinstance(value, Tag):
+            return value
+        elif isinstance(value, str):
+            return Tag(value)
+        elif value is None:
+            return None
+        else:
+            return Tag(str(value))
+
+
+class RelationshipBuilder(object):
+    def __init__(self, a: Entity):
+        self.rel = Relationship(a, None, None)
+
+    def __getattr__(self, tag_name):
+        self.rel.tag = Tag.convert(tag_name)
+        return self
+
+    def __call__(self, b: Entity):
+        self.rel.entity_b = b
+        return self.rel
+
+
+class Relationship(BaseModel):
+
+    __slots__ = ("entity_a", "tag", "entity_b")
+
+    def __init__(self, a: Entity, tag: Tag, b: Entity):
+        self.entity_a = a
+        self.tag = Tag.convert(tag)
+        self.entity_b = b
+
+    def __repr__(self):
+        return f"({self.entity_a})-{self.tag}->({self.entity_b})"
+
+    def __hash__(self):
+        return hash((self.entity_a, self.entity_b, self.tag))
+
+    def other(self, entity: Entity):
+        if entity == self.entity_a:
+            return self.entity_b
+
+        if entity == self.entity_b:
+            return self.entity_a
+
+
+class QType(type):
+    def __getattr__(self, tag_name: str):
+        return Q.has_rel(tag_name)
+
+
+class Q(BaseModel, metaclass=QType):
+
+    __slots__ = ("tags", "others", "incoming", "labels", "hops", "prior_q")
+
+    def __init__(
+        self,
+        *,
+        tags=None,
+        others: Iterable = None,
+        incoming=None,
+        labels=None,
+        hops=None,
+        prior_q=None,
+    ):
+        self.tags = frozenset(tags or ())
+        self.others = frozenset(others or ())
+        self.incoming = first_nn(incoming, True)
+        self.labels = frozenset(labels or ())
+        self.hops = first_nn(hops, -1)
+        self.prior_q = prior_q
+
+    def update(
+        self,
+        tags=None,
+        others=None,
+        incoming=None,
+        labels=None,
+        hops=None,
+        prior_q=None,
+    ):
+        self.incoming = first_nn(incoming, self.incoming)
+
+        if others:
+            self.others |= frozenset(others)
+
+        if tags:
+            self.tags |= frozenset(tags)
+
+        if labels:
+            self.labels |= frozenset(labels)
+
+        self.hops = first_nn(hops, self.hops)
+        self.prior_q = first_nn(prior_q, self.prior_q)
+
+        return self
+
+    def __call__(self, *others, **kwargs):
+        return self.update(others=others, **kwargs)
+
+    def __repr__(self):
+        return "<Q: " + repr(self.dict()) + ">"
+
+    def __hash__(self):
+        return hash(tuple(self.dict().items()))
+
+    def __getattr__(self, tag_name: str):
+        return self.has_rel(tag_name)
+
+    def __len__(self):
+        return len(tuple(item for item in self))
+
+    def __iter__(self):
+        if self.prior_q:
+            yield from self.prior_q
+        yield self
+
+    @hybrid_method
+    def has_rel(self_or_cls, *tags, incoming=None):
+        tags = [Tag.convert(tag) for tag in tags]
+        prior_q = None if isinstance(self_or_cls, type) else self_or_cls
+        return Q(tags=tags, incoming=incoming, prior_q=prior_q)
+
+    @hybrid_method
+    def has_label(self_or_cls, *labels):
+        labels = [Label.convert(label) for label in labels]
+        prior_q = None if isinstance(self_or_cls, type) else self_or_cls
+        return Q(labels=labels, prior_q=prior_q)
+
+    def dict(self):
+        data = {}
+
+        if self.tags:
+            data["others"] = frozenset(self.others)
+            data["tags"] = frozenset(self.tags)
+            data["incoming"] = self.incoming
+
+        if self.labels:
+            self.labels = frozenset(self.labels)
+            data["labels"] = self.labels
+
+        if self.hops > 0:
+            data["hops"] = self.hops
+
+        return data
+
+    def to_query(self):
+        return Query.convert(self)
+
+
+class Query(BaseModel):
+    def __init__(self, *q_list: Q, qs=None):
+        self.qs = qs or []
+        for q in q_list:
+            self.add(q)
+
+    def __hash__(self):
+        return hash(tuple(self.qs))
+
+    def __repr__(self):
+        return "<Query: " + repr(self.qs) + ">"
+
+    def __iter__(self):
+        return iter(self.qs)
+
+    def add(self, q: Q):
+        self.qs += list(q)
+
+    def list(self):
+        return [q.dict() for q in self.qs]
+
+    @classmethod
+    def convert(cls, *parts: Union[Q, "Query"], labels: Iterable[str] = None):
+        collect_qs = []
+
+        for part in parts:
+            if isinstance(part, Q):
+                collect_qs += list(part)
+            elif isinstance(part, Query):
+                collect_qs += part.qs
+
+        if labels:
+            collect_qs.append(Q.has_label(*labels))
+
+        return Query(qs=collect_qs)
+
+
 EntityValue = Union[Entity, dict]
+ER = Union[Entity, Relationship]

@@ -73,7 +73,7 @@ def test_extract_multi_token(
         "and The The Microsoft Corporation. Plus more AAPL and MSFT."
     )
     doc = extractor(text)
-    assert len(doc.entities) == 7
+    assert len(doc.entities) == 7, f"Incorrect: {doc.entities}"
 
     assert doc.entities[0].text == "Apple, Inc."
     assert doc.entities[1].text == "Google, Inc."

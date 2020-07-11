@@ -56,13 +56,9 @@ class Resolver(object):
         find_result = self.find(term=prefix, label_set=label_set)
 
         if find_result:
-            for (entity_key, entity) in find_result:
+            for entity in find_result:
                 doc_entity = DocEntity(
-                    text=prefix,
-                    doc=doc,
-                    entity_key=entity_key,
-                    entity=entity,
-                    tokens=doc_tokens,
+                    text=prefix, doc=doc, entity=entity, tokens=doc_tokens,
                 )
                 doc_entities.append(doc_entity)
 
@@ -112,10 +108,10 @@ class Resolver(object):
 
 class DefaultResolver(Resolver):
     def do_find(self, term: str, label_set: LabelSet) -> FindResult:
-        return self.index.find(term, label_set)
+        return self.index.find(term, labels=label_set.labels)
 
     def do_is_prefix(self, term: str, label_set: LabelSet) -> bool:
-        return self.index.is_prefix(term, label_set=label_set)
+        return self.index.is_prefix(term, labels=label_set.labels)
 
 
 ResolverType = Optional[Union[Type[Resolver], Resolver, str]]

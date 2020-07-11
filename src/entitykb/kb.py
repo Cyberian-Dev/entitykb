@@ -25,6 +25,14 @@ class KB(object):
     def index(self):
         return self.pipeline.index
 
+    @property
+    def store(self):
+        return self.pipeline.index.store
+
+    @property
+    def graph(self):
+        return self.pipeline.index.store.graph
+
     def __len__(self):
         return len(self.pipeline)
 
@@ -34,9 +42,9 @@ class KB(object):
     def reset(self):
         self.pipeline.reset()
 
-    def add(self, *entities):
+    def add(self, *items):
         self.is_dirty = True
-        self.pipeline.add(*entities)
+        self.pipeline.add(*items)
 
     def commit(self):
         self.pipeline.commit()

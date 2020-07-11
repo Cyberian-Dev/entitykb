@@ -82,3 +82,21 @@ def generate_edits(token: str, max_token_distance: int):
             if pair not in pairs:
                 pairs.add(pair)
                 yield pair
+
+
+def first_nn(*items):
+    """ Returns first not None item. Lazy creates list, set, tuple, dict. """
+    for item in items:
+        if item is not None:
+            if isinstance(item, type):
+                return item()
+            else:
+                return item
+
+
+# noinspection PyPep8Naming,PyMethodOverriding,PyUnresolvedReferences
+class hybrid_method(classmethod):
+    # ref: https://stackoverflow.com/a/28238047/1946790
+    def __get__(self, instance, type_):
+        d_get = super().__get__ if instance is None else self.__func__.__get__
+        return d_get(instance, type_)

@@ -27,17 +27,11 @@ def test_is_fuzzy_resolver_is_prefix(resolver, b_obama, m_obama):
 def test_find_candidates(
     index, b_obama: Entity, m_obama: Entity, michel_le: Entity
 ):
-    all_labels = {"PRESIDENT", "FIRST_LADY", "SINGER"}
-    assert {b_obama: 0, m_obama: 0} == index.find_candidates(
-        "obama", all_labels
-    )
-    assert {b_obama: 1} == index.find_candidates("barak", all_labels)
-    assert {m_obama: 1, michel_le: 1} == index.find_candidates(
-        "michele", all_labels
-    )
-    assert {m_obama: 1} == index.find_candidates("michellle", all_labels)
-    assert {michel_le: 0} == index.find_candidates("michel", all_labels)
-    assert {} == index.find_candidates("barak", {"FIRST_LADY"})
+    assert {b_obama: 0, m_obama: 0} == index.find_candidates("obama")
+    assert {b_obama: 1} == index.find_candidates("barak")
+    assert {m_obama: 1, michel_le: 1} == index.find_candidates("michele")
+    assert {m_obama: 1} == index.find_candidates("michellle")
+    assert {michel_le: 0} == index.find_candidates("michel")
 
 
 def test_find(
@@ -50,6 +44,10 @@ def test_find(
 
         msg = ujson.dumps(doc.dict(), indent=4)
         assert expected == found, msg
+
+    # index find returns 0
+    result = resolver.index.find("Barack")
+    assert 0 == len(result.entities)
 
     # exact matches
     do_run("Barack Obama", b_obama)
@@ -77,13 +75,13 @@ def test_find(
     # labels
     do_run("Barack Obama", label_set=("FIRST_LADY",))
     do_run("Barak Obama", label_set=("FIRST_LADY",))
-    do_run("Barack and Michelle Obama", b_obama, label_set=("PRESIDENT",))
     do_run(
         "Barack and Michelle Obama",
         b_obama,
         m_obama,
         label_set=("PRESIDENT", "FIRST_LADY"),
     )
+    do_run("Barack and Michelle Obama", b_obama, label_set=("PRESIDENT",))
 
 
 def test_fuzzy_prefix_with_labels(resolver, b_obama: Entity, m_obama: Entity):
@@ -138,17 +136,14 @@ def test_fuzzy(apple):
     )
     assert isinstance(index, fuzzy.FuzzyIndex)
 
-    index.add(apple)
-    index.add(Entity(name="banana", label="FRUIT"))
+    index.add_entity(apple)
+    index.add_entity(Entity(name="banana", label="FRUIT"))
 
     # is_prefix
     assert index.is_prefix("aple")
-    assert index.is_prefix("aple", label_set={"COMPANY", "ANOTHER"})
+    assert index.is_prefix("aple", labels={"COMPANY", "ANOTHER"})
     assert index.is_prefix("inc")
 
     # conjunctions
     assert index.is_prefix("Apple and")
     assert index.is_prefix("apple,")
-
-    # keys (2 names, 2 synonyms, 2 keys, map, and 7 edits)
-    assert 11 == len(index.store.trie), str(list(index.store.trie.keys()))
