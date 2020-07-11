@@ -1,6 +1,7 @@
 from dataclasses import dataclass
+from typing import Set
 
-from entitykb import DefaultIndex, LabelSet, utils
+from entitykb import DefaultIndex, LabelSet, utils, Query
 from .terms import FuzzyTerms
 
 
@@ -21,6 +22,21 @@ class FuzzyIndex(DefaultIndex):
 
     def is_conjunction(self, token):
         return self.terms.is_conjunction(token)
+
+    def is_prefix(
+        self, term: str, labels: Set[str] = None, query: Query = None
+    ) -> bool:
+
+        query = Query.convert(query, labels=labels)
+        is_prefix = super(FuzzyIndex, self).is_prefix(term, None, query)
+
+        if not is_prefix:
+            entity_it = self.terms.edit_values(term=term)
+            entity_it = self.engine.search(query, limit=1, entity_it=entity_it)
+            for _ in entity_it:
+                return True
+
+        return is_prefix
 
     def find_candidates(self, token: str):
         threshold = self.max_token_distance

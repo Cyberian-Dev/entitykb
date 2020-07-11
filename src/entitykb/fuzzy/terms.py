@@ -73,28 +73,6 @@ class FuzzyTerms(DefaultTerms):
     max_token_distance: int = 5
     label_set: LabelSet = None
 
-    def get_edit(self, edit: str) -> Iterable[Tuple[EID, int]]:
-        edit_entities = self.trie.get(edit, ())
-        distance = TermEditEntities.distance(edit_entities)
-        for entity_id in edit_entities:
-            yield entity_id, distance
-
-    # def find_edit(self, term: str, label_set: LabelSet = None) -> FindResult:
-    #     reference = self.trie.get(term, None)
-    #     label_set = LabelSet.create(label_set)
-    #
-    #     entities = ()
-    #     distance = None
-    #
-    #     if reference:
-    #         for entity_id in reference:
-    #             distance = TermEditEntities.distance(reference)
-    #             entity = self.graph.get_entity(entity_id)
-    #             # if label_set is None or label_set.is_allowed(entity.label):
-    #             #     entities += (entity,)
-    #
-    #     return FindResult(term=term, entities=entities, distance=distance)
-
     def add_terms(self, entity_id: EID, label: str, terms: Iterable[str]):
         norm_terms = super(FuzzyTerms, self).add_terms(entity_id, label, terms)
 
@@ -113,18 +91,12 @@ class FuzzyTerms(DefaultTerms):
 
         return entity_id
 
-    def values(self, term: str) -> Iterable[EID]:
-        count = 0
-        for eid in super(FuzzyTerms, self).values(term):
-            yield eid
-            count += 1
+    def edit_values(self, term: str) -> Iterable[EID]:
+        last_token = self.get_last_token(term)
 
-        if count == 0:
-            last_token = self.get_last_token(term)
-
-            if last_token:
-                edit_it = generate_edits(last_token, self.max_token_distance)
-                yield from self.generate_edit_ids(edit_it)
+        if last_token:
+            edit_it = generate_edits(last_token, self.max_token_distance)
+            yield from self.generate_edit_ids(edit_it)
 
     def generate_edit_ids(self, edit_it):
         min_dist_seen = self.max_token_distance
@@ -144,6 +116,12 @@ class FuzzyTerms(DefaultTerms):
             tokens = tokens[:-1]
         last_token = tokens and tokens[-1]
         return last_token
+
+    def get_edit(self, edit: str) -> Iterable[Tuple[EID, int]]:
+        edit_entities = self.trie.get(edit, ())
+        distance = TermEditEntities.distance(edit_entities)
+        for entity_id in edit_entities:
+            yield entity_id, distance
 
     @property
     def conjunctions(self):
