@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 install_requires = [
     "click",
-    "lark-parser",
+    "lark-parser==0.8.9",
     "pyahocorasick",
     "python-dateutil",
     "rapidfuzz",
@@ -22,7 +22,7 @@ extras_requires = {
 
 setup(
     name="entitykb",
-    version="0.1.3",
+    version="0.2.0",
     author="Ian Maurer",
     author_email="ian@genomoncology.com",
     packages=find_packages("src/"),

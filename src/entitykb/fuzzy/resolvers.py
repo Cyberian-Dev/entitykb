@@ -31,11 +31,13 @@ class FuzzyResolver(DefaultResolver):
         )
 
         if not doc_entities:
-            doc_entities = self.fuzzy_resolve(doc=doc, doc_tokens=doc_tokens)
+            doc_entities = self.fuzzy_resolve(
+                doc=doc, doc_tokens=doc_tokens, label_set=label_set
+            )
 
         return doc_entities
 
-    def fuzzy_resolve(self, *, doc, doc_tokens) -> List[DocEntity]:
+    def fuzzy_resolve(self, *, doc, doc_tokens, label_set) -> List[DocEntity]:
         doc_entities = []
         distances_by_entity = defaultdict(int)
         doc_tokens_by_entity = defaultdict(list)
@@ -47,7 +49,7 @@ class FuzzyResolver(DefaultResolver):
                 conjunctions.append(doc_token)
 
             else:
-                candidates = self.index.find_candidates(token)
+                candidates = self.index.find_candidates(token, label_set)
                 for entity, distance in candidates.items():
                     distances_by_entity[entity] += distance
                     doc_tokens_by_entity[entity].append(doc_token)

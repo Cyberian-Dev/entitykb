@@ -38,11 +38,12 @@ class FuzzyIndex(DefaultIndex):
 
         return is_prefix
 
-    def find_candidates(self, token: str):
+    def find_candidates(self, token: str, label_set: LabelSet = None):
         threshold = self.max_token_distance
         candidates: dict = {}
 
         edits_iter = utils.generate_edits(token, self.max_token_distance)
+        label_set = self.label_set.intersect(label_set)
 
         for edit, edit_dist in edits_iter:
             if threshold is None or edit_dist <= threshold:
@@ -52,8 +53,9 @@ class FuzzyIndex(DefaultIndex):
 
                     # todo: does this need to create entity?
                     entity = self.get_entity(entity_id)
-                    curr = candidates.get(entity, self.max_token_distance)
-                    candidates[entity] = min(entity_dist, curr)
+                    if label_set.is_allowed(entity.label):
+                        curr = candidates.get(entity, self.max_token_distance)
+                        candidates[entity] = min(entity_dist, curr)
             else:
                 break
 

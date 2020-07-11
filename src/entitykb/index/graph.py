@@ -1,14 +1,11 @@
 import time
 from collections import defaultdict
-from itertools import chain
 from typing import Dict, Set, Union
 
 from entitykb import (
     DocEntity,
     Entity,
     Relationship,
-    ER,
-    logger,
 )
 from . import HAS_LABEL, ENTITY_VAL
 

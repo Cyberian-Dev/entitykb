@@ -18,9 +18,12 @@ class TermEntities(object):
     def __repr__(self):
         return f"<TermEntities: {self.term_entity_ids}>"
 
-    def __iter__(self):
+    def iter_exact(self):
         if self.term_entity_ids:
             yield from self.term_entity_ids
+
+    def iter_all(self):
+        yield from self.iter_exact()
 
     def add_term_entity_id(self, entity_id):
         if entity_id not in self.term_entity_ids:
@@ -106,12 +109,13 @@ class DefaultTerms(Terms):
         term_entities = self.trie.values(term)
         seen = set()
         for term_entity in term_entities:
-            for entity_id in term_entity:
+            for entity_id in term_entity.iter_all():
                 if entity_id not in seen:
                     yield entity_id
                     seen.add(entity_id)
 
     def get(self, term: str) -> Iterable[EID]:
         term = self.normalizer(term)
-        term_entities = self.trie.get(term, ())
-        yield from term_entities
+        term_entities = self.trie.get(term, None)
+        if term_entities:
+            yield from term_entities.iter_exact()

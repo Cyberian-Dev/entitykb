@@ -24,9 +24,8 @@ class TermEditEntities(TermEntities):
         attr = ", ".join(map(str, attr))
         return f"<TermEditEntities: {attr}>"
 
-    def __iter__(self):
-        if self.term_entity_ids:
-            yield from self.term_entity_ids
+    def iter_all(self):
+        yield from self.iter_exact()
         if self.edit_entity_ids:
             yield from self.edit_entity_ids
 
@@ -118,10 +117,11 @@ class FuzzyTerms(DefaultTerms):
         return last_token
 
     def get_edit(self, edit: str) -> Iterable[Tuple[EID, int]]:
-        edit_entities = self.trie.get(edit, ())
-        distance = TermEditEntities.distance(edit_entities)
-        for entity_id in edit_entities:
-            yield entity_id, distance
+        edit_entities = self.trie.get(edit, None)
+        if edit_entities:
+            distance = TermEditEntities.distance(edit_entities)
+            for entity_id in edit_entities.iter_all():
+                yield entity_id, distance
 
     @property
     def conjunctions(self):

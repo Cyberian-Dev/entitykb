@@ -45,6 +45,10 @@ def test_find(
         msg = ujson.dumps(doc.dict(), indent=4)
         assert expected == found, msg
 
+    # index find returns 0
+    result = resolver.index.find("Barack")
+    assert 0 == len(result.entities)
+
     # exact matches
     do_run("Barack Obama", b_obama)
     do_run("Michelle Obama", m_obama)
@@ -71,13 +75,13 @@ def test_find(
     # labels
     do_run("Barack Obama", label_set=("FIRST_LADY",))
     do_run("Barak Obama", label_set=("FIRST_LADY",))
-    do_run("Barack and Michelle Obama", b_obama, label_set=("PRESIDENT",))
     do_run(
         "Barack and Michelle Obama",
         b_obama,
         m_obama,
         label_set=("PRESIDENT", "FIRST_LADY"),
     )
+    do_run("Barack and Michelle Obama", b_obama, label_set=("PRESIDENT",))
 
 
 def test_fuzzy_prefix_with_labels(resolver, b_obama: Entity, m_obama: Entity):
