@@ -80,10 +80,21 @@ def test_start_one_goal_all(graph):
     assert apple.key == results[0].start
 
 
-def test_start_one_walk_incoming_is_a_goal_all(graph):
+def test_start_one_walk_passthru_is_a_goal_all(graph):
     query = QB(apple).walk("is_a").all()
     results = Searcher(graph=graph).search(query)
     assert {r.end for r in results} == {
+        granny_smith.key,
+        honeycrisp.key,
+    }
+    assert {apple.key} == {r.start for r in results}
+
+
+def test_start_one_walk_incoming_is_a_include_start_goal_all(graph):
+    query = QB(apple).walk("is_a", passthru=True).all()
+    results = Searcher(graph=graph).search(query)
+    assert {r.end for r in results} == {
+        apple.key,
         granny_smith.key,
         honeycrisp.key,
     }

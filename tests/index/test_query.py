@@ -11,7 +11,12 @@ def test_create_query():
     assert data == {
         "start": {"entities": []},
         "steps": [
-            {"tags": ["HAS_A", "IS_A"], "incoming": True, "max_hops": None},
+            {
+                "tags": ["HAS_A", "IS_A"],
+                "incoming": True,
+                "max_hops": None,
+                "passthru": False,
+            },
             {"include": True},
             {"include": False},
         ],

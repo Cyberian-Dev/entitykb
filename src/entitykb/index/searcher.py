@@ -56,7 +56,11 @@ class WalkLayer(Layer):
 
     def __iter__(self) -> Iterator[Result]:
         for result in self.prev:
+            if self.step.passthru:
+                yield result
+
             self.seen.add(result)
+
             yield from self.descend(result)
 
 

@@ -22,7 +22,7 @@ class QueryStart(object):
 class Step(object):
     @classmethod
     def create(cls, **data: dict) -> Union["FilterStep", "WalkStep"]:
-        if data.keys() == {"tags", "incoming", "max_hops"}:
+        if data.keys() == {"tags", "incoming", "max_hops", "passthru"}:
             return WalkStep(**data)
         else:
             return FilterStep(**data)
@@ -44,6 +44,7 @@ class WalkStep(Step):
     tags: Set[str]
     incoming: bool = True
     max_hops: Optional[int] = None
+    passthru: bool = False
 
     def __post_init__(self):
         tags = set(Tag.convert(tag) for tag in self.tags)
@@ -54,6 +55,7 @@ class WalkStep(Step):
             tags=sorted(self.tags),
             incoming=self.incoming,
             max_hops=self.max_hops,
+            passthru=self.passthru,
         )
 
 
@@ -93,8 +95,19 @@ class QueryBuilder(object):
 
     # steps (returns self)
 
-    def walk(self, *tags: str, incoming: bool = True, max_hops: int = None):
-        walk = WalkStep(tags=tags, incoming=incoming, max_hops=max_hops,)
+    def walk(
+        self,
+        *tags: str,
+        incoming: bool = True,
+        max_hops: int = None,
+        passthru: bool = False,
+    ):
+        walk = WalkStep(
+            tags=tags,
+            incoming=incoming,
+            max_hops=max_hops,
+            passthru=passthru,
+        )
         self.query.steps.append(walk)
         return self
 
