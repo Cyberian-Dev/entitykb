@@ -1,13 +1,13 @@
 import time
 from collections import defaultdict
-from typing import Dict, Set, Union
+from typing import Dict, Set, Union, Iterator, Tuple
 
 from entitykb import (
     DocEntity,
     Entity,
     Relationship,
 )
-from . import HAS_LABEL, ENTITY_VAL
+from . import HAS_LABEL, ENTITY_VAL, EID
 
 
 def generate_new_id():
@@ -20,7 +20,8 @@ class Graph(object):
     def __init__(self):
         self.entity_by_id: Dict[float, Entity] = dict()
         self.entity_key_to_id: Dict[str, float] = defaultdict(generate_new_id)
-        self.relationships = {}
+        self.relationships_by_tag = {}
+        self.relationships_by_entity_id = {}
 
     def __repr__(self):
         return f"<Graph: ({len(self)} entities)>"
@@ -35,18 +36,23 @@ class Graph(object):
         else:
             raise KeyError(f"{item} not found.")
 
+    def __iter__(self):
+        yield from self.entity_by_id.keys()
+
     def get_data(self):
         return self
 
     def put_data(self, core: "Graph"):
         self.entity_by_id = core.entity_by_id
         self.entity_key_to_id = core.entity_key_to_id
-        self.relationships = core.relationships
+        self.relationships_by_tag = core.relationships_by_tag
+        self.relationships_by_entity_id = core.relationships_by_entity_id
 
     def reset_data(self):
-        self.entity_by_id = None
-        self.entity_key_to_id = None
-        self.relationships = None
+        self.entity_by_id = dict()
+        self.entity_key_to_id = defaultdict(generate_new_id)
+        self.relationships_by_tag = {}
+        self.relationships_by_entity_id = {}
 
     def get(self, item):
         if isinstance(item, Entity):
@@ -64,6 +70,11 @@ class Graph(object):
             return val.entity
         if isinstance(val, Entity):
             return val
+
+    def get_entity_key(self, val: ENTITY_VAL):
+        entity = self.get_entity(val)
+        if entity:
+            return entity.key
 
     def get_entity_id(self, val: ENTITY_VAL):
         if isinstance(val, Entity):
@@ -90,18 +101,53 @@ class Graph(object):
     def add_rel_using_ids(self, id_a: float, tag: str, id_b: float):
         assert id_a and id_b and tag, f"Invalid: {id_a}, {tag}, {id_b}"
 
-        top = self.relationships.setdefault(tag, {})
+        # tag first
 
-        rel_in = top.setdefault(False, {})
+        by_tag = self.relationships_by_tag.setdefault(tag, {})
+
+        rel_in = by_tag.setdefault(False, {})
         rel_in.setdefault(id_a, set()).add(id_b)
 
-        rel_out = top.setdefault(True, {})
+        rel_out = by_tag.setdefault(True, {})
         rel_out.setdefault(id_b, set()).add(id_a)
+
+        # entity first
+
+        by_ent_a = self.relationships_by_entity_id.setdefault(id_a, {})
+        by_ent_a = by_ent_a.setdefault(False, {})
+        by_ent_a.setdefault(tag, set()).add(id_b)
+
+        by_ent_b = self.relationships_by_entity_id.setdefault(id_b, {})
+        by_ent_b = by_ent_b.setdefault(True, {})
+        by_ent_b.setdefault(tag, set()).add(id_a)
+
+    def iterate_others(
+        self, *, tag: str, incoming: bool, entity: ENTITY_VAL = None
+    ) -> Iterator[Tuple[str, EID]]:
+        entity_id = entity and self.get_entity_id(entity)
+        incomings = {True, False} if incoming is None else {incoming}
+
+        if tag:
+            top = self.relationships_by_tag.get(tag)
+            next_keys = (entity_id,)
+        elif entity_id:
+            top = self.relationships_by_entity_id.get(entity_id)
+            next_keys = ()
+        else:
+            raise ValueError("Need to provide either a tag or entity.")
+
+        for incoming in incomings:
+            curr = top.get(incoming, {})
+            next_keys = next_keys or (curr.keys() - {"HAS_LABEL"})
+            for key in next_keys:
+                other_ids = curr.get(key, set())
+                for other_id in other_ids:
+                    yield tag or key, other_id
 
     def get_relationships(
         self, tag: str, incoming: bool = None, entity: ENTITY_VAL = None
     ) -> Union[Dict, Set]:
-        curr = self.relationships.get(tag)
+        curr = self.relationships_by_tag.get(tag)
 
         if curr:
             if incoming is not None:
