@@ -1,6 +1,6 @@
 import time
 from collections import defaultdict
-from typing import Dict, Set, Union, Iterator, Tuple
+from typing import Dict, Set, Union, Iterator, Tuple, Iterable
 
 from entitykb import (
     DocEntity,
@@ -8,6 +8,7 @@ from entitykb import (
     Relationship,
     EntityValue,
 )
+from entitykb.utils import ensure_iterable
 from . import HAS_LABEL, EID
 
 
@@ -21,8 +22,8 @@ class Graph(object):
     def __init__(self):
         self.entity_by_id: Dict[float, Entity] = dict()
         self.entity_key_to_id: Dict[str, float] = defaultdict(generate_new_id)
-        self.relationships_by_tag = {}
-        self.relationships_by_entity_id = {}
+        self.rel_by_tag = {}
+        self.rel_by_eid = {}
 
     def __repr__(self):
         return f"<Graph: ({len(self)} entities)>"
@@ -46,14 +47,14 @@ class Graph(object):
     def put_data(self, core: "Graph"):
         self.entity_by_id = core.entity_by_id
         self.entity_key_to_id = core.entity_key_to_id
-        self.relationships_by_tag = core.relationships_by_tag
-        self.relationships_by_entity_id = core.relationships_by_entity_id
+        self.rel_by_tag = core.rel_by_tag
+        self.rel_by_eid = core.rel_by_eid
 
     def reset_data(self):
         self.entity_by_id = dict()
         self.entity_key_to_id = defaultdict(generate_new_id)
-        self.relationships_by_tag = {}
-        self.relationships_by_entity_id = {}
+        self.rel_by_tag = {}
+        self.rel_by_eid = {}
 
     def get(self, item):
         if isinstance(item, Entity):
@@ -103,7 +104,7 @@ class Graph(object):
         assert id_a and id_b and tag, f"Invalid: {id_a}, {tag}, {id_b}"
 
         # tag first
-        by_tag = self.relationships_by_tag.setdefault(tag, {})
+        by_tag = self.rel_by_tag.setdefault(tag, {})
         rel_in = by_tag.setdefault(False, {})
         rel_in.setdefault(id_a, set()).add(id_b)
 
@@ -111,41 +112,60 @@ class Graph(object):
         rel_out.setdefault(id_b, set()).add(id_a)
 
         # entity first
-        by_ent_a = self.relationships_by_entity_id.setdefault(id_a, {})
+        by_ent_a = self.rel_by_eid.setdefault(id_a, {})
         by_ent_a = by_ent_a.setdefault(False, {})
         by_ent_a.setdefault(tag, set()).add(id_b)
 
-        by_ent_b = self.relationships_by_entity_id.setdefault(id_b, {})
+        by_ent_b = self.rel_by_eid.setdefault(id_b, {})
         by_ent_b = by_ent_b.setdefault(True, {})
         by_ent_b.setdefault(tag, set()).add(id_a)
 
-    def iterate_others(
-        self, *, tag: str, incoming: bool, entity: EntityValue = None
+    def iterate_all_relationships(
+        self,
+        *,
+        tags: Iterable[str] = (None,),
+        incoming: Iterable[bool] = (True, False),
+        entities: Iterable[EntityValue] = (None,),
     ) -> Iterator[Tuple[str, EID]]:
-        entity_id = entity and self.get_entity_id(entity)
-        incomings = {True, False} if incoming is None else {incoming}
+
+        if incoming is None:
+            incoming = (True, False)
+
+        for tag in ensure_iterable(tags):
+            for direction in ensure_iterable(incoming):
+                for entity in ensure_iterable(entities):
+                    yield from self.iterate_relationships(
+                        tag, direction, entity
+                    )
+
+    def iterate_relationships(self, tag, direction, entity):
+        eid = self.get_entity_id(entity)
 
         if tag:
-            top = self.relationships_by_tag.get(tag)
-            next_keys = (entity_id,) if entity_id else ()
-        elif entity_id:
-            top = self.relationships_by_entity_id.get(entity_id)
-            next_keys = ()
-        else:
-            raise ValueError("Need to provide either a tag or entity.")
+            other_by_eid = self.rel_by_tag.get(tag, {}).get(direction, {})
 
-        for incoming in incomings:
-            curr = top.get(incoming, {})
-            next_keys = next_keys or (curr.keys() - {"HAS_LABEL"})
-            for key in next_keys:
-                other_ids = curr.get(key, set())
-                for other_id in other_ids:
-                    yield tag or key, other_id
+            if eid:
+                other_ids = other_by_eid.get(eid, ())
+                yield from self.iter_other_ids(other_ids, tag)
+            else:
+                for other_ids in other_by_eid.values():
+                    yield from self.iter_other_ids(other_ids, tag)
+
+        elif eid:
+            other_by_tag = self.rel_by_eid.get(eid, {}).get(direction, {})
+            for rel_tag, other_ids in other_by_tag.items():
+                if rel_tag != "HAS_LABEL":
+                    yield from self.iter_other_ids(other_ids, tag)
+
+    @classmethod
+    def iter_other_ids(cls, other_ids, tag):
+        for other_id in other_ids:
+            yield other_id, tag
 
     def get_relationships(
         self, tag: str, incoming: bool = None, entity: EntityValue = None
     ) -> Union[Dict, Set]:
-        curr = self.relationships_by_tag.get(tag)
+        curr = self.rel_by_tag.get(tag)
 
         if curr:
             if incoming is not None:

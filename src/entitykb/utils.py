@@ -1,9 +1,8 @@
-import sys
 import datetime
 import functools
 import os
+import sys
 import tempfile
-
 from importlib import import_module
 from typing import Union
 
@@ -100,3 +99,9 @@ class hybrid_method(classmethod):
     def __get__(self, instance, type_):
         d_get = super().__get__ if instance is None else self.__func__.__get__
         return d_get(instance, type_)
+
+
+def ensure_iterable(items):
+    if not isinstance(items, (list, set, dict, frozenset, tuple)):
+        items = (items,)
+    return items

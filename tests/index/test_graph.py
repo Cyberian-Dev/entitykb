@@ -65,36 +65,46 @@ def test_pickle_load(graph):
 
 def convert(graph, others):
     converted = set()
-    for rel, other_id in others:
+    for other_id, tag in others:
         converted.add(graph.get_entity(other_id))
     return converted
 
 
 def test_is_a_apple(graph):
-    others = graph.iterate_others(tag=Tag.IS_A, incoming=True, entity=apple)
+    others = graph.iterate_all_relationships(
+        tags=Tag.IS_A, incoming=True, entities=apple
+    )
     others = convert(graph, others)
     assert {granny_smith, honeycrisp} == others
 
 
 def test_is_a_apple_outcoming(graph):
-    others = graph.iterate_others(tag=Tag.IS_A, incoming=False, entity=apple)
+    others = graph.iterate_all_relationships(
+        tags=Tag.IS_A, incoming=False, entities=apple
+    )
     others = convert(graph, others)
     assert {fruit} == others
 
 
 def test_is_a_apple_either_direction(graph):
-    others = graph.iterate_others(tag=Tag.IS_A, incoming=None, entity=apple)
+    others = graph.iterate_all_relationships(
+        tags=Tag.IS_A, incoming=None, entities=apple
+    )
     others = convert(graph, others)
     assert {fruit, granny_smith, honeycrisp} == others
 
 
 def test_is_a_incoming_dict(graph):
-    others = graph.iterate_others(tag=Tag.IS_A, incoming=None, entity=None)
+    others = graph.iterate_all_relationships(
+        tags=Tag.IS_A, incoming=None, entities=None
+    )
     others = convert(graph, others)
     assert 9 == len(others)
 
 
 def test_has_label(graph):
-    others = graph.iterate_others(tag=HAS_LABEL, incoming=True, entity="SAUCE")
+    others = graph.iterate_all_relationships(
+        tags=HAS_LABEL, incoming=True, entities="SAUCE"
+    )
     others = convert(graph, others)
     assert {apple_sauce} == others

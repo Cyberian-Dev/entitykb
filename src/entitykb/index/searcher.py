@@ -45,13 +45,13 @@ class WalkLayer(Layer):
 
         if result.end_id is not None:
             for req_tag in self.step.tags:
-                others_it = self.graph.iterate_others(
-                    tag=req_tag,
+                others_it = self.graph.iterate_all_relationships(
+                    tags=req_tag,
                     incoming=self.step.incoming,
-                    entity=result.end_id,
+                    entities=result.end_id,
                 )
 
-                for (rel_tag, end_id) in others_it:
+                for (end_id, rel_tag) in others_it:
                     next_result = result.push(tag=rel_tag, end_id=end_id)
                     if next_result not in self.seen:
                         self.seen.add(next_result)

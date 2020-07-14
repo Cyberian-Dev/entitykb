@@ -38,6 +38,10 @@ class Index(object):
     def __call__(self, query):
         return self.find(query=query)
 
+    @property
+    def exists(self) -> bool:
+        return self.storage.exists
+
     def info(self) -> dict:
         raise NotImplementedError
 

@@ -47,15 +47,14 @@ def init(root_dir: str):
 def reset(root_dir: str):
     """ Reset an entitykb index. """
     kb = load(root_dir=root_dir)
-    if not kb.index.store.exists:
+    if not kb.index.exists:
         raise Exit(f"KB index does not exist: {kb.index}")
 
     click.confirm(
         f"Are you sure you want to remove: {kb.index}?", abort=True,
     )
 
-    kb.index.store.archive()
-
+    kb.index.storage.archive()
     kb.index.reset()
     index_path = kb.index.commit()
     click.echo(f"Index reset: {index_path}")

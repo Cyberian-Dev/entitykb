@@ -27,11 +27,11 @@ class KB(object):
 
     @property
     def store(self):
-        return self.pipeline.index.store
+        return self.pipeline.index.storage
 
     @property
     def graph(self):
-        return self.pipeline.index.store.graph
+        return self.pipeline.index.graph
 
     def __len__(self):
         return len(self.pipeline)
@@ -73,9 +73,10 @@ class KB(object):
         return self.pipeline(text=text, label_set=label_set)
 
     def suggest(
-        self, term: str, label_set: LabelSet, limit: int = None
+        self, term: str, label_set: LabelSet = None, limit: int = None
     ) -> List[str]:
-        results = self.index.suggest(term, label_set=label_set, limit=limit)
+        labels = label_set.labels if label_set else None
+        results = self.index.suggest(term, labels=labels, limit=limit)
         return results
 
 
