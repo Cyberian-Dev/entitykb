@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from typing import Iterable, List, Optional, Union, Set
 
 from entitykb import Tag, EntityValue
+from entitykb.utils import ensure_iterable
 from . import EID, AND, Graph
 
 
@@ -12,8 +13,10 @@ class Filter(object):
 
     @classmethod
     def create(cls, **data: dict):
-        if data.keys() == {"labels"}:
+        if data.keys() == {"label"}:
             return LabelFilter(**data)
+        elif {"entities", "tags", "incoming"}.issuperset(data.keys()):
+            return RelationshipFilter(**data)
 
     def dict(self):
         raise NotImplementedError
@@ -21,33 +24,63 @@ class Filter(object):
 
 @dataclass
 class LabelFilter(Filter):
-    labels: Set[str] = field(default_factory=set)
+    label: Set[str] = field(default_factory=set)
+
+    def __post_init__(self):
+        self.label = set(ensure_iterable(self.label))
 
     def evaluate(self, graph: Graph, entity_id: EID):
         entity = graph.get_entity(entity_id)
-        return entity and (entity.label in self.labels)
+        return entity and (entity.label in self.label)
 
     def dict(self):
-        return dict(labels=self.labels)
+        return dict(label=self.label)
 
 
 @dataclass
 class RelationshipFilter(Filter):
+    entities: Set[str]
     tags: Set[str]
     incoming: bool = True
-    max_hops: Optional[int] = None
-    passthru: bool = False
+    _others: Set[EID] = None
+
+    def __post_init__(self):
+        self.entities = set(ensure_iterable(self.entities))
+        self.tags = set((tag.upper() for tag in ensure_iterable(self.tags)))
+
+    def descend(self, graph, entities):
+        others_it = graph.iterate_all_relationships(
+            tags=self.tags, incoming=self.incoming, entities=entities
+        )
+
+        new_ids = set()
+        for other_id, tag in others_it:
+            new_ids.add(other_id)
+
+        next_work = new_ids - self._others
+        self._others.update(new_ids)
+
+        if next_work:
+            self.descend(graph, next_work)
+
+    def find_others(self, graph: Graph):
+        if self._others is None:
+            self._others = set()
+            self.descend(graph, self.entities)
+
+        return self._others
 
     def evaluate(self, graph: Graph, entity_id: EID):
-        # todo
-        raise NotImplementedError
+        others = self.find_others(graph)
+        entity_id = graph.get_entity_id(entity_id)
+        result = entity_id in others
+        return result
 
     def dict(self):
         return dict(
             tags=sorted(self.tags),
             incoming=self.incoming,
-            max_hops=self.max_hops,
-            passthru=self.passthru,
+            entities=sorted(self.entities),
         )
 
 
@@ -92,6 +125,9 @@ class FilterStep(Step):
     join_type: str = AND
     exclude: bool = False
 
+    def __len__(self):
+        return len(self.filters)
+
     def evaluate(self, graph: Graph, entity_id: EID):
         success = self.join_type == AND
         for filter in self.filters:
@@ -106,10 +142,12 @@ class FilterStep(Step):
         return success
 
     def dict(self):
-        filters = [filter.dict() for filter in self.filters]
-        return dict(
-            filters=filters, join_type=self.join_type, exclude=self.exclude
-        )
+        data = {"filters": [filter.dict() for filter in self.filters]}
+        if self.join_type != "AND":
+            data["join_type"] = self.join_type
+        if self.exclude:
+            data["exclude"] = self.exclude
+        return data
 
 
 @dataclass
@@ -137,7 +175,10 @@ class QueryGoal(object):
     limit: int = None
 
     def dict(self):
-        return dict(limit=self.limit)
+        if self.limit is not None:
+            return dict(limit=self.limit)
+        else:
+            return {}
 
 
 @dataclass
@@ -155,7 +196,7 @@ class Query(object):
 
     @classmethod
     def from_dict(cls, data: dict):
-        start = QueryStart(**data.get("start"))
+        start = QueryStart(**data.get("start", {}))
         steps = [Step.create(**step) for step in data.get("steps", [])]
-        goal = QueryGoal(**data.get("goal"))
+        goal = QueryGoal(**data.get("goal", {}))
         return Query(start=start, steps=steps, goal=goal)

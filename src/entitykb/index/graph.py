@@ -126,7 +126,7 @@ class Graph(object):
         tags: Iterable[str] = (None,),
         incoming: Iterable[bool] = (True, False),
         entities: Iterable[EntityValue] = (None,),
-    ) -> Iterator[Tuple[str, EID]]:
+    ) -> Iterator[Tuple[EID, str]]:
 
         if incoming is None:
             incoming = (True, False)
@@ -138,7 +138,9 @@ class Graph(object):
                         tag, direction, entity
                     )
 
-    def iterate_relationships(self, tag, direction, entity):
+    def iterate_relationships(
+        self, tag, direction, entity
+    ) -> Iterator[Tuple[EID, str]]:
         eid = self.get_entity_id(entity)
 
         if tag:
@@ -158,7 +160,7 @@ class Graph(object):
                     yield from self.iter_other_ids(other_ids, tag)
 
     @classmethod
-    def iter_other_ids(cls, other_ids, tag):
+    def iter_other_ids(cls, other_ids, tag) -> Iterator[Tuple[EID, str]]:
         for other_id in other_ids:
             yield other_id, tag
 

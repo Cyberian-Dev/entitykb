@@ -145,7 +145,7 @@ class DefaultIndex(Index):
 
     def is_prefix(self, term: str, labels: Set[str] = None) -> bool:
         term_it = self.terms.values(term=term)
-        query = QB(iterables=term_it).filter(labels=labels).first()
+        query = QB(iterables=term_it).filter(label=labels).first()
         entity_it = self.searcher.search(query)
 
         for _ in entity_it:
@@ -157,7 +157,7 @@ class DefaultIndex(Index):
     ) -> FindResult:
 
         term_it = self.terms.get(term=term) if term else []
-        query = QB(iterables=term_it).filter(labels=labels).limit(limit)
+        query = QB(iterables=term_it).filter(label=labels).limit(limit)
         results = self.searcher.search(query)
 
         return FindResult(term=term, entities=results.entities)
@@ -171,7 +171,7 @@ class DefaultIndex(Index):
     ) -> List[str]:
 
         term_it = self.terms.values(term=term)
-        query = QB(iterables=term_it).filter(labels=labels).limit(limit)
+        query = QB(iterables=term_it).filter(label=labels).limit(limit)
         results = self.searcher.search(query)
         return [entity.name for entity in results.entities]
 

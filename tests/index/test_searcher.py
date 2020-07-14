@@ -140,3 +140,22 @@ def test_start_one_multi_step_walk_goal_all(graph):
         pie.key,
     }
     assert {apple.key} == {r.start for r in results}
+
+
+def test_start_one_filter_label_goal_all(graph):
+    query = QB(dessert).walk(incoming=True).filter(label="SAUCE").all()
+    results = Searcher(graph=graph).search(query)
+    assert {r.end for r in results} == {
+        apple_sauce.key,
+    }
+    assert {dessert.key} == {r.start for r in results}
+
+
+def test_start_one_wall_every_filter_is_a(graph):
+    query = QB(apple).walk("HAS_A", incoming=None).filter(is_a=dessert).all()
+    results = Searcher(graph=graph).search(query)
+    assert {r.end for r in results} == {
+        apple_sauce.key,
+        apple_pie.key,
+    }
+    assert {apple.key} == {r.start for r in results}

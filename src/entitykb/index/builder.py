@@ -1,5 +1,14 @@
 from typing import Set
-from . import Query, QueryStart, QueryGoal, WalkStep, FilterStep, LabelFilter
+from . import (
+    Query,
+    QueryStart,
+    QueryGoal,
+    WalkStep,
+    FilterStep,
+    LabelFilter,
+    RelationshipFilter,
+    Filter,
+)
 
 
 class QueryBuilder(object):
@@ -22,10 +31,27 @@ class QueryBuilder(object):
         self.query.steps.append(walk)
         return self
 
-    def filter(self, labels: Set[str] = None, exclude: bool = False, **_):
-        if labels:
-            label_filter = LabelFilter(labels=labels)
-            filter_step = FilterStep(filters=[label_filter], exclude=exclude)
+    def filter(
+        self,
+        filter: Filter = None,
+        label: Set[str] = None,
+        exclude: bool = False,
+        **kwargs,
+    ):
+        filter_step = FilterStep(filters=[], exclude=exclude)
+
+        if filter:
+            filter_step.filters.append(filter)
+
+        if label:
+            label_filter = LabelFilter(label=label)
+            filter_step.filters.append(label_filter)
+
+        for tag, entity in kwargs.items():
+            rel_filter = RelationshipFilter(tags={tag}, entities={entity})
+            filter_step.filters.append(rel_filter)
+
+        if filter_step:
             self.query.steps.append(filter_step)
 
         return self

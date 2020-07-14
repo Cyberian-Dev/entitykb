@@ -28,7 +28,7 @@ class FuzzyIndex(DefaultIndex):
 
         if not is_prefix:
             entity_it = self.terms.edit_values(term=term)
-            query = QB(entity_it).filter(labels=labels).first()
+            query = QB(entity_it).filter(label=labels).first()
             entity_it = self.searcher.search(query)
 
             for _ in entity_it:

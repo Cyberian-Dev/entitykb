@@ -7,15 +7,15 @@ def test_create_query():
     query = (
         QB()
         .walk(Tag.IS_A, Tag.HAS_A)
-        .filter(labels={"FOOD"})
-        .exclude(labels={"SAUCE"})
+        .filter(label={"FOOD"})
+        .exclude(label={"SAUCE"})
+        .filter(is_a="Dessert|FOOD")
         .all()
     )
 
     # to dict
     data = query.dict()
     assert data == {
-        "goal": {"limit": None},
         "start": {"entities": []},
         "steps": [
             {
@@ -24,17 +24,19 @@ def test_create_query():
                 "passthru": False,
                 "tags": ["HAS_A", "IS_A"],
             },
+            {"filters": [{"label": {"FOOD"}}]},
+            {"exclude": True, "filters": [{"label": {"SAUCE"}}]},
             {
-                "exclude": False,
-                "filters": [{"labels": {"FOOD"}}],
-                "join_type": "AND",
-            },
-            {
-                "exclude": True,
-                "filters": [{"labels": {"SAUCE"}}],
-                "join_type": "AND",
+                "filters": [
+                    {
+                        "entities": ["Dessert|FOOD"],
+                        "incoming": True,
+                        "tags": ["IS_A"],
+                    }
+                ]
             },
         ],
+        "goal": {},
     }
 
     # test round-tripping

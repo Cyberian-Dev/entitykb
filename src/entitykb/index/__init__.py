@@ -5,6 +5,7 @@ from .terms import Terms, DefaultTerms
 from .query import (
     Filter,
     LabelFilter,
+    RelationshipFilter,
     QueryStart,
     Step,
     FilterStep,
@@ -37,6 +38,7 @@ __all__ = (
     "QueryGoal",
     "QueryStart",
     "Result",
+    "RelationshipFilter",
     "SearchResults",
     "Searcher",
     "Step",
