@@ -7,8 +7,6 @@ from entitykb import (
     Doc,
     FindResult,
     Token,
-    Q,
-    Query,
 )
 from entitykb.date import Date
 
@@ -142,22 +140,3 @@ def test_date():
         meta=None,
         synonyms=(),
     )
-
-
-def test_model_query():
-    apple = Entity(name="apple")
-    pie = Entity(name="pie")
-
-    assert Q.is_a == Q(tags=["IS_A"])
-    assert Q.is_a(apple) == Q(tags=["IS_A"], others=[apple])
-    assert Q.is_a(apple, incoming=False) == Q(
-        tags=["IS_A"], others=[apple], incoming=False
-    )
-    assert Q.is_a(apple, hops=2) == Q(tags=["IS_A"], others=[apple], hops=2)
-    assert 1 == len(Q.is_a(apple))
-
-    q = Q.is_a(pie).has_a(apple)
-    assert Query(q) == Query(Q.is_a(pie), Q.has_a(apple))
-    assert Query(q) == Query.convert(q)
-
-    assert Q.has_label("ENTITY") == Q(labels=["ENTITY"])

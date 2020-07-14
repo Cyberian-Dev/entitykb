@@ -5,20 +5,20 @@ from entitykb import (
     Tokenizer,
     Normalizer,
     Entity,
+    EntityValue,
     Relationship,
     FindResult,
-    Query,
 )
 from entitykb.utils import instantiate_class_from_name
 from . import (
+    Query,
+    QB,
     Storage,
     DefaultStorage,
     Terms,
     DefaultTerms,
     Graph,
-    ENTITY_VAL,
-    Engine,
-    DefaultEngine,
+    Searcher,
 )
 
 
@@ -30,7 +30,7 @@ class Index(object):
     storage: Storage = None
     terms: Terms = None
     graph: Graph = None
-    engine: Engine = None
+    searcher: Searcher = None
 
     def __repr__(self):
         return f"<Index: {self.root_dir}>"
@@ -56,20 +56,14 @@ class Index(object):
     def add_relationship(self, relationship: Relationship):
         raise NotImplementedError
 
-    def get_entity(self, val: ENTITY_VAL) -> ENTITY_VAL:
+    def get_entity(self, val: EntityValue) -> EntityValue:
         raise NotImplementedError
 
-    def is_prefix(
-        self, term: str, labels: Set[str] = None, query: Query = None
-    ) -> bool:
+    def is_prefix(self, term: str, labels: Set[str] = None) -> bool:
         raise NotImplementedError
 
     def find(
-        self,
-        term: str = None,
-        labels: Set[str] = None,
-        query: Query = None,
-        limit: int = None,
+        self, term: str = None, labels: Set[str] = None, limit: int = None,
     ) -> FindResult:
         raise NotImplementedError
 
@@ -103,8 +97,8 @@ class DefaultIndex(Index):
         if self.graph is None:
             self.graph = Graph()
 
-        if self.engine is None:
-            self.engine = DefaultEngine(terms=self.terms, graph=self.graph)
+        if self.searcher is None:
+            self.searcher = Searcher(graph=self.graph)
 
     def __repr__(self):
         msg = f"{len(self.graph)} entities, {len(self.terms)} terms"
@@ -141,37 +135,27 @@ class DefaultIndex(Index):
     def add_relationship(self, relationship: Relationship):
         self.graph.add_relationship(relationship)
 
-    def get_entity(self, val: ENTITY_VAL) -> ENTITY_VAL:
+    def get_entity(self, val: EntityValue) -> EntityValue:
         return self.graph.get(val)
 
-    def is_prefix(
-        self, term: str, labels: Set[str] = None, query: Query = None
-    ) -> bool:
-
-        query = Query.convert(query, labels=labels)
-
-        entity_it = self.terms.values(term=term)
-        entity_it = self.engine.search(query, limit=1, entity_it=entity_it)
+    def is_prefix(self, term: str, labels: Set[str] = None) -> bool:
+        term_it = self.terms.values(term=term)
+        query = QB(iterables=term_it).filter(labels=labels).first()
+        entity_it = self.searcher.search(query)
 
         for _ in entity_it:
             return True
         return False
 
     def find(
-        self,
-        term: str = None,
-        labels: Set[str] = None,
-        query: Query = None,
-        limit: int = None,
+        self, term: str = None, labels: Set[str] = None, limit: int = None,
     ) -> FindResult:
 
-        query = Query.convert(query, labels=labels)
+        term_it = self.terms.get(term=term) if term else []
+        query = QB(iterables=term_it).filter(labels=labels).limit(limit)
+        results = self.searcher.search(query)
 
-        entity_it = self.terms.get(term=term) if term else None
-        entity_it = self.engine.search(query, limit=limit, entity_it=entity_it)
-        entity_it = map(self.graph.get_entity, entity_it)
-
-        return FindResult(term=term, entities=tuple(entity_it))
+        return FindResult(term=term, entities=results.entities)
 
     def suggest(
         self,
@@ -181,13 +165,10 @@ class DefaultIndex(Index):
         limit: int = None,
     ) -> List[str]:
 
-        query = Query.convert(query, labels=labels)
-
-        entity_it = self.terms.values(term=term)
-        entity_it = self.engine.search(query, limit=limit, entity_it=entity_it)
-        entity_it = map(self.graph.get_entity, entity_it)
-
-        return [entity.name for entity in entity_it]
+        term_it = self.terms.values(term=term)
+        query = QB(iterables=term_it).filter(labels=labels).limit(limit)
+        results = self.searcher.search(query)
+        return [entity.name for entity in results.entities]
 
 
 DefaultIndexType = Optional[Union[Type[DefaultIndex], DefaultIndex, str]]

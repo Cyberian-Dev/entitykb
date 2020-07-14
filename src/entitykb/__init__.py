@@ -9,12 +9,11 @@ from .model import (
     DocEntity,
     DocToken,
     Entity,
+    EntityValue,
     ER,
     FindResult,
     Label,
     LabelSet,
-    Q,
-    Query,
     Relationship,
     Tag,
     Token,
@@ -35,7 +34,7 @@ from .filterers import (
 )
 
 # (3) depends on tokenizers, normalizer
-from .index import Index, DefaultIndex
+from .index import Index, DefaultIndex, Query, QueryBuilder, QB
 
 # (4) depends on index
 from .handlers import TokenHandler
@@ -72,6 +71,7 @@ __all__ = (
     "DocEntity",
     "DocToken",
     "Entity",
+    "EntityValue",
     "ExactOnlyFilterer",
     "Extractor",
     "ExtractorType",
@@ -89,8 +89,9 @@ __all__ = (
     "Normalizer",
     "NormalizerType",
     "Pipeline",
-    "Q",
     "Query",
+    "QueryBuilder",
+    "QB",
     "Relationship",
     "Resolver",
     "ResolverType",

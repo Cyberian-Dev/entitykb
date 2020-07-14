@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 from typing import Iterator, Set
 
-from .graph import Graph
-from .query import (
+from . import (
+    Graph,
     Query,
     QueryStart,
     QueryGoal,
@@ -26,7 +26,7 @@ class StartLayer(Layer):
     start: QueryStart
 
     def __iter__(self) -> Iterator[Result]:
-        entity_id_it = self.start.entities or self.graph
+        entity_id_it = self.start.get_iterator(self.graph)
         for entity_id in entity_id_it:
             entity_id = self.graph.get_entity_id(entity_id)
             yield Result(graph=self.graph, start_id=entity_id)
@@ -71,7 +71,8 @@ class FilterLayer(Layer):
 
     def __iter__(self) -> Iterator[Result]:
         for result in self.prev:
-            yield result
+            if self.step.evaluate(self.graph, result.end_id):
+                yield result
 
 
 @dataclass
@@ -83,7 +84,7 @@ class GoalLayer(Layer):
         count = 0
 
         for result in self.prev:
-            if self.goal.limit and count >= self.goal.limit:
+            if self.goal.limit is not None and count >= self.goal.limit:
                 break
 
             yield result

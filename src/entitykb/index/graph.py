@@ -6,13 +6,14 @@ from entitykb import (
     DocEntity,
     Entity,
     Relationship,
+    EntityValue,
 )
-from . import HAS_LABEL, ENTITY_VAL, EID
+from . import HAS_LABEL, EID
 
 
 def generate_new_id():
     new_id = time.time()
-    time.sleep(0.0)
+    time.sleep(0.000001)
     return new_id
 
 
@@ -60,7 +61,7 @@ class Graph(object):
         else:
             return self.get_entity(item)
 
-    def get_entity(self, val: ENTITY_VAL):
+    def get_entity(self, val: EntityValue):
         if isinstance(val, float):
             return self.entity_by_id.get(val)
         if isinstance(val, str):
@@ -71,12 +72,12 @@ class Graph(object):
         if isinstance(val, Entity):
             return val
 
-    def get_entity_key(self, val: ENTITY_VAL):
+    def get_entity_key(self, val: EntityValue):
         entity = self.get_entity(val)
         if entity:
             return entity.key
 
-    def get_entity_id(self, val: ENTITY_VAL):
+    def get_entity_id(self, val: EntityValue):
         if isinstance(val, Entity):
             return self.entity_key_to_id.get(val.key)
         if isinstance(val, DocEntity):
@@ -102,9 +103,7 @@ class Graph(object):
         assert id_a and id_b and tag, f"Invalid: {id_a}, {tag}, {id_b}"
 
         # tag first
-
         by_tag = self.relationships_by_tag.setdefault(tag, {})
-
         rel_in = by_tag.setdefault(False, {})
         rel_in.setdefault(id_a, set()).add(id_b)
 
@@ -112,7 +111,6 @@ class Graph(object):
         rel_out.setdefault(id_b, set()).add(id_a)
 
         # entity first
-
         by_ent_a = self.relationships_by_entity_id.setdefault(id_a, {})
         by_ent_a = by_ent_a.setdefault(False, {})
         by_ent_a.setdefault(tag, set()).add(id_b)
@@ -122,14 +120,14 @@ class Graph(object):
         by_ent_b.setdefault(tag, set()).add(id_a)
 
     def iterate_others(
-        self, *, tag: str, incoming: bool, entity: ENTITY_VAL = None
+        self, *, tag: str, incoming: bool, entity: EntityValue = None
     ) -> Iterator[Tuple[str, EID]]:
         entity_id = entity and self.get_entity_id(entity)
         incomings = {True, False} if incoming is None else {incoming}
 
         if tag:
             top = self.relationships_by_tag.get(tag)
-            next_keys = (entity_id,)
+            next_keys = (entity_id,) if entity_id else ()
         elif entity_id:
             top = self.relationships_by_entity_id.get(entity_id)
             next_keys = ()
@@ -145,7 +143,7 @@ class Graph(object):
                     yield tag or key, other_id
 
     def get_relationships(
-        self, tag: str, incoming: bool = None, entity: ENTITY_VAL = None
+        self, tag: str, incoming: bool = None, entity: EntityValue = None
     ) -> Union[Dict, Set]:
         curr = self.relationships_by_tag.get(tag)
 

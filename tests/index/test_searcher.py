@@ -1,8 +1,7 @@
 import pytest
 
 from entitykb import Entity
-from entitykb.index.query import QB
-from entitykb.index.searcher import Searcher, SearchResults
+from entitykb.index import QB, Searcher, SearchResults
 
 food = Entity(name="Food")
 fruit = Entity(name="Fruit")

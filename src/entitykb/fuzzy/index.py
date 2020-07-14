@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Set
 
-from entitykb import DefaultIndex, LabelSet, utils, Query
+from entitykb import DefaultIndex, LabelSet, utils, QB
 from .terms import FuzzyTerms
 
 
@@ -23,16 +23,14 @@ class FuzzyIndex(DefaultIndex):
     def is_conjunction(self, token):
         return self.terms.is_conjunction(token)
 
-    def is_prefix(
-        self, term: str, labels: Set[str] = None, query: Query = None
-    ) -> bool:
-
-        query = Query.convert(query, labels=labels)
-        is_prefix = super(FuzzyIndex, self).is_prefix(term, None, query)
+    def is_prefix(self, term: str, labels: Set[str] = None) -> bool:
+        is_prefix = super(FuzzyIndex, self).is_prefix(term, labels)
 
         if not is_prefix:
             entity_it = self.terms.edit_values(term=term)
-            entity_it = self.engine.search(query, limit=1, entity_it=entity_it)
+            query = QB(entity_it).filter(labels=labels).first()
+            entity_it = self.searcher.search(query)
+
             for _ in entity_it:
                 return True
 
