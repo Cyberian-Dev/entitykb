@@ -120,6 +120,7 @@ class DefaultIndex(Index):
             self.graph.put_data(graph_core)
 
     def commit(self):
+        self.storage.archive()
         py_data = self.terms.get_data(), self.graph.get_data()
         self.storage.save(py_data)
 

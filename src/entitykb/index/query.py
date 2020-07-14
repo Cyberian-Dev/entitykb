@@ -39,8 +39,8 @@ class RelationshipFilter(Filter):
     passthru: bool = False
 
     def evaluate(self, graph: Graph, entity_id: EID):
-        entity = graph.get_entity(entity_id)
-        return entity.label in self.labels
+        # todo
+        raise NotImplementedError
 
     def dict(self):
         return dict(
@@ -58,7 +58,7 @@ class QueryStart(object):
 
     def get_iterator(self, graph: Graph):
         if self.entities:
-            yield from self.entities
+            yield from chain(self.entities)
         elif self.iterables is not None:
             yield from chain(self.iterables)
         else:

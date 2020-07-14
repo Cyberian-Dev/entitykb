@@ -1,5 +1,7 @@
 from dataclasses import dataclass, field
-from typing import Iterator, Set
+from typing import Iterator, Set, Dict, List
+
+from entitykb import Entity
 
 from . import (
     Graph,
@@ -40,16 +42,21 @@ class WalkLayer(Layer):
 
     def descend(self, result: Result):
         children = set()
-        for req_tag in self.step.tags:
-            others_it = self.graph.iterate_others(
-                tag=req_tag, incoming=self.step.incoming, entity=result.end_id
-            )
-            for (rel_tag, end_id) in others_it:
-                next_result = result.push(tag=rel_tag, end_id=end_id)
-                if next_result not in self.seen:
-                    self.seen.add(next_result)
-                    children.add(next_result)
-                    yield from self.descend(next_result)
+
+        if result.end_id is not None:
+            for req_tag in self.step.tags:
+                others_it = self.graph.iterate_others(
+                    tag=req_tag,
+                    incoming=self.step.incoming,
+                    entity=result.end_id,
+                )
+
+                for (rel_tag, end_id) in others_it:
+                    next_result = result.push(tag=rel_tag, end_id=end_id)
+                    if next_result not in self.seen:
+                        self.seen.add(next_result)
+                        children.add(next_result)
+                        yield from self.descend(next_result)
 
         # yield last, handle case of parallel rel w/ multiple tags
         yield from children
@@ -95,7 +102,13 @@ class GoalLayer(Layer):
 class Searcher(object):
     graph: Graph
 
+    def __call__(self, query: Query):
+        return self.search(query)
+
     def search(self, query: Query) -> SearchResults:
+        """
+        Execute search using Query object.
+        """
         layer = StartLayer(graph=self.graph, start=query.start)
 
         for step in query.steps:
@@ -111,3 +124,37 @@ class Searcher(object):
             results.append(result)
 
         return SearchResults(graph=self.graph, query=query, results=results)
+
+    def closest(self, query: Query) -> Entity:
+        """
+        Returns the entity with the least number of hops.
+        Tie-breaker is the entity with the most results.
+        """
+        rollup = self.rollup(query)
+
+        if not rollup:
+            return
+
+        if len(rollup) == 1:
+            return next(iter(rollup.keys()))
+
+        aggregates = []
+
+        for entity, results in rollup.items():
+            aggregate = (min(r.hops for r in results), -len(results), entity)
+            aggregates.append(aggregate)
+
+        _, _, entity = sorted(aggregates)[0]
+        return entity
+
+    def rollup(self, query: Query) -> Dict[Entity, List[Result]]:
+        """
+        Roll-up search results by Entity and return dictionary.
+        """
+        results = self.search(query)
+        rollup = {}
+
+        for result in results:
+            rollup.setdefault(result.entity, []).append(result)
+
+        return rollup

@@ -29,7 +29,7 @@ class Result(object):
     by_end_id: Dict[EID, Hop] = field(default_factory=dict)
 
     def __repr__(self):
-        return f"<Result: {self.start} - {len(self.hops)} -> {self.end}>"
+        return f"<Result: {self.start} - {len(self)} -> {self.end}>"
 
     def __len__(self):
         return len(self.hops)
