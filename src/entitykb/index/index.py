@@ -102,7 +102,7 @@ class DefaultIndex(Index):
             self.graph = Graph()
 
         if self.searcher is None:
-            self.searcher = Searcher(graph=self.graph)
+            self.searcher = Searcher(graph=self.graph, terms=self.terms)
 
     def __repr__(self):
         msg = f"{len(self.graph)} entities, {len(self.terms)} terms"

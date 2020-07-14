@@ -10,6 +10,7 @@ from . import (
     QueryGoal,
     Result,
     SearchResults,
+    Terms,
     WalkStep,
     FilterStep,
 )
@@ -18,6 +19,7 @@ from . import (
 @dataclass
 class Layer(object):
     graph: Graph
+    terms: Terms
 
     def __iter__(self) -> Iterator[Result]:
         raise NotImplementedError
@@ -101,6 +103,7 @@ class GoalLayer(Layer):
 @dataclass
 class Searcher(object):
     graph: Graph
+    terms: Terms
 
     def __call__(self, query: Query):
         return self.search(query)
@@ -109,21 +112,51 @@ class Searcher(object):
         """
         Execute search using Query object.
         """
-        layer = StartLayer(graph=self.graph, start=query.start)
+        layer = StartLayer(
+            graph=self.graph, terms=self.terms, start=query.start
+        )
 
         for step in query.steps:
             if isinstance(step, WalkStep):
-                layer = WalkLayer(graph=self.graph, step=step, prev=layer)
+                layer = WalkLayer(
+                    graph=self.graph, terms=self.terms, step=step, prev=layer
+                )
             elif isinstance(step, FilterStep):
-                layer = FilterLayer(graph=self.graph, step=step, prev=layer)
+                layer = FilterLayer(
+                    graph=self.graph, terms=self.terms, step=step, prev=layer
+                )
 
-        layer = GoalLayer(graph=self.graph, goal=query.goal, prev=layer)
+        layer = GoalLayer(
+            graph=self.graph, terms=self.terms, goal=query.goal, prev=layer
+        )
 
         results = []
         for result in layer:
             results.append(result)
 
         return SearchResults(graph=self.graph, query=query, results=results)
+
+    def most_relevant(self, query: Query) -> Entity:
+        """
+        Returns the entity with the most results.
+        Tie-breaker is the entity with the least number of hops.
+        """
+        rollup = self.rollup(query)
+
+        if not rollup:
+            return
+
+        if len(rollup) == 1:
+            return next(iter(rollup.keys()))
+
+        aggregates = []
+
+        for entity, results in rollup.items():
+            agg = (-len(results), min(len(r.hops) for r in results), entity)
+            aggregates.append(agg)
+
+        _, _, entity = sorted(aggregates)[0]
+        return entity
 
     def closest(self, query: Query) -> Entity:
         """
@@ -141,8 +174,8 @@ class Searcher(object):
         aggregates = []
 
         for entity, results in rollup.items():
-            aggregate = (min(r.hops for r in results), -len(results), entity)
-            aggregates.append(aggregate)
+            agg = (min(len(r.hops) for r in results), -len(results), entity)
+            aggregates.append(agg)
 
         _, _, entity = sorted(aggregates)[0]
         return entity

@@ -55,23 +55,30 @@ def graph(index):
     return graph
 
 
-def test_start_all_goal_all(graph):
-    results = Searcher(graph=graph).search(QB().all())
+@pytest.fixture
+def terms(index):
+    terms = index.terms
+    assert "<Terms: (9 terms)>" == repr(terms)
+    return terms
+
+
+def test_start_all_goal_all(graph, terms):
+    results = Searcher(graph=graph, terms=terms).search(QB().all())
     assert isinstance(results, SearchResults)
     assert 9 == len(results)
     assert 0 == len(results[0])
     assert results[0].start_id == results[0].end_id
 
 
-def test_start_all_goal_first(graph):
-    results = Searcher(graph=graph).search(QB().first())
+def test_start_all_goal_first(graph, terms):
+    results = Searcher(graph=graph, terms=terms).search(QB().first())
     assert 1 == len(results)
     assert 0 == len(results[0])
     assert results[0].start_id == results[0].end_id
 
 
-def test_start_one_goal_all(graph):
-    results = Searcher(graph=graph).search(QB(apple).all())
+def test_start_one_goal_all(graph, terms):
+    results = Searcher(graph=graph, terms=terms).search(QB(apple).all())
 
     assert 1 == len(results)
     assert 0 == len(results[0])
@@ -79,9 +86,9 @@ def test_start_one_goal_all(graph):
     assert apple.key == results[0].start
 
 
-def test_start_one_walk_passthru_is_a_goal_all(graph):
+def test_start_one_walk_passthru_is_a_goal_all(graph, terms):
     query = QB(apple).walk("is_a").all()
-    results = Searcher(graph=graph).search(query)
+    results = Searcher(graph=graph, terms=terms).search(query)
     assert {r.end for r in results} == {
         granny_smith.key,
         honeycrisp.key,
@@ -89,9 +96,9 @@ def test_start_one_walk_passthru_is_a_goal_all(graph):
     assert {apple.key} == {r.start for r in results}
 
 
-def test_start_one_walk_incoming_is_a_include_start_goal_all(graph):
+def test_start_one_walk_incoming_is_a_include_start_goal_all(graph, terms):
     query = QB(apple).walk("is_a", passthru=True).all()
-    results = Searcher(graph=graph).search(query)
+    results = Searcher(graph=graph, terms=terms).search(query)
     assert {r.end for r in results} == {
         apple.key,
         granny_smith.key,
@@ -100,9 +107,9 @@ def test_start_one_walk_incoming_is_a_include_start_goal_all(graph):
     assert {apple.key} == {r.start for r in results}
 
 
-def test_start_one_walk_outcoming_is_a_goal_all(graph):
+def test_start_one_walk_outcoming_is_a_goal_all(graph, terms):
     query = QB(apple).walk("is_a", incoming=False).all()
-    results = Searcher(graph=graph).search(query)
+    results = Searcher(graph=graph, terms=terms).search(query)
     assert {r.end for r in results} == {
         fruit.key,
         food.key,
@@ -110,9 +117,9 @@ def test_start_one_walk_outcoming_is_a_goal_all(graph):
     assert {apple.key} == {r.start for r in results}
 
 
-def test_start_one_walk_incoming_all_goal_all(graph):
+def test_start_one_walk_incoming_all_goal_all(graph, terms):
     query = QB(apple).walk(incoming=True).all()
-    results = Searcher(graph=graph).search(query)
+    results = Searcher(graph=graph, terms=terms).search(query)
     assert {r.end for r in results} == {
         granny_smith.key,
         honeycrisp.key,
@@ -122,17 +129,17 @@ def test_start_one_walk_incoming_all_goal_all(graph):
     assert {apple.key} == {r.start for r in results}
 
 
-def test_start_one_walk_every_direction_goal_all(graph):
+def test_start_one_walk_every_direction_goal_all(graph, terms):
     query = QB(apple).walk(incoming=None).all()
-    results = Searcher(graph=graph).search(query)
+    results = Searcher(graph=graph, terms=terms).search(query)
     assert 8 == len(results)
     assert apple.key not in {r.end for r in results}
     assert {apple.key} == {r.start for r in results}
 
 
-def test_start_one_multi_step_walk_goal_all(graph):
+def test_start_one_multi_step_walk_goal_all(graph, terms):
     query = QB(apple).walk("has_a").walk("is_a", incoming=False).all()
-    results = Searcher(graph=graph).search(query)
+    results = Searcher(graph=graph, terms=terms).search(query)
     assert 3 == len(results)
     assert {r.end for r in results} == {
         food.key,
@@ -142,20 +149,48 @@ def test_start_one_multi_step_walk_goal_all(graph):
     assert {apple.key} == {r.start for r in results}
 
 
-def test_start_one_filter_label_goal_all(graph):
+def test_start_one_filter_label_goal_all(graph, terms):
     query = QB(dessert).walk(incoming=True).filter(label="SAUCE").all()
-    results = Searcher(graph=graph).search(query)
+    results = Searcher(graph=graph, terms=terms).search(query)
     assert {r.end for r in results} == {
         apple_sauce.key,
     }
     assert {dessert.key} == {r.start for r in results}
 
 
-def test_start_one_wall_every_filter_is_a(graph):
+def test_start_one_wall_every_filter_is_a(graph, terms):
     query = QB(apple).walk("HAS_A", incoming=None).filter(is_a=dessert).all()
-    results = Searcher(graph=graph).search(query)
+    results = Searcher(graph=graph, terms=terms).search(query)
     assert {r.end for r in results} == {
         apple_sauce.key,
         apple_pie.key,
     }
     assert {apple.key} == {r.start for r in results}
+
+
+def test_find_most_relevant(graph, terms):
+    query = QB(food, pie, dessert).walk().all()
+    entity = Searcher(graph=graph, terms=terms).most_relevant(query)
+    assert apple_pie == entity
+
+    query = QB(food, pie, dessert).walk(incoming=False).all()
+    entity = Searcher(graph=graph, terms=terms).most_relevant(query)
+    assert food == entity
+
+    query = QB(food, pie, dessert).walk(incoming=None).all()
+    entity = Searcher(graph=graph, terms=terms).most_relevant(query)
+    assert apple_pie == entity
+
+
+def test_find_closest(graph, terms):
+    query = QB(granny_smith, honeycrisp, pie).walk().all()
+    entity = Searcher(graph=graph, terms=terms).closest(query)
+    assert apple_pie == entity
+
+    query = QB(granny_smith, honeycrisp, pie).walk(incoming=False).all()
+    entity = Searcher(graph=graph, terms=terms).closest(query)
+    assert apple == entity
+
+    query = QB(granny_smith, honeycrisp, pie).walk(incoming=None).all()
+    entity = Searcher(graph=graph, terms=terms).closest(query)
+    assert apple == entity

@@ -35,6 +35,9 @@ class Terms(object):
     normalizer: Normalizer
     max_backups: int = 5
 
+    def __repr__(self):
+        raise NotImplementedError
+
     def __len__(self):
         raise NotImplementedError
 
@@ -71,6 +74,9 @@ class DefaultTerms(Terms):
     def __post_init__(self):
         if self.trie is None:
             self.trie = Trie()
+
+    def __repr__(self):
+        return f"<Terms: ({len(self)} terms)>"
 
     def __len__(self):
         return len(self.trie)
