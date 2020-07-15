@@ -6,7 +6,6 @@ from entitykb import (
     DefaultNormalizer,
     Entity,
     Extractor,
-    Pipeline,
     DefaultIndex,
 )
 from entitykb.date import DateResolver, Date
@@ -28,14 +27,7 @@ def extractor(apple, google, amazon, microsoft):
         index=index,
     )
 
-    pipeline = Pipeline(
-        tokenizer=tokenizer,
-        normalizer=normalizer,
-        index=index,
-        resolvers=(resolver,),
-    )
-
-    pipeline.add(apple, google, amazon, microsoft, the_the)
+    index.add(apple, google, amazon, microsoft, the_the)
 
     resolvers = (
         resolver,

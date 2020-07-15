@@ -4,7 +4,7 @@ from typing import Iterable, List, Optional, Union, Set
 
 from entitykb import Tag, EntityValue
 from entitykb.utils import ensure_iterable
-from . import EID, AND, Graph
+from . import EID, AND, Graph, Terms
 
 
 class Filter(object):
@@ -43,6 +43,10 @@ class RelationshipFilter(Filter):
     tags: Set[str]
     incoming: bool = True
     _others: Set[EID] = None
+
+    def __repr__(self):
+        msg = f"tags={self.tags}, entities={self.entities}"
+        return f"<RelationshipFilter: ({msg})>"
 
     def __post_init__(self):
         self.entities = set(ensure_iterable(self.entities))
@@ -87,20 +91,25 @@ class RelationshipFilter(Filter):
 @dataclass
 class QueryStart(object):
     entities: Iterable[EntityValue] = None
-    iterables: Iterable[Iterable[EntityValue]] = None
+    prefix: str = None
+    term: str = None
 
-    def get_iterator(self, graph: Graph):
+    def get_iterator(self, graph: Graph, terms: Terms):
         if self.entities:
             yield from chain(self.entities)
-        elif self.iterables is not None:
-            yield from chain(self.iterables)
+        elif self.prefix:
+            yield from terms.values(self.prefix)
+        elif self.term:
+            yield from terms.get(self.term)
         else:
             yield from graph
 
     def dict(self):
-        # todo: how to handle terms query starts?
-        self.entities = list(self.entities)
-        return dict(entities=self.entities)
+        if self.entities:
+            self.entities = list(self.entities)
+        data = dict(entities=self.entities, prefix=self.prefix, term=self.term)
+        data = dict((k, v) for (k, v) in data.items() if v)
+        return data
 
 
 @dataclass

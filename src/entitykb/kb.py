@@ -26,29 +26,29 @@ class KB(object):
         return self.pipeline.index
 
     @property
-    def store(self):
-        return self.pipeline.index.storage
+    def graph(self):
+        return self.index.graph
 
     @property
-    def graph(self):
-        return self.pipeline.index.graph
+    def searcher(self):
+        return self.index.searcher
 
     def __len__(self):
         return len(self.pipeline)
 
-    def reload(self):
-        self.pipeline.reload()
+    def load(self):
+        self.index.load()
 
     def reset(self):
-        self.pipeline.reset()
+        self.index.reset()
+
+    def commit(self):
+        self.index.commit()
+        self.is_dirty = False
 
     def add(self, *items):
         self.is_dirty = True
-        self.pipeline.add(*items)
-
-    def commit(self):
-        self.pipeline.commit()
-        self.is_dirty = False
+        self.index.add(*items)
 
     def find(self, text: str, label_set: LabelSet = None) -> List[Entity]:
         doc = self.process(text, label_set=label_set)

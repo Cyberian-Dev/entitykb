@@ -1,4 +1,5 @@
 from typing import Set
+
 from . import (
     Query,
     QueryStart,
@@ -12,8 +13,8 @@ from . import (
 
 
 class QueryBuilder(object):
-    def __init__(self, *entities: str, iterables=None):
-        start = QueryStart(entities=entities, iterables=iterables)
+    def __init__(self, *entities: str, prefix=None, term=None):
+        start = QueryStart(entities=entities, prefix=prefix, term=term)
         self.query = Query(start=start)
 
     # steps (returns self)
@@ -48,7 +49,7 @@ class QueryBuilder(object):
             filter_step.filters.append(label_filter)
 
         for tag, entity in kwargs.items():
-            rel_filter = RelationshipFilter(tags={tag}, entities={entity})
+            rel_filter = RelationshipFilter(tags=tag, entities=entity)
             filter_step.filters.append(rel_filter)
 
         if filter_step:

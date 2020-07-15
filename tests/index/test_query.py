@@ -16,7 +16,7 @@ def test_create_query():
     # to dict
     data = query.dict()
     assert data == {
-        "start": {"entities": []},
+        "start": {},
         "steps": [
             {
                 "incoming": True,

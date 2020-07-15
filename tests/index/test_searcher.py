@@ -133,7 +133,7 @@ def test_start_one_walk_every_direction_goal_all(graph, terms):
     query = QB(apple).walk(incoming=None).all()
     results = Searcher(graph=graph, terms=terms).search(query)
     assert 8 == len(results)
-    assert apple.key not in {r.end for r in results}
+    assert apple not in {r.entity for r in results}
     assert {apple.key} == {r.start for r in results}
 
 
@@ -141,30 +141,21 @@ def test_start_one_multi_step_walk_goal_all(graph, terms):
     query = QB(apple).walk("has_a").walk("is_a", incoming=False).all()
     results = Searcher(graph=graph, terms=terms).search(query)
     assert 3 == len(results)
-    assert {r.end for r in results} == {
-        food.key,
-        dessert.key,
-        pie.key,
-    }
+    assert {r.entity for r in results} == {food, dessert, pie}
     assert {apple.key} == {r.start for r in results}
 
 
 def test_start_one_filter_label_goal_all(graph, terms):
     query = QB(dessert).walk(incoming=True).filter(label="SAUCE").all()
     results = Searcher(graph=graph, terms=terms).search(query)
-    assert {r.end for r in results} == {
-        apple_sauce.key,
-    }
+    assert {r.entity for r in results} == {apple_sauce}
     assert {dessert.key} == {r.start for r in results}
 
 
 def test_start_one_wall_every_filter_is_a(graph, terms):
     query = QB(apple).walk("HAS_A", incoming=None).filter(is_a=dessert).all()
     results = Searcher(graph=graph, terms=terms).search(query)
-    assert {r.end for r in results} == {
-        apple_sauce.key,
-        apple_pie.key,
-    }
+    assert set(results.entities) == {apple_sauce, apple_pie}
     assert {apple.key} == {r.start for r in results}
 
 
@@ -194,3 +185,31 @@ def test_find_closest(graph, terms):
     query = QB(granny_smith, honeycrisp, pie).walk(incoming=None).all()
     entity = Searcher(graph=graph, terms=terms).closest(query)
     assert apple == entity
+
+
+def test_prefix_text_suggest(graph, terms):
+    query = QB(prefix="appl").all()
+    results = Searcher(graph=graph, terms=terms).search(query)
+    assert set(results.entities) == {apple, apple_pie, apple_sauce}
+
+    query = QB(prefix="appl").filter(is_a="Pie|ENTITY").all()
+    results = Searcher(graph=graph, terms=terms).search(query)
+    assert set(results.entities) == {apple_pie}
+
+    query = QB(prefix="appl").filter(label="SAUCE").all()
+    results = Searcher(graph=graph, terms=terms).search(query)
+    assert set(results.entities) == {apple_sauce}
+
+
+def test_prefix_text_term(graph, terms):
+    query = QB(term="appl").all()
+    results = Searcher(graph=graph, terms=terms).search(query)
+    assert not results.entities
+
+    query = QB(term="apple").all()
+    results = Searcher(graph=graph, terms=terms).search(query)
+    assert set(results.entities) == {apple}
+
+    query = QB(term="apple pie").all()
+    results = Searcher(graph=graph, terms=terms).search(query)
+    assert set(results.entities) == {apple_pie}

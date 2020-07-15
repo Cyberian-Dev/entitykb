@@ -48,7 +48,7 @@ def pipeline(resolver, index):
 
 
 @pytest.fixture()
-def b_obama(pipeline):
+def b_obama(index):
     entity = Entity(
         name="Barack Obama",
         label="PRESIDENT",
@@ -58,12 +58,12 @@ def b_obama(pipeline):
             "President Obama",
         ),
     )
-    pipeline.add(entity)
+    index.add(entity)
     return entity
 
 
 @pytest.fixture()
-def m_obama(pipeline):
+def m_obama(index):
     entity = Entity(
         name="Michelle Obama",
         label="FIRST_LADY",
@@ -73,16 +73,16 @@ def m_obama(pipeline):
             "Michelle LaVaughn Robinson Obama",
         ),
     )
-    pipeline.add(entity)
+    index.add(entity)
     return entity
 
 
 @pytest.fixture()
-def michel_le(pipeline):
+def michel_le(index):
     entity = Entity(
         name="Michel'le",
         label="SINGER",
         synonyms=("Michel'le Denise Toussaint",),
     )
-    pipeline.add(entity)
+    index.add(entity)
     return entity

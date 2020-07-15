@@ -30,7 +30,7 @@ class StartLayer(Layer):
     start: QueryStart
 
     def __iter__(self) -> Iterator[Result]:
-        entity_id_it = self.start.get_iterator(self.graph)
+        entity_id_it = self.start.get_iterator(self.graph, self.terms)
         for entity_id in entity_id_it:
             entity_id = self.graph.get_entity_id(entity_id)
             yield Result(graph=self.graph, start_id=entity_id)

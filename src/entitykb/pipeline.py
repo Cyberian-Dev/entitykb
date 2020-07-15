@@ -58,7 +58,7 @@ class Pipeline(object):
             tokenizer=tokenizer,
         )
 
-        pipeline.reload()
+        index.load()
 
         return pipeline
 
@@ -77,23 +77,3 @@ class Pipeline(object):
         for filterer in self.filterers:
             doc_entities = filterer.filter(doc_entities)
         return doc_entities
-
-    # indices
-
-    def reload(self):
-        self.index.load()
-
-    def reset(self):
-        self.index.reset()
-
-    def commit(self):
-        self.index.commit()
-
-    # entities/relationships
-
-    def add(self, *ent_rels: entitykb.ER):
-        for er in ent_rels:
-            if isinstance(er, entitykb.Entity):
-                self.index.add_entity(er)
-            else:
-                self.index.add_relationship(er)

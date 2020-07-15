@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Optional, Type, Union, Set, List
 
 from entitykb import (
+    ER,
     Tokenizer,
     Normalizer,
     Entity,
@@ -53,6 +54,13 @@ class Index(object):
 
     def reset(self):
         raise NotImplementedError
+
+    def add(self, *ent_rels: ER):
+        for er in ent_rels:
+            if isinstance(er, Entity):
+                self.add_entity(er)
+            else:
+                self.add_relationship(er)
 
     def add_entity(self, entity: Entity):
         raise NotImplementedError
@@ -144,8 +152,7 @@ class DefaultIndex(Index):
         return self.graph.get(val)
 
     def is_prefix(self, term: str, labels: Set[str] = None) -> bool:
-        term_it = self.terms.values(term=term)
-        query = QB(iterables=term_it).filter(label=labels).first()
+        query = QB(prefix=term).filter(label=labels).first()
         entity_it = self.searcher.search(query)
 
         for _ in entity_it:
@@ -156,22 +163,20 @@ class DefaultIndex(Index):
         self, term: str = None, labels: Set[str] = None, limit: int = None,
     ) -> FindResult:
 
-        term_it = self.terms.get(term=term) if term else []
-        query = QB(iterables=term_it).filter(label=labels).limit(limit)
+        query = QB(term=term).filter(label=labels).limit(limit)
         results = self.searcher.search(query)
 
         return FindResult(term=term, entities=results.entities)
 
     def suggest(
         self,
-        term: str,
+        prefix: str,
         labels: Set[str] = None,
         query: Query = None,
         limit: int = None,
     ) -> List[str]:
 
-        term_it = self.terms.values(term=term)
-        query = QB(iterables=term_it).filter(label=labels).limit(limit)
+        query = QB(prefix=prefix).filter(label=labels).limit(limit)
         results = self.searcher.search(query)
         return [entity.name for entity in results.entities]
 
