@@ -388,6 +388,14 @@ class Doc(HasTokens):
             tokens=[token.dict() for token in self.tokens],
         )
 
+    @property
+    def entity_keys(self):
+        return tuple(
+            doc_entity.entity.key
+            for doc_entity in self.entities
+            if doc_entity.entity
+        )
+
 
 class FindResult(BaseModel):
 

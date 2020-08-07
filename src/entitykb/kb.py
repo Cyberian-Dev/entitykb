@@ -67,6 +67,7 @@ class KB(object):
             "index": self.index.info(),
             "load_time": f"{self.load_time :.2} sec",
             "is_dirty": self.is_dirty,
+            "graph": self.graph.info(),
         }
 
     def process(self, text: str, label_set: LabelSet = None):

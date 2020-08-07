@@ -41,6 +41,9 @@ class Graph(object):
     def __iter__(self):
         yield from self.entity_by_id.keys()
 
+    def info(self):
+        return {"entity_count": len(self.entity_by_id)}
+
     def get_data(self):
         return self
 

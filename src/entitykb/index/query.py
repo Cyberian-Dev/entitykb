@@ -42,6 +42,7 @@ class RelationshipFilter(Filter):
     entities: Set[str]
     tags: Set[str]
     incoming: bool = True
+    self_ok: bool = False
     _others: Set[EID] = None
 
     def __repr__(self):
@@ -71,6 +72,10 @@ class RelationshipFilter(Filter):
         if self._others is None:
             self._others = set()
             self.descend(graph, self.entities)
+
+            if self.self_ok:
+                for entity in self.entities:
+                    self._others.add(graph.get_entity_id(entity))
 
         return self._others
 

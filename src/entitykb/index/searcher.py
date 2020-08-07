@@ -58,7 +58,10 @@ class WalkLayer(Layer):
                     if next_result not in self.seen:
                         self.seen.add(next_result)
                         children.add(next_result)
-                        yield from self.descend(next_result)
+                        if self.step.max_hops is None or (
+                            len(next_result.hops) < self.step.max_hops
+                        ):
+                            yield from self.descend(next_result)
 
         # yield last, handle case of parallel rel w/ multiple tags
         yield from children
@@ -155,7 +158,8 @@ class Searcher(object):
             agg = (-len(results), min(len(r.hops) for r in results), entity)
             aggregates.append(agg)
 
-        _, _, entity = sorted(aggregates)[0]
+        aggregates = sorted(aggregates)
+        _, _, entity = aggregates[0]
         return entity
 
     def closest(self, query: Query) -> Entity:

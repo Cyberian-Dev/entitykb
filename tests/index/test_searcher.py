@@ -96,6 +96,19 @@ def test_start_one_walk_passthru_is_a_goal_all(graph, terms):
     assert {apple.key} == {r.start for r in results}
 
 
+def test_walk_with_max_hops(graph, terms):
+    query = QB(food).walk("is_a", max_hops=2).all()
+    results = Searcher(graph=graph, terms=terms).search(query)
+    assert {r.end for r in results} == {
+        fruit.key,
+        apple.key,
+        dessert.key,
+        pie.key,
+        apple_sauce.key,
+    }
+    assert {food.key} == {r.start for r in results}
+
+
 def test_start_one_walk_incoming_is_a_include_start_goal_all(graph, terms):
     query = QB(apple).walk("is_a", passthru=True).all()
     results = Searcher(graph=graph, terms=terms).search(query)
@@ -213,3 +226,13 @@ def test_prefix_text_term(graph, terms):
     query = QB(term="apple pie").all()
     results = Searcher(graph=graph, terms=terms).search(query)
     assert set(results.entities) == {apple_pie}
+
+
+def test_filter_with_entity_self_ok(graph, terms):
+    query = QB(food).walk().filter(is_a=apple).all()
+    results = Searcher(graph=graph, terms=terms).search(query)
+    assert set(results.entities) == {honeycrisp, granny_smith}
+
+    query = QB(food).walk().filter(is_a=apple, self_ok=True).all()
+    results = Searcher(graph=graph, terms=terms).search(query)
+    assert set(results.entities) == {honeycrisp, granny_smith, apple}

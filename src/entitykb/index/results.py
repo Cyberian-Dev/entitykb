@@ -48,10 +48,6 @@ class Result(object):
             by_end_id=self.by_end_id,
         )
 
-    def add_hop(self, hop):
-        self.hops.append(hop)
-        self.by_end_id[hop.end_id] = hop
-
     def push(self, tag: str, end_id: EID) -> "Result":
         curr_hop = self.by_end_id.get(end_id, None)
 
