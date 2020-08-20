@@ -83,6 +83,9 @@ def test_find(
     )
     do_run("Barack and Michelle Obama", b_obama, label_set=("PRESIDENT",))
 
+    # label_set will stop is_prefix from connecting
+    do_run("Barack and Michelle Obama", label_set=("PRESIDENT",))
+
 
 def test_fuzzy_prefix_with_labels(resolver, b_obama: Entity, m_obama: Entity):
     assert resolver.is_prefix("Barak", label_set=("PRESIDENT",))
