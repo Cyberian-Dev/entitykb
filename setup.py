@@ -22,7 +22,7 @@ extras_requires = {
 
 setup(
     name="entitykb",
-    version="0.2.0",
+    version="0.2.1",
     author="Ian Maurer",
     author_email="ian@genomoncology.com",
     packages=find_packages("src/"),
