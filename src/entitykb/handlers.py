@@ -27,7 +27,9 @@ class TokenHandler(object):
         for (prefix, prefix_tokens) in self.prefixes.items():
             candidate = prefix + doc_token.token
 
-            if self.resolver.is_prefix(term=candidate):
+            if self.resolver.is_prefix(
+                term=candidate, label_set=self.label_set
+            ):
                 new_prefixes[candidate] = prefix_tokens + [doc_token]
 
             self.resolve_entity(prefix, prefix_tokens)
