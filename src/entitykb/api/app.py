@@ -1,11 +1,9 @@
-import logging
-
-from fastapi import FastAPI
+import os
+from fastapi import FastAPI, staticfiles, APIRouter
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import UJSONResponse
 
-from .instance import Instance
-from .routes import router
+from . import read, write
 
 app = FastAPI(
     title="EntityKB API",
@@ -20,24 +18,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.include_router(router)
 
-logger = logging.getLogger("api")
+# mount Admin UI
+ui_public_dir = os.path.join(os.path.dirname(__file__), "admin_ui/public")
+app.mount(
+    "/",
+    staticfiles.StaticFiles(directory=ui_public_dir, html=True),
+    name="ui_public_dir",
+)
 
-
-@app.on_event("startup")
-def startup_event():
-    kb = Instance.get()
-    logger.info(f"Knowledge Base loaded: {kb.config.root_dir}")
-
-
-@app.on_event("shutdown")
-def shutdown_event():
-    kb = Instance.get()
-
-    if kb.is_dirty:
-        logger.info("Changes found. Commit started.")
-        kb.commit()
-        logger.info("KB commit complete.")
-    else:
-        logger.info("No changes found. No KB commit.")
+# add API routes
+api_router = APIRouter()
+api_router.include_router(read.router, prefix="/r", tags=["read-only"])
+api_router.include_router(write.router, prefix="/w", tags=["write"])
+app.include_router(api_router)

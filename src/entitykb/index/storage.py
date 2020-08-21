@@ -62,7 +62,7 @@ class DefaultStorage(Storage):
                 try:
                     py_data = pickle.loads(pickle_data)
 
-                except AttributeError:
+                except (AttributeError, pickle.UnpicklingError):
                     logger.error("Failed to load index: " + self.index_path)
 
         return py_data

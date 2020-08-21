@@ -17,7 +17,7 @@ if sys.version_info[:2] == (3, 6):
     install_requires.append("dataclasses")
 
 extras_requires = {
-    "api": ["fastapi", "uvicorn"],
+    "api": ["fastapi", "uvicorn", "aiofiles"],
 }
 
 setup(

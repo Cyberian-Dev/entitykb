@@ -6,7 +6,7 @@ import click
 import tabulate
 from click.exceptions import Exit
 
-from entitykb import Config, load
+from entitykb import Config, load, utils
 from . import etl, render_doc
 
 
@@ -67,20 +67,20 @@ def reset(root_dir: str):
 def info(root_dir: str):
     """ Print entitykb stats and meta information. """
     kb = load(root_dir=root_dir)
-    data = kb.info()
-
-    flat = {}
-    for k0, v0 in data.items():
-        if isinstance(v0, dict):
-            for k1, v1 in v0.items():
-                flat[k0 + "." + k1] = v1
-        else:
-            flat[k0] = v0
-
+    flat = utils.flatten_dict(kb.info())
     output = tabulate.tabulate(
-        flat.items(), tablefmt="pretty", colalign=("left", "right"),
+        sorted(flat.items()), tablefmt="pretty", colalign=("left", "right"),
     )
     click.echo(output)
+
+
+@cli.command()
+@click.argument(
+    "api", type=click.Path(), required=False,
+)
+def api(root_dir: str):
+    """ Print entitykb stats and meta information. """
+    kb = load(root_dir=root_dir, reload=True)
 
 
 @cli.command("load")
