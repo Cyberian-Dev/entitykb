@@ -80,7 +80,6 @@ def info(root_dir: str):
 )
 def api(root_dir: str):
     """ Print entitykb stats and meta information. """
-    kb = load(root_dir=root_dir, reload=True)
 
 
 @cli.command("load")

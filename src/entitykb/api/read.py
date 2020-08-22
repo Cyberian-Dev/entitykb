@@ -1,41 +1,60 @@
+import threading
 from typing import Dict, Optional, List
 
 from fastapi import APIRouter, Depends
 
-from . import get_kb, KB, schemas, LabelSet
+from entitykb import KB, LabelSet
+from . import get_kb, schemas
 
 router = APIRouter()
 
 
-@router.post("/info", summary="Get configuration and meta data info.")
-async def info(kb: KB = Depends(get_kb)) -> Dict:
-    return kb.info()
+@router.get(
+    "/info",
+    summary="Get configuration and meta data info.",
+    response_model=dict,
+)
+async def info(kb: KB = Depends(get_kb)) -> dict:
+    return {**kb.info(), "thread_id": threading.get_ident()}
 
 
-@router.post("/find", summary="Find entities from text.")
+@router.post(
+    "/find",
+    summary="Find entities from text.",
+    response_model=List[schemas.Entity],
+)
 async def find(
     request: schemas.TextLabelsInput, kb: KB = Depends(get_kb)
-) -> List[Dict]:
+) -> List[schemas.Entity]:
     label_set = LabelSet(labels=request.labels)
     results = kb.find(request.text, label_set)
-    return [entity.dict() for entity in results]
+    return [schemas.Entity.from_orm(entity) for entity in results]
 
 
-@router.post("/find_one", summary="Find entities from text.")
+@router.post(
+    "/find_one",
+    summary="Return first found entity in text.",
+    response_model=schemas.Entity,
+)
 async def find_one(
     request: schemas.TextLabelsInput, kb: KB = Depends(get_kb)
 ) -> Optional[List[Dict]]:
     label_set = LabelSet(labels=request.labels)
     entity = kb.find_one(request.text, label_set)
-    return entity.dict() if entity else None
+    return schemas.Entity.from_orm(entity) if entity else None
 
 
-@router.post("/process", summary="Parse text and return doc object.")
+@router.post(
+    "/process",
+    summary="Parse text and return doc object.",
+    response_model=schemas.Doc,
+)
 async def process(
     request: schemas.TextLabelsInput, kb: KB = Depends(get_kb)
-) -> Dict:
+) -> schemas.Doc:
     label_set = LabelSet(labels=request.labels)
-    return kb.process(request.text, label_set=label_set).dict()
+    doc = kb.process(request.text, label_set=label_set)
+    return schemas.Doc.from_orm(doc)
 
 
 @router.post("/suggest", summary="Find entities from text.")

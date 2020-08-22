@@ -12,13 +12,14 @@ from entitykb import (
 )
 from entitykb.utils import instantiate_class_from_name
 from . import (
+    Graph,
     Query,
     QB,
     Storage,
     DefaultStorage,
     Terms,
     DefaultTerms,
-    Graph,
+    DefaultGraph,
     Searcher,
 )
 
@@ -107,7 +108,7 @@ class DefaultIndex(Index):
             self.terms = DefaultTerms(normalizer=self.normalizer)
 
         if self.graph is None:
-            self.graph = Graph()
+            self.graph = DefaultGraph()
 
         if self.searcher is None:
             self.searcher = Searcher(graph=self.graph, terms=self.terms)
@@ -148,8 +149,8 @@ class DefaultIndex(Index):
     def add_relationship(self, relationship: Relationship):
         self.graph.add_relationship(relationship)
 
-    def get_entity(self, val: EntityValue) -> EntityValue:
-        return self.graph.get(val)
+    def get_entity(self, val: EntityValue) -> Entity:
+        return self.graph.get_entity(val)
 
     def is_prefix(self, term: str, labels: Set[str] = None) -> bool:
         query = QB(prefix=term).filter(label=labels).first()

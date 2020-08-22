@@ -44,14 +44,14 @@ def graph(index):
     """ Must access graph to test func args, see the "food" items added. """
 
     graph = index.graph
-    assert "<Graph: (0 entities)>" == repr(graph)
+    assert "<Graph: 0 nodes>" == repr(graph)
 
     for entity in entities:
         index.add_entity(entity)
     for relationship in relationships:
         index.add_relationship(relationship)
 
-    assert "<Graph: (9 entities)>" == repr(graph)
+    assert "<Graph: 11 nodes>" == repr(graph)
     return graph
 
 
@@ -65,7 +65,7 @@ def terms(index):
 def test_start_all_goal_all(graph, terms):
     results = Searcher(graph=graph, terms=terms).search(QB().all())
     assert isinstance(results, SearchResults)
-    assert 9 == len(results)
+    assert 11 == len(results)
     assert 0 == len(results[0])
     assert results[0].start_id == results[0].end_id
 

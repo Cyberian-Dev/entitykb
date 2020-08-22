@@ -12,10 +12,10 @@ class Hop(object):
     tags: Set[str]
 
     def start(self):
-        return self.graph.get_entity_key(self.start_id)
+        return self.graph.get_key(self.start_id)
 
     def end(self):
-        return self.graph.get_entity_key(self.end_id)
+        return self.graph.get_key(self.end_id)
 
     def dict(self):
         return dict(start=self.start, end=self.end, tags=sorted(self.tags))
@@ -75,11 +75,15 @@ class Result(object):
 
     @property
     def start(self):
-        return self.graph.get_entity_key(self.start_id)
+        return self.graph.get_key(self.start_id)
 
     @property
     def end(self):
-        return self.graph.get_entity_key(self.end_id)
+        return self.graph.get_key(self.end_id)
+
+    @property
+    def node(self):
+        return self.graph.get_node(self.end_id)
 
     @property
     def entity(self):
@@ -113,5 +117,9 @@ class SearchResults(object):
         return dict(query=self.query.dict(), results=results)
 
     @property
+    def nodes(self):
+        return tuple(result.node for result in self.results)
+
+    @property
     def entities(self):
-        return tuple(result.entity for result in self.results)
+        return tuple(result.entity for result in self.results if result.entity)

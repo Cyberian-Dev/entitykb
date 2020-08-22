@@ -36,7 +36,7 @@ def test_create_query():
                 ]
             },
         ],
-        "goal": {},
+        "goal": {"limit": None, "offset": 0},
     }
 
     # test round-tripping

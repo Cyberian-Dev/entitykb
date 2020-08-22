@@ -1,6 +1,6 @@
 from .const import EID, HAS_LABEL, AND, OR
 from .storage import Storage, DefaultStorage
-from .graph import Graph
+from .graph import Graph, DefaultGraph
 from .terms import Terms, DefaultTerms
 from .query import (
     Filter,
@@ -20,6 +20,7 @@ from .index import Index, DefaultIndex
 
 __all__ = (
     "AND",
+    "DefaultGraph",
     "DefaultIndex",
     "DefaultStorage",
     "DefaultTerms",

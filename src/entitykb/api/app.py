@@ -19,6 +19,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+# add API routes
+api_router = APIRouter()
+api_router.include_router(read.router, prefix="/r", tags=["read-only"])
+api_router.include_router(write.router, prefix="/w", tags=["write"])
+app.include_router(api_router)
+
 # mount Admin UI
 ui_public_dir = os.path.join(os.path.dirname(__file__), "admin_ui/public")
 app.mount(
@@ -26,9 +33,3 @@ app.mount(
     staticfiles.StaticFiles(directory=ui_public_dir, html=True),
     name="ui_public_dir",
 )
-
-# add API routes
-api_router = APIRouter()
-api_router.include_router(read.router, prefix="/r", tags=["read-only"])
-api_router.include_router(write.router, prefix="/w", tags=["write"])
-app.include_router(api_router)

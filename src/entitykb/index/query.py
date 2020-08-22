@@ -75,13 +75,13 @@ class RelationshipFilter(Filter):
 
             if self.self_ok:
                 for entity in self.entities:
-                    self._others.add(graph.get_entity_id(entity))
+                    self._others.add(graph.get_node_id(entity))
 
         return self._others
 
     def evaluate(self, graph: Graph, entity_id: EID):
         others = self.find_others(graph)
-        entity_id = graph.get_entity_id(entity_id)
+        entity_id = graph.get_node_id(entity_id)
         result = entity_id in others
         return result
 
@@ -187,12 +187,10 @@ class WalkStep(Step):
 @dataclass
 class QueryGoal(object):
     limit: int = None
+    offset: int = 0
 
     def dict(self):
-        if self.limit is not None:
-            return dict(limit=self.limit)
-        else:
-            return {}
+        return dict(limit=self.limit, offset=self.offset)
 
 
 @dataclass

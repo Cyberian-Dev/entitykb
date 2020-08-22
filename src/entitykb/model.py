@@ -65,6 +65,10 @@ class Label(str, metaclass=LabelType):
         obj = super(Label, cls).__new__(cls, string)
         return obj
 
+    @property
+    def key(self):
+        return self
+
     @classmethod
     def convert(cls, value):
         if isinstance(value, Label):
@@ -542,31 +546,51 @@ class RelationshipBuilder(object):
         return self
 
     def __call__(self, b: Entity):
-        self.rel.entity_b = b
+        self.rel.node_b = b
         return self.rel
+
+
+class Resource(BaseModel):
+
+    __slots__ = ("key", "title", "data")
+
+    def __init__(self, key: str, title: str, data: dict):
+        self.key = key
+        self.title = title
+        self.data = data
+
+    def __repr__(self):
+        return f"<Resource: {self.key}>"
+
+    def __hash__(self):
+        return hash(("Resource", self.key))
+
+
+Node = Union[Entity, Resource, Label]
 
 
 class Relationship(BaseModel):
 
-    __slots__ = ("entity_a", "tag", "entity_b")
+    __slots__ = ("node_a", "tag", "node_b")
 
-    def __init__(self, a: Entity, tag: Tag, b: Entity):
-        self.entity_a = a
+    def __init__(self, a: Node, tag: Tag, b: Node):
+        self.node_a = a
         self.tag = Tag.convert(tag)
-        self.entity_b = b
+        self.node_b = b
+        self.key = f"({self.node_a}):{self.tag}:({self.node_b})"
 
     def __repr__(self):
-        return f"({self.entity_a})-{self.tag}->({self.entity_b})"
+        return self.key
 
     def __hash__(self):
-        return hash((self.entity_a, self.entity_b, self.tag))
+        return hash(("Relationship", self.key))
 
-    def other(self, entity: Entity):
-        if entity == self.entity_a:
-            return self.entity_b
+    def other(self, node: Node):
+        if node == self.node_a:
+            return self.node_b
 
-        if entity == self.entity_b:
-            return self.entity_a
+        if node == self.node_b:
+            return self.node_a
 
 
 EntityValue = Union[Entity, dict, DocEntity, str, float]

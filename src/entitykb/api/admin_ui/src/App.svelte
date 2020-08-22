@@ -1,9 +1,9 @@
 <script>
-	import Header from "./Header.svelte";
+    import Header from "./Header.svelte";
 </script>
 
 <main>
-	<Header/>
+    <Header/>
 </main>
 
 <style>

@@ -82,5 +82,10 @@ class QueryBuilder(object):
         self.query.goal = QueryGoal(limit=1)
         return self.query
 
+    def page(self, number: int = 0, size: int = 20):
+        offset = number * size
+        self.query.goal = QueryGoal(limit=size, offset=offset)
+        return self.query
+
 
 QB = QueryBuilder

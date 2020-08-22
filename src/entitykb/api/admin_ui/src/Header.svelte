@@ -8,7 +8,7 @@
         <img src="images/logo.png" height="50px" alt="header logo">
     </span>
     <div class="right menu">
-        <a href="docs" title="API Documentation (Swagger UI)">API</a>
+        <a href="docs" title="API Documentation (Swagger UI)">[API]</a>
     </div>
 </div>
 

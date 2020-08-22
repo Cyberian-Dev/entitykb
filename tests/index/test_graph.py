@@ -46,21 +46,21 @@ def graph(index):
     """ Must access graph to test func args, see the "food" items addded. """
 
     graph = index.graph
-    assert "<Graph: (0 entities)>" == repr(graph)
+    assert "<Graph: 0 nodes>" == repr(graph)
 
     for entity in entities:
         index.add_entity(entity)
     for relationship in relationships:
         index.add_relationship(relationship)
 
-    assert "<Graph: (9 entities)>" == repr(graph)
+    assert "<Graph: 11 nodes>" == repr(graph)
     return graph
 
 
 def test_pickle_load(graph):
     data = pickle.dumps(graph)
     graph = pickle.loads(data)
-    assert "<Graph: (9 entities)>" == repr(graph)
+    assert "<Graph: 11 nodes>" == repr(graph)
 
 
 def convert(graph, others):
@@ -91,7 +91,7 @@ def test_is_a_apple_either_direction(graph):
         tags=Tag.IS_A, incoming=None, entities=apple
     )
     others = convert(graph, others)
-    assert {fruit, granny_smith, honeycrisp} == others
+    assert {fruit, granny_smith, honeycrisp} == others, f"Wrong: {others}"
 
 
 def test_is_a_incoming_dict(graph):

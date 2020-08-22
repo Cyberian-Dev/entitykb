@@ -7,10 +7,9 @@ def test_get_entity(index, apple):
 
 def test_add_again(index, apple):
     index.add_entity(apple)
-    entity_id = index.get_entity(apple)
+    entity_id = index.graph.get_node_id(apple)
     assert entity_id == index.add_entity(apple)
-    assert 1 == len(index)
-    assert 1 == len(index.graph)
+    assert 2 == len(index.graph)
     assert 3 == len(index.terms)
 
 
