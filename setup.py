@@ -3,21 +3,21 @@ import sys
 from setuptools import setup, find_packages
 
 install_requires = [
-    "click",
-    "lark-parser==0.8.9",
     "pyahocorasick",
-    "python-dateutil",
-    "rapidfuzz",
-    "tabulate",
     "translitcodec",
     "ujson",
+    "lark-parser==0.8.9",
+    "python-dateutil",
+    "rapidfuzz",
 ]
 
 if sys.version_info[:2] == (3, 6):
     install_requires.append("dataclasses")
 
 extras_requires = {
-    "api": ["fastapi", "uvicorn", "aiofiles"],
+    "cli": ["tabulate", "typer"],
+    "rpc": ["aiorpc"],
+    "http": ["fastapi", "aiofiles", "uvicorn"],
 }
 
 setup(

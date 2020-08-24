@@ -1,7 +1,7 @@
 import time
 from typing import List, Optional
 
-from . import Config, Pipeline, Entity, LabelSet
+from . import Config, Pipeline, Entity, LabelSet, Doc
 
 
 class KB(object):
@@ -70,7 +70,14 @@ class KB(object):
             "graph": self.graph.info(),
         }
 
-    def process(self, text: str, label_set: LabelSet = None):
+    def process(self, text: str, label_set: LabelSet = None) -> Doc:
+        """
+        Process text string and generate Doc with extracted entities.
+
+        @param text: Text string to be processed
+        @param label_set: Optional labels for filtering entities
+        @return: Doc object
+        """
         return self.pipeline(text=text, label_set=label_set)
 
     def suggest(

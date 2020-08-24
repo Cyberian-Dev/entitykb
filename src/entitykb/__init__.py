@@ -58,6 +58,8 @@ from .kb import KB, load
 from . import date
 from . import fuzzy
 
+# interface
+from . import interface
 
 __all__ = (
     "BaseModel",
@@ -106,6 +108,8 @@ __all__ = (
     "TokenizerType",
     "date",
     "fuzzy",
+    "interface",
     "load",
+    "get_logger",
     "logger",
 )

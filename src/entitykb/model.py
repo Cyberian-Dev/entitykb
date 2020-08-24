@@ -7,6 +7,9 @@ class BaseModel(object):
     def __eq__(self, other):
         return hash(self) == hash(other)
 
+    def dict(self):
+        raise NotImplementedError
+
 
 class Token(str):
     @property
@@ -59,7 +62,7 @@ class LabelType(type):
         return Label(label_name)
 
 
-class Label(str, metaclass=LabelType):
+class Label(str, BaseModel, metaclass=LabelType):
     def __new__(cls, string):
         string = string.upper()
         obj = super(Label, cls).__new__(cls, string)
@@ -79,6 +82,9 @@ class Label(str, metaclass=LabelType):
             return None
         else:
             return Label(str(value))
+
+    def dict(self):
+        return self
 
 
 class Entity(BaseModel):
@@ -222,12 +228,16 @@ class HasTokens(BaseModel):
 
     __slots__ = ("text", "tokens")
 
-    def __init__(self, *, text: str, tokens: Iterable[DocToken] = None):
+    def __init__(
+        self, *, text: str, tokens: Iterable[DocToken] = None, doc=None
+    ):
         self.text = text
 
         if tokens:
             tokens = [
-                DocToken(**token) if isinstance(token, dict) else token
+                DocToken(doc=doc, **token)
+                if isinstance(token, dict)
+                else token
                 for token in tokens
             ]
 
@@ -290,7 +300,7 @@ class DocEntity(HasTokens):
         correction: Correction = None,
         tokens: Iterable[DocToken] = None,
     ):
-        super().__init__(text=text, tokens=tokens)
+        super().__init__(text=text, tokens=tokens, doc=doc)
 
         self.doc = doc
         self.entity = Entity.convert(entity)
@@ -377,7 +387,16 @@ class Doc(HasTokens):
         entities: Tuple[DocEntity] = None,
         tokens: Tuple[DocToken] = None,
     ):
-        super().__init__(text=text, tokens=tokens)
+        super().__init__(text=text, tokens=tokens, doc=self)
+
+        if entities:
+            entities = [
+                DocEntity(doc=self, **entity)
+                if isinstance(entity, dict)
+                else entity
+                for entity in entities
+            ]
+
         self.entities = tupilify(entities)
 
     def __hash__(self):
@@ -424,6 +443,13 @@ class FindResult(BaseModel):
 
     def __iter__(self):
         return iter(self.entities)
+
+    def dict(self):
+        return dict(
+            term=self.term,
+            entities=[e.dict() for e in self.entities],
+            distance=self.distance,
+        )
 
 
 class LabelSet(object):
@@ -565,8 +591,22 @@ class Resource(BaseModel):
     def __hash__(self):
         return hash(("Resource", self.key))
 
+    def dict(self):
+        return dict(key=self.key, title=self.title, data=self.data)
+
 
 Node = Union[Entity, Resource, Label]
+
+
+def convert_node(data):
+    if isinstance(data, (Entity, Resource, Label)):
+        return data
+
+    if isinstance(data, str):
+        return Label.convert(data)
+
+    if {"key", "title", "data"}.issubset(data.keys()):
+        return Resource(**data.keys())
 
 
 class Relationship(BaseModel):
@@ -591,6 +631,11 @@ class Relationship(BaseModel):
 
         if node == self.node_b:
             return self.node_a
+
+    def dict(self):
+        return dict(
+            a=self.node_a.dict(), tag=str(self.tag), b=self.node_b.dict()
+        )
 
 
 EntityValue = Union[Entity, dict, DocEntity, str, float]
