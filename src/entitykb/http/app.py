@@ -1,14 +1,12 @@
 import os
 from dataclasses import asdict
 
-
 import uvicorn
-
 from fastapi import FastAPI, APIRouter, staticfiles, Body
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import UJSONResponse
 
-from entitykb import rpc, logger, LOGGING_CONFIG
+from entitykb import rpc, logger
 from . import schema
 
 app = FastAPI(
