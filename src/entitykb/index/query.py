@@ -172,7 +172,7 @@ class WalkStep(Step):
     passthru: bool = False
 
     def __post_init__(self):
-        tags = set(Tag.convert(tag) for tag in self.tags)
+        tags = set(Tag.create(tag) for tag in self.tags)
         self.tags = tags or {None}
 
     def dict(self):

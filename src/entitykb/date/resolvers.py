@@ -1,4 +1,5 @@
-from entitykb import Resolver, FindResult, LabelSet
+from entitykb.model import FindResult, LabelSet
+from entitykb.pipeline import Resolver
 from . import grammar, Date
 
 

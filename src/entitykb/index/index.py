@@ -1,16 +1,9 @@
 from dataclasses import dataclass
-from typing import Optional, Type, Union, Set, List
+from typing import Optional, Type, Union, Set, List, Callable
 
-from entitykb import (
-    ER,
-    Tokenizer,
-    Normalizer,
-    Entity,
-    EntityValue,
-    Relationship,
-    FindResult,
-)
+from entitykb.model import ER, Entity, EntityValue, Relationship, FindResult
 from entitykb.utils import instantiate_class_from_name
+
 from . import (
     Graph,
     Query,
@@ -26,8 +19,8 @@ from . import (
 
 @dataclass
 class Index(object):
-    tokenizer: Tokenizer
-    normalizer: Normalizer
+    tokenizer: Callable
+    normalizer: Callable
     root_dir: str = None
     storage: Storage = None
     terms: Terms = None
@@ -153,7 +146,11 @@ class DefaultIndex(Index):
         return self.graph.get_entity(val)
 
     def is_prefix(self, term: str, labels: Set[str] = None) -> bool:
-        query = QB(prefix=term).filter(label=labels).first()
+        query = QB(prefix=term)
+        if labels:
+            query = query.filter(label=labels)
+        query = query.first()
+
         entity_it = self.searcher.search(query)
 
         for _ in entity_it:
@@ -164,7 +161,11 @@ class DefaultIndex(Index):
         self, term: str = None, labels: Set[str] = None, limit: int = None,
     ) -> FindResult:
 
-        query = QB(term=term).filter(label=labels).limit(limit)
+        query = QB(term=term)
+        if labels:
+            query = query.filter(label=labels)
+        query = query.limit(limit)
+
         results = self.searcher.search(query)
 
         return FindResult(term=term, entities=results.entities)

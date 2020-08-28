@@ -4,7 +4,7 @@ from typing import Optional, Union, Type
 import translitcodec
 import codecs
 
-from .utils import instantiate_class_from_name
+from entitykb.utils import instantiate_class_from_name
 
 
 class Normalizer(object):

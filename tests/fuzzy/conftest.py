@@ -1,13 +1,13 @@
 import pytest
 
-from entitykb import (
+from entitykb.fuzzy import FuzzyIndex, FuzzyResolver
+from entitykb.model import Entity
+from entitykb.pipeline import (
     DefaultTokenizer,
     DefaultNormalizer,
-    Entity,
     Pipeline,
     DefaultExtractor,
 )
-from entitykb.fuzzy import FuzzyIndex, FuzzyResolver
 
 
 @pytest.fixture()

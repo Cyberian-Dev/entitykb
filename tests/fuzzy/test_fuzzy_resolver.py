@@ -1,6 +1,7 @@
 import ujson
 
-from entitykb import Doc, Entity, fuzzy, Tokenizer, Normalizer, LabelSet
+from entitykb.model import Doc, Entity, LabelSet
+from entitykb.pipeline import Tokenizer, Normalizer
 from entitykb.fuzzy import FuzzyIndex
 
 
@@ -135,7 +136,7 @@ def test_fuzzy(apple):
         normalizer=Normalizer.create(),
         max_token_distance=1,
     )
-    assert isinstance(index, fuzzy.FuzzyIndex)
+    assert isinstance(index, FuzzyIndex)
 
     index.add_entity(apple)
     index.add_entity(Entity(name="banana", label="FRUIT"))

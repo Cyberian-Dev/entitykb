@@ -1,14 +1,14 @@
 import pytest
 
-from entitykb import (
+from entitykb.date import DateResolver, Date
+from entitykb.index import DefaultIndex
+from entitykb.model import Entity
+from entitykb.pipeline import (
     DefaultResolver,
     DefaultTokenizer,
     DefaultNormalizer,
-    Entity,
     Extractor,
-    DefaultIndex,
 )
-from entitykb.date import DateResolver, Date
 
 the_the = Entity(name="The The", label="BAND")
 

@@ -1,4 +1,4 @@
-from entitykb.normalizers import Normalizer, DefaultNormalizer
+from entitykb.pipeline import Normalizer, DefaultNormalizer
 
 
 def test_construct():
@@ -8,7 +8,7 @@ def test_construct():
     normalizer = Normalizer.create(DefaultNormalizer)
     assert isinstance(normalizer, DefaultNormalizer)
 
-    class_name = "entitykb.normalizers.DefaultNormalizer"
+    class_name = "entitykb.pipeline.DefaultNormalizer"
     normalizer = DefaultNormalizer.create(class_name)
     assert isinstance(normalizer, DefaultNormalizer)
 

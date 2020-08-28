@@ -15,7 +15,8 @@ from typing import List
 
 from rapidfuzz import fuzz
 
-from entitykb import DefaultResolver, DocEntity, Correction
+from entitykb.model import DocEntity, Correction
+from entitykb.pipeline import DefaultResolver
 
 
 class FuzzyResolver(DefaultResolver):

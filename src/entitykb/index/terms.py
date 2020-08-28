@@ -1,9 +1,8 @@
 from dataclasses import dataclass
-from typing import Set, Iterable
+from typing import Set, Iterable, Callable
 
 from ahocorasick import Automaton as Trie
 
-from entitykb import Normalizer
 from . import EID
 
 
@@ -32,7 +31,7 @@ class TermEntities(object):
 
 @dataclass
 class Terms(object):
-    normalizer: Normalizer
+    normalizer: Callable
     max_backups: int = 5
 
     def __repr__(self):
@@ -59,7 +58,7 @@ class Terms(object):
     def add_terms(self, entity_id: EID, label: str, terms: Iterable[str]):
         raise NotImplementedError
 
-    def values(self, term: str) -> Iterable[EID]:
+    def values(self, prefix: str) -> Iterable[EID]:
         raise NotImplementedError
 
     def get(self, term: str) -> Iterable[EID]:
@@ -110,9 +109,9 @@ class DefaultTerms(Terms):
 
         return normalized_terms
 
-    def values(self, term: str) -> Iterable[EID]:
-        term = self.normalizer(term)
-        term_entities = self.trie.values(term)
+    def values(self, prefix: str) -> Iterable[EID]:
+        prefix = self.normalizer(prefix)
+        term_entities = self.trie.values(prefix)
         seen = set()
         for term_entity in term_entities:
             for entity_id in term_entity.iter_all():

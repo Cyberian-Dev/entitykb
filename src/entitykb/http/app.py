@@ -6,7 +6,8 @@ from fastapi import FastAPI, APIRouter, staticfiles, Body
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import UJSONResponse
 
-from . import get_rpc, schema
+from entitykb.rpc import RPCConnection
+from . import schema
 
 app = FastAPI(
     title="EntityKB HTTP API",
@@ -24,7 +25,7 @@ app.add_middleware(
 
 
 router = APIRouter()
-rpc = get_rpc()
+rpc = RPCConnection()
 
 
 @router.post("/parse", response_model=schema.Doc)
@@ -42,9 +43,10 @@ async def save_entity(entity: schema.Entity = Body(...)):
 
 
 @router.post("/commit")
-async def commit():
+async def commit() -> int:
     async with rpc as client:
-        await client.call("commit")
+        commit_count: int = await client.call("commit")
+        return commit_count
 
 
 app.include_router(router)

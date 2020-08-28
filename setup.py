@@ -29,7 +29,7 @@ setup(
     package_dir={"": "src"},
     package_data={"": ["*.lark"]},
     include_package_data=True,
-    entry_points={"console_scripts": ["entitykb=entitykb.cli:main"]},
+    entry_points={"console_scripts": ["entitykb=entitykb.cli:app"]},
     install_requires=install_requires,
     extras_require=extras_requires,
     description="Rules-based Named Entity Recognition and Linking",

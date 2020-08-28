@@ -87,17 +87,13 @@ def test_is_a_apple_outcoming(graph):
 
 
 def test_is_a_apple_either_direction(graph):
-    others = graph.iterate_all_relationships(
-        tags=Tag.IS_A, incoming=None, entities=apple
-    )
+    others = graph.iterate_all_relationships(tags=Tag.IS_A, entities=apple)
     others = convert(graph, others)
     assert {fruit, granny_smith, honeycrisp} == others, f"Wrong: {others}"
 
 
 def test_is_a_incoming_dict(graph):
-    others = graph.iterate_all_relationships(
-        tags=Tag.IS_A, incoming=None, entities=None
-    )
+    others = graph.iterate_all_relationships(tags=Tag.IS_A)
     others = convert(graph, others)
     assert 9 == len(others)
 

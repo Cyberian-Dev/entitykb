@@ -1,20 +1,23 @@
-from entitykb import (
+from entitykb.model import (
     Doc,
     DocToken,
     Token,
+    DocEntity,
+    Entity,
+)
+from entitykb.pipeline import (
     KeepLongestOnly,
     KeepLongestByKey,
     KeepLongestByLabel,
-    DocEntity,
     ExactOnlyFilterer,
     Filterer,
-    Entity,
 )
 
 
 def test_construct():
     assert isinstance(
-        Filterer.create("entitykb.ExactOnlyFilterer"), ExactOnlyFilterer
+        Filterer.create("entitykb.pipeline.ExactOnlyFilterer"),
+        ExactOnlyFilterer,
     )
     assert isinstance(KeepLongestByKey.create(), KeepLongestByKey)
 

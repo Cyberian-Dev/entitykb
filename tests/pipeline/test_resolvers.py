@@ -1,11 +1,11 @@
-from entitykb import (
+from entitykb.date import DateResolver, Date
+from entitykb.index import DefaultIndex
+from entitykb.pipeline import (
     DefaultResolver,
     Resolver,
     DefaultNormalizer,
     DefaultTokenizer,
-    DefaultIndex,
 )
-from entitykb.date import DateResolver, Date
 
 
 def test_resolver_construct():

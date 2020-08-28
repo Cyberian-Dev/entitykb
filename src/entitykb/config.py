@@ -1,5 +1,6 @@
 import os
-from dataclasses import dataclass, field, fields
+from pathlib import Path
+from dataclasses import dataclass, fields
 from typing import List
 
 import ujson
@@ -10,15 +11,12 @@ import entitykb
 @dataclass
 class Config:
     file_path: str = None
-    extractor: str = "entitykb.DefaultExtractor"
-    filterers: List[str] = field(default_factory=list)
-    index: str = "entitykb.DefaultIndex"
-    normalizer: str = "entitykb.DefaultNormalizer"
+    extractor: str = None
+    filterers: List[str] = None
+    index: str = None
+    normalizer: str = None
     resolvers: List[str] = None
-    tokenizer: str = "entitykb.DefaultTokenizer"
-
-    def __post_init__(self):
-        self.resolvers = self.resolvers or ["entitykb.DefaultResolver"]
+    tokenizer: str = None
 
     def __str__(self):
         return f"<Config: {self.file_path}>"
@@ -52,7 +50,7 @@ class Config:
         return config
 
     def dict(self) -> dict:
-        return {
+        kw = {
             "extractor": self.extractor,
             "filterers": self.filterers,
             "index": self.index,
@@ -60,6 +58,8 @@ class Config:
             "resolvers": self.resolvers,
             "tokenizer": self.tokenizer,
         }
+
+        return dict((k, v) for k, v in kw.items() if v is not None)
 
     @classmethod
     def get_file_path(cls, root_dir=None, file_name="config.json"):
@@ -69,16 +69,26 @@ class Config:
 
     @classmethod
     def get_root_dir(cls, root_dir=None):
+        if isinstance(root_dir, Path):
+            root_dir = str(root_dir.resolve())
+
         root_dir = (
             root_dir
             or os.environ.get("ENTITYKB_ROOT")
             or os.path.expanduser("~/.entitykb")
         )
+
         return root_dir
 
     def info(self) -> dict:
         info = self.dict()
+
         info["path"] = self.file_path
-        info["resolvers"] = "\n".join(self.resolvers)
-        info["filterers"] = "\n".join(self.filterers)
+
+        if self.resolvers:
+            info["resolvers"] = "\n".join(self.resolvers)
+
+        if self.filterers:
+            info["filterers"] = "\n".join(self.filterers)
+
         return info

@@ -1,10 +1,7 @@
 import pytest
 
-from entitykb import (
-    DefaultNormalizer,
-    DefaultTokenizer,
-)
 from entitykb.index import DefaultIndex
+from entitykb.pipeline import DefaultNormalizer, DefaultTokenizer
 
 
 @pytest.fixture

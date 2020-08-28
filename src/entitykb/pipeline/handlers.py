@@ -1,6 +1,6 @@
 from typing import List, Dict
 
-from . import Doc, DocToken, DocEntity, Token, LabelSet
+from entitykb.model import Doc, DocToken, DocEntity, Token, LabelSet
 
 
 class TokenHandler(object):
@@ -15,7 +15,7 @@ class TokenHandler(object):
     def get_doc_entities(self) -> List[DocEntity]:
         # process any incomplete prefixes
         for (prefix, doc_tokens) in self.prefixes.items():
-            self.resolve_entity(prefix, doc_tokens)
+            self._resolve_entity(prefix, doc_tokens)
         self.prefixes = {}
         self.doc_entities = self.resolver.merge_doc_entities(self.doc_entities)
         return self.doc_entities
@@ -32,7 +32,7 @@ class TokenHandler(object):
             ):
                 new_prefixes[candidate] = prefix_tokens + [doc_token]
 
-            self.resolve_entity(prefix, prefix_tokens)
+            self._resolve_entity(prefix, prefix_tokens)
 
         # do resolve and is_prefix for just this doc_token
         if self.resolver.is_prefix(
@@ -42,7 +42,9 @@ class TokenHandler(object):
 
         self.prefixes = new_prefixes
 
-    def resolve_entity(self, prefix: Token, doc_tokens: List[DocToken]):
+    # private methods
+
+    def _resolve_entity(self, prefix: Token, doc_tokens: List[DocToken]):
         doc_entities = []
 
         while not doc_entities and prefix:

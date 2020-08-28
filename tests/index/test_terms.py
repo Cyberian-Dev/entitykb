@@ -1,5 +1,5 @@
-from entitykb.normalizers import DefaultNormalizer
-from entitykb.index.terms import DefaultTerms
+from entitykb.index import DefaultTerms
+from entitykb.pipeline import DefaultNormalizer
 
 
 def test_add_get_terms():

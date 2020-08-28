@@ -1,5 +1,5 @@
 from entitykb.model import Token
-from entitykb.tokenizers import Tokenizer, DefaultTokenizer
+from entitykb.pipeline import Tokenizer, DefaultTokenizer
 
 
 def test_construct():
@@ -9,7 +9,7 @@ def test_construct():
     tokenizer = Tokenizer.create(DefaultTokenizer)
     assert isinstance(tokenizer, DefaultTokenizer)
 
-    class_name = "entitykb.tokenizers.DefaultTokenizer"
+    class_name = "entitykb.pipeline.DefaultTokenizer"
     tokenizer = Tokenizer.create(class_name)
     assert isinstance(tokenizer, DefaultTokenizer)
 

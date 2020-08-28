@@ -11,6 +11,29 @@ class BaseModel(object):
         raise NotImplementedError
 
 
+class Node(object):
+    """ Base Mixin for Entity, Resource or Label. """
+
+    def dict(self):
+        raise NotImplementedError
+
+    @classmethod
+    def create(cls, value=None, **kwargs):
+        value = value or kwargs
+
+        if isinstance(value, (Entity, Resource, Label)):
+            return value
+
+        if isinstance(value, str):
+            return Label.create(value)
+
+        if isinstance(value, dict):
+            if {"key", "title"}.issubset(value.keys()):
+                return Resource.create(value)
+            if {"name"}.issubset(value.keys()):
+                return Entity.create(value)
+
+
 class Token(str):
     @property
     def ws_after(self) -> bool:
@@ -40,6 +63,9 @@ class Token(str):
 
 
 class Correction(BaseModel):
+
+    __slots__ = ["distance", "ratio"]
+
     def __init__(self, *, distance: int, ratio: int):
         self.distance = distance
         self.ratio = ratio
@@ -51,7 +77,7 @@ class Correction(BaseModel):
         return dict(distance=self.distance, ratio=self.ratio,)
 
     @classmethod
-    def convert(cls, value: Union[dict, "Correction"]):
+    def create(cls, value: Union[dict, "Correction"]):
         if isinstance(value, dict):
             value = cls(**value)
         return value
@@ -62,7 +88,7 @@ class LabelType(type):
         return Label(label_name)
 
 
-class Label(str, BaseModel, metaclass=LabelType):
+class Label(str, BaseModel, Node, metaclass=LabelType):
     def __new__(cls, string):
         string = string.upper()
         obj = super(Label, cls).__new__(cls, string)
@@ -73,7 +99,7 @@ class Label(str, BaseModel, metaclass=LabelType):
         return self
 
     @classmethod
-    def convert(cls, value):
+    def create(cls, value=None, **_):
         if isinstance(value, Label):
             return value
         elif isinstance(value, str):
@@ -87,7 +113,7 @@ class Label(str, BaseModel, metaclass=LabelType):
         return self
 
 
-class Entity(BaseModel):
+class Entity(BaseModel, Node):
 
     __slots__ = ("name", "key", "label", "synonyms", "meta")
 
@@ -101,7 +127,7 @@ class Entity(BaseModel):
         meta: dict = None,
     ):
         self.name = name
-        self.label = Label.convert(label or self.__class__.__name__.upper())
+        self.label = Label.create(label or self.__class__.__name__.upper())
         self.key = key or f"{self.name}|{self.label}"
         self.synonyms = tupilify(synonyms)
         self.meta = meta
@@ -135,11 +161,14 @@ class Entity(BaseModel):
         )
 
     @classmethod
-    def convert(cls, value: "EntityValue"):
+    def create(cls, value=None, **kwargs):
+        value = value or kwargs
+
         if isinstance(value, dict):
             value = cls.from_dict(value)
         elif isinstance(value, Entity) and not isinstance(value, cls):
             value = cls(**value.dict())
+
         return value
 
     @classmethod
@@ -287,6 +316,7 @@ class DocEntity(HasTokens):
         "doc",
         "entity",
         "entity_key",
+        "correction",
         "_sort_order",
     )
 
@@ -303,9 +333,9 @@ class DocEntity(HasTokens):
         super().__init__(text=text, tokens=tokens, doc=doc)
 
         self.doc = doc
-        self.entity = Entity.convert(entity)
+        self.entity = Entity.create(entity)
         self.entity_key = entity_key or self.entity.key
-        self.correction = Correction.convert(correction)
+        self.correction = Correction.create(correction)
         self._sort_order = None
 
     def __str__(self):
@@ -552,7 +582,7 @@ class Tag(str, metaclass=TagType):
         return obj
 
     @classmethod
-    def convert(cls, value):
+    def create(cls, value):
         if isinstance(value, Tag):
             return value
         elif isinstance(value, str):
@@ -568,7 +598,7 @@ class RelationshipBuilder(object):
         self.rel = Relationship(a, None, None)
 
     def __getattr__(self, tag_name):
-        self.rel.tag = Tag.convert(tag_name)
+        self.rel.tag = Tag.create(tag_name)
         return self
 
     def __call__(self, b: Entity):
@@ -576,11 +606,11 @@ class RelationshipBuilder(object):
         return self.rel
 
 
-class Resource(BaseModel):
+class Resource(BaseModel, Node):
 
     __slots__ = ("key", "title", "data")
 
-    def __init__(self, key: str, title: str, data: dict):
+    def __init__(self, key: str, title: str, data: dict = None):
         self.key = key
         self.title = title
         self.data = data
@@ -594,19 +624,14 @@ class Resource(BaseModel):
     def dict(self):
         return dict(key=self.key, title=self.title, data=self.data)
 
+    @classmethod
+    def create(cls, value=None, **kwargs):
+        value = value or kwargs
 
-Node = Union[Entity, Resource, Label]
+        if isinstance(value, dict):
+            value = cls(**value)
 
-
-def convert_node(data):
-    if isinstance(data, (Entity, Resource, Label)):
-        return data
-
-    if isinstance(data, str):
-        return Label.convert(data)
-
-    if {"key", "title", "data"}.issubset(data.keys()):
-        return Resource(**data.keys())
+        return value
 
 
 class Relationship(BaseModel):
@@ -615,7 +640,7 @@ class Relationship(BaseModel):
 
     def __init__(self, a: Node, tag: Tag, b: Node):
         self.node_a = a
-        self.tag = Tag.convert(tag)
+        self.tag = Tag.create(tag)
         self.node_b = b
         self.key = f"({self.node_a}):{self.tag}:({self.node_b})"
 

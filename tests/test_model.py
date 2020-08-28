@@ -6,7 +6,9 @@ from entitykb import (
     DocEntity,
     Doc,
     FindResult,
+    Node,
     Token,
+    Resource,
 )
 from entitykb.date import Date
 
@@ -140,3 +142,15 @@ def test_date():
         meta=None,
         synonyms=(),
     )
+
+
+def test_node_create():
+    entity = Node.create(name="Apple")
+    assert isinstance(entity, Entity)
+    assert "Apple|ENTITY" == entity.key
+
+    resource = Node.create(title="Wikipedia", key="http://wikipedia.org/")
+    assert isinstance(resource, Resource)
+    assert "Wikipedia" == resource.title
+    assert "http://wikipedia.org/" == resource.key
+    assert resource.data is None

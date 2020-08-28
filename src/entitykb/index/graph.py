@@ -8,6 +8,9 @@ from entitykb.utils import ensure_iterable
 from . import HAS_LABEL
 
 
+IDTagPair = Tuple[float, str]
+
+
 class Graph(object):
     def __len__(self):
         raise NotImplementedError
@@ -43,6 +46,15 @@ class Graph(object):
         raise NotImplementedError
 
     def get_key(self, item):
+        raise NotImplementedError
+
+    def iterate_all_relationships(
+        self,
+        *,
+        tags: Iterable[str] = None,
+        incoming: Iterable[bool] = None,
+        entities: Iterable = None,
+    ) -> Iterator[IDTagPair]:
         raise NotImplementedError
 
 
@@ -118,7 +130,7 @@ class DefaultGraph(Graph):
         self.core = GraphCore()
 
     def __repr__(self):
-        return f"<Graph: {len(self.core.node_by_id)} nodes>"
+        return f"<Graph: {len(self.core)} nodes>"
 
     def __len__(self):
         return len(self.core)
@@ -182,20 +194,21 @@ class DefaultGraph(Graph):
     def iterate_all_relationships(
         self,
         *,
-        tags: Iterable[str] = (None,),
-        incoming: Iterable[bool] = (True, False),
-        entities: Iterable = (None,),
-    ) -> Iterator[Tuple[float, str]]:
+        tags: Iterable[str] = None,
+        incoming: Iterable[bool] = None,
+        entities: Iterable = None,
+    ) -> Iterator[IDTagPair]:
 
-        if incoming is None:
-            incoming = (True, False)
+        tags = (None,) if tags is None else tags
+        incoming = (True, False) if incoming is None else incoming
+        entities = (None,) if entities is None else entities
 
         for tag in ensure_iterable(tags):
             for direction in ensure_iterable(incoming):
                 for entity in ensure_iterable(entities):
                     yield from self._do_iter(tag, direction, entity)
 
-    def _do_iter(self, tag, direction, entity) -> Iterator[Tuple[float, str]]:
+    def _do_iter(self, tag, direction, entity) -> Iterator[IDTagPair]:
         eid = self.get_node_id(entity)
 
         if tag:
@@ -219,6 +232,6 @@ class DefaultGraph(Graph):
                     yield from self._do_iter_other(other_ids, tag)
 
     @classmethod
-    def _do_iter_other(cls, other_ids, tag) -> Iterator[Tuple[float, str]]:
+    def _do_iter_other(cls, other_ids, tag) -> Iterator[IDTagPair]:
         for other_id in other_ids:
             yield other_id, tag

@@ -1,15 +1,8 @@
 from typing import Optional, Union, Type, List, Tuple
 
-from . import (
-    Doc,
-    DocToken,
-    DocEntity,
-    LabelSet,
-    Resolver,
-    Tokenizer,
-    utils,
-    TokenHandler,
-)
+from entitykb.model import Doc, DocEntity, DocToken, LabelSet
+from entitykb.utils import instantiate_class_from_name
+from . import Resolver, Tokenizer, TokenHandler
 
 
 class Extractor(object):
@@ -28,7 +21,7 @@ class Extractor(object):
     @classmethod
     def create(cls, extractor: "ExtractorType" = None, **kwargs):
         if isinstance(extractor, str):
-            extractor = utils.instantiate_class_from_name(extractor, **kwargs)
+            extractor = instantiate_class_from_name(extractor, **kwargs)
         elif not isinstance(extractor, Extractor):
             extractor = (extractor or DefaultExtractor)(**kwargs)
         return extractor

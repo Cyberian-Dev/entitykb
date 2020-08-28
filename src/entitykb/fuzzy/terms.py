@@ -1,8 +1,8 @@
 import string
 from dataclasses import dataclass
-from typing import Optional, Set, Iterable, Tuple
+from typing import Optional, Set, Iterable, Tuple, Callable
 
-from entitykb import LabelSet, Tokenizer
+from entitykb.model import LabelSet
 from entitykb.index.terms import EID, DefaultTerms, TermEntities
 from entitykb.utils import generate_edits
 
@@ -68,7 +68,7 @@ class TermEditEntities(TermEntities):
 @dataclass
 class FuzzyTerms(DefaultTerms):
 
-    tokenizer: Tokenizer = None
+    tokenizer: Callable = None
     max_token_distance: int = 5
     label_set: LabelSet = None
 
@@ -77,7 +77,7 @@ class FuzzyTerms(DefaultTerms):
 
         if self.label_set.is_allowed(label):
             for term in norm_terms:
-                tokens = self.tokenizer.tokenize(term)
+                tokens = self.tokenizer(term)
                 for token in tokens:
                     if token not in FUZZ_BLOCK_TOKEN:
                         gen = generate_edits(token, self.max_token_distance)

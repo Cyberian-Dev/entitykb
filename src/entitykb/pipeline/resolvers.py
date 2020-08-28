@@ -1,19 +1,17 @@
 from typing import Optional, Union, Type, List
 
-from entitykb import (
+from entitykb.model import (
     Doc,
-    KeepLongestByKey,
-    DocEntity,
     DocToken,
+    DocEntity,
     FindResult,
     LabelSet,
-    Normalizer,
     Token,
-    TokenHandler,
-    Tokenizer,
-    utils,
-    DefaultIndex,
 )
+from entitykb.utils import instantiate_class_from_name
+from entitykb.index import DefaultIndex
+
+from . import Normalizer, Tokenizer, TokenHandler, KeepLongestByKey
 
 
 class Resolver(object):
@@ -95,7 +93,7 @@ class Resolver(object):
     def create(cls, resolver: "ResolverType" = None, **kwargs) -> "Resolver":
 
         if isinstance(resolver, str):
-            resolver = utils.instantiate_class_from_name(resolver, **kwargs)
+            resolver = instantiate_class_from_name(resolver, **kwargs)
 
         elif not isinstance(resolver, Resolver):
             resolver = (resolver or DefaultResolver)(**kwargs)
