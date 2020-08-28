@@ -1,4 +1,4 @@
-from .logger import logger
+from .logging import logger, LOGGING_CONFIG
 
 from .model import (
     BaseModel,

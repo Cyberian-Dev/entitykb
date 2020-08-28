@@ -35,10 +35,10 @@ class KB(BaseKB):
         """ Commit index's terms and graph to disk. """
         if self.uncommitted:
             self.index.commit()
-            logger.warn(f"Committed {self.uncommitted} records.")
+            logger.info(f"Committed {self.uncommitted} records.")
             self.uncommitted = 0
         else:
-            logger.warn("Nothing to commit.")
+            logger.info("Nothing to commit.")
 
     def reset(self):
         """ Clear index's terms and graph of all data. """

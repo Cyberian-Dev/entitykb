@@ -1,12 +1,14 @@
 import os
 from dataclasses import asdict
 
+
 import uvicorn
+
 from fastapi import FastAPI, APIRouter, staticfiles, Body
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import UJSONResponse
 
-from entitykb.rpc import RPCConnection
+from entitykb import rpc, logger, LOGGING_CONFIG
 from . import schema
 
 app = FastAPI(
@@ -23,9 +25,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 router = APIRouter()
-rpc = RPCConnection()
+rpc = rpc.RPCConnection()
 
 
 @router.post("/parse", response_model=schema.Doc)
@@ -59,4 +60,5 @@ app.mount(
 
 
 def launch_http(host="0.0.0.0", port=8000, reload=False):
+    logger.info(f"Launching http://{host}:{port}/")
     uvicorn.run(app, host=host, port=port, reload=reload)

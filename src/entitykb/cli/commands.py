@@ -14,9 +14,9 @@ app = typer.Typer()
 
 def finish(operation: str, success: bool, error_code: int = None):
     if success:
-        logger.warn(f"{operation} completed successfully.")
+        logger.info(f"{operation} completed successfully.")
     else:
-        logger.warn(f"{operation} failed.")
+        logger.warning(f"{operation} failed.")
         raise typer.Exit(error_code or 1)
 
 

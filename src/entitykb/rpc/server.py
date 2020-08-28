@@ -39,7 +39,7 @@ class RPCServerKB(BaseKB):
         pass
 
     def save_entity(self, entity: dict):
-        logger.warn(f"save_entity: {entity}")
+        logger.info(f"save_entity: {entity}")
         entity = Entity(**entity)
         self._kb.save_entity(entity)
 
@@ -80,7 +80,7 @@ def launch_rpc(root_dir: str = None, host: str = None, port: int = None):
     loop = uvloop.new_event_loop()
     asyncio.set_event_loop(loop)
 
-    logger.warn(f"Launching RPC Server on {conn}")
+    logger.info(f"Launching RPC Server on {conn}")
     future = asyncio.start_server(serve, conn.host, conn.port, loop=loop)
     server = loop.run_until_complete(future)
 
