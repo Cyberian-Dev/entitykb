@@ -16,19 +16,18 @@
         ]
     },
     "default": {
+        "aio-msgpack-rpc": {
+            "hashes": [
+                "sha256:5ad7e1b632c0e84aef555d59cf2bba6c1140a37779d82d8012abdf03b51341d3"
+            ],
+            "version": "==0.2.0"
+        },
         "aiofiles": {
             "hashes": [
                 "sha256:377fdf7815cc611870c59cbd07b68b180841d2a2b79812d8c218be02448c2acb",
                 "sha256:98e6bcfd1b50f97db4980e182ddd509b7cc35909e903a8fe50d8849e02d815af"
             ],
             "version": "==0.5.0"
-        },
-        "aiorpc": {
-            "hashes": [
-                "sha256:1a617f70dbb0be945abf4a97ef3722190278c0b720b5f7f967fbc3c4059be2e4",
-                "sha256:875dc5fd5afcbc4799bdfbd30f52bc91df1ea56843be69077cf3320db627c91c"
-            ],
-            "version": "==0.1.7"
         },
         "attrs": {
             "hashes": [
@@ -55,10 +54,10 @@
         },
         "fastapi": {
             "hashes": [
-                "sha256:29c12dd0d4ac825d13c2db4762d2863281c18085ae521825829182e977fd25ac",
-                "sha256:d0b3f629f8d165a21ee082bf31e1697c391c1cdf940304408614b5b7c59d1fb3"
+                "sha256:61ed73b4304413a2ea618d1b95ea866ee386e0e62dd8659c4f5059286f4a39c2",
+                "sha256:6cc31bb555dd8ca956d1d227477d661e4ac012337242a41d36214ffbda78bfe9"
             ],
-            "version": "==0.61.0"
+            "version": "==0.61.1"
         },
         "h11": {
             "hashes": [
@@ -482,11 +481,11 @@
         },
         "ipython": {
             "hashes": [
-                "sha256:4dbacf73ac7409c33c918044476eefe4c2428ce0ca4cc118aee718ac6026ac0f",
-                "sha256:73c61ebcc30baadf600b870c3a38b96d6e5ae8dde5ef5425b8aab75dc9a9a602"
+                "sha256:2e22c1f74477b5106a6fb301c342ab8c64bb75d702e350f05a649e8cb40a0fb8",
+                "sha256:a331e78086001931de9424940699691ad49dfb457cea31f5471eae7b78222d5e"
             ],
             "index": "pypi",
-            "version": "==7.18.0"
+            "version": "==7.18.1"
         },
         "ipython-genutils": {
             "hashes": [
@@ -554,10 +553,10 @@
         },
         "prompt-toolkit": {
             "hashes": [
-                "sha256:683397077a64cd1f750b71c05afcfc6612a7300cb6932666531e5a54f38ea564",
-                "sha256:7630ab85a23302839a0f26b31cc24f518e6155dea1ed395ea61b42c45941b6a6"
+                "sha256:822f4605f28f7d2ba6b0b09a31e25e140871e96364d1d377667b547bb3bf4489",
+                "sha256:83074ee28ad4ba6af190593d4d4c607ff525272a504eb159199b6dd9f950c950"
             ],
-            "version": "==3.0.6"
+            "version": "==3.0.7"
         },
         "ptyprocess": {
             "hashes": [

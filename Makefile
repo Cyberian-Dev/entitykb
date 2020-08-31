@@ -1,10 +1,10 @@
 SHELL := /bin/bash
 
 rpc:
-	PIPENV_IGNORE_VIRTUALENVS=1 PYTHONPATH=src pipenv run python -m entitykb.interface.cli rpc
+	PIPENV_IGNORE_VIRTUALENVS=1 PYTHONPATH=src pipenv run entitykb rpc
 
 http:
-	PIPENV_IGNORE_VIRTUALENVS=1 PYTHONPATH=src pipenv run python -m entitykb.interface.cli http
+	PIPENV_IGNORE_VIRTUALENVS=1 PYTHONPATH=src pipenv run entitykb http
 
 ipython:
 	PIPENV_IGNORE_VIRTUALENVS=1 PYTHONPATH=src pipenv run ipython

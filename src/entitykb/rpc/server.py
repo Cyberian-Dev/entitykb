@@ -1,7 +1,6 @@
 import asyncio
 
-import uvloop
-from aiorpc import register, serve
+from aio_msgpack_rpc import Server
 
 from entitykb import logger, KB
 from entitykb.kb import BaseKB
@@ -9,8 +8,8 @@ from entitykb.model import Entity
 from .connection import RPCConnection
 
 
-class RPCServerKB(BaseKB):
-    """ EntityKB RPC Server """
+class HandlerKB(BaseKB):
+    """ EntityKB RPC Handler Server """
 
     def __init__(self, _kb):
         self._kb: KB = _kb
@@ -69,19 +68,12 @@ def launch_rpc(root_dir: str = None, host: str = None, port: int = None):
     """ Function for starting RPC Server. Called from entitykb CLI. """
     conn = RPCConnection(host=host, port=port)
     kb = KB(root_dir=root_dir)
-    rpc = RPCServerKB(kb)
+    handler = HandlerKB(kb)
+    server = Server(handler=handler)
 
-    # register rpc end-points
-    register("parse", rpc.parse)
-    register("save_entity", rpc.save_entity)
-    register("commit", rpc.commit)
-
-    # start server
-    loop = uvloop.new_event_loop()
-    asyncio.set_event_loop(loop)
-
+    loop = asyncio.get_event_loop()
     logger.info(f"Launching RPC Server on {conn}")
-    future = asyncio.start_server(serve, conn.host, conn.port, loop=loop)
+    future = asyncio.start_server(server, conn.host, conn.port, loop=loop)
     server = loop.run_until_complete(future)
 
     try:
