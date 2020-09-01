@@ -1,4 +1,5 @@
 from .const import EID, HAS_LABEL, AND, OR
+from .types import ensure_iterable
 from .storage import Storage, DefaultStorage
 from .graph import Graph, DefaultGraph
 from .terms import Terms, DefaultTerms
@@ -46,4 +47,5 @@ __all__ = (
     "Storage",
     "Terms",
     "WalkStep",
+    "ensure_iterable",
 )

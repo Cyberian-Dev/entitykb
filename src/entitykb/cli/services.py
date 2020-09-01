@@ -1,3 +1,4 @@
+import collections
 import csv
 import enum
 import os
@@ -103,3 +104,14 @@ def init_kb(root_dir) -> bool:
         logger.error(e)
 
     return success
+
+
+def flatten_dict(d, parent_key="", sep="."):
+    items = []
+    for k, v in d.items():
+        new_key = parent_key + sep + k if parent_key else k
+        if isinstance(v, collections.MutableMapping):
+            items.extend(flatten_dict(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)

@@ -1,6 +1,8 @@
-from typing import Tuple, Union, Optional, Set, Iterable
+import functools
+from importlib import import_module
 
-from .utils import get_class_from_name, tupilify
+
+from typing import Tuple, Union, Optional, Set, Iterable
 
 
 class BaseModel(object):
@@ -13,6 +15,7 @@ class BaseModel(object):
 
 class Node(object):
     """ Base Mixin for Entity, Resource or Label. """
+
     key: str
 
     def dict(self):
@@ -90,7 +93,6 @@ class LabelType(type):
 
 
 class Label(str, BaseModel, Node, metaclass=LabelType):
-
     def __new__(cls, string):
         string = string.upper()
         obj = super(Label, cls).__new__(cls, string)
@@ -667,3 +669,25 @@ class Relationship(BaseModel):
 
 EntityValue = Union[Entity, dict, DocEntity, str, float]
 ER = Union[Entity, Relationship]
+
+
+def tupilify(values: Union[list, tuple, set]) -> tuple:
+    """ Converts values to a sorted, unique tuple. """
+    if values:
+        values = tuple(sorted(set(values)))
+    else:
+        values = tuple()
+    return values
+
+
+@functools.lru_cache(maxsize=100)
+def get_class_from_name(full_name: str):
+    module_name, class_name = full_name.rsplit(".", 1)
+    module = import_module(module_name)
+    klass = getattr(module, class_name)
+    return klass
+
+
+def instantiate_class_from_name(full_name: str, *args, **kwargs):
+    klass = get_class_from_name(full_name)
+    return klass(*args, **kwargs)

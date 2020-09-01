@@ -7,8 +7,8 @@ from entitykb.model import (
     FindResult,
     LabelSet,
     Token,
+    instantiate_class_from_name,
 )
-from entitykb.utils import instantiate_class_from_name
 from entitykb.index import DefaultIndex
 
 from . import Normalizer, Tokenizer, TokenHandler, KeepLongestByKey

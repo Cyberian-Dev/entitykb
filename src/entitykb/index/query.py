@@ -3,8 +3,7 @@ from dataclasses import dataclass, field
 from typing import Iterable, List, Optional, Union, Set
 
 from entitykb import Tag, EntityValue
-from entitykb.utils import ensure_iterable
-from . import EID, AND, Graph, Terms
+from . import EID, AND, Graph, Terms, ensure_iterable
 
 
 class Filter(object):

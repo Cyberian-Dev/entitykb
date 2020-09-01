@@ -1,8 +1,14 @@
 from dataclasses import dataclass
 from typing import Optional, Type, Union, Set, List, Callable
 
-from entitykb.model import ER, Entity, EntityValue, Relationship, FindResult
-from entitykb.utils import instantiate_class_from_name
+from entitykb.model import (
+    ER,
+    Entity,
+    EntityValue,
+    Relationship,
+    FindResult,
+    instantiate_class_from_name,
+)
 
 from . import (
     Graph,

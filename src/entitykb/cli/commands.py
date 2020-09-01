@@ -4,7 +4,7 @@ from typing import Optional
 import typer
 from tabulate import tabulate
 
-from entitykb import KB, Config, logger, utils
+from entitykb import KB, Config, logger
 from entitykb.http import launch_http
 from entitykb.rpc import launch_rpc
 from . import services
@@ -39,7 +39,7 @@ def reset(root_dir: Optional[Path] = typer.Argument(None)):
 @app.command()
 def info(root_dir: Optional[Path] = typer.Argument(None)):
     kb = KB(root_dir=root_dir)
-    flat = sorted(utils.flatten_dict(kb.info()).items())
+    flat = sorted(services.flatten_dict(kb.info()).items())
     output = tabulate(flat, tablefmt="pretty", colalign=("left", "right"))
     typer.echo(output)
 

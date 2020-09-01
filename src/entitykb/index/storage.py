@@ -1,9 +1,12 @@
+import datetime
 import os
 import pickle
+import sys
+import tempfile
 from dataclasses import dataclass
 from typing import Optional, Any
 
-from entitykb import utils, logger
+from entitykb import logger
 
 
 @dataclass
@@ -40,8 +43,8 @@ class DefaultStorage(Storage):
     def info(self) -> dict:
         return {
             "path": self.index_path,
-            "disk_space": utils.sizeof(self.index_path),
-            "last_commit": utils.file_updated(self.index_path).strftime("%c"),
+            "disk_space": self.sizeof(self.index_path),
+            "last_commit": self.file_updated(self.index_path).strftime("%c"),
         }
 
     @property
@@ -69,12 +72,12 @@ class DefaultStorage(Storage):
 
     def save(self, py_data: Any):
         pickle_data = pickle.dumps(py_data)
-        utils.safe_write(self.index_path, pickle_data)
+        self.safe_write(self.index_path, pickle_data)
 
     def archive(self):
         if self.exists and self.max_backups:
             path = self.index_path
-            update_time = utils.file_updated(path)
+            update_time = self.file_updated(path)
             file_name = os.path.basename(path)
             file_name += update_time.strftime(".%d-%m-%Y_%I-%M-%S_%p")
             backup_path = os.path.join(self.backup_dir, file_name)
@@ -90,3 +93,38 @@ class DefaultStorage(Storage):
             oldest = paths[0]
             os.remove(oldest)
             return oldest
+
+    @classmethod
+    def file_updated(cls, path) -> datetime:
+        if path and os.path.exists(path):
+            file_t = os.path.getmtime(path)
+            return datetime.datetime.fromtimestamp(file_t)
+
+    @classmethod
+    def sizeof_fmt(cls, num, suffix="B"):
+        # https://stackoverflow.com/a/1094933/1946790
+        for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
+            if abs(num) < 1024.0:
+                return "%.2f %s%s" % (num, unit, suffix)
+            num /= 1024.0
+        return "%.2f %s%s" % (num, "Yi", suffix)
+
+    @classmethod
+    def sizeof(cls, path_or_obj):
+        try:
+            num = os.path.getsize(path_or_obj)
+        except FileNotFoundError:
+            num = 0
+        except TypeError:
+            num = sys.getsizeof(path_or_obj)
+        return cls.sizeof_fmt(num)
+
+    @classmethod
+    def safe_write(cls, path: str, data: bytes):
+        """ Write data to temp file. Then use os.link to move into place. """
+        # https://stackoverflow.com/a/36784658/1946790
+        # https://stackoverflow.com/a/57015098/1946790
+        dir_path = os.path.dirname(path)
+        with tempfile.NamedTemporaryFile(dir=dir_path, mode="w+b") as tf:
+            tf.write(data)
+            os.link(tf.name, path)

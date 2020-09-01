@@ -4,8 +4,7 @@ from itertools import count
 from typing import Dict, Iterator, Tuple, Iterable
 
 from entitykb import Node, Entity, Relationship, Resource, Label, DocEntity
-from entitykb.utils import ensure_iterable
-from . import HAS_LABEL
+from . import HAS_LABEL, ensure_iterable
 
 
 IDTagPair = Tuple[float, str]

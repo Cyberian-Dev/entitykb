@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from typing import Set
 
-from entitykb import DefaultIndex, LabelSet, utils, QB
+from entitykb import DefaultIndex, LabelSet, QB
 from .terms import FuzzyTerms
+from .edits import generate_edits
 
 
 @dataclass
@@ -40,7 +41,7 @@ class FuzzyIndex(DefaultIndex):
         threshold = self.max_token_distance
         candidates: dict = {}
 
-        edits_iter = utils.generate_edits(token, self.max_token_distance)
+        edits_iter = generate_edits(token, self.max_token_distance)
         label_set = self.label_set.intersect(label_set)
 
         for edit, edit_dist in edits_iter:

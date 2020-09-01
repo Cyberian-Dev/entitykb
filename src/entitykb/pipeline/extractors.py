@@ -1,7 +1,12 @@
 from typing import Optional, Union, Type, List, Tuple
 
-from entitykb.model import Doc, DocEntity, DocToken, LabelSet
-from entitykb.utils import instantiate_class_from_name
+from entitykb.model import (
+    Doc,
+    DocEntity,
+    DocToken,
+    LabelSet,
+    instantiate_class_from_name,
+)
 from . import Resolver, Tokenizer, TokenHandler
 
 

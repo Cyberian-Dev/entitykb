@@ -4,7 +4,7 @@ from typing import Optional, Set, Iterable, Tuple, Callable
 
 from entitykb.model import LabelSet
 from entitykb.index.terms import EID, DefaultTerms, TermEntities
-from entitykb.utils import generate_edits
+from .edits import generate_edits
 
 FUZZ_BLOCK_TOKEN = set(string.punctuation)
 

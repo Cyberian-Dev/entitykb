@@ -1,7 +1,7 @@
 from typing import Set
-from entitykb.utils import ensure_iterable
 
 from . import (
+    ensure_iterable,
     Query,
     QueryStart,
     QueryGoal,

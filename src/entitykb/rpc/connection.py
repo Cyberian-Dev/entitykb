@@ -4,8 +4,6 @@ from os import getenv as env
 
 from aio_msgpack_rpc import Client
 
-from entitykb.utils import first_nn
-
 
 @dataclass
 class RPCConnection(object):
@@ -50,3 +48,13 @@ class RPCConnection(object):
                 last_e = e
 
         raise last_e
+
+
+def first_nn(*items):
+    """ Returns first not None item. Lazy creates list, set, tuple, dict. """
+    for item in items:
+        if item is not None:
+            if isinstance(item, type):
+                return item()
+            else:
+                return item
