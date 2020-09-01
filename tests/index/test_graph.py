@@ -49,9 +49,9 @@ def graph(index):
     assert "<Graph: 0 nodes>" == repr(graph)
 
     for entity in entities:
-        index.add_entity(entity)
+        index.save_entity(entity)
     for relationship in relationships:
-        index.add_relationship(relationship)
+        index.save_relationship(relationship)
 
     assert "<Graph: 11 nodes>" == repr(graph)
     return graph

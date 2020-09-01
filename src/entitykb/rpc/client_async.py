@@ -26,13 +26,15 @@ class AsyncKB(BaseKB):
             return count
 
     async def reset(self):
-        pass
+        async with self.connection as client:
+            return await client.call("reset")
 
     async def reload(self):
         pass
 
     async def info(self):
-        pass
+        async with self.connection as client:
+            return await client.call("info")
 
     async def save_entity(self, entity: Entity):
         async with self.connection as client:

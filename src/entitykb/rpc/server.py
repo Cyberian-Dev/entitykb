@@ -29,13 +29,15 @@ class HandlerKB(BaseKB):
         return count
 
     def reset(self):
-        pass
+        success = self._kb.reset()
+        return success
 
     def reload(self):
         pass
 
     def info(self):
-        pass
+        data = self._kb.info()
+        return data
 
     def save_entity(self, entity: dict):
         logger.info(f"save_entity: {entity}")

@@ -41,7 +41,7 @@ class DefaultStorage(Storage):
         return {
             "path": self.index_path,
             "disk_space": utils.sizeof(self.index_path),
-            "last_commit": utils.file_updated(self.index_path),
+            "last_commit": utils.file_updated(self.index_path).strftime("%c"),
         }
 
     @property

@@ -52,14 +52,14 @@ class Index(object):
     def add(self, *ent_rels: ER):
         for er in ent_rels:
             if isinstance(er, Entity):
-                self.add_entity(er)
+                self.save_entity(er)
             else:
-                self.add_relationship(er)
+                self.save_relationship(er)
 
-    def add_entity(self, entity: Entity):
+    def save_entity(self, entity: Entity):
         raise NotImplementedError
 
-    def add_relationship(self, relationship: Relationship):
+    def save_relationship(self, relationship: Relationship):
         raise NotImplementedError
 
     def get_entity(self, val: EntityValue) -> EntityValue:
@@ -134,13 +134,13 @@ class DefaultIndex(Index):
         self.terms.reset_data()
         self.graph.reset_data()
 
-    def add_entity(self, entity: Entity):
-        entity_id = self.graph.add_entity(entity)
+    def save_entity(self, entity: Entity):
+        entity_id = self.graph.save_entity(entity)
         self.terms.add_terms(entity_id, entity.label, entity.terms)
         return entity_id
 
-    def add_relationship(self, relationship: Relationship):
-        self.graph.add_relationship(relationship)
+    def save_relationship(self, relationship: Relationship):
+        self.graph.save_relationship(relationship)
 
     def get_entity(self, val: EntityValue) -> Entity:
         return self.graph.get_entity(val)

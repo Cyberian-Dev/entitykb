@@ -30,10 +30,10 @@ class Graph(object):
     def reset_data(self):
         raise NotImplementedError
 
-    def add_entity(self, entity: Entity):
+    def save_entity(self, entity: Entity):
         raise NotImplementedError
 
-    def add_relationship(self, rel: Relationship):
+    def save_relationship(self, rel: Relationship):
         raise NotImplementedError
 
     def get_node_id(self, item):
@@ -150,13 +150,13 @@ class DefaultGraph(Graph):
     def reset_data(self):
         self.core = GraphCore()
 
-    def add_entity(self, entity: Entity):
+    def save_entity(self, entity: Entity):
         entity_id = self.core.store_node(entity)
         label_id = self.core.store_node(entity.label)
         self.core.store_edge(entity_id, HAS_LABEL, label_id)
         return entity_id
 
-    def add_relationship(self, rel: Relationship):
+    def save_relationship(self, rel: Relationship):
         id_a = self.get_node_id(rel.node_a)
         id_b = self.get_node_id(rel.node_b)
         self.core.store_edge(id_a=id_a, tag=rel.tag, id_b=id_b)

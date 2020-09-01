@@ -42,6 +42,13 @@ class KB(BaseKB):
 
     def reset(self):
         """ Clear index's terms and graph of all data. """
+        success = False
+        if self.index.exists:
+            self.index.storage.archive()
+            self.index.reset()
+            self.index.commit()
+            success = True
+        return success
 
     def reload(self):
         """ Reload index's terms and graph data to last commit. """
@@ -56,7 +63,7 @@ class KB(BaseKB):
 
     def save_entity(self, entity):
         """ Save entity by indexing terms and storing in graph. """
-        self.index.add_entity(entity=entity)
+        self.index.save_entity(entity=entity)
         self.uncommitted += 1
 
     def get_entity(self, key_or_id):

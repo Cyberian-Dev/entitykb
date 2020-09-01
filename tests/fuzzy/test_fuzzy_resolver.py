@@ -138,8 +138,8 @@ def test_fuzzy(apple):
     )
     assert isinstance(index, FuzzyIndex)
 
-    index.add_entity(apple)
-    index.add_entity(Entity(name="banana", label="FRUIT"))
+    index.save_entity(apple)
+    index.save_entity(Entity(name="banana", label="FRUIT"))
 
     # is_prefix
     assert index.is_prefix("aple")

@@ -13,6 +13,7 @@ class BaseModel(object):
 
 class Node(object):
     """ Base Mixin for Entity, Resource or Label. """
+    key: str
 
     def dict(self):
         raise NotImplementedError
@@ -89,6 +90,7 @@ class LabelType(type):
 
 
 class Label(str, BaseModel, Node, metaclass=LabelType):
+
     def __new__(cls, string):
         string = string.upper()
         obj = super(Label, cls).__new__(cls, string)

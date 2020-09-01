@@ -30,7 +30,9 @@ def init(root_dir: Optional[Path] = typer.Argument(None)):
 def reset(root_dir: Optional[Path] = typer.Argument(None)):
     root_dir = Config.get_root_dir(root_dir)
     typer.confirm(f"Are you sure you want to reset: {root_dir}?", abort=True)
-    success = services.reset_kb(root_dir=root_dir)
+
+    kb = KB(root_dir=root_dir)
+    success = kb.reset()
     finish("Reset", success)
 
 

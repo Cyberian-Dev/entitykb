@@ -103,16 +103,3 @@ def init_kb(root_dir) -> bool:
         logger.error(e)
 
     return success
-
-
-def reset_kb(root_dir) -> bool:
-    success = False
-
-    kb = KB(root_dir)
-    if kb.index.exists:
-        kb.index.storage.archive()
-        kb.index.reset()
-        kb.index.commit()
-        success = True
-
-    return success

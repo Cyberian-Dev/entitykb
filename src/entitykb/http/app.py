@@ -41,11 +41,25 @@ async def save_entity(entity: schema.Entity = Body(...)):
         await client.call("save_entity", asdict(entity))
 
 
+@router.post("/reset")
+async def reset() -> bool:
+    async with rpc as client:
+        success: bool = await client.call("resent")
+        return success
+
+
 @router.post("/commit")
 async def commit() -> int:
     async with rpc as client:
         commit_count: int = await client.call("commit")
         return commit_count
+
+
+@router.post("/info")
+async def info() -> int:
+    async with rpc as client:
+        data: dict = await client.call("info")
+        return data
 
 
 app.include_router(router)

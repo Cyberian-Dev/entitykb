@@ -30,13 +30,17 @@ class SyncKB(AsyncKB):
         return count
 
     def reset(self):
-        pass
+        future = super(SyncKB, self).reset()
+        success = run_future(future)
+        return success
 
     def reload(self):
         pass
 
     def info(self):
-        pass
+        future = super(SyncKB, self).info()
+        data = run_future(future)
+        return data
 
     def save_entity(self, entity: Entity):
         future = super(SyncKB, self).save_entity(entity)
