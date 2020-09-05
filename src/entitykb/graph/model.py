@@ -2,7 +2,7 @@ import functools
 from importlib import import_module
 import enum
 
-from typing import Tuple, Union
+from typing import Tuple, Union, Iterable
 from uuid import uuid4
 
 
@@ -148,7 +148,7 @@ class Edge(Base):
         **kw,
     ):
         self.start = Node.to_key(start)
-        self.tag = tag
+        self.tag = tag.upper()
         self.end = Node.to_key(end)
         self.weight = weight
         self.meta = {**(meta or {}), **kw}
@@ -170,15 +170,15 @@ class Filter(Base):
     def __init__(
         self,
         *,
-        keys=None,
         labels=None,
         tags=None,
+        keys=None,
         directions=None,
         self_ok=False,
     ):
-        self.keys = set(ensure_iterable(keys or ()))
         self.labels = set(ensure_iterable(labels or ()))
         self.tags = set(ensure_iterable(tags or ()))
+        self.keys = set(ensure_iterable(keys or ()))
         self.directions = Direction.as_tuple(directions, all_if_none=True)
         self.self_ok = self_ok
 
@@ -198,7 +198,7 @@ class WalkStep(Step):
         max_hops=None,
         passthru=False,
     ):
-        self.tags = ensure_iterable(tags or (), f=set)
+        self.tags = {t.upper() for t in ensure_iterable(tags or (), f=set)}
         self.directions = Direction.as_tuple(directions, all_if_none=True)
         self.max_hops = max_hops
         self.passthru = passthru
@@ -213,24 +213,24 @@ class FilterStep(Step):
         self.join_type = join_type
         self.exclude = exclude
 
+    @property
+    def is_and(self):
+        return self.join_type == "AND"
+
 
 class Query(Base):
 
-    __slots__ = ["initial", "steps", "limit", "offset"]
+    __slots__ = ["starts", "steps", "limit", "offset"]
 
     def __init__(
         self,
-        initial: tuple = None,
-        steps: tuple = None,
+        starts: Iterable,
+        steps: Iterable,
         limit: int = None,
         offset: int = 0,
     ):
-        self.initial = tuple(
-            Node.to_key(node) for node in ensure_iterable(initial or ())
-        )
-        self.steps = tuple(
-            [Step.create(step) for step in ensure_iterable(steps or ())]
-        )
+        self.starts = starts
+        self.steps = [Step.create(s) for s in ensure_iterable(steps or ())]
         self.limit = limit
         self.offset = offset
 

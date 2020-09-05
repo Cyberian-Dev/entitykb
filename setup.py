@@ -17,7 +17,7 @@ if sys.version_info[:2] == (3, 6):
 extras_requires = {
     "cli": ["tabulate", "typer"],
     "rpc": ["aio-msgpack-rpc"],
-    "http": ["fastapi", "aiofiles", "uvicorn"],
+    "http": ["fastapi", "aiofiles", "uvicorn >=0.11.7"],
 }
 
 setup(

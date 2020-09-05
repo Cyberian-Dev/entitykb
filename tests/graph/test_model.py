@@ -78,14 +78,14 @@ def test_edge():
 
 def test_create_query_single_node():
     n = Node()
-    q = Query(n)
-    assert q.initial == (n.key,)
-    assert q.steps == ()
+    q = Query((n.key,), steps=())
+    assert q.starts == (n.key,)
+    assert q.steps == []
     assert q.limit is None
     assert q.offset == 0
     assert q.dict() == {
         "_klass": "entitykb.graph.model.Query",
-        "initial": (n.key,),
+        "starts": (n.key,),
         "limit": None,
         "offset": 0,
         "steps": (),
@@ -94,13 +94,14 @@ def test_create_query_single_node():
 
 def test_create_walk_step_only():
     walk_step = WalkStep()
-    q = Query(steps=walk_step)
-    assert q.steps == (walk_step,)
+    q = Query(starts=(), steps=walk_step)
+    assert q.starts == ()
+    assert q.steps == [walk_step]
     assert q.limit is None
     assert q.offset == 0
     assert q.dict() == {
         "_klass": "entitykb.graph.model.Query",
-        "initial": (),
+        "starts": (),
         "limit": None,
         "offset": 0,
         "steps": (
@@ -121,13 +122,13 @@ def test_create_walk_step_only():
 def test_create_filter_step_only():
     filter = Filter()
     filter_step = FilterStep(filters=filter)
-    q = Query(steps=filter_step)
-    assert q.steps == (filter_step,)
+    q = Query(starts=(), steps=filter_step)
+    assert q.steps == [filter_step]
     assert q.limit is None
     assert q.offset == 0
     assert q.dict() == {
         "_klass": "entitykb.graph.model.Query",
-        "initial": (),
+        "starts": (),
         "limit": None,
         "offset": 0,
         "steps": (

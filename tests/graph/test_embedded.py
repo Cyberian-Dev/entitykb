@@ -1,11 +1,5 @@
-from entitykb.graph.embedded import NestedDict, Graph
+from entitykb.graph.embedded import Graph
 from entitykb.graph.model import Node, Edge
-
-
-def test_nested_dict():
-    ddds = NestedDict()
-    ddds["a"][1]["IS_A"]["b"] = "Edge()"
-    assert ddds == {"a": {1: {"IS_A": {"b": "Edge()"}}}}
 
 
 def test_connect_nodes():
