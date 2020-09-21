@@ -1,7 +1,16 @@
 from dataclasses import dataclass, field
-from typing import Iterator, Set, List
-from .embedded import Graph
-from .model import Node, Edge, Query, WalkStep, FilterStep, Filter
+from typing import Iterable, Iterator, Set, List
+
+from . import (
+    AttrCriteria,
+    Edge,
+    FilterStep,
+    Graph,
+    Node,
+    Query,
+    RelCriteria,
+    WalkStep,
+)
 
 
 class Hop(object):
@@ -16,12 +25,11 @@ class Hop(object):
 
 class Result(object):
 
-    __slots__ = ["start", "hops", "by_end"]
+    __slots__ = ["start", "hops"]
 
-    def __init__(self, start, hops: List[Hop] = None, by_end: dict = None):
+    def __init__(self, start, hops: List[Hop] = None):
         self.start = start
         self.hops: List[Hop] = hops or []
-        self.by_end = by_end or {}
 
     def __hash__(self):
         return hash((self.start, self.end))
@@ -43,21 +51,12 @@ class Result(object):
             return self.start
 
     def copy(self):
-        return Result(
-            start=self.start, hops=self.hops[:], by_end=self.by_end.copy(),
-        )
+        return Result(start=self.start, hops=self.hops[:])
 
     def push(self, end, edge: Edge) -> "Result":
-        curr_hop: Hop = self.by_end.get(end, None)
-
-        if curr_hop is None:
-            copy = self.copy()
-            next_hop = Hop(start=self.end, end=end, edge=edge)
-            copy.hops.append(next_hop)
-        else:
-            curr_hop.edges.append(edge)
-            copy = self
-
+        copy = self.copy()
+        next_hop = Hop(start=self.end, end=end, edge=edge)
+        copy.hops.append(next_hop)
         return copy
 
 
@@ -80,6 +79,10 @@ class SearchResults(object):
     def ends(self):
         return tuple(result.end for result in self.results if result.end)
 
+    @property
+    def starts(self):
+        return tuple(result.start for result in self.results if result.start)
+
 
 @dataclass
 class Layer(object):
@@ -92,8 +95,10 @@ class Layer(object):
 
 @dataclass
 class StartLayer(Layer):
+    starts: Iterable
+
     def __iter__(self) -> Iterator[Result]:
-        for start in self.query.starts:
+        for start in self.starts:
             start = Node.to_key(start)
             yield Result(start=start)
 
@@ -108,7 +113,7 @@ class WalkLayer(Layer):
         children = set()
 
         if result.end is not None:
-            others_it = self.graph.edges.iterate(
+            others_it = self.graph.iterate_edges(
                 tags=self.step.tags,
                 directions=self.step.directions,
                 nodes=result.end,
@@ -141,17 +146,45 @@ class FilterLayer(Layer):
     step: FilterStep
     prev: Layer
 
-    def evaluate_filter(self, filter: Filter, result: Result):
-        # todo: need to figure out how to apply different types of labels...
-        return True
+    def evaluate_attr_criteria(self, criteria, result: Result):
+        node = self.graph.get_node(result.end)
+        other = getattr(node, criteria.attr_name)
+        return criteria.do_compare(other)
+
+    def evaluate_rel_criteria(self, criteria, result: Result):
+        it = self.graph.iterate_edges(
+            tags=criteria.tags,
+            directions=criteria.directions,
+            nodes=result.end,
+        )
+
+        node_set = set(criteria.nodes)
+
+        found = False
+        for (key, edge) in it:
+            if key in node_set:
+                found = True
+                break
+
+        return found
+
+    def evaluate_criteria(self, criteria, result: Result):
+        if isinstance(criteria, AttrCriteria):
+            return self.evaluate_attr_criteria(criteria, result)
+
+        if isinstance(criteria, RelCriteria):
+            return self.evaluate_rel_criteria(criteria, result)
+
+        raise NotImplementedError(f"Unknown Criteria: {criteria}")
 
     def evaluate(self, result: Result):
-        success = self.step.is_and
-        for filter in self.step.filters:
-            if self.step.is_and:
-                success = success and self.evaluate_filter(filter, result)
+        success = self.step.all
+
+        for criteria in self.step.criteria:
+            if self.step.all:
+                success = success and self.evaluate_criteria(criteria, result)
             else:
-                success = success or self.evaluate_filter(filter, result)
+                success = success or self.evaluate_criteria(criteria, result)
 
         if self.step.exclude:
             success = not success
@@ -166,25 +199,33 @@ class FilterLayer(Layer):
 
 @dataclass
 class Searcher(object):
-    graph: Graph
+    graph: Graph = None
+    query: Query = None
 
-    def __call__(self, query: Query):
-        return self.search(query)
+    def __call__(self, *starts, **kwargs):
+        return self.search(*starts, **kwargs)
 
-    def search(self, query: Query) -> SearchResults:
+    def search(self, *starts, graph=None, query=None) -> SearchResults:
         """
         Execute search using Query object.
         """
-        layer = StartLayer(graph=self.graph, query=query)
+        graph = graph or self.graph
+        assert graph, "Graph not provided to searcher."
+
+        query = query or self.query
+        assert graph, "Query not provided to searcher."
+
+        starts = chain(starts)
+        layer = StartLayer(starts=starts, graph=graph, query=query)
 
         for step in query.steps:
             if isinstance(step, WalkStep):
                 layer = WalkLayer(
-                    graph=self.graph, query=query, step=step, prev=layer
+                    graph=graph, query=query, step=step, prev=layer
                 )
             elif isinstance(step, FilterStep):
                 layer = FilterLayer(
-                    graph=self.graph, query=query, step=step, prev=layer
+                    graph=graph, query=query, step=step, prev=layer
                 )
 
         index = -1
@@ -198,7 +239,17 @@ class Searcher(object):
             if under_limit(items=results, limit=query.limit):
                 results.append(result)
 
-        return SearchResults(graph=self.graph, query=query, results=results)
+        return SearchResults(graph=graph, query=query, results=results)
+
+
+def chain(*items):
+    for item in items:
+        if isinstance(item, (str, dict)):
+            yield item
+        elif isinstance(item, (Iterable, Iterator)):
+            yield from chain(*item)
+        else:
+            yield item
 
 
 def under_limit(items: List, limit: int):

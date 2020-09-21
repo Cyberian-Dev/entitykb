@@ -1,6 +1,8 @@
+from collections import defaultdict
 from threading import Lock
+from typing import Dict, Set
 
-from .model import Edge, Direction, ensure_iterable
+from .model import Node, Edge, Direction, ensure_iterable
 
 
 class NestedDict(dict):
@@ -8,6 +10,25 @@ class NestedDict(dict):
         value = NestedDict()
         self[key] = value
         return value
+
+
+class NodeIndex(object):
+    def __init__(self):
+        self.nodes_by_key: Dict[str, Node] = {}
+        self.nodes_by_label: Dict[str, Set[Node]] = defaultdict(set)
+
+    def __len__(self):
+        return len(self.nodes_by_key)
+
+    def __iter__(self):
+        return iter(self.nodes_by_key.values())
+
+    def get(self, key: str):
+        return self.nodes_by_key[key]
+
+    def save(self, node: Node):
+        self.nodes_by_key[node.key] = node
+        self.nodes_by_label[node.label].add(node)
 
 
 class EdgeIndex(object):
@@ -50,13 +71,14 @@ class EdgeIndex(object):
 
     def iterate(self, tags=None, directions=None, nodes=None):
         tags = (None,) if not tags else tags
-        directions = tuple(Direction) if directions is None else directions
+        directions = Direction.as_tuple(directions, all_if_none=True)
         nodes = (None,) if nodes is None else nodes
 
         for tag in ensure_iterable(tags):
             for direction in ensure_iterable(directions):
                 for node in ensure_iterable(nodes):
-                    yield from self._do_iter(tag, direction, node)
+                    node_key = Node.to_key(node)
+                    yield from self._do_iter(tag, direction, node_key)
 
     # private methods
 

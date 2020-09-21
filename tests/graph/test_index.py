@@ -1,5 +1,17 @@
-from entitykb.graph.edge_index import NestedDict, EdgeIndex
-from entitykb.graph.model import Edge, Node
+from entitykb.graph import (
+    EdgeIndex,
+    NestedDict,
+    Edge,
+    Node,
+    NodeIndex,
+)
+
+
+def test_node_index():
+    node = Node()
+    index = NodeIndex()
+    index.save(node)
+    assert node == index.get(node.key)
 
 
 def test_nested_dict():
@@ -24,6 +36,10 @@ def test_edge_index_save_delete():
     assert len(edge_index.by_node_key) == 3
     assert len(edge_index.by_edge_tag) == 1
 
+    # iterate edges
+    assert 4 == len(list(edge_index.iterate(tags="IS_A")))
+    assert 1 == len(list(edge_index.iterate(nodes=node_b)))
+
     # delete edge 1 (twice)
     edge_index.delete(edge_1)
     assert edge_index.count == 1
@@ -39,5 +55,3 @@ def test_edge_index_save_delete():
     assert edge_index.count == 0
     assert len(edge_index.by_node_key) == 0
     assert len(edge_index.by_edge_tag) == 0
-
-    assert edge_index.iterate()

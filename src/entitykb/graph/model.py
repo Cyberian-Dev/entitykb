@@ -1,29 +1,9 @@
-import functools
-from importlib import import_module
 import enum
-
 from typing import Tuple, Union, Iterable
 from uuid import uuid4
 
-
-class Direction(str, enum.Enum):
-    outgoing = "outgoing"
-    incoming = "incoming"
-
-    @classmethod
-    def as_tuple(cls, directions, all_if_none=False):
-        values = tuple()
-        directions = ensure_iterable(directions or ())
-
-        for d in directions:
-            if isinstance(d, str):
-                d = Direction[d]
-            values = values + (d,)
-
-        if all_if_none and not values:
-            values = (Direction.outgoing, Direction.incoming)
-
-        return values
+from .enums import Direction, Comparison
+from .funcs import ensure_iterable, get_class_from_name
 
 
 class Base(object):
@@ -34,6 +14,12 @@ class Base(object):
 
     def __hash__(self):
         return hash(repr(self))
+
+    def __repr__(self):
+        data = self.dict()
+        klass = data.pop("_klass")
+        items = sorted(f"{k}={v}" for k, v in data.items() if v is not None)
+        return f"<{klass}: {', '.join(items)}>"
 
     @property
     def _klass(self):
@@ -81,31 +67,143 @@ class Base(object):
         return klass(**kwargs)
 
 
-class Node(Base):
+class Criteria(Base):
+    pass
 
-    __slots__ = ["key", "label", "meta"]
+
+class AttrCriteriaType(type):
+    def __getattr__(self, attr_name: str):
+        return AttrCriteria(attr_name)
+
+
+class AttrCriteria(Criteria, metaclass=AttrCriteriaType):
+
+    __slots__ = ["attr_name", "compare", "value"]
 
     def __init__(
-        self, *, key: str = None, label: str = None, meta: dict = None, **kw
+        self, attr_name: str, compare: Comparison = None, value=None,
+    ):
+        self.attr_name = attr_name
+        self.compare = compare
+        self.value = value
+
+    def set(self, compare: Comparison, value):
+        self.compare = compare
+        self.value = value
+        return self
+
+    def __eq__(self, other):
+        return self.set(Comparison.eq, other)
+
+    def __ge__(self, other):
+        return self.set(Comparison.ge, other)
+
+    def __gt__(self, other):
+        return self.set(Comparison.gt, other)
+
+    def __le__(self, other):
+        return self.set(Comparison.le, other)
+
+    def __lt__(self, other):
+        return self.set(Comparison.lt, other)
+
+    def __ne__(self, other):
+        return self.set(Comparison.ne, other)
+
+    def do_compare(self, other) -> bool:
+        method_name = f"do_{self.compare.name}"
+        method_func = getattr(self, method_name)
+        result = method_func(other)
+        return result
+
+    def do_eq(self, other):
+        return other == self.value
+
+    def do_ge(self, other):
+        return other >= self.value
+
+    def do_gt(self, other):
+        return other > self.value
+
+    def do_le(self, other):
+        return other <= self.value
+
+    def do_lt(self, other):
+        return other < self.value
+
+    def do_ne(self, other):
+        return other != self.value
+
+
+class RelCriteriaType(type):
+    def __getattr__(self, tag: str):
+        tag = tag.upper()
+        return RelCriteria(tag)
+
+
+class RelCriteria(Criteria, metaclass=RelCriteriaType):
+
+    __slots__ = ["tags", "nodes", "directions"]
+
+    def __init__(self, tags: str, directions=None, nodes=None):
+        self.tags = ensure_iterable(tags)
+        self.directions = ensure_iterable(directions)
+        self.nodes = Node.to_key_tuple(nodes)
+
+    def __rshift__(self, nodes):
+        self.directions = (Direction.outgoing,)
+        self.nodes = Node.to_key_tuple(nodes)
+        return self
+
+    def __lshift__(self, nodes):
+        self.directions = (Direction.incoming,)
+        self.nodes = Node.to_key_tuple(nodes)
+        return self
+
+    def __pow__(self, nodes):
+        self.directions = (Direction.incoming, Direction.outgoing)
+        self.nodes = Node.to_key_tuple(nodes)
+        return self
+
+
+class Node(Base):
+
+    __slots__ = ["key", "label", "attrs"]
+
+    def __init__(
+        self, *, key: str = None, label: str = None, attrs: dict = None, **kw
     ):
         self.key = key or str(uuid4())
         self.label = label
-        self.meta = {**(meta or {}), **kw}
+        self.attrs = {**(attrs or {}), **kw}
 
     def __rshift__(self, tag):
         return Edge(start=self.key, tag=tag, end=None)
 
+    def __lshift__(self, tag):
+        return Edge(start=None, tag=tag, end=self.key)
+
     def __repr__(self):
-        return f"Node(key='{self.key}')"
+        return f"<entitykb.graph.model.Node: key={self.key}>"
+
+    def __getattr__(self, item):
+        if item in self.attrs:
+            return self.attrs.get(item)
+        else:
+            raise AttributeError
 
     @staticmethod
     def to_key(node_key: Union["Node", str]) -> str:
         return node_key.key if isinstance(node_key, Node) else node_key
 
+    @staticmethod
+    def to_key_tuple(nodes):
+        return tuple(Node.to_key(n) for n in ensure_iterable(nodes))
+
 
 class Entity(Node):
 
-    __slots__ = ["key", "label", "meta", "name", "synonyms"]
+    __slots__ = ["key", "label", "attrs", "name", "synonyms"]
 
     def __init__(
         self,
@@ -114,7 +212,7 @@ class Entity(Node):
         label: str = None,
         synonyms: Tuple[str] = None,
         key: str = None,
-        meta: dict = None,
+        attrs: dict = None,
         **kw,
     ):
         self.name = name
@@ -123,10 +221,13 @@ class Entity(Node):
         label = label or "ENTITY"
         key = key or f"{name}|{label}"
 
-        super().__init__(key=key, label=label, meta=meta, **kw)
+        super().__init__(key=key, label=label, attrs=attrs, **kw)
 
     def __repr__(self):
-        return f"Entity(name='{self.name}', label='{self.label}')"
+        return (
+            "<entitykb.graph.model.Entity: "
+            f"name={self.name}, label={self.label}>"
+        )
 
     @property
     def terms(self):
@@ -135,7 +236,7 @@ class Entity(Node):
 
 class Edge(Base):
 
-    __slots__ = ["start", "tag", "end", "weight", "meta"]
+    __slots__ = ["start", "tag", "end", "weight", "attrs"]
 
     def __init__(
         self,
@@ -144,43 +245,28 @@ class Edge(Base):
         tag: str,
         end: str,
         weight: int = 1,
-        meta: dict = None,
+        attrs: dict = None,
         **kw,
     ):
         self.start = Node.to_key(start)
         self.tag = tag.upper()
         self.end = Node.to_key(end)
         self.weight = weight
-        self.meta = {**(meta or {}), **kw}
+        self.attrs = {**(attrs or {}), **kw}
 
     def __repr__(self):
         return (
-            f"Edge(start='{self.start}', tag='{self.tag}', end='{self.end}')"
+            "<entitykb.graph.model.Edge: "
+            f"start={self.start}, tag={self.tag}, end={self.end}>"
         )
 
     def __rshift__(self, end: Union[Node, str]):
         self.end = Node.to_key(end)
         return self
 
-
-class Filter(Base):
-
-    __slots__ = ["keys", "labels", "tags", "directions", "self_ok"]
-
-    def __init__(
-        self,
-        *,
-        labels=None,
-        tags=None,
-        keys=None,
-        directions=None,
-        self_ok=False,
-    ):
-        self.labels = set(ensure_iterable(labels or ()))
-        self.tags = set(ensure_iterable(tags or ()))
-        self.keys = set(ensure_iterable(keys or ()))
-        self.directions = Direction.as_tuple(directions, all_if_none=True)
-        self.self_ok = self_ok
+    def __lshift__(self, start: Union[Node, str]):
+        self.start = Node.to_key(start)
+        return self
 
 
 class Step(Base):
@@ -195,65 +281,45 @@ class WalkStep(Step):
         self,
         tags=None,
         directions=Direction.incoming,
-        max_hops=None,
+        max_hops=1,
         passthru=False,
     ):
-        self.tags = {t.upper() for t in ensure_iterable(tags or (), f=set)}
+        self.tags = tuple(t.upper() for t in ensure_iterable(tags or ()))
         self.directions = Direction.as_tuple(directions, all_if_none=True)
         self.max_hops = max_hops
         self.passthru = passthru
 
+    def __hash__(self):
+        return hash(repr(self))
+
+    def __eq__(self, other):
+        return hash(self) == hash(other)
+
 
 class FilterStep(Step):
 
-    __slots__ = ["filters", "join_type", "exclude"]
+    __slots__ = ["criteria", "all", "exclude"]
 
-    def __init__(self, *, filters=None, join_type="AND", exclude=False):
-        self.filters = [Filter.create(f) for f in ensure_iterable(filters)]
-        self.join_type = join_type
+    def __init__(self, *, criteria=None, all=False, exclude=False):
+        criteria = ensure_iterable(criteria, explode_first=True)
+        self.criteria = [Criteria.create(c) for c in criteria]
+        self.all = all
         self.exclude = exclude
-
-    @property
-    def is_and(self):
-        return self.join_type == "AND"
 
 
 class Query(Base):
 
-    __slots__ = ["starts", "steps", "limit", "offset"]
+    __slots__ = ["steps", "limit", "offset"]
 
     def __init__(
-        self,
-        starts: Iterable,
-        steps: Iterable,
-        limit: int = None,
-        offset: int = 0,
+        self, steps: Iterable = None, limit: int = None, offset: int = 0,
     ):
-        self.starts = starts
         self.steps = [Step.create(s) for s in ensure_iterable(steps or ())]
         self.limit = limit
         self.offset = offset
 
+    def __len__(self):
+        return len(self.steps)
 
-@functools.lru_cache(maxsize=100)
-def get_class_from_name(full_name: str):
-    module_name, class_name = full_name.rsplit(".", 1)
-    module = import_module(module_name)
-    klass = getattr(module, class_name)
-    return klass
-
-
-def is_iterable(items):
-    return isinstance(items, (list, set, dict, frozenset, tuple))
-
-
-def ensure_iterable(items, f=tuple, explode_first=False):
-    if not is_iterable(items):
-        items = f((items,))
-
-    elif explode_first and len(items) == 1:
-        first_item = next(iter(items))
-        if is_iterable(first_item):
-            items = f(first_item)
-
-    return items
+    def __getitem__(self, item):
+        return self.steps[item]

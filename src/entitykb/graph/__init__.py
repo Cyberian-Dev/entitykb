@@ -1,32 +1,43 @@
+from .enums import Direction, Comparison
+
 from .model import (
-    Direction,
+    AttrCriteria,
+    RelCriteria,
     Edge,
     Entity,
-    Filter,
     FilterStep,
     Node,
     Query,
     WalkStep,
 )
 
-from .builder import QueryBuilder, QB
+from .index import NodeIndex, EdgeIndex, NestedDict
 
-from .embedded import Graph
+from .builder import QueryBuilder, QB, A, R
+
+from .graph import Graph
 
 from .searcher import Searcher, SearchResults
 
 __all__ = (
+    "A",
+    "AttrCriteria",
+    "Comparison",
     "Direction",
-    "Graph",
-    "Node",
-    "Entity",
     "Edge",
-    "Query",
-    "QB",
-    "QueryBuilder",
-    "WalkStep",
+    "EdgeIndex",
+    "Entity",
     "FilterStep",
-    "Filter",
-    "Searcher",
+    "Graph",
+    "NestedDict",
+    "Node",
+    "NodeIndex",
+    "QB",
+    "Query",
+    "QueryBuilder",
+    "R",
+    "RelCriteria",
     "SearchResults",
+    "Searcher",
+    "WalkStep",
 )

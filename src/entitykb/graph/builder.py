@@ -1,84 +1,78 @@
-from typing import Set, Iterable
-
 from .model import (
-    Node,
+    Criteria,
+    AttrCriteria,
+    RelCriteria,
     Query,
-    WalkStep,
     FilterStep,
-    Filter,
+    WalkStep,
     Direction,
-    ensure_iterable,
 )
 
 
 class QueryBuilder(object):
-    def __init__(self, starts=None, *args):
-        starts = starts or args
-        self.query = Query(starts=starts, steps=[])
+    def __init__(self):
+        self.query = Query()
 
-    # steps (returns self)
+    # walk nodes
 
-    def walk(
+    def all_nodes(self, *tags: str, max_hops: int = 1, passthru: bool = False):
+        return self._walk_nodes(
+            *tags,
+            max_hops=max_hops,
+            passthru=passthru,
+            directions=(Direction.outgoing, Direction.incoming)
+        )
+
+    def out_nodes(self, *tags: str, max_hops: int = 1, passthru: bool = False):
+        return self._walk_nodes(
+            *tags,
+            max_hops=max_hops,
+            passthru=passthru,
+            directions=(Direction.outgoing,)
+        )
+
+    def in_nodes(self, *tags: str, max_hops: int = 1, passthru: bool = False):
+        return self._walk_nodes(
+            *tags,
+            max_hops=max_hops,
+            passthru=passthru,
+            directions=(Direction.incoming,)
+        )
+
+    # filter
+
+    def keep(self, *criteria, all=False):
+        return self._add_filter(*criteria, all=all, exclude=False)
+
+    def remove(self, *criteria, all=False):
+        return self._add_filter(*criteria, all=all, exclude=True)
+
+    # private functions
+
+    def _add_filter(
+        self, *criteria: Criteria, all: bool = False, exclude: bool = False
+    ):
+        filter = FilterStep(criteria=criteria, all=all, exclude=exclude)
+        self.query.steps.append(filter)
+        return self
+
+    def _walk_nodes(
         self,
         *tags: str,
-        directions: Direction = Direction.incoming,
         max_hops: int = None,
         passthru: bool = False,
+        directions=None
     ):
         walk = WalkStep(
             tags=tags,
-            directions=directions,
+            directions=Direction.as_tuple(directions, all_if_none=True),
             max_hops=max_hops,
             passthru=passthru,
         )
         self.query.steps.append(walk)
         return self
 
-    def filter(
-        self,
-        *,
-        filters: Iterable = None,
-        label: str = None,
-        labels: Set[str] = None,
-        directions=Direction.incoming,
-        self_ok: bool = False,
-        _exclude: bool = False,
-        **kwargs,
-    ):
-        # prep step
-        filters = ensure_iterable(filters) if filters else []
-
-        labels = list(ensure_iterable(labels or []))
-        if label:
-            labels.append(label)
-
-        tags = []
-        keys = []
-        for tag, node in kwargs.items():
-            tags.append(tag)
-            keys.append(Node.to_key(node))
-
-        if labels or tags:
-            f = Filter(
-                labels=labels,
-                tags=tags,
-                keys=keys,
-                directions=directions,
-                self_ok=self_ok,
-            )
-            filters.append(f)
-
-        if filters:
-            filter_step = FilterStep(filters=filters, exclude=_exclude)
-            self.query.steps.append(filter_step)
-
-        return self
-
-    def exclude(self, **kwargs):
-        self.filter(_exclude=True, **kwargs)
-        return self
-
-    # goals (return query)
+    # limit (and offset)
 
     def all(self):
         self.query.limit = None
@@ -100,3 +94,5 @@ class QueryBuilder(object):
 
 
 QB = QueryBuilder
+A = AttrCriteria
+R = RelCriteria

@@ -1,11 +1,13 @@
 from entitykb.graph import (
-    Node,
-    Entity,
+    AttrCriteria,
+    Direction,
     Edge,
-    Query,
-    WalkStep,
+    Entity,
     FilterStep,
-    Filter,
+    Node,
+    Query,
+    RelCriteria,
+    WalkStep,
 )
 
 
@@ -13,19 +15,16 @@ def test_node():
     empty = Node()
     assert 36 == len(empty.key)
     assert empty.dict() == dict(
-        key=empty.key, label=None, meta={}, _klass="entitykb.graph.model.Node"
+        key=empty.key, label=None, attrs={}, _klass="entitykb.graph.model.Node"
     )
 
     node = Node(key="ENTITY|LABEL", label="LABEL")
     assert node.dict() == dict(
         key="ENTITY|LABEL",
         label="LABEL",
-        meta={},
+        attrs={},
         _klass="entitykb.graph.model.Node",
     )
-
-    # warning: don't use eval in production code, just an example.
-    assert node == eval(repr(node))
 
 
 def test_entity():
@@ -35,7 +34,7 @@ def test_entity():
         synonyms=tuple(),
         key="empty|ENTITY",
         label="ENTITY",
-        meta={},
+        attrs={},
         _klass="entitykb.graph.model.Entity",
     )
     assert empty.terms == ("empty",)
@@ -46,13 +45,10 @@ def test_entity():
         synonyms=("GO",),
         key="GenomOncology|COMPANY",
         label="COMPANY",
-        meta={},
+        attrs={},
         _klass="entitykb.graph.model.Entity",
     )
     assert entity.terms == ("GenomOncology", "GO")
-
-    # warning: don't use eval in production code, just an example.
-    assert entity == eval(repr(entity))
 
 
 def test_edge():
@@ -64,28 +60,26 @@ def test_edge():
         tag="IS_A",
         end=end.key,
         weight=1,
-        meta={},
+        attrs={},
         _klass="entitykb.graph.model.Edge",
     )
-
-    # warning: don't use eval in production code, just an example.
-    assert edge == eval(repr(edge))
 
     two = start >> "IS_A" >> end
     assert two == edge
     assert two.dict() == edge.dict()
 
+    three = end << "IS_A" << start
+    assert three == edge
+    assert three.dict() == edge.dict()
+
 
 def test_create_query_single_node():
-    n = Node()
-    q = Query((n.key,), steps=())
-    assert q.starts == (n.key,)
+    q = Query(steps=())
     assert q.steps == []
     assert q.limit is None
     assert q.offset == 0
     assert q.dict() == {
         "_klass": "entitykb.graph.model.Query",
-        "starts": (n.key,),
         "limit": None,
         "offset": 0,
         "steps": (),
@@ -94,21 +88,19 @@ def test_create_query_single_node():
 
 def test_create_walk_step_only():
     walk_step = WalkStep()
-    q = Query(starts=(), steps=walk_step)
-    assert q.starts == ()
+    q = Query(steps=walk_step)
     assert q.steps == [walk_step]
     assert q.limit is None
     assert q.offset == 0
     assert q.dict() == {
         "_klass": "entitykb.graph.model.Query",
-        "starts": (),
         "limit": None,
         "offset": 0,
         "steps": (
             {
                 "_klass": "entitykb.graph.model.WalkStep",
                 "directions": ("incoming",),
-                "max_hops": None,
+                "max_hops": 1,
                 "passthru": False,
                 "tags": (),
             },
@@ -120,35 +112,41 @@ def test_create_walk_step_only():
 
 
 def test_create_filter_step_only():
-    filter = Filter()
-    filter_step = FilterStep(filters=filter)
-    q = Query(starts=(), steps=filter_step)
+    filter_step = FilterStep()
+    q = Query(steps=filter_step)
     assert q.steps == [filter_step]
     assert q.limit is None
     assert q.offset == 0
     assert q.dict() == {
         "_klass": "entitykb.graph.model.Query",
-        "starts": (),
         "limit": None,
         "offset": 0,
         "steps": (
             {
                 "_klass": "entitykb.graph.model.FilterStep",
+                "criteria": (None,),
                 "exclude": False,
-                "filters": (
-                    {
-                        "_klass": "entitykb.graph.model.Filter",
-                        "directions": ("outgoing", "incoming"),
-                        "keys": (),
-                        "labels": (),
-                        "self_ok": False,
-                        "tags": (),
-                    },
-                ),
-                "join_type": "AND",
+                "all": False,
             },
         ),
     }
 
     q2 = Query.create(q.dict())
     assert q2.dict() == q.dict()
+
+
+def test_simple_attr_criteria():
+    a = AttrCriteria.label == "FOOD"
+    assert a.dict() == {
+        "_klass": "entitykb.graph.model.AttrCriteria",
+        "attr_name": "label",
+        "compare": "==",
+        "value": "FOOD",
+    }
+
+
+def test_simple_rel_criteria():
+    n = Node()
+    r = RelCriteria.is_a >> n
+    compare = RelCriteria(tags="IS_A", directions=Direction.outgoing, nodes=n)
+    assert r.dict() == compare.dict()
