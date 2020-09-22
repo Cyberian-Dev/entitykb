@@ -1,12 +1,12 @@
 from typing import List, Dict
 
-from entitykb.model import Doc, DocToken, DocEntity, Token, LabelSet
+from .model import Doc, DocToken, DocEntity, Token
 
 
 class TokenHandler(object):
-    def __init__(self, resolver, label_set: LabelSet, doc: Doc):
+    def __init__(self, resolver, labels, doc: Doc):
         self.resolver = resolver
-        self.label_set = label_set
+        self.labels = labels
         self.doc = doc
 
         self.prefixes: Dict[Token, List[DocToken]] = {}
@@ -27,17 +27,13 @@ class TokenHandler(object):
         for (prefix, prefix_tokens) in self.prefixes.items():
             candidate = prefix + doc_token.token
 
-            if self.resolver.is_prefix(
-                term=candidate, label_set=self.label_set
-            ):
+            if self.resolver.is_prefix(term=candidate, labels=self.labels):
                 new_prefixes[candidate] = prefix_tokens + [doc_token]
 
             self._resolve_entity(prefix, prefix_tokens)
 
         # do resolve and is_prefix for just this doc_token
-        if self.resolver.is_prefix(
-            term=doc_token.token, label_set=self.label_set
-        ):
+        if self.resolver.is_prefix(term=doc_token.token, labels=self.labels):
             new_prefixes[doc_token.token] = [doc_token]
 
         self.prefixes = new_prefixes
@@ -51,7 +47,7 @@ class TokenHandler(object):
             doc_entities = self.resolver.resolve(
                 doc=self.doc,
                 prefix=prefix,
-                label_set=self.label_set,
+                labels=self.labels,
                 doc_tokens=doc_tokens,
             )
 

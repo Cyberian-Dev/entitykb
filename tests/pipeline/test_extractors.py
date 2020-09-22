@@ -1,8 +1,7 @@
 import pytest
 
 from entitykb.date import DateResolver, Date
-from entitykb.index import DefaultIndex
-from entitykb.model import Entity
+from entitykb import Entity
 from entitykb.pipeline import (
     DefaultResolver,
     DefaultTokenizer,
@@ -14,24 +13,20 @@ the_the = Entity(name="The The", label="BAND")
 
 
 @pytest.fixture(scope="function")
-def extractor(apple, google, amazon, microsoft):
+def extractor(kb, apple, google, amazon, microsoft):
     tokenizer = DefaultTokenizer()
     normalizer = DefaultNormalizer()
 
-    index = DefaultIndex(tokenizer=tokenizer, normalizer=normalizer)
-
     resolver = DefaultResolver(
-        name="default",
-        tokenizer=tokenizer,
-        normalizer=normalizer,
-        index=index,
+        name="default", tokenizer=tokenizer, normalizer=normalizer, kb=kb,
     )
 
-    index.add(apple, google, amazon, microsoft, the_the)
+    for entity in (apple, google, amazon, microsoft, the_the):
+        kb.save_entity(entity)
 
     resolvers = (
         resolver,
-        DateResolver(tokenizer=tokenizer, normalizer=normalizer, index=index),
+        DateResolver(tokenizer=tokenizer, normalizer=normalizer, kb=kb),
     )
     extractor = Extractor.create(tokenizer=tokenizer, resolvers=resolvers,)
     return extractor

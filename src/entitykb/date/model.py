@@ -1,11 +1,20 @@
 from datetime import date
 
-from entitykb import Entity
+from entitykb.graph import Entity
 
 
 class Date(Entity):
 
-    __slots__ = ("name", "label", "synonyms", "meta", "year", "month", "day")
+    __slots__ = (
+        "key",
+        "name",
+        "label",
+        "synonyms",
+        "meta",
+        "year",
+        "month",
+        "day",
+    )
 
     def __init__(
         self,
@@ -23,6 +32,7 @@ class Date(Entity):
         if "name" not in kwargs:
             kwargs["name"] = self.as_date.strftime("%Y-%m-%d")
 
+        kwargs = {"label": "DATE", **kwargs}
         super().__init__(meta=meta, **kwargs)
 
     @property

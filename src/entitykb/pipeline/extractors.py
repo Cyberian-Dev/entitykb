@@ -1,13 +1,12 @@
-from typing import Optional, Union, Type, List, Tuple
+from typing import Optional, Union, Type, List, Tuple, Iterable
 
-from entitykb.model import (
+from entitykb.funcs import instantiate_class_from_name
+from . import Resolver, Tokenizer, TokenHandler
+from .model import (
     Doc,
     DocEntity,
     DocToken,
-    LabelSet,
-    instantiate_class_from_name,
 )
-from . import Resolver, Tokenizer, TokenHandler
 
 
 class Extractor(object):
@@ -17,10 +16,10 @@ class Extractor(object):
         self.tokenizer = tokenizer
         self.resolvers = resolvers
 
-    def __call__(self, text: str, label_set: LabelSet = None) -> Doc:
-        return self.extract_doc(text, label_set)
+    def __call__(self, text: str, labels: Iterable[str] = None) -> Doc:
+        return self.extract_doc(text, labels)
 
-    def extract_doc(self, text: str, label_set: LabelSet = None) -> Doc:
+    def extract_doc(self, text: str, labels: Iterable[str]) -> Doc:
         raise NotImplementedError
 
     @classmethod
@@ -33,13 +32,13 @@ class Extractor(object):
 
 
 class DefaultExtractor(Extractor):
-    def extract_doc(self, text: str, label_set: LabelSet = None) -> Doc:
+    def extract_doc(self, text: str, labels: Iterable[str]) -> Doc:
         doc = Doc(text=text)
 
         iter_tokens = self.tokenizer.tokenize(text)
         doc_tokens = []
         handlers: List[TokenHandler] = [
-            resolver.create_handler(doc=doc, label_set=label_set)
+            resolver.create_handler(doc=doc, labels=labels)
             for resolver in self.resolvers
         ]
 

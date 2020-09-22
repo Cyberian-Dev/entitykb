@@ -1,4 +1,4 @@
-from entitykb.model import (
+from entitykb import (
     Doc,
     DocToken,
     Token,

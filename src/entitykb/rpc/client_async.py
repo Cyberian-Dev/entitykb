@@ -1,5 +1,4 @@
-from entitykb.kb import BaseKB
-from entitykb.model import Doc, Entity
+from entitykb import BaseKB, Doc, Entity
 from .connection import RPCConnection
 
 
@@ -9,9 +8,9 @@ class AsyncKB(BaseKB):
             host=host, port=port, timeout=timeout
         )
 
-    async def parse(self, text, *labels):
+    async def parse(self, text, labels=None):
         async with self.connection as client:
-            data: dict = await client.call("parse", text, *labels)
+            data: dict = await client.call("parse", text, labels=labels)
             return Doc(**data)
 
     async def search(self, query):

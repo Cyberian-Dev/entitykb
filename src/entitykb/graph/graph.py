@@ -1,3 +1,4 @@
+from typing import Tuple
 from .index import NodeIndex, EdgeIndex
 from .model import Node, Edge
 
@@ -34,3 +35,19 @@ class Graph(object):
         edge = Edge(start=start, tag=tag, end=end, attrs=attrs)
         self.save_edge(edge)
         return edge
+
+    def info(self):
+        return {
+            "nodes": len(self.nodes),
+            "edges": len(self.edges),
+        }
+
+    def get_data(self) -> Tuple[NodeIndex, EdgeIndex]:
+        return self.nodes, self.edges
+
+    def put_data(self, data: Tuple[NodeIndex, EdgeIndex]):
+        self.nodes, self.edges = data
+
+    def reset_data(self):
+        self.nodes = NodeIndex()
+        self.edges = EdgeIndex()

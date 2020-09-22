@@ -1,16 +1,11 @@
-import datetime
-
-from entitykb import (
+from entitykb.pipeline.model import (
     Entity,
     DocToken,
     DocEntity,
     Doc,
     FindResult,
-    Node,
     Token,
-    Resource,
 )
-from entitykb.date import Date
 
 
 def test_entity_create():
@@ -18,10 +13,11 @@ def test_entity_create():
     assert entity.name == "Barack Obama"
     assert entity.synonyms == ()
     assert entity.dict() == {
-        "label": "ENTITY",
-        "meta": None,
-        "name": "Barack Obama",
+        "_klass": "entitykb.graph.model.Entity",
+        "attrs": {},
         "key": "Barack Obama|ENTITY",
+        "label": "ENTITY",
+        "name": "Barack Obama",
         "synonyms": (),
     }
     assert entity == entity
@@ -56,14 +52,14 @@ def test_doc_create():
 
     doc_ent = doc.entities[0]
     assert doc_ent.doc == doc
-    assert doc_ent.sort_order == (-2, False, -100, 0, 0, 0, 2, "PRESIDENT")
+    assert doc_ent.sort_order == (-2, 0, 0, 2, "PRESIDENT")
     assert doc_ent.offsets == (2, 3)
     assert doc_ent.dict() == {
-        "correction": None,
         "entity": {
+            "_klass": "entitykb.graph.model.Entity",
+            "attrs": {},
             "key": "Barack Obama|PRESIDENT",
             "label": "PRESIDENT",
-            "meta": None,
             "name": "Barack Obama",
             "synonyms": (),
         },
@@ -95,62 +91,3 @@ def test_create_find_result():
     assert hash(result)
     assert str(result) == "aaa [AAA|ENTITY]"
     assert len(result) == 1
-
-
-def test_default_label():
-    entity = Entity(name="Barack Obama")
-    assert entity.label == "ENTITY"
-
-    class President(Entity):
-        pass
-
-    entity = President(name="Barack Obama")
-    assert entity.label == "PRESIDENT"
-
-
-def test_from_dict():
-    d = dict(name="2000-01-02", year=2000, month=1, day=2)
-    entity = Entity.from_dict(d)
-    assert entity.meta == dict(year=2000, month=1, day=2)
-    assert repr(entity) == "2000-01-02|ENTITY"
-
-    date = Date.from_dict(d)
-    assert date.year == 2000
-    assert date.month == 1
-    assert date.day == 2
-    assert date.meta is None
-    assert repr(date) == "2000-01-02|DATE"
-
-    d = dict(name="MET", synonyms="AUTS9||HGFR", ignored=None)
-    gene = Entity.from_dict(d, mv_keys={"synonyms"}, mv_sep="||")
-    assert gene.name == "MET"
-    assert gene.synonyms == ("AUTS9", "HGFR")
-    assert gene.meta is None
-
-
-def test_date():
-    date = Date(year=2001, month=2, day=3)
-    assert date.name == "2001-02-03"
-    assert date.as_date == datetime.date(2001, 2, 3)
-    assert date.dict() == dict(
-        name="2001-02-03",
-        key="2001-02-03|DATE",
-        year=2001,
-        month=2,
-        day=3,
-        label="DATE",
-        meta=None,
-        synonyms=(),
-    )
-
-
-def test_node_create():
-    entity = Node.create(name="Apple")
-    assert isinstance(entity, Entity)
-    assert "Apple|ENTITY" == entity.key
-
-    resource = Node.create(title="Wikipedia", key="http://wikipedia.org/")
-    assert isinstance(resource, Resource)
-    assert "Wikipedia" == resource.title
-    assert "http://wikipedia.org/" == resource.key
-    assert resource.data is None

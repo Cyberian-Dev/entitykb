@@ -10,6 +10,11 @@ def get_class_from_name(full_name: str):
     return klass
 
 
+def instantiate_class_from_name(full_name: str, *args, **kwargs):
+    klass = get_class_from_name(full_name)
+    return klass(*args, **kwargs)
+
+
 def is_iterable(items):
     return isinstance(items, (list, set, dict, frozenset, tuple))
 

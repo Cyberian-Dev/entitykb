@@ -1,9 +1,9 @@
 from dataclasses import dataclass
-from typing import Tuple, List
+from typing import Tuple, List, Iterable
 
+from entitykb.base import BaseKB
 from entitykb.config import Config
-from entitykb.index import Index, DefaultIndex
-from entitykb.model import DocEntity, LabelSet
+from .model import DocEntity
 
 from . import Tokenizer, Normalizer, Extractor, Filterer, Resolver
 
@@ -14,29 +14,18 @@ class Pipeline(object):
     normalizer: Normalizer
 
     config: Config = None
-    index: Index = None
+    kb: BaseKB = None
     extractor: Extractor = None
     filterers: Tuple[Filterer, ...] = tuple
     resolvers: Tuple[Resolver, ...] = tuple
 
     @classmethod
-    def create(cls, config: Config):
+    def create(cls, kb: BaseKB, config: Config, normalizer: Normalizer):
         tokenizer = Tokenizer.create(config.tokenizer)
-        normalizer = Normalizer.create(config.normalizer)
-
-        index = DefaultIndex.create(
-            config.index,
-            root_dir=config.root_dir,
-            tokenizer=tokenizer,
-            normalizer=normalizer,
-        )
 
         resolvers = tuple(
             Resolver.create(
-                resolver,
-                tokenizer=tokenizer,
-                normalizer=normalizer,
-                index=index,
+                resolver, tokenizer=tokenizer, normalizer=normalizer, kb=kb,
             )
             for resolver in config.resolvers or [None]
         )
@@ -54,7 +43,7 @@ class Pipeline(object):
 
         pipeline = cls(
             config=config,
-            index=index,
+            kb=kb,
             extractor=extractor,
             filterers=filterers,
             normalizer=normalizer,
@@ -62,20 +51,18 @@ class Pipeline(object):
             tokenizer=tokenizer,
         )
 
-        index.load()
-
         return pipeline
 
     # pipeline
 
-    def __call__(self, text: str, label_set: LabelSet = None):
-        doc = self.extractor.extract_doc(text=text, label_set=label_set)
+    def __call__(self, text: str, labels: Iterable[str]):
+        doc = self.extractor.extract_doc(text=text, labels=labels)
         doc.entities = self.filter_entities(doc.entities)
         doc.entities = tuple(doc.entities)
         return doc
 
     def __len__(self):
-        return len(self.index)
+        return len(self.kb)
 
     def filter_entities(self, doc_entities: List[DocEntity]):
         for filterer in self.filterers:

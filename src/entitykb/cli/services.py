@@ -7,8 +7,7 @@ from typing import Iterator, List
 import typer
 from tabulate import tabulate
 
-from entitykb import Config, KB, logger
-from entitykb.model import Entity
+from entitykb import Config, KB, logger, Entity
 
 
 class FileFormat(str, enum.Enum):
@@ -52,7 +51,7 @@ def iterate_entities(
         if synonyms and synonyms in record:
             record["synonyms"] = record.pop(synonyms)
 
-        item = Entity.from_dict(
+        item = Entity.create(
             record=record,
             mv_keys=mv_keys,
             mv_sep=mv_sep,

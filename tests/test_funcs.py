@@ -1,4 +1,4 @@
-from entitykb.graph import funcs, Entity
+from entitykb import funcs, Entity
 
 
 def test_get_class_from_name():

@@ -2,9 +2,7 @@ import asyncio
 
 from aio_msgpack_rpc import Server
 
-from entitykb import logger, KB
-from entitykb.kb import BaseKB
-from entitykb.model import Entity
+from entitykb import logger, KB, BaseKB, Entity
 from .connection import RPCConnection
 
 
@@ -14,8 +12,8 @@ class HandlerKB(BaseKB):
     def __init__(self, _kb):
         self._kb: KB = _kb
 
-    def parse(self, text: str, *labels: str) -> dict:
-        doc = self._kb.parse(text, *labels)
+    def parse(self, text: str, labels=None) -> dict:
+        doc = self._kb.parse(text, labels)
         return doc.dict()
 
     def search(self, query):

@@ -7,7 +7,19 @@ class BaseKB(object):
     """
 
     @abstractmethod
-    def parse(self, text, *labels):
+    def __len__(self):
+        """ Return number of nodes in KB. """
+
+    @abstractmethod
+    def is_prefix(self, prefix, labels=None):
+        """ Returns True if prefix exists for given labels. """
+
+    @abstractmethod
+    def find(self, term: str = None, labels=None, limit: int = None):
+        """ Returns FindResult based on term and labels requested. """
+
+    @abstractmethod
+    def parse(self, text, labels=None):
         """ Parse text string and return Doc with tokens and entities. """
 
     @abstractmethod

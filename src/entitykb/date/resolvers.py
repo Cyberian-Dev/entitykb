@@ -1,13 +1,15 @@
-from entitykb.model import FindResult, LabelSet
-from entitykb.pipeline import Resolver
+from typing import Iterable
+from entitykb.pipeline import Resolver, FindResult
 from . import grammar, Date
 
 
 class DateResolver(Resolver):
+    def is_allowed(cls, labels: Iterable[str]):
+        ok = labels is None
+        ok = ok or ("DATE" in labels)
+        return ok
 
-    label_set = LabelSet(labels=["DATE"])
-
-    def do_find(self, term: str, label_set: LabelSet = None) -> FindResult:
+    def do_find(self, term: str, labels: Iterable[str]) -> FindResult:
         dt = grammar.parse_date(term)
 
         if dt:
@@ -20,6 +22,6 @@ class DateResolver(Resolver):
 
         return result
 
-    def do_is_prefix(self, term: str, label_set: LabelSet = None) -> bool:
+    def do_is_prefix(self, term: str, labels: Iterable[str]) -> bool:
         is_prefix = grammar.is_prefix(term)
         return is_prefix

@@ -1,34 +1,27 @@
-from typing import Optional, Union, Type, List
+from typing import Optional, Union, Type, List, Iterable
 
-from entitykb.model import (
+from entitykb.funcs import instantiate_class_from_name
+from . import Normalizer, Tokenizer, TokenHandler, KeepLongestByKey
+from .model import (
     Doc,
     DocToken,
     DocEntity,
     FindResult,
-    LabelSet,
     Token,
-    instantiate_class_from_name,
 )
-from entitykb.index import DefaultIndex
-
-from . import Normalizer, Tokenizer, TokenHandler, KeepLongestByKey
 
 
 class Resolver(object):
-
-    label_set = LabelSet.create()
-
     def __init__(
-        self,
-        *,
-        tokenizer: Tokenizer,
-        normalizer: Normalizer,
-        index: DefaultIndex = None,
-        **kwargs,
+        self, *, tokenizer: Tokenizer, normalizer: Normalizer, kb, **_,
     ):
         self.tokenizer = tokenizer
         self.normalizer = normalizer
-        self.index = index
+        self.kb = kb
+
+    @classmethod
+    def is_allowed(cls, _: Iterable[str]):
+        return True
 
     def resolve(
         self,
@@ -36,22 +29,22 @@ class Resolver(object):
         doc,
         doc_tokens: List[DocToken],
         prefix: Token,
-        label_set: LabelSet = None,
+        labels: Iterable[str],
     ) -> List[DocEntity]:
 
         doc_entities = []
 
-        if self.label_set.is_allowed(label_set):
-            doc_entities = self.do_resolve(doc, doc_tokens, prefix, label_set)
+        if self.is_allowed(labels):
+            doc_entities = self.do_resolve(doc, doc_tokens, prefix, labels)
 
         return doc_entities
 
     def do_resolve(
-        self, doc, doc_tokens, prefix: str, label_set: LabelSet
+        self, doc, doc_tokens, prefix: str, labels
     ) -> List[DocEntity]:
         doc_entities = []
 
-        find_result = self.find(term=prefix, label_set=label_set)
+        find_result = self.find(term=prefix, labels=labels)
 
         if find_result:
             for entity in find_result:
@@ -73,20 +66,18 @@ class Resolver(object):
     def clean_doc_tokens(self, doc_entities):
         pass
 
-    def find(self, term: str, label_set: LabelSet = None) -> FindResult:
-        label_set = self.label_set.intersect(label_set)
-        if label_set:
-            return self.do_find(term, label_set)
+    def find(self, term: str, labels: Iterable[str] = None) -> FindResult:
+        if self.is_allowed(labels):
+            return self.do_find(term, labels)
 
-    def do_find(self, term: str, label_set: LabelSet) -> FindResult:
+    def do_find(self, term: str, labels: Iterable[str]) -> FindResult:
         raise NotImplementedError
 
-    def is_prefix(self, term: str, label_set: LabelSet = None) -> bool:
-        label_set = self.label_set.intersect(label_set)
-        if label_set:
-            return self.do_is_prefix(term, label_set)
+    def is_prefix(self, term: str, labels: Iterable[str] = None) -> bool:
+        if self.is_allowed(labels):
+            return self.do_is_prefix(term, labels)
 
-    def do_is_prefix(self, term: str, label_set: LabelSet) -> bool:
+    def do_is_prefix(self, term: str, labels) -> bool:
         raise NotImplementedError
 
     @classmethod
@@ -100,16 +91,16 @@ class Resolver(object):
 
         return resolver
 
-    def create_handler(self, doc: Doc, label_set: LabelSet):
-        return TokenHandler(resolver=self, doc=doc, label_set=label_set)
+    def create_handler(self, doc: Doc, labels):
+        return TokenHandler(resolver=self, doc=doc, labels=labels)
 
 
 class DefaultResolver(Resolver):
-    def do_find(self, term: str, label_set: LabelSet) -> FindResult:
-        return self.index.find(term, labels=label_set.labels)
+    def do_find(self, term: str, labels: Iterable[str]) -> FindResult:
+        return self.kb.find(term, labels=labels)
 
-    def do_is_prefix(self, term: str, label_set: LabelSet) -> bool:
-        return self.index.is_prefix(term, labels=label_set.labels)
+    def do_is_prefix(self, term: str, labels: Iterable[str]) -> bool:
+        return self.kb.is_prefix(term, labels=labels)
 
 
 ResolverType = Optional[Union[Type[Resolver], Resolver, str]]

@@ -1,6 +1,6 @@
 import enum
 
-from .funcs import ensure_iterable
+from entitykb.funcs import ensure_iterable
 
 
 @enum.unique

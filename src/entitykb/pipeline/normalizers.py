@@ -1,10 +1,10 @@
+import codecs
 from string import ascii_lowercase, digits, punctuation
 from typing import Optional, Union, Type
 
 import translitcodec
-import codecs
 
-from entitykb.model import instantiate_class_from_name
+from entitykb.funcs import instantiate_class_from_name
 
 
 class Normalizer(object):

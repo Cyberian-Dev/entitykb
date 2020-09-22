@@ -1,5 +1,4 @@
 from entitykb.date import DateResolver, Date
-from entitykb.index import DefaultIndex
 from entitykb.pipeline import (
     DefaultResolver,
     Resolver,
@@ -8,10 +7,9 @@ from entitykb.pipeline import (
 )
 
 
-def test_resolver_construct():
+def test_resolver_construct(kb):
     tokenizer = DefaultTokenizer()
     normalizer = DefaultNormalizer()
-    index = DefaultIndex(tokenizer=tokenizer, normalizer=normalizer)
 
     assert isinstance(
         Resolver.create(
@@ -19,7 +17,7 @@ def test_resolver_construct():
             name="default",
             tokenizer=tokenizer,
             normalizer=normalizer,
-            index=index,
+            kb=kb,
         ),
         DefaultResolver,
     )
@@ -30,7 +28,7 @@ def test_resolver_construct():
             name="default",
             tokenizer=tokenizer,
             normalizer=normalizer,
-            index=index,
+            kb=kb,
         ),
         DefaultResolver,
     )
@@ -41,7 +39,7 @@ def test_resolver_construct():
             name="default",
             tokenizer=tokenizer,
             normalizer=normalizer,
-            index=index,
+            kb=kb,
         ),
         DateResolver,
     )
@@ -52,15 +50,15 @@ def test_resolver_construct():
             name="default",
             tokenizer=tokenizer,
             normalizer=normalizer,
-            index=index,
+            kb=kb,
         ),
         DateResolver,
     )
 
 
-def test_date_resolver_is_prefix():
+def test_date_resolver_is_prefix(kb):
     resolver = DateResolver(
-        tokenizer=DefaultTokenizer(), normalizer=DefaultNormalizer()
+        tokenizer=DefaultTokenizer(), normalizer=DefaultNormalizer(), kb=kb
     )
 
     assert resolver.is_prefix("2019")
@@ -75,9 +73,9 @@ def test_date_resolver_is_prefix():
     assert not resolver.is_prefix("2017 07 19 J")
 
 
-def test_date_resolver_find_valid():
+def test_date_resolver_find_valid(kb):
     resolver = DateResolver(
-        tokenizer=DefaultTokenizer(), normalizer=DefaultNormalizer()
+        tokenizer=DefaultTokenizer(), normalizer=DefaultNormalizer(), kb=kb
     )
 
     result = resolver.find("2019-01-01")
@@ -94,12 +92,12 @@ def test_date_resolver_find_valid():
     assert str(result) == "2019-JAN-01 [2019-01-01|DATE]"
 
 
-def test_date_resolver_fail_invalid():
+def test_date_resolver_fail_invalid(kb):
     resolver = DateResolver(
-        tokenizer=DefaultTokenizer(), normalizer=DefaultNormalizer()
+        tokenizer=DefaultTokenizer(), normalizer=DefaultNormalizer(), kb=kb
     )
 
-    result = resolver.find("2019-01-01", label_set={"NOT_DATE"})
+    result = resolver.find("2019-01-01", labels={"NOT_DATE"})
     assert not result
 
     result = resolver.find("Nonsense!")
@@ -115,25 +113,21 @@ def test_date_resolver_fail_invalid():
     assert not result
 
 
-def test_default_resolver(apple):
+def test_default_resolver(kb, apple):
     tokenizer = DefaultTokenizer()
     normalizer = DefaultNormalizer()
-    index = DefaultIndex(tokenizer=tokenizer, normalizer=normalizer)
     resolver = DefaultResolver(
-        name="default",
-        tokenizer=tokenizer,
-        normalizer=normalizer,
-        index=index,
+        name="default", tokenizer=tokenizer, normalizer=normalizer, kb=kb,
     )
-    resolver.index.save_entity(apple)
+    kb.save_entity(apple)
 
     assert resolver.is_prefix("a")
     assert resolver.is_prefix("apple")
     assert not resolver.is_prefix("b")
     assert not resolver.is_prefix("apple, ink.")
 
-    assert (apple,) == resolver.find("apple").entities
-    assert (apple,) == resolver.find("apple, inc.").entities
+    assert (apple,) == tuple(resolver.find("apple").entities)
+    assert (apple,) == tuple(resolver.find("apple, inc.").entities)
 
     assert not resolver.find("banana").entities
     assert not resolver.find("apple, ink.").entities

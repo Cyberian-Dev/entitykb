@@ -3,10 +3,10 @@ from typing import Tuple, Union, Iterable
 from uuid import uuid4
 
 from .enums import Direction, Comparison
-from .funcs import ensure_iterable, get_class_from_name
+from entitykb.funcs import ensure_iterable, get_class_from_name
 
 
-class Base(object):
+class SlotBase(object):
     """ Each subclass must define __slots__ """
 
     def __eq__(self, other):
@@ -37,7 +37,7 @@ class Base(object):
 
     @classmethod
     def _convert(cls, value):
-        if isinstance(value, Base):
+        if isinstance(value, SlotBase):
             return value.dict()
 
         if isinstance(value, (tuple, list, set)):
@@ -53,7 +53,7 @@ class Base(object):
         if _item is None and len(kwargs) == 0:
             return None
 
-        if isinstance(_item, Base):
+        if isinstance(_item, SlotBase):
             return _item
 
         if isinstance(_item, dict):
@@ -67,7 +67,7 @@ class Base(object):
         return klass(**kwargs)
 
 
-class Criteria(Base):
+class Criteria(SlotBase):
     pass
 
 
@@ -166,7 +166,7 @@ class RelCriteria(Criteria, metaclass=RelCriteriaType):
         return self
 
 
-class Node(Base):
+class Node(SlotBase):
 
     __slots__ = ["key", "label", "attrs"]
 
@@ -187,6 +187,9 @@ class Node(Base):
         return f"<entitykb.graph.model.Node: key={self.key}>"
 
     def __getattr__(self, item):
+        if item == "attrs":
+            raise AttributeError
+
         if item in self.attrs:
             return self.attrs.get(item)
         else:
@@ -234,7 +237,7 @@ class Entity(Node):
         return (self.name,) + (self.synonyms or ())
 
 
-class Edge(Base):
+class Edge(SlotBase):
 
     __slots__ = ["start", "tag", "end", "weight", "attrs"]
 
@@ -269,7 +272,7 @@ class Edge(Base):
         return self
 
 
-class Step(Base):
+class Step(SlotBase):
     pass
 
 
@@ -307,7 +310,7 @@ class FilterStep(Step):
         self.exclude = exclude
 
 
-class Query(Base):
+class Query(SlotBase):
 
     __slots__ = ["steps", "limit", "offset"]
 

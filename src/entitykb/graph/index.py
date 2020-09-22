@@ -4,6 +4,8 @@ from typing import Dict, Set
 
 from .model import Node, Edge, Direction, ensure_iterable
 
+lock = Lock()
+
 
 class NestedDict(dict):
     def __missing__(self, key):
@@ -36,14 +38,13 @@ class EdgeIndex(object):
         self.by_node_key = NestedDict()
         self.by_edge_tag = NestedDict()
         self.count = 0
-        self.lock = Lock()
 
     def __len__(self):
         return self.count
 
     def save(self, edge):
         any_add = False
-        with self.lock:
+        with lock:
             for a, dir, tag, b in self._edge_keys(edge):
                 bottom = self.by_node_key[a][dir][tag]
                 any_add = self._do_add(bottom, b, edge) or any_add
@@ -57,7 +58,7 @@ class EdgeIndex(object):
 
     def delete(self, edge):
         any_del = False
-        with self.lock:
+        with lock:
             for a, dir, tag, b in self._edge_keys(edge):
                 keys = (a, dir, tag, b)
                 any_del = self._do_delete(self.by_node_key, keys) or any_del

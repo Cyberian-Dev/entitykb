@@ -1,61 +1,36 @@
 from .logging import logger
-
-from .model import (
-    BaseModel,
-    Correction,
+from .base import BaseKB
+from .config import Config
+from .graph import Node, Entity, Graph
+from .terms import Terms
+from .pipeline import (
+    Pipeline,
+    Normalizer,
+    FindResult,
     Doc,
     DocEntity,
     DocToken,
-    Entity,
-    EntityValue,
-    ER,
-    FindResult,
-    Label,
-    LabelSet,
-    Node,
-    Relationship,
-    Resource,
-    Tag,
     Token,
 )
-
-from .index import Index, DefaultIndex, Query, QueryBuilder, QB
-
-from .config import Config
-
-from . import pipeline
-
 from .kb import KB
-
 from . import date
-from . import fuzzy
 
 __all__ = (
-    "BaseModel",
+    "BaseKB",
     "Config",
-    "Correction",
-    "DefaultIndex",
     "Doc",
     "DocEntity",
     "DocToken",
     "Entity",
-    "EntityValue",
-    "ER",
     "FindResult",
-    "Index",
+    "Graph",
     "KB",
-    "Label",
-    "LabelSet",
     "Node",
-    "Query",
-    "QueryBuilder",
-    "QB",
-    "Relationship",
-    "Resource",
-    "Tag",
+    "Normalizer",
+    "Pipeline",
+    "Terms",
     "Token",
     "date",
-    "fuzzy",
     "logger",
     "pipeline",
 )

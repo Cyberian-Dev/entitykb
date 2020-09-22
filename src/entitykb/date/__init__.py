@@ -1,5 +1,5 @@
 from . import grammar
-from .entities import Date
+from .model import Date
 from .resolvers import DateResolver
 
 

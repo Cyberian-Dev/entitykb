@@ -1,6 +1,6 @@
 import asyncio
 
-from entitykb.model import Doc, Entity, Resource, Relationship
+from entitykb import Doc, Entity
 from .client_async import AsyncKB
 
 
@@ -13,8 +13,8 @@ def run_future(future):
 class SyncKB(AsyncKB):
     """ EntityKB RPC Client """
 
-    def parse(self, text, *labels) -> Doc:
-        future = super(SyncKB, self).parse(text, *labels)
+    def parse(self, text, labels=None) -> Doc:
+        future = super(SyncKB, self).parse(text, labels=labels)
         doc = run_future(future)
         return doc
 
@@ -53,7 +53,7 @@ class SyncKB(AsyncKB):
     def delete_entity(self, key_or_id):
         pass
 
-    def save_resource(self, resource: Resource):
+    def save_resource(self, resource):
         pass
 
     def get_resource(self, key_or_id):
@@ -62,8 +62,8 @@ class SyncKB(AsyncKB):
     def delete_resource(self, key_or_id):
         pass
 
-    def save_relationship(self, relationship: Relationship):
+    def save_relationship(self, relationship):
         pass
 
-    def delete_relationship(self, relationship: Relationship):
+    def delete_relationship(self, relationship):
         pass

@@ -1,11 +1,22 @@
+import tempfile
 from typing import Union
 
 import pytest
 
-from entitykb import BaseModel, Entity
+from entitykb import Node, Entity, KB
 
 
-class Location(BaseModel):
+@pytest.fixture()
+def root_dir():
+    return tempfile.mkdtemp()
+
+
+@pytest.fixture()
+def kb(root_dir):
+    return KB(root_dir=root_dir)
+
+
+class Location(Node):
     def __init__(self, *, city: str):
         self.city = city
 
