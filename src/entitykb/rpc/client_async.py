@@ -1,23 +1,39 @@
-from entitykb import BaseKB, Doc, Entity
+from entitykb import BaseKB, Doc, Node
 from .connection import RPCConnection
 
 
 class AsyncKB(BaseKB):
+
     def __init__(self, *, connection=None, host=None, port=None, timeout=None):
         self.connection = connection or RPCConnection(
             host=host, port=port, timeout=timeout
         )
 
+    def __len__(self):
+        raise NotImplementedError
+
+    async def get_node(self, key: str):
+        async with self.connection as client:
+            data: dict = await client.call("get_node", key)
+            return Node(**data)
+
+    async def save_node(self, node: Node):
+        async with self.connection as client:
+            await client.call("save_node", node.dict())
+
+    async def remove_node(self, key):
+        raise NotImplementedError
+
+    async def save_edge(self, edge):
+        raise NotImplementedError
+
+    async def suggest(self, term, query=None):
+        raise NotImplementedError
+
     async def parse(self, text, labels=None):
         async with self.connection as client:
             data: dict = await client.call("parse", text, labels=labels)
             return Doc(**data)
-
-    async def search(self, query):
-        pass
-
-    async def suggest(self, query):
-        pass
 
     async def commit(self):
         async with self.connection as client:
@@ -29,33 +45,8 @@ class AsyncKB(BaseKB):
             return await client.call("reset")
 
     async def reload(self):
-        pass
+        raise NotImplementedError
 
     async def info(self):
         async with self.connection as client:
             return await client.call("info")
-
-    async def save_entity(self, entity: Entity):
-        async with self.connection as client:
-            await client.call("save_entity", entity.dict())
-
-    async def get_entity(self, key_or_id):
-        pass
-
-    async def delete_entity(self, key_or_id):
-        pass
-
-    async def save_resource(self, resource):
-        pass
-
-    async def get_resource(self, key_or_id):
-        pass
-
-    async def delete_resource(self, key_or_id):
-        pass
-
-    async def save_relationship(self, relationship):
-        pass
-
-    async def delete_relationship(self, relationship):
-        pass

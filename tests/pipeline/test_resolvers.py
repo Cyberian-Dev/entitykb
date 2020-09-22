@@ -119,7 +119,7 @@ def test_default_resolver(kb, apple):
     resolver = DefaultResolver(
         name="default", tokenizer=tokenizer, normalizer=normalizer, kb=kb,
     )
-    kb.save_entity(apple)
+    kb.save_node(apple)
 
     assert resolver.is_prefix("a")
     assert resolver.is_prefix("apple")

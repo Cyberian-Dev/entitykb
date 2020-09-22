@@ -1,6 +1,6 @@
 import asyncio
 
-from entitykb import Doc, Entity
+from entitykb import Doc, Node
 from .client_async import AsyncKB
 
 
@@ -13,16 +13,30 @@ def run_future(future):
 class SyncKB(AsyncKB):
     """ EntityKB RPC Client """
 
+    def __len__(self):
+        pass
+
+    def get_node(self, key: str) -> Node:
+        raise NotImplementedError
+
+    def save_node(self, node: Node):
+        future = super(SyncKB, self).save_node(node)
+        doc = run_future(future)
+        return doc
+
+    def remove_node(self, key):
+        raise NotImplementedError
+
+    def save_edge(self, edge):
+        raise NotImplementedError
+
+    def suggest(self, term, query=None):
+        raise NotImplementedError
+
     def parse(self, text, labels=None) -> Doc:
         future = super(SyncKB, self).parse(text, labels=labels)
         doc = run_future(future)
         return doc
-
-    def search(self, query):
-        pass
-
-    def suggest(self, query):
-        pass
 
     def commit(self):
         future = super(SyncKB, self).commit()
@@ -35,35 +49,9 @@ class SyncKB(AsyncKB):
         return success
 
     def reload(self):
-        pass
+        raise NotImplementedError
 
     def info(self):
         future = super(SyncKB, self).info()
         data = run_future(future)
         return data
-
-    def save_entity(self, entity: Entity):
-        future = super(SyncKB, self).save_entity(entity)
-        doc = run_future(future)
-        return doc
-
-    def get_entity(self, key_or_id):
-        pass
-
-    def delete_entity(self, key_or_id):
-        pass
-
-    def save_resource(self, resource):
-        pass
-
-    def get_resource(self, key_or_id):
-        pass
-
-    def delete_resource(self, key_or_id):
-        pass
-
-    def save_relationship(self, relationship):
-        pass
-
-    def delete_relationship(self, relationship):
-        pass

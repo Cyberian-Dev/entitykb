@@ -1,4 +1,4 @@
-from entitykb import Config, BaseKB, Graph, Entity
+from entitykb import Config, BaseKB, Graph
 from entitykb.pipeline import Pipeline, Normalizer, FindResult
 from entitykb.terms import Terms
 from .storage import DefaultStorage
@@ -15,94 +15,32 @@ class KB(BaseKB):
         self.pipeline = Pipeline.create(
             kb=self, config=self.config, normalizer=self.normalizer
         )
-        self.load()
-
-    # common base interface
+        self.reload()
 
     def __len__(self):
         return len(self.graph)
 
-    def is_prefix(self, prefix, labels=None):
-        """ Returns True if prefix exists for given labels. """
-        if labels:
-            term_iter = self.terms.iterate_prefix_keys(prefix)
-            for key in term_iter:
-                node = self.graph.get_node(key)
-                if node.label in labels:
-                    return True
+    def get_node(self, key: str):
+        return self.graph.get_node(key)
 
-            return False
-        else:
-            return self.terms.is_prefix(prefix=prefix)
-
-    def find(self, term: str = None, labels=None, limit: int = None):
-        term_iter = self.terms.iterate_term_keys(term=term)
-        entities = []
-        for key in term_iter:
-            entity = self.graph.get_node(key)
-            entities.append(entity)
-
-        # query = QB(term=term)
-        # if labels:
-        #     query = query.filter(label=labels)
-        # query = query.limit(limit)
-        #
-        # results = self.searcher.search(query)
-
-        return FindResult(term=term, entities=entities)
-
-    def parse(self, text, labels=None):
-        """ Parse text string and return Doc with tokens and entities. """
-        doc = self.pipeline(text=text, labels=labels)
-        return doc
-
-    def search(self, query):
-        """ Search index's terms and graph using the query. """
-
-    def suggest(self, query):
-        """ Provide terms based on prefix query for auto-complete. """
-
-    def save_entity(self, entity: Entity):
-        """ Save entity by indexing terms and storing in graph. """
-        self.graph.save_node(entity)
-        for term in entity.terms:
-            self.terms.add_term(term, entity)
+    def save_node(self, node):
+        self.graph.save_node(node)
+        for term in node.terms:
+            self.terms.add_term(term, node)
         self.uncommitted += 1
 
-    def get_entity(self, key_or_id):
-        """ Get entity object using it's key or system unique id. """
+    def remove_node(self, key):
+        raise NotImplementedError
 
-    def delete_entity(self, key_or_id):
-        """ Remove entity object and relationships using it's key or id. """
+    def save_edge(self, edge):
+        return self.graph.save_edge(edge)
 
-    def save_resource(self, resource):
-        """ Save resources by storing in graph. """
+    def suggest(self, term, query=None):
+        raise NotImplementedError
 
-    def get_resource(self, key_or_id):
-        """ Get resource object using it's key or system unique id. """
-
-    def delete_resource(self, key_or_id):
-        """ Remove resource object and relationships using it's key or id. """
-
-    def save_relationship(self, relationship):
-        """ Connect node a to node b with relationship tag. """
-
-    def delete_relationship(self, relationship):
-        """ Remove an existing relationship using keys' key/id and tag. """
-
-    # data
-
-    def info(self) -> dict:
-        return {
-            "storage": self.storage.info(),
-        }
-
-    def load(self):
-        py_data = self.storage.load()
-        if py_data:
-            terms_core, graph_core = py_data
-            self.terms.put_data(terms_core)
-            self.graph.put_data(graph_core)
+    def parse(self, text, labels=None):
+        doc = self.pipeline(text=text, labels=labels)
+        return doc
 
     def commit(self):
         self.storage.archive()
@@ -114,4 +52,46 @@ class KB(BaseKB):
         self.graph.reset_data()
 
     def reload(self):
-        pass
+        py_data = self.storage.load()
+        if py_data:
+            terms_core, graph_core = py_data
+            self.terms.put_data(terms_core)
+            self.graph.put_data(graph_core)
+
+    def info(self) -> dict:
+        return {
+            "storage": self.storage.info(),
+            "graph": self.graph.info(),
+            "terms": self.terms.info(),
+        }
+
+    # Local-only KB functions
+
+    def is_prefix(self, prefix, labels=None):
+        """ Returns True if prefix exists for given labels. """
+        if labels:
+            term_iter = self.terms.iterate_prefix_keys(prefix)
+
+            # todo: create query with limit of 1
+
+            for key in term_iter:
+                node = self.graph.get_node(key)
+                if node.label in labels:
+                    return True
+
+            return False
+
+        else:
+            return self.terms.is_prefix(prefix=prefix)
+
+    def find(self, term: str = None, labels=None, limit: int = None):
+        term_iter = self.terms.iterate_term_keys(term=term)
+
+        # todo: create query with label filter and limit
+
+        entities = []
+        for key in term_iter:
+            entity = self.graph.get_node(key)
+            entities.append(entity)
+
+        return FindResult(term=term, entities=entities)

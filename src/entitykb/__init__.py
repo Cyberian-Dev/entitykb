@@ -1,7 +1,7 @@
 from .logging import logger
 from .base import BaseKB
 from .config import Config
-from .graph import Node, Entity, Graph
+from .graph import Graph, Node, Entity, Edge
 from .terms import Terms
 from .pipeline import (
     Pipeline,
@@ -21,6 +21,7 @@ __all__ = (
     "Doc",
     "DocEntity",
     "DocToken",
+    "Edge",
     "Entity",
     "FindResult",
     "Graph",

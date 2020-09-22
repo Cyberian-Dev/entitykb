@@ -2,7 +2,7 @@ import asyncio
 
 from aio_msgpack_rpc import Server
 
-from entitykb import logger, KB, BaseKB, Entity
+from entitykb import logger, KB, BaseKB, Node
 from .connection import RPCConnection
 
 
@@ -12,15 +12,28 @@ class HandlerKB(BaseKB):
     def __init__(self, _kb):
         self._kb: KB = _kb
 
-    def parse(self, text: str, labels=None) -> dict:
+    def __len__(self):
+        raise NotImplementedError
+
+    def get_node(self, key: str):
+        raise NotImplementedError
+
+    def save_node(self, node):
+        node = Node.create(node)
+        return self._kb.save_node(node)
+
+    def remove_node(self, key):
+        raise NotImplementedError
+
+    def save_edge(self, edge):
+        raise NotImplementedError
+
+    def suggest(self, term, query=None):
+        raise NotImplementedError
+
+    def parse(self, text, labels=None) -> dict:
         doc = self._kb.parse(text, labels)
         return doc.dict()
-
-    def search(self, query):
-        pass
-
-    def suggest(self, query):
-        pass
 
     def commit(self):
         count = self._kb.commit()
@@ -31,37 +44,11 @@ class HandlerKB(BaseKB):
         return success
 
     def reload(self):
-        pass
+        raise NotImplementedError
 
     def info(self):
         data = self._kb.info()
         return data
-
-    def save_entity(self, entity: dict):
-        logger.info(f"save_entity: {entity}")
-        entity = Entity(**entity)
-        self._kb.save_entity(entity)
-
-    def get_entity(self, key_or_id):
-        pass
-
-    def delete_entity(self, key_or_id):
-        pass
-
-    def save_resource(self, resource: dict):
-        pass
-
-    def get_resource(self, key_or_id):
-        pass
-
-    def delete_resource(self, key_or_id):
-        pass
-
-    def save_relationship(self, relationship: dict):
-        pass
-
-    def delete_relationship(self, relationship: dict):
-        pass
 
 
 def launch_rpc(root_dir: str = None, host: str = None, port: int = None):

@@ -203,6 +203,10 @@ class Node(SlotBase):
     def to_key_tuple(nodes):
         return tuple(Node.to_key(n) for n in ensure_iterable(nodes))
 
+    @property
+    def terms(self):
+        return ()
+
 
 class Entity(Node):
 

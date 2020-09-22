@@ -13,7 +13,7 @@ def test_creates_files(root_dir, kb: KB, apple):
     assert os.path.isfile(os.path.join(root_dir, "config.json"))
     assert not os.path.isfile(os.path.join(root_dir, "index.db"))
 
-    kb.save_entity(apple)
+    kb.save_node(apple)
     assert not os.path.isfile(os.path.join(root_dir, "index.db"))
 
     kb.commit()
@@ -21,14 +21,14 @@ def test_creates_files(root_dir, kb: KB, apple):
 
 
 def test_save_entity(kb: KB, apple):
-    kb.save_entity(apple)
+    kb.save_node(apple)
     assert (kb.parse("AAPL")).entities[0].entity == apple
     assert (kb.parse("Apple, Inc.")).entities[0].entity == apple
     assert (kb.parse("Apple,Inc.")).entities[0].entity == apple
 
 
 def test_save_load_sync(root_dir, kb: KB, apple):
-    kb.save_entity(apple)
+    kb.save_node(apple)
     assert (kb.parse("AAPL")).entities[0].entity == apple
     assert (kb.parse("Apple, Inc.")).entities[0].entity == apple
     assert (kb.parse("Apple,Inc.")).entities[0].entity == apple

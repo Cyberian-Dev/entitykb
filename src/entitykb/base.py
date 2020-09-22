@@ -10,70 +10,50 @@ class BaseKB(object):
     def __len__(self):
         """ Return number of nodes in KB. """
 
-    @abstractmethod
-    def is_prefix(self, prefix, labels=None):
-        """ Returns True if prefix exists for given labels. """
+    # nodes
 
     @abstractmethod
-    def find(self, term: str = None, labels=None, limit: int = None):
-        """ Returns FindResult based on term and labels requested. """
+    def get_node(self, key: str):
+        """ Retrieve node using key from KB. """
+
+    @abstractmethod
+    def save_node(self, node):
+        """ Save node to KB. """
+
+    @abstractmethod
+    def remove_node(self, key):
+        """ Remove node and relationships from KB. """
+
+    # edges
+
+    @abstractmethod
+    def save_edge(self, edge):
+        """ Save edge to KB. """
+
+    # queries
+
+    @abstractmethod
+    def suggest(self, term, query=None):
+        """ Suggest term auto-completes, filtered by query. """
 
     @abstractmethod
     def parse(self, text, labels=None):
-        """ Parse text string and return Doc with tokens and entities. """
+        """ Parse text into Doc with entities, filtered by query. """
 
-    @abstractmethod
-    def search(self, query):
-        """ Search index's terms and graph using the query. """
-
-    @abstractmethod
-    def suggest(self, query):
-        """ Provide terms based on prefix query for auto-complete. """
+    # state
 
     @abstractmethod
     def commit(self):
-        """ Commit index's terms and graph to disk. """
+        """ Commit KB to disk. """
 
     @abstractmethod
     def reset(self):
-        """ Clear index's terms and graph of all data. """
+        """ Clear KB of all data. """
 
     @abstractmethod
     def reload(self):
-        """ Reload index's terms and graph data to last commit. """
+        """ Reload KB from disk. """
 
     @abstractmethod
     def info(self):
-        """ Return configuration and metrics information about KB. """
-
-    @abstractmethod
-    def save_entity(self, entity):
-        """ Save entity by indexing terms and storing in graph. """
-
-    @abstractmethod
-    def get_entity(self, key_or_id):
-        """ Get entity object using it's key or system unique id. """
-
-    @abstractmethod
-    def delete_entity(self, key_or_id):
-        """ Remove entity object and relationships using it's key or id. """
-
-    @abstractmethod
-    def save_resource(self, resource):
-        """ Save resources by storing in graph. """
-
-    @abstractmethod
-    def get_resource(self, key_or_id):
-        """ Get resource object using it's key or system unique id. """
-
-    @abstractmethod
-    def delete_resource(self, key_or_id):
-        """ Remove resource object and relationships using it's key or id. """
-
-    @abstractmethod
-    def save_relationship(self, relationship):
-        """ Connect node a to node b with relationship tag. """
-
-    @abstractmethod
-    def delete_relationship(self, relationship):
-        """ Remove an existing relationship using keys' key/id and tag. """
+        """ Return KB's state and meta info. """
