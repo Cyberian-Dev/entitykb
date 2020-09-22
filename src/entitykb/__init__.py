@@ -23,6 +23,8 @@ from .index import Index, DefaultIndex, Query, QueryBuilder, QB
 
 from .config import Config
 
+from . import pipeline
+
 from .kb import KB
 
 from . import date
@@ -55,4 +57,5 @@ __all__ = (
     "date",
     "fuzzy",
     "logger",
+    "pipeline",
 )
