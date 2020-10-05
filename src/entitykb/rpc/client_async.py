@@ -15,7 +15,8 @@ class AsyncKB(BaseKB):
     async def get_node(self, key: str):
         async with self.connection as client:
             data: dict = await client.call("get_node", key)
-            return Node(**data)
+            if data:
+                return Node(**data)
 
     async def save_node(self, node: Node):
         async with self.connection as client:

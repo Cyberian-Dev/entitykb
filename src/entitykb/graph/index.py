@@ -26,7 +26,7 @@ class NodeIndex(object):
         return iter(self.nodes_by_key.values())
 
     def get(self, key: str):
-        return self.nodes_by_key[key]
+        return self.nodes_by_key.get(key)
 
     def save(self, node: Node):
         self.nodes_by_key[node.key] = node

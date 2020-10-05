@@ -41,10 +41,11 @@ class Storage(object):
 @dataclass
 class DefaultStorage(Storage):
     def info(self) -> dict:
+        last_commit = self.file_updated(self.index_path)
         return {
             "path": self.index_path,
             "disk_space": self.sizeof(self.index_path),
-            "last_commit": self.file_updated(self.index_path).strftime("%c"),
+            "last_commit": last_commit and last_commit.strftime("%c"),
         }
 
     @property

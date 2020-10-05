@@ -7,8 +7,8 @@ from .storage import DefaultStorage
 class KB(BaseKB):
     def __init__(self, root_dir: str = None):
         self.uncommitted = 0
-        self.storage = DefaultStorage(root_dir=root_dir)
         self.config = Config.create(root_dir=root_dir)
+        self.storage = DefaultStorage(root_dir=self.config.root_dir)
         self.normalizer = Normalizer.create(self.config.normalizer)
         self.terms = Terms(normalizer=self.normalizer)
         self.graph = Graph()
@@ -28,6 +28,7 @@ class KB(BaseKB):
         for term in node.terms:
             self.terms.add_term(term, node)
         self.uncommitted += 1
+        return self.uncommitted
 
     def remove_node(self, key):
         raise NotImplementedError
@@ -50,6 +51,8 @@ class KB(BaseKB):
     def reset(self):
         self.terms.reset_data()
         self.graph.reset_data()
+        self.commit()
+        return True
 
     def reload(self):
         py_data = self.storage.load()

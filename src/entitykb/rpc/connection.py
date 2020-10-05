@@ -14,7 +14,7 @@ class RPCConnection(object):
     _client: Client = None
 
     def __post_init__(self):
-        self.host = first_nn(self.host, env("ENTITYKB_RCP_HOST", "0.0.0.0"))
+        self.host = first_nn(self.host, env("ENTITYKB_RCP_HOST", "localhost"))
         self.port = first_nn(self.port, env("ENTITYKB_RCP_HOST", 3477))
         self.timeout = first_nn(self.timeout, env("ENTITYKB_RCP_TIMEOUT", 2))
         self.retries = first_nn(self.retries, env("ENTITYKB_RCP_RETRIES", 10))

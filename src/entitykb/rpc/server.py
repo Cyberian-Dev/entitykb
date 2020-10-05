@@ -11,14 +11,17 @@ class HandlerKB(BaseKB):
 
     def __init__(self, _kb):
         self._kb: KB = _kb
+        logger.info(f"Handler initialized with {self._kb.config.root_dir}")
 
     def __len__(self):
         raise NotImplementedError
 
-    def get_node(self, key: str):
-        raise NotImplementedError
+    def get_node(self, key: str) -> dict:
+        node = self._kb.get_node(key)
+        data = node.dict()
+        return data
 
-    def save_node(self, node):
+    def save_node(self, node) -> int:
         node = Node.create(node)
         return self._kb.save_node(node)
 
@@ -36,8 +39,12 @@ class HandlerKB(BaseKB):
         return doc.dict()
 
     def commit(self):
-        count = self._kb.commit()
-        return count
+        try:
+            count = self._kb.commit()
+            return count
+        except Exception as e:
+            logger.exception(e)
+            raise e
 
     def reset(self):
         success = self._kb.reset()
@@ -47,6 +54,7 @@ class HandlerKB(BaseKB):
         raise NotImplementedError
 
     def info(self):
+        logger.info("call received: info()")
         data = self._kb.info()
         return data
 
@@ -62,6 +70,7 @@ def launch_rpc(root_dir: str = None, host: str = None, port: int = None):
     logger.info(f"Launching RPC Server on {conn}")
     future = asyncio.start_server(server, conn.host, conn.port, loop=loop)
     server = loop.run_until_complete(future)
+    logger.info(f"Server info: {handler.info()}")
 
     try:
         loop.run_forever()
