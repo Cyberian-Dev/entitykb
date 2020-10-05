@@ -2,8 +2,8 @@ import enum
 from typing import Tuple, Union, Iterable
 from uuid import uuid4
 
+from entitykb.funcs import ensure_iterable
 from .enums import Direction, Comparison
-from entitykb.funcs import ensure_iterable, get_class_from_name
 
 
 class SlotBase(object):
@@ -17,16 +17,11 @@ class SlotBase(object):
 
     def __repr__(self):
         data = self.dict()
-        klass = data.pop("_klass")
         items = sorted(f"{k}={v}" for k, v in data.items() if v is not None)
-        return f"<{klass}: {', '.join(items)}>"
-
-    @property
-    def _klass(self):
-        return f"{self.__module__}.{self.__class__.__name__}"
+        return f"<{self.__class__.__name__}: {', '.join(items)}>"
 
     def dict(self):
-        data = dict(_klass=self._klass)
+        data = dict()
 
         for name in self.__slots__:
             value = getattr(self, name)
@@ -49,26 +44,33 @@ class SlotBase(object):
         return value
 
     @classmethod
-    def create(cls, _item=None, **kwargs):
+    def get_subclass(cls, keys):
+        pass
+
+    @classmethod
+    def create(cls, _item=None, *, _klass=None, **kwargs):
         if _item is None and len(kwargs) == 0:
             return None
 
-        if isinstance(_item, SlotBase):
+        if isinstance(_item, cls):
             return _item
 
         if isinstance(_item, dict):
             kwargs = {**_item, **kwargs}
 
-        klass = kwargs.pop("_klass", None)
-        if isinstance(klass, str):
-            klass = get_class_from_name(klass)
-        klass = klass or cls
+        _klass = _klass or cls.get_subclass(keys=kwargs.keys())
+        _klass = _klass or cls
 
-        return klass(**kwargs)
+        return _klass(**kwargs)
 
 
 class Criteria(SlotBase):
-    pass
+    @classmethod
+    def get_subclass(cls, keys):
+        if keys == set(AttrCriteria.__slots__):
+            return AttrCriteria
+        else:
+            return RelCriteria
 
 
 class AttrCriteriaType(type):
@@ -184,7 +186,7 @@ class Node(SlotBase):
         return Edge(start=None, tag=tag, end=self.key)
 
     def __repr__(self):
-        return f"<entitykb.graph.model.Node: key={self.key}>"
+        return f"<Node: key={self.key} attrs={self.attrs}>"
 
     def __getattr__(self, item):
         if item == "attrs":
@@ -231,10 +233,7 @@ class Entity(Node):
         super().__init__(key=key, label=label, attrs=attrs, **kw)
 
     def __repr__(self):
-        return (
-            "<entitykb.graph.model.Entity: "
-            f"name={self.name}, label={self.label}>"
-        )
+        return "<Entity: " f"name={self.name}, label={self.label}>"
 
     @property
     def terms(self):
@@ -277,7 +276,12 @@ class Edge(SlotBase):
 
 
 class Step(SlotBase):
-    pass
+    @classmethod
+    def get_subclass(cls, keys):
+        if keys == set(WalkStep.__slots__):
+            return WalkStep
+        else:
+            return FilterStep
 
 
 class WalkStep(Step):

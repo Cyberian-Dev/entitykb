@@ -13,7 +13,6 @@ def test_entity_create():
     assert entity.name == "Barack Obama"
     assert entity.synonyms == ()
     assert entity.dict() == {
-        "_klass": "entitykb.graph.model.Entity",
         "attrs": {},
         "key": "Barack Obama|ENTITY",
         "label": "ENTITY",
@@ -56,7 +55,6 @@ def test_doc_create():
     assert doc_ent.offsets == (2, 3)
     assert doc_ent.dict() == {
         "entity": {
-            "_klass": "entitykb.graph.model.Entity",
             "attrs": {},
             "key": "Barack Obama|PRESIDENT",
             "label": "PRESIDENT",

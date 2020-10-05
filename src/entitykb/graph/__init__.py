@@ -3,6 +3,7 @@ from .enums import Direction, Comparison
 from .model import (
     AttrCriteria,
     RelCriteria,
+    Criteria,
     Edge,
     Entity,
     FilterStep,
@@ -23,6 +24,7 @@ __all__ = (
     "A",
     "AttrCriteria",
     "Comparison",
+    "Criteria",
     "Direction",
     "Edge",
     "EdgeIndex",
