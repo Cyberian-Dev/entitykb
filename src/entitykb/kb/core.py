@@ -1,4 +1,4 @@
-from entitykb import Config, BaseKB, Graph
+from entitykb import Config, BaseKB, Graph, Entity
 from entitykb.pipeline import Pipeline, Normalizer, FindResult
 from entitykb.terms import Terms
 from .storage import DefaultStorage
@@ -25,8 +25,10 @@ class KB(BaseKB):
 
     def save_node(self, node):
         self.graph.save_node(node)
-        for term in node.terms:
-            self.terms.add_term(term, node)
+
+        if isinstance(node, Entity):
+            self.terms.add_entity(node)
+
         self.uncommitted += 1
         return self.uncommitted
 
@@ -63,6 +65,7 @@ class KB(BaseKB):
 
     def info(self) -> dict:
         return {
+            "config": self.config.info(),
             "storage": self.storage.info(),
             "graph": self.graph.info(),
             "terms": self.terms.info(),

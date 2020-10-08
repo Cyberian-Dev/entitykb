@@ -1,5 +1,4 @@
 from .model import (
-    BaseModel,
     Doc,
     DocEntity,
     DocToken,
@@ -33,7 +32,6 @@ from .extractors import Extractor, DefaultExtractor, ExtractorType
 from .pipeline import Pipeline
 
 __all__ = (
-    "BaseModel",
     "BaseUniqueFilterer",
     "DefaultExtractor",
     "DefaultNormalizer",

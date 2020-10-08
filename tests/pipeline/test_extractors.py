@@ -7,9 +7,24 @@ from entitykb.pipeline import (
     DefaultTokenizer,
     DefaultNormalizer,
     Extractor,
+    DefaultExtractor,
 )
 
 the_the = Entity(name="The The", label="BAND")
+
+
+def test_construct():
+    extractor = Extractor.create(tokenizer=None, resolvers=None)
+    assert isinstance(extractor, DefaultExtractor)
+
+    extractor = Extractor.create(
+        DefaultExtractor, tokenizer=None, resolvers=None
+    )
+    assert isinstance(extractor, DefaultExtractor)
+
+    class_name = "entitykb.pipeline.DefaultExtractor"
+    extractor = Extractor.create(class_name, tokenizer=None, resolvers=None)
+    assert isinstance(extractor, DefaultExtractor)
 
 
 @pytest.fixture(scope="function")

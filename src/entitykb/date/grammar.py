@@ -1,6 +1,7 @@
 from typing import Optional
 from datetime import date
 from lark.lark import Lark, Tree
+from lark.exceptions import LarkError
 from dateutil import parser
 import os
 
@@ -18,13 +19,12 @@ class Parser(object):
         return cls._instance
 
 
-# noinspection PyBroadException
 def get_tree(text: str) -> Optional[str]:
     try:
         tree = Parser.instance().parse(text)
         if isinstance(tree.children[0], Tree):
             return tree.children[0].data
-    except:
+    except LarkError:
         pass
 
 
@@ -36,10 +36,8 @@ def is_date(text: str) -> bool:
     return get_tree(text) == "is_date"
 
 
-# noinspection PyBroadException
 def parse_date(text: str) -> Optional[date]:
     if is_date(text):
-        try:
-            return parser.parse(text).date()
-        except:
-            pass
+        result = parser.parse(text)
+        result = result and result.date()
+        return result

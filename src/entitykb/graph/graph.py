@@ -12,6 +12,9 @@ class Graph(object):
         n, e = len(self.nodes), len(self.edges)
         return f"<Graph: {n} nodes, {e} edges>"
 
+    def __len__(self):
+        return len(self.nodes)
+
     def __iter__(self):
         return iter(self.nodes)
 

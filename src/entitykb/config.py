@@ -68,7 +68,7 @@ class Config:
         return file_path
 
     @classmethod
-    def get_root_dir(cls, root_dir=None):
+    def get_root_dir(cls, root_dir=None) -> str:
         if isinstance(root_dir, Path):
             root_dir = str(root_dir.resolve())
 
@@ -82,13 +82,7 @@ class Config:
 
     def info(self) -> dict:
         info = self.dict()
-
         info["path"] = self.file_path
-
-        if self.resolvers:
-            info["resolvers"] = "\n".join(self.resolvers)
-
-        if self.filterers:
-            info["filterers"] = "\n".join(self.filterers)
-
+        info["resolvers"] = "\n".join(self.resolvers or ())
+        info["filterers"] = "\n".join(self.filterers or ())
         return info

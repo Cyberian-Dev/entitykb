@@ -1,3 +1,4 @@
+import pytest
 from entitykb import (
     Doc,
     DocToken,
@@ -6,6 +7,7 @@ from entitykb import (
     Entity,
 )
 from entitykb.pipeline import (
+    Pipeline,
     KeepLongestOnly,
     KeepLongestByKey,
     KeepLongestByLabel,
@@ -25,7 +27,8 @@ def test_construct():
     assert Filterer.create(filterer) == filterer
 
 
-def test_merge_filterer():
+@pytest.fixture()
+def doc_entities():
     doc = Doc(text="a")
     tokens = [DocToken(doc=doc, token=Token("a"), offset=0)]
 
@@ -56,7 +59,10 @@ def test_merge_filterer():
         ),
     ]
     assert 4 == len(doc_entities)
+    return doc_entities
 
+
+def test_longest_filters(doc_entities):
     doc_entities = KeepLongestByKey().filter(doc_entities=doc_entities)
     assert 3 == len(doc_entities)
 
@@ -65,3 +71,10 @@ def test_merge_filterer():
 
     doc_entities = KeepLongestOnly().filter(doc_entities=doc_entities)
     assert 1 == len(doc_entities)
+
+
+def test_pipeline_filter_entities(doc_entities):
+    pipeline = Pipeline(
+        tokenizer=None, normalizer=None, filterers=[ExactOnlyFilterer()],
+    )
+    assert 3 == len(pipeline.filter_entities(doc_entities))

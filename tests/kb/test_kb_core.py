@@ -1,6 +1,6 @@
 import os
 
-from entitykb import KB, Doc
+from entitykb import KB, Doc, Edge
 
 
 def test_parse(kb: KB):
@@ -44,3 +44,17 @@ def test_save_load_sync(root_dir, kb: KB, apple):
     assert (kb.parse("AAPL")).entities[0].entity == apple
     assert (kb.parse("Apple, Inc.")).entities[0].entity == apple
     assert (kb.parse("Apple,Inc.")).entities[0].entity == apple
+
+
+def test_save_edge(kb: KB, apple):
+    assert 1 == kb.save_node(apple)
+    assert 1 == len(kb)
+    assert apple == kb.get_node(apple.key)
+
+    edge = Edge(start=apple, end=apple, tag="IS_A")
+    kb.save_edge(edge)
+
+    assert kb.info().keys() == {"graph", "storage", "terms", "config"}
+
+    kb.reset()
+    assert 0 == len(kb)

@@ -38,16 +38,3 @@ class Date(Entity):
     @property
     def as_date(self) -> date:
         return date(self.year, self.month, self.day)
-
-    @classmethod
-    def field_names(cls):
-        return {"name", "label", "synonyms", "year", "month", "day"}
-
-    def dict(self):
-        data = super(Date, self).dict()
-        return {
-            **data,
-            "year": self.year,
-            "month": self.month,
-            "day": self.day,
-        }

@@ -1,6 +1,6 @@
 from typing import Callable, Iterable
 from ahocorasick import Automaton as Trie
-from entitykb.graph import Node
+from entitykb.graph import Entity
 
 
 class Terms(object):
@@ -26,19 +26,22 @@ class Terms(object):
     def info(self) -> dict:
         return self.trie.get_stats()
 
-    def add_term(self, term: str, node: Node, **meta):
+    def add_entity(self, entity: Entity, **kwargs):
+        key = Entity.to_key(entity)
+        for term in entity.terms:
+            self.add_term(key=key, term=term, **kwargs)
+
+    def add_term(self, key: str, term: str, **kwargs):
         normalized = self.normalizer(term)
-        key = Node.to_key(node)
         entry = self.trie.get(normalized, None)
 
         if entry is None:
             entry = set()
             self.trie.add_word(normalized, entry)
 
-        if not meta:
-            meta = None
+        props = tuple(kwargs.items())
+        entry.add((key, props))
 
-        entry.add((key, meta))
         return normalized
 
     def is_prefix(self, prefix: str):

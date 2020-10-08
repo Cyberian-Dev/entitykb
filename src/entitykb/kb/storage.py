@@ -80,7 +80,7 @@ class DefaultStorage(Storage):
             path = self.index_path
             update_time = self.file_updated(path)
             file_name = os.path.basename(path)
-            file_name += update_time.strftime(".%d-%m-%Y_%I-%M-%S_%p")
+            file_name += update_time.strftime(".%d-%m-%Y_%I-%M-%S.%f_%p")
             backup_path = os.path.join(self.backup_dir, file_name)
             os.rename(path, backup_path)
 
@@ -90,7 +90,7 @@ class DefaultStorage(Storage):
         paths = [f"{self.backup_dir}/{x}" for x in os.listdir(self.backup_dir)]
         paths = sorted(paths, key=os.path.getctime)
 
-        if len(paths) >= self.max_backups:
+        if len(paths) > self.max_backups:
             oldest = paths[0]
             os.remove(oldest)
             return oldest
@@ -104,19 +104,20 @@ class DefaultStorage(Storage):
     @classmethod
     def sizeof_fmt(cls, num, suffix="B"):
         # https://stackoverflow.com/a/1094933/1946790
+        val = None
         for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
             if abs(num) < 1024.0:
-                return "%.2f %s%s" % (num, unit, suffix)
+                val = "%.2f %s%s" % (num, unit, suffix)
+                break
             num /= 1024.0
-        return "%.2f %s%s" % (num, "Yi", suffix)
+        val = val or "%.2f %s%s" % (num, "Yi", suffix)
+        return val
 
     @classmethod
     def sizeof(cls, path_or_obj):
-        try:
+        if isinstance(path_or_obj, str) and os.path.exists(path_or_obj):
             num = os.path.getsize(path_or_obj)
-        except FileNotFoundError:
-            num = 0
-        except TypeError:
+        else:
             num = sys.getsizeof(path_or_obj)
         return cls.sizeof_fmt(num)
 

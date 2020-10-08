@@ -22,12 +22,15 @@ def finish(operation: str, success: bool, error_code: int = None):
 
 @app.command()
 def init(root_dir: Optional[Path] = typer.Argument(None)):
+    """ Initialize local KB """
     success = services.init_kb(root_dir=root_dir)
     finish("Initialization", success)
 
 
 @app.command()
 def reset(root_dir: Optional[Path] = typer.Argument(None)):
+    """ Reset local KB """
+
     root_dir = Config.get_root_dir(root_dir)
     typer.confirm(f"Are you sure you want to reset: {root_dir}?", abort=True)
 
@@ -51,12 +54,16 @@ def load(
     dry_run: bool = typer.Option(False, "--dry-run"),
     root_dir: Optional[Path] = typer.Option(None),
 ):
+    """ Load data into local KB """
+
     if not dry_run:
         kb = KB(root_dir=root_dir)
     else:
         kb = services.PreviewKB(length=10)
 
-    it = services.iterate_entities(in_file=in_file, format=format)
+    file_obj = in_file.open("r")
+    it = services.iterate_entities(file_obj=file_obj, format=format)
+
     total = 0
     with typer.progressbar(it) as progress:
         for entity in progress:

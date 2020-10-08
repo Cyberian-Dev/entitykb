@@ -129,6 +129,10 @@ def test_default_resolver(kb, apple):
     assert (apple,) == tuple(resolver.find("apple").entities)
     assert (apple,) == tuple(resolver.find("apple, inc.").entities)
 
+    assert resolver.find("apple, inc.").dict() == dict(
+        term="apple, inc.", entities=(apple.dict(),)
+    )
+
     assert not resolver.find("banana").entities
     assert not resolver.find("apple, ink.").entities
     assert not resolver.is_prefix("apple, ink")

@@ -1,14 +1,6 @@
 from typing import Tuple, Union, Optional, Iterable
 
-from entitykb.graph import Entity
-
-
-class BaseModel(object):
-    def __eq__(self, other):
-        return hash(self) == hash(other)
-
-    def dict(self):
-        raise NotImplementedError
+from entitykb.graph import Entity, SlotBase
 
 
 class Token(str):
@@ -39,7 +31,7 @@ class Token(str):
         return new_token
 
 
-class DocToken(BaseModel):
+class DocToken(SlotBase):
 
     __slots__ = ("doc", "token", "offset")
 
@@ -54,9 +46,6 @@ class DocToken(BaseModel):
     def __repr__(self):
         return f"{self.token} [offset: {self.offset}]"
 
-    def __hash__(self):
-        return hash(("DocToken", self.offset, self.token, id(self.doc)))
-
     def __lt__(self, other):
         return self.offset < other.offset
 
@@ -64,7 +53,7 @@ class DocToken(BaseModel):
         return dict(offset=self.offset, token=self.token)
 
 
-class HasTokens(BaseModel):
+class HasTokens(SlotBase):
 
     __slots__ = ("text", "tokens")
 
@@ -97,9 +86,6 @@ class HasTokens(BaseModel):
     def __getitem__(self, item):
         return self.tokens[item]
 
-    def __lt__(self, other: "HasTokens"):
-        return self.tokens < other.tokens
-
     @property
     def offset(self):
         return self.tokens[0].offset
@@ -115,9 +101,6 @@ class HasTokens(BaseModel):
     @property
     def num_tokens(self):
         return len(self.tokens)
-
-    def dict(self, **_):
-        return dict(text=self.text, tokens=[t.dict() for t in self.tokens])
 
 
 class DocEntity(HasTokens):
@@ -149,9 +132,6 @@ class DocEntity(HasTokens):
     def __str__(self):
         return f"{self.text} [{self.entity_key}]"
 
-    def __hash__(self):
-        return hash(("DocEntity", self.entity_key, self.offsets, id(self.doc)))
-
     def __lt__(self, other: "DocEntity"):
         return self.sort_order < other.sort_order
 
@@ -170,11 +150,6 @@ class DocEntity(HasTokens):
     @property
     def is_lower_match(self):
         return self.name and (self.name.lower() == self.text.lower())
-
-    @property
-    def meta(self):
-        if self.entity:
-            return self.entity.meta
 
     @property
     def sort_order(self):
@@ -221,26 +196,6 @@ class Doc(HasTokens):
 
         self.entities = tupilify(entities)
 
-    def __hash__(self):
-        return hash(
-            ("Doc", self.text, tuple(self.tokens), tuple(self.entities))
-        )
-
-    def dict(self):
-        return dict(
-            text=self.text,
-            entities=[entity.dict() for entity in self.entities],
-            tokens=[token.dict() for token in self.tokens],
-        )
-
-    @property
-    def entity_keys(self):
-        return tuple(
-            doc_entity.entity.key
-            for doc_entity in self.entities
-            if doc_entity.entity
-        )
-
 
 EntityValue = Union[Entity, dict, DocEntity, str, float]
 
@@ -254,16 +209,13 @@ def tupilify(values: Union[list, tuple, set]) -> tuple:
     return values
 
 
-class FindResult(BaseModel):
+class FindResult(SlotBase):
 
     __slots__ = ("term", "entities")
 
     def __init__(self, term: str, entities=None):
         self.term = term
-        self.entities = entities or []
-
-    def __hash__(self):
-        return hash((self.term, frozenset(self.entities)))
+        self.entities = entities or ()
 
     def __repr__(self):
         keys = ", ".join(map(lambda e: e.key, self.entities))
@@ -274,8 +226,3 @@ class FindResult(BaseModel):
 
     def __iter__(self):
         return iter(self.entities)
-
-    def dict(self):
-        return dict(
-            term=self.term, entities=[e.dict() for e in self.entities],
-        )

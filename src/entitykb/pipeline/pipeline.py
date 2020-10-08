@@ -61,9 +61,6 @@ class Pipeline(object):
         doc.entities = tuple(doc.entities)
         return doc
 
-    def __len__(self):
-        return len(self.kb)
-
     def filter_entities(self, doc_entities: List[DocEntity]):
         for filterer in self.filterers:
             doc_entities = filterer.filter(doc_entities)

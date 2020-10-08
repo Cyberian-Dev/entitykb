@@ -17,7 +17,8 @@ def kb(root_dir):
 
 
 class Location(Node):
-    def __init__(self, *, city: str):
+    def __init__(self, *, city: str, **kw):
+        super().__init__(**kw)
         self.city = city
 
     def dict(self):

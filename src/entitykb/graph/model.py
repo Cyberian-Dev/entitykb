@@ -13,7 +13,7 @@ class SlotBase(object):
         return hash(self) == hash(other)
 
     def __hash__(self):
-        return hash(repr(self))
+        return hash((repr(self)))
 
     def __repr__(self):
         data = self.dict()
@@ -25,27 +25,23 @@ class SlotBase(object):
 
         for name in self.__slots__:
             value = getattr(self, name)
-            value = self._convert(value)
+            value = self._dict_value(value)
             data[name] = value
 
         return data
 
     @classmethod
-    def _convert(cls, value):
+    def _dict_value(cls, value):
         if isinstance(value, SlotBase):
             return value.dict()
 
         if isinstance(value, (tuple, list, set)):
-            return tuple([cls._convert(v) for v in value])
+            return tuple([cls._dict_value(v) for v in value])
 
         if isinstance(value, enum.Enum):
             return value.value
 
         return value
-
-    @classmethod
-    def get_subclass(cls, keys):
-        pass
 
     @classmethod
     def create(cls, _item=None, *, _klass=None, **kwargs):
@@ -58,16 +54,20 @@ class SlotBase(object):
         if isinstance(_item, dict):
             kwargs = {**_item, **kwargs}
 
-        _klass = _klass or cls.get_subclass(keys=kwargs.keys())
+        _klass = _klass or cls.identify_klass(kwargs)
         _klass = _klass or cls
 
         return _klass(**kwargs)
 
+    @classmethod
+    def identify_klass(cls, kwargs):
+        return cls
+
 
 class Criteria(SlotBase):
     @classmethod
-    def get_subclass(cls, keys):
-        if keys == set(AttrCriteria.__slots__):
+    def identify_klass(cls, kwargs):
+        if kwargs.keys() == set(AttrCriteria.__slots__):
             return AttrCriteria
         else:
             return RelCriteria
@@ -113,28 +113,7 @@ class AttrCriteria(Criteria, metaclass=AttrCriteriaType):
         return self.set(Comparison.ne, other)
 
     def do_compare(self, other) -> bool:
-        method_name = f"do_{self.compare.name}"
-        method_func = getattr(self, method_name)
-        result = method_func(other)
-        return result
-
-    def do_eq(self, other):
-        return other == self.value
-
-    def do_ge(self, other):
-        return other >= self.value
-
-    def do_gt(self, other):
-        return other > self.value
-
-    def do_le(self, other):
-        return other <= self.value
-
-    def do_lt(self, other):
-        return other < self.value
-
-    def do_ne(self, other):
-        return other != self.value
+        return self.compare.eval(self.value, other)
 
 
 class RelCriteriaType(type):
@@ -152,20 +131,19 @@ class RelCriteria(Criteria, metaclass=RelCriteriaType):
         self.directions = ensure_iterable(directions)
         self.nodes = Node.to_key_tuple(nodes)
 
-    def __rshift__(self, nodes):
-        self.directions = (Direction.outgoing,)
+    def update(self, directions, nodes):
+        self.directions = ensure_iterable(directions)
         self.nodes = Node.to_key_tuple(nodes)
         return self
+
+    def __rshift__(self, nodes):
+        return self.update((Direction.outgoing,), nodes)
 
     def __lshift__(self, nodes):
-        self.directions = (Direction.incoming,)
-        self.nodes = Node.to_key_tuple(nodes)
-        return self
+        return self.update((Direction.incoming,), nodes)
 
     def __pow__(self, nodes):
-        self.directions = (Direction.incoming, Direction.outgoing)
-        self.nodes = Node.to_key_tuple(nodes)
-        return self
+        return self.update((Direction.incoming, Direction.outgoing), nodes)
 
 
 class Node(SlotBase):
@@ -204,10 +182,6 @@ class Node(SlotBase):
     @staticmethod
     def to_key_tuple(nodes):
         return tuple(Node.to_key(n) for n in ensure_iterable(nodes))
-
-    @property
-    def terms(self):
-        return ()
 
 
 class Entity(Node):
@@ -277,8 +251,8 @@ class Edge(SlotBase):
 
 class Step(SlotBase):
     @classmethod
-    def get_subclass(cls, keys):
-        if keys == set(WalkStep.__slots__):
+    def identify_klass(cls, kwargs):
+        if kwargs.keys() == set(WalkStep.__slots__):
             return WalkStep
         else:
             return FilterStep

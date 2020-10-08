@@ -44,7 +44,7 @@ async def save_entity(entity: schema.Entity = Body(...)):
 @router.post("/reset")
 async def reset() -> bool:
     async with rpc as client:
-        success: bool = await client.call("resent")
+        success: bool = await client.call("reset")
         return success
 
 
@@ -74,3 +74,10 @@ app.mount(
 def launch_http(host="0.0.0.0", port=8000, reload=False):
     logger.info(f"Launching http://{host}:{port}/")
     uvicorn.run(app, host=host, port=port, reload=reload)
+
+
+@app.exception_handler(ConnectionRefusedError)
+async def rpc_connection_handler(*_):
+    return UJSONResponse(
+        status_code=503, content="Connection Refused. Check RPC server.",
+    )

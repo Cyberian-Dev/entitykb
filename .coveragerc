@@ -1,5 +1,8 @@
 [run]
 omit =
+    src/entitykb/rpc/*.py
+    src/entitykb/cli/*.py
+    src/entitykb/http/*.py
 
 [report]
 exclude_lines =

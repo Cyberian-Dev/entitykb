@@ -17,7 +17,7 @@ class RPCConnection(object):
         self.host = first_nn(self.host, env("ENTITYKB_RCP_HOST", "localhost"))
         self.port = first_nn(self.port, env("ENTITYKB_RCP_HOST", 3477))
         self.timeout = first_nn(self.timeout, env("ENTITYKB_RCP_TIMEOUT", 2))
-        self.retries = first_nn(self.retries, env("ENTITYKB_RCP_RETRIES", 10))
+        self.retries = first_nn(self.retries, env("ENTITYKB_RCP_RETRIES", 5))
 
     def __str__(self):
         return f"tcp://{self.host}:{self.port}"
@@ -28,7 +28,10 @@ class RPCConnection(object):
 
     async def __aenter__(self):
         if self._client is None:
-            await self.open()
+            try:
+                await self.open()
+            except ConnectionRefusedError:
+                self._client = None
 
         return self
 
@@ -39,6 +42,9 @@ class RPCConnection(object):
         last_e = None
         for retry in range(self.retries):
             try:
+                if self._client is None:
+                    raise ConnectionRefusedError
+
                 response = await self._client.call(name, *args)
                 return response
 

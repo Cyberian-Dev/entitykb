@@ -9,6 +9,7 @@ from .model import (
     FilterStep,
     Node,
     Query,
+    SlotBase,
     WalkStep,
 )
 
@@ -41,5 +42,6 @@ __all__ = (
     "RelCriteria",
     "SearchResults",
     "Searcher",
+    "SlotBase",
     "WalkStep",
 )
