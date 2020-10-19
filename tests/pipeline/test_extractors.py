@@ -75,24 +75,25 @@ def test_extract_multi_token(
         "and The The Microsoft Corporation. Plus more AAPL and MSFT."
     )
     doc = extractor(text)
-    assert len(doc.entities) == 7, f"Incorrect: {doc.entities}"
+    assert len(doc.entities) == 8, f"Incorrect: {doc.entities}"
 
     assert doc.entities[0].text == "Apple, Inc."
     assert doc.entities[1].text == "Google, Inc."
     assert doc.entities[2].text == "Amazon, Inc."
     assert doc.entities[3].text == "The The"
     assert doc.entities[4].text == "The Microsoft Corporation"
-    assert doc.entities[5].text == "AAPL"
-    assert doc.entities[6].text == "MSFT"
-
-    doc = extractor(text, ("COMPANY",))
-    assert len(doc.entities) == 6
+    assert doc.entities[5].text == "Microsoft Corporation"
+    assert doc.entities[6].text == "AAPL"
+    assert doc.entities[7].text == "MSFT"
 
     doc = extractor(text, ("COMPANY", "BAND"))
-    assert len(doc.entities) == 7
+    assert len(doc.entities) == 8
 
     doc = extractor(text, ("BAND",))
     assert len(doc.entities) == 1
+
+    doc = extractor(text, ("COMPANY",))
+    assert len(doc.entities) == 7
 
 
 def test_extract_with_date(extractor: Extractor, apple):

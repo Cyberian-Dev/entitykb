@@ -17,10 +17,9 @@ from .filterers import (
     Filterer,
     FiltererType,
     ExactOnlyFilterer,
-    BaseUniqueFilterer,
     KeepLongestByKey,
     KeepLongestByLabel,
-    KeepLongestOnly,
+    KeepLongestByOffset,
 )
 
 from .handlers import TokenHandler
@@ -32,7 +31,6 @@ from .extractors import Extractor, DefaultExtractor, ExtractorType
 from .pipeline import Pipeline
 
 __all__ = (
-    "BaseUniqueFilterer",
     "DefaultExtractor",
     "DefaultNormalizer",
     "DefaultResolver",
@@ -50,7 +48,7 @@ __all__ = (
     "FindResult",
     "KeepLongestByKey",
     "KeepLongestByLabel",
-    "KeepLongestOnly",
+    "KeepLongestByOffset",
     "Normalizer",
     "NormalizerType",
     "Pipeline",

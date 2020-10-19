@@ -73,27 +73,11 @@ class KB(BaseKB):
 
     # Local-only KB functions
 
-    def is_prefix(self, prefix, labels=None):
-        """ Returns True if prefix exists for given labels. """
-        if labels:
-            term_iter = self.terms.iterate_prefix_keys(prefix)
+    def is_prefix(self, prefix) -> bool:
+        return self.terms.is_prefix(prefix=prefix)
 
-            # todo: create query with limit of 1
-
-            for key in term_iter:
-                node = self.graph.get_node(key)
-                if node.label in labels:
-                    return True
-
-            return False
-
-        else:
-            return self.terms.is_prefix(prefix=prefix)
-
-    def find(self, term: str = None, labels=None, limit: int = None):
+    def find(self, term: str) -> FindResult:
         term_iter = self.terms.iterate_term_keys(term=term)
-
-        # todo: create query with label filter and limit
 
         entities = []
         for key in term_iter:

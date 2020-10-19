@@ -3,6 +3,7 @@ from typing import Tuple, List, Iterable
 
 from entitykb.base import BaseKB
 from entitykb.config import Config
+from entitykb.funcs import get_class_from_name
 from .model import DocEntity
 
 from . import Tokenizer, Normalizer, Extractor, Filterer, Resolver
@@ -31,9 +32,8 @@ class Pipeline(object):
         )
         assert resolvers, f"No resolvers found. ({config})"
 
-        filterers = tuple(
-            Filterer.create(filterer) for filterer in config.filterers or []
-        )
+        filterers = config.filterers or []
+        filterers = tuple(get_class_from_name(f) for f in filterers)
 
         extractor = Extractor.create(
             extractor=config.extractor,

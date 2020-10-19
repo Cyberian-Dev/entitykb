@@ -62,12 +62,12 @@ def load(
         kb = services.PreviewKB(length=10)
 
     file_obj = in_file.open("r")
-    it = services.iterate_entities(file_obj=file_obj, format=format)
+    it = services.iterate_entities(file_obj=file_obj, file_format=format)
 
     total = 0
     with typer.progressbar(it) as progress:
         for entity in progress:
-            kb.save_entity(entity)
+            kb.save_node(entity)
             total += 1
 
     kb.commit()

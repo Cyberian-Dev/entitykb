@@ -44,7 +44,7 @@ class Terms(object):
 
         return normalized
 
-    def is_prefix(self, prefix: str):
+    def is_prefix(self, prefix: str) -> bool:
         normalized = self.normalizer(prefix)
         return self.trie.match(normalized)
 

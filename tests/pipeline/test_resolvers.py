@@ -97,9 +97,6 @@ def test_date_resolver_fail_invalid(kb):
         tokenizer=DefaultTokenizer(), normalizer=DefaultNormalizer(), kb=kb
     )
 
-    result = resolver.find("2019-01-01", labels={"NOT_DATE"})
-    assert not result
-
     result = resolver.find("Nonsense!")
     assert not result
 

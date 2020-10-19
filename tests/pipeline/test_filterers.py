@@ -8,23 +8,11 @@ from entitykb import (
 )
 from entitykb.pipeline import (
     Pipeline,
-    KeepLongestOnly,
+    KeepLongestByOffset,
     KeepLongestByKey,
     KeepLongestByLabel,
     ExactOnlyFilterer,
-    Filterer,
 )
-
-
-def test_construct():
-    assert isinstance(
-        Filterer.create("entitykb.pipeline.ExactOnlyFilterer"),
-        ExactOnlyFilterer,
-    )
-    assert isinstance(KeepLongestByKey.create(), KeepLongestByKey)
-
-    filterer = KeepLongestByKey()
-    assert Filterer.create(filterer) == filterer
 
 
 @pytest.fixture()
@@ -69,7 +57,7 @@ def test_longest_filters(doc_entities):
     doc_entities = KeepLongestByLabel().filter(doc_entities=doc_entities)
     assert 2 == len(doc_entities)
 
-    doc_entities = KeepLongestOnly().filter(doc_entities=doc_entities)
+    doc_entities = KeepLongestByOffset().filter(doc_entities=doc_entities)
     assert 1 == len(doc_entities)
 
 

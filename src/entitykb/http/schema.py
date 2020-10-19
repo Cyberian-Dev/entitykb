@@ -20,13 +20,7 @@ class Entity:
     label: str
     key: str = None
     synonyms: List[str] = None
-    meta: dict = None
-
-
-@dataclass
-class Correction:
-    distance: int
-    ratio: int
+    attrs: dict = None
 
 
 @dataclass
@@ -35,7 +29,6 @@ class DocEntity:
     tokens: List[DocToken]
     entity: Entity
     entity_key: str
-    correction: Correction = None
 
 
 @dataclass

@@ -43,7 +43,7 @@ class PreviewKB(object):
         self.length = kwargs.get("length", 10)
         self.echo = echo or typer.echo
 
-    def save_entity(self, entity):
+    def save_node(self, entity):
         if len(self.dry_run) < self.length:
             d = entity.dict()
             d.pop("key", None)

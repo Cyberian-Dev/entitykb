@@ -29,7 +29,7 @@ def test_preview_mode():
     file_obj = StringIO(data)
     it = services.iterate_entities(file_obj, services.FileFormat.csv)
     for entity in it:
-        preview.save_entity(entity)
+        preview.save_node(entity)
 
     assert 3 == len(preview.dry_run)
 

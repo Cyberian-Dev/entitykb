@@ -83,6 +83,6 @@ class Config:
     def info(self) -> dict:
         info = self.dict()
         info["path"] = self.file_path
-        info["resolvers"] = "\n".join(self.resolvers or ())
-        info["filterers"] = "\n".join(self.filterers or ())
+        info["resolvers"] = self.resolvers
+        info["filterers"] = self.filterers
         return info
