@@ -1,14 +1,3 @@
-from .model import (
-    Doc,
-    DocEntity,
-    DocToken,
-    Entity,
-    EntityValue,
-    FindResult,
-    Token,
-)
-
-
 from .normalizers import Normalizer, DefaultNormalizer, NormalizerType
 
 from .tokenizers import Tokenizer, DefaultTokenizer, TokenizerType
@@ -35,17 +24,11 @@ __all__ = (
     "DefaultNormalizer",
     "DefaultResolver",
     "DefaultTokenizer",
-    "Doc",
-    "DocEntity",
-    "DocToken",
-    "Entity",
-    "EntityValue",
     "ExactOnlyFilterer",
     "Extractor",
     "ExtractorType",
     "Filterer",
     "FiltererType",
-    "FindResult",
     "KeepLongestByKey",
     "KeepLongestByLabel",
     "KeepLongestByOffset",
@@ -54,7 +37,6 @@ __all__ = (
     "Pipeline",
     "Resolver",
     "ResolverType",
-    "Token",
     "TokenHandler",
     "Tokenizer",
     "TokenizerType",

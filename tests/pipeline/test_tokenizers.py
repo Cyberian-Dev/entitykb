@@ -1,4 +1,5 @@
-from entitykb.pipeline import Tokenizer, DefaultTokenizer, Token
+from entitykb.pipeline import Tokenizer, DefaultTokenizer
+from entitykb.models import Token
 
 
 def test_construct():

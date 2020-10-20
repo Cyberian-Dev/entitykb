@@ -1,4 +1,4 @@
-from entitykb.graph import Graph, Node, Edge
+from entitykb import Graph, Node, Edge
 
 
 def test_connect_nodes():

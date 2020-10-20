@@ -3,9 +3,7 @@ from typing import Tuple, List, Iterable
 
 from entitykb.base import BaseKB
 from entitykb.config import Config
-from entitykb.funcs import get_class_from_name
-from .model import DocEntity
-
+from entitykb.models import get_class_from_name, DocEntity
 from . import Tokenizer, Normalizer, Extractor, Filterer, Resolver
 
 

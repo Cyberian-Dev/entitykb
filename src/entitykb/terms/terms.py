@@ -1,6 +1,6 @@
 from typing import Callable, Iterable
 from ahocorasick import Automaton as Trie
-from entitykb.graph import Entity
+from entitykb.models import Entity
 
 
 class TermsIndex(object):

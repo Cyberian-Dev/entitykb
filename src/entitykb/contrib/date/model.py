@@ -1,6 +1,6 @@
 from datetime import date
 
-from entitykb.graph import Entity
+from entitykb.models import Entity
 
 
 class Date(Entity):

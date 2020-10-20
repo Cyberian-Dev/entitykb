@@ -1,6 +1,6 @@
-from entitykb.graph import (
-    QB,
-    A,
+from entitykb.graph import QB, A
+
+from entitykb.models.query import (
     Query,
     WalkStep,
     FilterStep,

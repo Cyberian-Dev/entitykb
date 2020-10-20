@@ -1,6 +1,6 @@
 import pytest
 
-from entitykb.date import DateResolver, Date
+from entitykb.contrib.date import DateResolver, Date
 from entitykb import Entity
 from entitykb.pipeline import (
     DefaultResolver,

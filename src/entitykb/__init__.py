@@ -1,8 +1,34 @@
 from . import logging
 from .logging import logger
+
+from . import models
+from .models import (
+    AttrCriteria,
+    Criteria,
+    Doc,
+    DocEntity,
+    DocToken,
+    Edge,
+    Entity,
+    FilterStep,
+    FindResult,
+    Node,
+    Query,
+    RelCriteria,
+    SlotBase,
+    Step,
+    Token,
+    WalkStep,
+    ensure_iterable,
+    get_class_from_name,
+    import_module,
+    instantiate_class_from_name,
+    is_iterable,
+)
+
 from .base import BaseKB
 from .config import Config
-from .graph import Graph, Node, Entity, Edge
+from .graph import Graph
 from .terms import TermsIndex
 from .pipeline import (
     DefaultExtractor,
@@ -11,14 +37,9 @@ from .pipeline import (
     DefaultTokenizer,
     Pipeline,
     Normalizer,
-    FindResult,
-    Doc,
-    DocEntity,
-    DocToken,
-    Token,
 )
 from .kb import KB
-from . import date
+from . import contrib
 
 __all__ = (
     "BaseKB",
@@ -27,21 +48,35 @@ __all__ = (
     "DefaultNormalizer",
     "DefaultResolver",
     "DefaultTokenizer",
+    "Graph",
+    "KB",
+    "Normalizer",
+    "Pipeline",
+    "TermsIndex",
+    "contrib",
+    "logger",
+    "logging",
+    "models",
+    "pipeline",
+    "AttrCriteria",
+    "Criteria",
     "Doc",
     "DocEntity",
     "DocToken",
     "Edge",
     "Entity",
+    "FilterStep",
     "FindResult",
-    "Graph",
-    "KB",
     "Node",
-    "Normalizer",
-    "Pipeline",
-    "TermsIndex",
+    "Query",
+    "RelCriteria",
+    "SlotBase",
+    "Step",
     "Token",
-    "date",
-    "logger",
-    "logging",
-    "pipeline",
+    "WalkStep",
+    "ensure_iterable",
+    "get_class_from_name",
+    "import_module",
+    "instantiate_class_from_name",
+    "is_iterable",
 )

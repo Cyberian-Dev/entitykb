@@ -3,7 +3,8 @@ from typing import Union
 
 import pytest
 
-from entitykb import Node, Entity, KB
+from entitykb.models import Node, Entity
+from entitykb import KB
 
 
 @pytest.fixture()

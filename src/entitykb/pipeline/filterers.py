@@ -1,7 +1,7 @@
 from functools import partial
 from typing import Optional, Union, Type, List, Iterable
 
-from .model import DocEntity
+from entitykb.models import DocEntity
 
 
 class Filterer(object):

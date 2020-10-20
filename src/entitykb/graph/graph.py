@@ -1,6 +1,7 @@
 from typing import Tuple
+
+from entitykb.models import Node, Edge
 from .index import NodeIndex, EdgeIndex
-from .model import Node, Edge
 
 
 class Graph(object):

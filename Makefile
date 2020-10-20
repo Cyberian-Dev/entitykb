@@ -32,6 +32,7 @@ docs-build:
 clean: clean-build clean-pyc clean-test
 
 clean-build:
+	rm -fr site/
 	rm -fr build/
 	rm -fr dist/
 	rm -fr .eggs/

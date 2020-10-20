@@ -1,7 +1,12 @@
 from typing import Optional, Union, Type, List, Tuple, Iterable
 
-from entitykb.funcs import instantiate_class_from_name
-from . import Resolver, Tokenizer, TokenHandler, Doc, DocEntity, DocToken
+from . import Resolver, Tokenizer, TokenHandler
+from entitykb.models import (
+    instantiate_class_from_name,
+    Doc,
+    DocToken,
+    DocEntity,
+)
 
 Labels = Iterable[str]
 

@@ -1,7 +1,7 @@
 from typing import Optional, Union, Type, Iterable
 
-from entitykb.funcs import instantiate_class_from_name
-from . import Normalizer, Tokenizer, TokenHandler, FindResult
+from . import Normalizer, Tokenizer, TokenHandler
+from entitykb.models import instantiate_class_from_name, FindResult
 
 
 class Resolver(object):

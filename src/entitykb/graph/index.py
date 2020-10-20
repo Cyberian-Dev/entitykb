@@ -2,7 +2,7 @@ from collections import defaultdict
 from threading import Lock
 from typing import Dict, Set
 
-from .model import Node, Edge, Direction, ensure_iterable
+from entitykb.models import Node, Edge, Direction, ensure_iterable
 
 lock = Lock()
 

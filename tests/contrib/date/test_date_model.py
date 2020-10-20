@@ -1,7 +1,7 @@
 import datetime
 
-from entitykb.date import Date
-from entitykb.pipeline.model import Entity
+from entitykb.contrib.date import Date
+from entitykb import Entity
 
 
 def test_from_dict():

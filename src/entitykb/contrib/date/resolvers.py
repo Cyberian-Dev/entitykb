@@ -1,5 +1,6 @@
 from typing import Iterable
-from entitykb.pipeline import Resolver, FindResult
+from entitykb.pipeline import Resolver
+from entitykb.models import FindResult
 from . import grammar, Date
 
 DATE = "DATE"

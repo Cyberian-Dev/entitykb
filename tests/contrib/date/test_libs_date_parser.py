@@ -1,6 +1,6 @@
 from datetime import date
 
-from entitykb.date.grammar import parse_date, is_prefix
+from entitykb.contrib.date.grammar import parse_date, is_prefix
 
 
 def test_parse_examples():

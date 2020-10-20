@@ -1,15 +1,7 @@
 import pytest
 
-from entitykb.graph import (
-    A,
-    Entity,
-    Graph,
-    QB,
-    Query,
-    R,
-    SearchResults,
-    Searcher,
-)
+from entitykb.graph import A, Graph, QB, R, SearchResults, Searcher
+from entitykb.models import Entity, Query
 
 food = Entity(name="Food")
 fruit = Entity(name="Fruit")

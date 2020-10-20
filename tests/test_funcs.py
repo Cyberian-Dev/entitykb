@@ -1,13 +1,13 @@
-from entitykb import funcs, Entity
+from entitykb.models import get_class_from_name, ensure_iterable, Entity
 
 
 def test_get_class_from_name():
-    cls = funcs.get_class_from_name("entitykb.graph.model.Entity")
-    assert cls == Entity
+    assert Entity == get_class_from_name("entitykb.Entity")
+    assert Entity == get_class_from_name("entitykb.models.Entity")
 
 
 def test_ensure_iterable():
-    assert (1,) == funcs.ensure_iterable(1)
-    assert ("abc",) == funcs.ensure_iterable("abc")
-    assert [1, "abc"] == funcs.ensure_iterable([1, "abc"])
-    assert (1, 2) == funcs.ensure_iterable([{1, 2}], explode_first=True)
+    assert (1,) == ensure_iterable(1)
+    assert ("abc",) == ensure_iterable("abc")
+    assert [1, "abc"] == ensure_iterable([1, "abc"])
+    assert (1, 2) == ensure_iterable([{1, 2}], explode_first=True)

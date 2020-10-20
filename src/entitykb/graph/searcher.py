@@ -1,16 +1,16 @@
 from dataclasses import dataclass, field
 from typing import Iterable, Iterator, Set, List
 
-from . import (
+from entitykb.models import (
     AttrCriteria,
     Edge,
     FilterStep,
-    Graph,
     Node,
     Query,
     RelCriteria,
     WalkStep,
 )
+from . import Graph
 
 
 class Hop(object):

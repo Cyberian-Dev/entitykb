@@ -1,5 +1,6 @@
-from entitykb import Config, BaseKB, Graph, Entity
-from entitykb.pipeline import Pipeline, Normalizer, FindResult
+from entitykb.models import Entity, FindResult
+from entitykb import Config, BaseKB, Graph
+from entitykb.pipeline import Pipeline, Normalizer
 from entitykb.terms import TermsIndex
 from .storage import DefaultStorage
 

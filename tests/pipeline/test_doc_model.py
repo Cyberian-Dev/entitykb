@@ -1,4 +1,4 @@
-from entitykb.pipeline.model import (
+from entitykb.models import (
     Entity,
     DocToken,
     DocEntity,

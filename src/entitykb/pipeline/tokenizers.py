@@ -1,8 +1,7 @@
 import string
 from typing import Optional, Union, Type, Iterator, Set, Iterable
 
-from entitykb.funcs import instantiate_class_from_name
-from .model import Token, DocToken
+from entitykb.models import instantiate_class_from_name, Token, DocToken
 
 
 class Tokenizer(object):

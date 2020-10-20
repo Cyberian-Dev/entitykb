@@ -1,63 +1,13 @@
-from entitykb.graph import (
+from entitykb.models.graph import Node
+from entitykb.models.query import (
     AttrCriteria,
     Criteria,
     Direction,
-    Edge,
-    Entity,
     FilterStep,
-    Node,
     Query,
     RelCriteria,
     WalkStep,
 )
-
-
-def test_node():
-    empty = Node()
-    assert 36 == len(empty.key)
-    assert empty.dict() == dict(key=empty.key, label=None, attrs={})
-
-    node = Node(key="ENTITY|LABEL", label="LABEL")
-    assert node.dict() == dict(key="ENTITY|LABEL", label="LABEL", attrs={},)
-
-
-def test_entity():
-    empty = Entity(name="empty")
-    assert empty.dict() == dict(
-        name="empty",
-        synonyms=tuple(),
-        key="empty|ENTITY",
-        label="ENTITY",
-        attrs={},
-    )
-    assert empty.terms == ("empty",)
-
-    entity = Entity(name="GenomOncology", label="COMPANY", synonyms=("GO",))
-    assert entity.dict() == dict(
-        name="GenomOncology",
-        synonyms=("GO",),
-        key="GenomOncology|COMPANY",
-        label="COMPANY",
-        attrs={},
-    )
-    assert entity.terms == ("GenomOncology", "GO")
-
-
-def test_edge():
-    start = Node()
-    end = Node()
-    edge = Edge(start=start, end=end, tag="IS_A")
-    assert edge.dict() == dict(
-        start=start.key, tag="IS_A", end=end.key, weight=1, attrs={},
-    )
-
-    two = start >> "IS_A" >> end
-    assert two == edge
-    assert two.dict() == edge.dict()
-
-    three = end << "IS_A" << start
-    assert three == edge
-    assert three.dict() == edge.dict()
 
 
 def test_create_query_single_node():

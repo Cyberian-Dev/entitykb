@@ -1,4 +1,4 @@
-from entitykb.date import DateResolver, Date
+from entitykb.contrib.date import DateResolver, Date
 from entitykb.pipeline import (
     DefaultResolver,
     Resolver,
@@ -46,7 +46,7 @@ def test_resolver_construct(kb):
 
     assert isinstance(
         Resolver.create(
-            "entitykb.date.DateResolver",
+            "entitykb.contrib.date.DateResolver",
             name="default",
             tokenizer=tokenizer,
             normalizer=normalizer,

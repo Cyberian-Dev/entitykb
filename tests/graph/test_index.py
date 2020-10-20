@@ -1,10 +1,5 @@
-from entitykb.graph import (
-    EdgeIndex,
-    NestedDict,
-    Edge,
-    Node,
-    NodeIndex,
-)
+from entitykb.models import Node, Edge
+from entitykb.graph import EdgeIndex, NestedDict, NodeIndex
 
 
 def test_node_index():
