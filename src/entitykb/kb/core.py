@@ -5,10 +5,10 @@ from .storage import DefaultStorage
 
 
 class KB(BaseKB):
-    def __init__(self, root_dir: str = None):
+    def __init__(self, root: str = None):
         self.uncommitted = 0
-        self.config = Config.create(root_dir=root_dir)
-        self.storage = DefaultStorage(root_dir=self.config.root_dir)
+        self.config = Config.create(root=root)
+        self.storage = DefaultStorage(root=self.config.root)
         self.normalizer = Normalizer.create(self.config.normalizer)
         self.terms = Terms(normalizer=self.normalizer)
         self.graph = Graph()

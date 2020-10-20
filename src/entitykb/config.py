@@ -1,9 +1,9 @@
 import os
+import json
+
 from pathlib import Path
 from dataclasses import dataclass, fields
 from typing import List
-
-import ujson
 
 import entitykb
 
@@ -11,34 +11,33 @@ import entitykb
 @dataclass
 class Config:
     file_path: str = None
-    extractor: str = None
-    filterers: List[str] = None
-    index: str = None
-    normalizer: str = None
-    resolvers: List[str] = None
-    tokenizer: str = None
+    extractor: str = "entitykb.DefaultExtractor"
+    filterers: List[str] = ()
+    normalizer: str = "entitykb.DefaultNormalizer"
+    resolvers: List[str] = ("entitykb.DefaultResolver",)
+    tokenizer: str = "entitykb.DefaultTokenizer"
 
     def __str__(self):
         return f"<Config: {self.file_path}>"
 
     @property
-    def root_dir(self):
+    def root(self):
         return os.path.dirname(self.file_path)
 
     @classmethod
-    def create(cls, root_dir: str) -> "Config":
-        config_file_path = entitykb.Config.get_file_path(root_dir=root_dir)
+    def create(cls, root: str) -> "Config":
+        config_file_path = entitykb.Config.get_file_path(root=root)
 
         data = {}
         if os.path.isfile(config_file_path):
             with open(config_file_path, "r") as fp:
-                data = ujson.load(fp)
+                data = json.load(fp)
 
         config = cls.construct(file_path=config_file_path, data=data)
 
         if not os.path.isfile(config_file_path):
             with open(config_file_path, "w") as fp:
-                ujson.dump(config.dict(), fp, indent=4)
+                json.dump(config.dict(), fp, indent=4)
 
         return config
 
@@ -53,32 +52,31 @@ class Config:
         kw = {
             "extractor": self.extractor,
             "filterers": self.filterers,
-            "index": self.index,
             "normalizer": self.normalizer,
             "resolvers": self.resolvers,
             "tokenizer": self.tokenizer,
         }
 
-        return dict((k, v) for k, v in kw.items() if v is not None)
+        return dict((k, v) for k, v in kw.items())
 
     @classmethod
-    def get_file_path(cls, root_dir=None, file_name="config.json"):
-        root_dir = cls.get_root_dir(root_dir)
-        file_path = os.path.join(root_dir, file_name)
+    def get_file_path(cls, root=None, file_name="config.json"):
+        root = cls.get_root(root)
+        file_path = os.path.join(root, file_name)
         return file_path
 
     @classmethod
-    def get_root_dir(cls, root_dir=None) -> str:
-        if isinstance(root_dir, Path):
-            root_dir = str(root_dir.resolve())
+    def get_root(cls, root=None) -> str:
+        if isinstance(root, Path):
+            root = str(root.resolve())
 
-        root_dir = (
-            root_dir
+        root = (
+            root
             or os.environ.get("ENTITYKB_ROOT")
             or os.path.expanduser("~/.entitykb")
         )
 
-        return root_dir
+        return root
 
     def info(self) -> dict:
         info = self.dict()

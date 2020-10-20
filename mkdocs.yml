@@ -1,0 +1,59 @@
+site_name: EntityKB
+site_description: EntityKB, python knowledge base toolset
+site_url: https://entitykb.org/
+
+theme:
+    name: 'material'
+    palette:
+        primary: 'grey'
+        accent: 'yellow'
+    icon:
+        repo: fontawesome/brands/github-alt
+    logo: 'img/favicon.png'
+    favicon: 'img/favicon.png'
+
+repo_name: genomoncology/entitykb
+repo_url: https://github.com/genomoncology/entitykb
+edit_uri: ''
+
+nav:
+    - EntityKB: 'index.md'
+    - Contributing: 'contributing.md'
+    - Release Notes: 'release-notes.md'
+
+markdown_extensions:
+    - toc:
+        permalink: true
+    - markdown.extensions.codehilite:
+        guess_lang: false
+    - markdown_include.include:
+        base_path: docs
+    - admonition
+    - codehilite
+    - extra
+    - pymdownx.superfences:
+        custom_fences:
+            - name: mermaid
+              class: mermaid
+              format: !!python/name:pymdownx.superfences.fence_div_format
+    - pymdownx.tabbed
+
+extra:
+    social:
+        - icon: fontawesome/brands/github-alt
+          link: 'https://github.com/genomoncology'
+        - icon: fontawesome/brands/twitter
+          link: 'https://twitter.com/genomoncology'
+        - icon: fontawesome/brands/linkedin
+          link: 'https://www.linkedin.com/company/genomoncology'
+        - icon: fontawesome/solid/globe
+          link: 'https://www.genomoncology.com'
+
+extra_css:
+    - 'css/termynal.css'
+    - 'css/custom.css'
+
+extra_javascript:
+    - 'https://unpkg.com/mermaid@8.4.6/dist/mermaid.min.js'
+    - 'js/termynal.js'
+    - 'js/custom.js'

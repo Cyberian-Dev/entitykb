@@ -1,11 +1,5 @@
 SHELL := /bin/bash
 
-rpc:
-	PIPENV_IGNORE_VIRTUALENVS=1 PYTHONPATH=src pipenv run entitykb rpc
-
-http:
-	PIPENV_IGNORE_VIRTUALENVS=1 PYTHONPATH=src pipenv run entitykb http
-
 ipython:
 	PIPENV_IGNORE_VIRTUALENVS=1 PYTHONPATH=src pipenv run ipython
 
@@ -24,6 +18,14 @@ update:
 
 tox: clean
 	tox
+
+docs-live:
+	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run mkdocs serve --dev-addr 127.0.0.1:8008
+
+docs-build:
+	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run mkdocs build
+	cp ./docs/index.md ./README.md
+
 
 # clean
 

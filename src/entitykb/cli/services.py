@@ -60,16 +60,16 @@ class PreviewKB(object):
         self.echo(output)
 
 
-def init_kb(root_dir, exist_ok=False) -> bool:
+def init_kb(root, exist_ok=False) -> bool:
     success = False
 
     try:
-        root_dir = Config.get_root_dir(root_dir)
+        root = Config.get_root(root)
 
-        os.makedirs(root_dir, exist_ok=exist_ok)
-        Config.create(root_dir=root_dir)
+        os.makedirs(root, exist_ok=exist_ok)
+        Config.create(root=root)
 
-        kb = KB(root_dir=root_dir)
+        kb = KB(root=root)
         kb.commit()
         success = True
 

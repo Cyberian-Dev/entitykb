@@ -9,15 +9,15 @@ def test_parse(kb: KB):
     assert 4 == len(doc.tokens)
 
 
-def test_creates_files(root_dir, kb: KB, apple):
-    assert os.path.isfile(os.path.join(root_dir, "config.json"))
-    assert not os.path.isfile(os.path.join(root_dir, "index.db"))
+def test_creates_files(root, kb: KB, apple):
+    assert os.path.isfile(os.path.join(root, "config.json"))
+    assert not os.path.isfile(os.path.join(root, "index.db"))
 
     kb.save_node(apple)
-    assert not os.path.isfile(os.path.join(root_dir, "index.db"))
+    assert not os.path.isfile(os.path.join(root, "index.db"))
 
     kb.commit()
-    assert os.path.isfile(os.path.join(root_dir, "index.db"))
+    assert os.path.isfile(os.path.join(root, "index.db"))
 
 
 def test_save_entity(kb: KB, apple):
@@ -27,7 +27,7 @@ def test_save_entity(kb: KB, apple):
     assert (kb.parse("Apple,Inc.")).entities[0].entity == apple
 
 
-def test_save_load_sync(root_dir, kb: KB, apple):
+def test_save_load_sync(root, kb: KB, apple):
     kb.save_node(apple)
     assert (kb.parse("AAPL")).entities[0].entity == apple
     assert (kb.parse("Apple, Inc.")).entities[0].entity == apple
@@ -35,12 +35,12 @@ def test_save_load_sync(root_dir, kb: KB, apple):
 
     kb.commit()
 
-    kb = KB(root_dir=root_dir)
+    kb = KB(root=root)
     assert (kb.parse("AAPL")).entities[0].entity == apple
     assert (kb.parse("Apple, Inc.")).entities[0].entity == apple
     assert (kb.parse("Apple,Inc.")).entities[0].entity == apple
 
-    kb = KB(root_dir=root_dir)
+    kb = KB(root=root)
     assert (kb.parse("AAPL")).entities[0].entity == apple
     assert (kb.parse("Apple, Inc.")).entities[0].entity == apple
     assert (kb.parse("Apple,Inc.")).entities[0].entity == apple

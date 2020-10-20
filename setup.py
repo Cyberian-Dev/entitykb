@@ -5,17 +5,16 @@ from setuptools import setup, find_packages
 install_requires = [
     "pyahocorasick",
     "translitcodec",
-    "ujson",
     "lark-parser==0.8.9",
     "python-dateutil",
-    "rapidfuzz",
+    "tabulate",
+    "typer",
 ]
 
 if sys.version_info[:2] == (3, 6):
     install_requires.append("dataclasses")
 
-extras_requires = {
-    "cli": ["tabulate", "typer"],
+extras_require = {
     "rpc": ["aio-msgpack-rpc"],
     "http": ["fastapi", "aiofiles", "uvicorn >=0.11.7"],
 }
@@ -31,7 +30,7 @@ setup(
     include_package_data=True,
     entry_points={"console_scripts": ["entitykb=entitykb.cli:app"]},
     install_requires=install_requires,
-    extras_require=extras_requires,
+    extras_require=extras_require,
     description="Rules-based Named Entity Recognition and Linking",
     long_description="Rules-based Named Entity Recognition and Linking",
     classifiers=[

@@ -1,13 +1,11 @@
 import logging.config
 
-# using uvicorn's default formatter
-
 LOGGING_CONFIG = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
         "default": {
-            "()": "uvicorn.logging.DefaultFormatter",
+            "()": "entitykb.formatters.DefaultFormatter",
             "fmt": "%(levelprefix)s %(message)s",
             "use_colors": True,
         },

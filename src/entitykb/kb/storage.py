@@ -11,7 +11,7 @@ from entitykb import logger
 
 @dataclass
 class Storage(object):
-    root_dir: str = None
+    root: str = None
     max_backups: int = 5
 
     def info(self) -> dict:
@@ -32,7 +32,7 @@ class Storage(object):
 
     @property
     def backup_dir(self):
-        backup_dir = os.path.join(self.root_dir, "backups")
+        backup_dir = os.path.join(self.root, "backups")
         if not os.path.exists(backup_dir):
             os.makedirs(backup_dir, exist_ok=True)
         return backup_dir
@@ -50,8 +50,8 @@ class DefaultStorage(Storage):
 
     @property
     def index_path(self):
-        if self.root_dir:
-            return os.path.join(self.root_dir, "index.db")
+        if self.root:
+            return os.path.join(self.root, "index.db")
 
     @property
     def exists(self):

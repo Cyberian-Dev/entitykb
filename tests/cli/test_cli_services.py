@@ -43,16 +43,16 @@ def test_flatten_dict():
     assert {"a.b": 1, "a.c": 2, "d": (3, 4), "e.f.g": 5} == flat
 
 
-def test_init_kb(root_dir):
-    assert isinstance(root_dir, str)
-    assert os.path.exists(root_dir)
-    assert os.path.isdir(root_dir)
-    assert [] == os.listdir(root_dir)
+def test_init_kb(root):
+    assert isinstance(root, str)
+    assert os.path.exists(root)
+    assert os.path.isdir(root)
+    assert [] == os.listdir(root)
 
-    assert services.init_kb(root_dir, exist_ok=True)
-    assert {"config.json", "index.db"} == set(os.listdir(root_dir))
+    assert services.init_kb(root, exist_ok=True)
+    assert {"config.json", "index.db"} == set(os.listdir(root))
 
-    assert services.init_kb(root_dir, exist_ok=False) is False
+    assert services.init_kb(root, exist_ok=False) is False
 
 
 data = """name,synonyms,label

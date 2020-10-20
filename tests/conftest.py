@@ -7,13 +7,13 @@ from entitykb import Node, Entity, KB
 
 
 @pytest.fixture()
-def root_dir():
+def root():
     return tempfile.mkdtemp()
 
 
 @pytest.fixture()
-def kb(root_dir):
-    return KB(root_dir=root_dir)
+def kb(root):
+    return KB(root=root)
 
 
 class Location(Node):

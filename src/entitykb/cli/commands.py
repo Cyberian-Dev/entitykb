@@ -21,27 +21,28 @@ def finish(operation: str, success: bool, error_code: int = None):
 
 
 @app.command()
-def init(root_dir: Optional[Path] = typer.Argument(None)):
+def init(root: Optional[Path] = typer.Option(None)):
     """ Initialize local KB """
-    success = services.init_kb(root_dir=root_dir)
+    success = services.init_kb(root=root, exist_ok=True)
     finish("Initialization", success)
 
 
 @app.command()
-def reset(root_dir: Optional[Path] = typer.Argument(None)):
+def reset(root: Optional[Path] = typer.Option(None)):
     """ Reset local KB """
 
-    root_dir = Config.get_root_dir(root_dir)
-    typer.confirm(f"Are you sure you want to reset: {root_dir}?", abort=True)
+    root = Config.get_root(root)
+    typer.confirm(f"Are you sure you want to reset: {root}?", abort=True)
 
-    kb = KB(root_dir=root_dir)
+    kb = KB(root=root)
     success = kb.reset()
     finish("Reset", success)
 
 
 @app.command()
-def info(root_dir: Optional[Path] = typer.Argument(None)):
-    kb = KB(root_dir=root_dir)
+def info(root: Optional[Path] = typer.Option(None)):
+    """ Display information for local KB """
+    kb = KB(root=root)
     flat = sorted(services.flatten_dict(kb.info()).items())
     output = tabulate(flat, tablefmt="pretty", colalign=("left", "right"))
     typer.echo(output)
@@ -49,15 +50,15 @@ def info(root_dir: Optional[Path] = typer.Argument(None)):
 
 @app.command()
 def load(
+    root: Optional[Path] = typer.Option(None),
     in_file: Path = typer.Argument(None),
     format: services.FileFormat = services.FileFormat.csv,
     dry_run: bool = typer.Option(False, "--dry-run"),
-    root_dir: Optional[Path] = typer.Option(None),
 ):
     """ Load data into local KB """
 
     if not dry_run:
-        kb = KB(root_dir=root_dir)
+        kb = KB(root=root)
     else:
         kb = services.PreviewKB(length=10)
 
@@ -74,12 +75,18 @@ def load(
 
 
 @app.command()
-def rpc():
-    launch_rpc()
+def rpc(
+    root: Optional[Path] = typer.Option(None),
+    host: Optional[str] = typer.Option(None),
+    port: int = typer.Option(None),
+):
+    """ Launch RPC server calling local KB """
+    launch_rpc(root=root, host=host, port=port)
 
 
 @app.command()
 def http():
+    """ Launch HTTP server calling RPC server """
     launch_http()
 
 

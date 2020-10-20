@@ -11,7 +11,7 @@ class HandlerKB(BaseKB):
 
     def __init__(self, _kb):
         self._kb: KB = _kb
-        logger.info(f"Handler initialized with {self._kb.config.root_dir}")
+        logger.info(f"Handler initialized with {self._kb.config.root}")
 
     def __len__(self):
         raise NotImplementedError
@@ -54,15 +54,14 @@ class HandlerKB(BaseKB):
         raise NotImplementedError
 
     def info(self):
-        logger.info("call received: info()")
         data = self._kb.info()
         return data
 
 
-def launch_rpc(root_dir: str = None, host: str = None, port: int = None):
+def launch_rpc(root: str = None, host: str = None, port: int = None):
     """ Function for starting RPC Server. Called from entitykb CLI. """
     conn = RPCConnection(host=host, port=port)
-    kb = KB(root_dir=root_dir)
+    kb = KB(root=root)
     handler = HandlerKB(kb)
     server = Server(handler=handler)
 
