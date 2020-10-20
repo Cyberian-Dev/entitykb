@@ -3,6 +3,7 @@ omit =
     src/entitykb/rpc/*.py
     src/entitykb/cli/*.py
     src/entitykb/http/*.py
+    src/entitykb/formatters.py
 
 [report]
 exclude_lines =

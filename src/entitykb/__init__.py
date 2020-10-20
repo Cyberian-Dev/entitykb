@@ -3,7 +3,7 @@ from .logging import logger
 from .base import BaseKB
 from .config import Config
 from .graph import Graph, Node, Entity, Edge
-from .terms import Terms
+from .terms import TermsIndex
 from .pipeline import (
     DefaultExtractor,
     DefaultNormalizer,
@@ -38,7 +38,7 @@ __all__ = (
     "Node",
     "Normalizer",
     "Pipeline",
-    "Terms",
+    "TermsIndex",
     "Token",
     "date",
     "logger",

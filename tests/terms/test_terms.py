@@ -1,13 +1,13 @@
 import pytest
 
-from entitykb.terms import Terms
+from entitykb.terms import TermsIndex
 from entitykb.pipeline import Normalizer
 
 
 @pytest.fixture()
 def terms():
     normalizer = Normalizer.create()
-    terms = Terms(normalizer=normalizer)
+    terms = TermsIndex(normalizer=normalizer)
     return terms
 
 

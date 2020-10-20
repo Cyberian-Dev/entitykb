@@ -3,7 +3,7 @@ from ahocorasick import Automaton as Trie
 from entitykb.graph import Entity
 
 
-class Terms(object):
+class TermsIndex(object):
 
     __slots__ = ("trie", "normalizer")
 

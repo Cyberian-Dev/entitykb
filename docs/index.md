@@ -22,7 +22,7 @@ The key features of EntityKB are:
 * **Terms Index**: Store and find entities using their names and synonyms.
 * **Keyword Extraction**: Tokenize, normalize, extract and filter entities from text.
 * **Autocomplete**: Support type-ahead use cases.
-* **Load and Dump**: Load data into and export data out of your KB.
+* **Import/Export**: Load data into and dump data out of your KB.
 
 There are multiple ways to interact with the Knowledge Base:
 

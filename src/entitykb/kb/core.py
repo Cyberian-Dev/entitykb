@@ -1,6 +1,6 @@
 from entitykb import Config, BaseKB, Graph, Entity
 from entitykb.pipeline import Pipeline, Normalizer, FindResult
-from entitykb.terms import Terms
+from entitykb.terms import TermsIndex
 from .storage import DefaultStorage
 
 
@@ -10,7 +10,7 @@ class KB(BaseKB):
         self.config = Config.create(root=root)
         self.storage = DefaultStorage(root=self.config.root)
         self.normalizer = Normalizer.create(self.config.normalizer)
-        self.terms = Terms(normalizer=self.normalizer)
+        self.terms = TermsIndex(normalizer=self.normalizer)
         self.graph = Graph()
         self.pipeline = Pipeline.create(
             kb=self, config=self.config, normalizer=self.normalizer
