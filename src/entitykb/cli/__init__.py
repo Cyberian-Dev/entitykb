@@ -1,4 +1,4 @@
-from .commands import app
+from .commands import cli
 
 
-__all__ = ("app",)
+__all__ = ("cli",)

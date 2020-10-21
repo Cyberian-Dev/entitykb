@@ -5,7 +5,7 @@ LOGGING_CONFIG = {
     "disable_existing_loggers": False,
     "formatters": {
         "default": {
-            "()": "entitykb.formatters.DefaultFormatter",
+            "()": "entitykb.deps.DefaultFormatter",
             "fmt": "%(levelprefix)s %(message)s",
             "use_colors": True,
         },

@@ -1,8 +1,8 @@
 import asyncio
 from dataclasses import dataclass
-from os import getenv as env
 
 from aio_msgpack_rpc import Client
+from entitykb import environ
 
 
 @dataclass
@@ -14,10 +14,10 @@ class RPCConnection(object):
     _client: Client = None
 
     def __post_init__(self):
-        self.host = first_nn(self.host, env("ENTITYKB_RCP_HOST", "localhost"))
-        self.port = first_nn(self.port, env("ENTITYKB_RCP_HOST", 3477))
-        self.timeout = first_nn(self.timeout, env("ENTITYKB_RCP_TIMEOUT", 2))
-        self.retries = first_nn(self.retries, env("ENTITYKB_RCP_RETRIES", 5))
+        self.host = self.host or environ.rpc_host
+        self.port = self.port or environ.rpc_port
+        self.timeout = self.timeout or environ.rpc_timeout
+        self.retries = self.retries or environ.rpc_retries
 
     def __str__(self):
         return f"tcp://{self.host}:{self.port}"
@@ -54,13 +54,3 @@ class RPCConnection(object):
                 last_e = e
 
         raise last_e
-
-
-def first_nn(*items):
-    """ Returns first not None item. Lazy creates list, set, tuple, dict. """
-    for item in items:
-        if item is not None:
-            if isinstance(item, type):
-                return item()
-            else:
-                return item

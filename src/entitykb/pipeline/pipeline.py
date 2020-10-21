@@ -1,9 +1,7 @@
 from dataclasses import dataclass
 from typing import Tuple, List, Iterable
 
-from entitykb.base import BaseKB
-from entitykb.config import Config
-from entitykb.models import get_class_from_name, DocEntity
+from entitykb import BaseKB, Config, get_class_from_name, DocEntity
 from . import Tokenizer, Normalizer, Extractor, Filterer, Resolver
 
 

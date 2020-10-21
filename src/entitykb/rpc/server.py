@@ -1,6 +1,6 @@
 import asyncio
 
-from aio_msgpack_rpc import Server
+import aio_msgpack_rpc
 
 from entitykb import logger, KB, BaseKB, Node
 from .connection import RPCConnection
@@ -58,21 +58,38 @@ class HandlerKB(BaseKB):
         return data
 
 
-def launch_rpc(root: str = None, host: str = None, port: int = None):
-    """ Function for starting RPC Server. Called from entitykb CLI. """
-    conn = RPCConnection(host=host, port=port)
-    kb = KB(root=root)
-    handler = HandlerKB(kb)
-    server = Server(handler=handler)
+class RPCServer(object):
+    def __init__(self, root: str = None, host: str = None, port: int = None):
+        self.conn = RPCConnection(host=host, port=port)
+        self.kb = KB(root=root)
+        self.handler = HandlerKB(self.kb)
+        self.rpc_server = aio_msgpack_rpc.Server(handler=self.handler)
+        self.loop: asyncio.AbstractEventLoop = None
+        self.stream: asyncio.StreamWriter = None
 
-    loop = asyncio.get_event_loop()
-    logger.info(f"Launching RPC Server on {conn}")
-    future = asyncio.start_server(server, conn.host, conn.port, loop=loop)
-    server = loop.run_until_complete(future)
-    logger.info(f"Server info: {handler.info()}")
+    def __call__(self, *args, **kwargs):
+        return self.serve()
 
+    def serve(self):
+        self.loop = asyncio.get_event_loop()
+        logger.info(f"Loading Local Knowledge Base: {self.kb.config}")
+        logger.info(f"Launching RPC Server on {self.conn}")
+        future = asyncio.start_server(
+            self.rpc_server, self.conn.host, self.conn.port, loop=self.loop
+        )
+        self.stream = self.loop.run_until_complete(future)
+        self.loop.run_forever()
+
+    def close(self):
+        if self.stream:
+            logger.info("User terminated. Exiting RPC Server.")
+            self.stream.close()
+            self.loop.run_until_complete(self.stream.wait_closed())
+
+
+def launch(root: str = None, host: str = None, port: int = None):
+    server = RPCServer(root=root, host=host, port=port)
     try:
-        loop.run_forever()
+        server.serve()
     except KeyboardInterrupt:
         server.close()
-        loop.run_until_complete(server.wait_closed())

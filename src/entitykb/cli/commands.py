@@ -2,14 +2,13 @@ from pathlib import Path
 from typing import Optional
 
 import typer
+import uvicorn
 from tabulate import tabulate
 
-from entitykb import KB, Config, logger
-from entitykb.http import launch_http
-from entitykb.rpc import launch_rpc
+from entitykb import KB, Config, logger, environ, rpc, http
 from . import services
 
-app = typer.Typer()
+cli = typer.Typer()
 
 
 def finish(operation: str, success: bool, error_code: int = None):
@@ -20,14 +19,14 @@ def finish(operation: str, success: bool, error_code: int = None):
         raise typer.Exit(error_code or 1)
 
 
-@app.command()
+@cli.command()
 def init(root: Optional[Path] = typer.Option(None)):
     """ Initialize local KB """
     success = services.init_kb(root=root, exist_ok=True)
     finish("Initialization", success)
 
 
-@app.command()
+@cli.command()
 def reset(root: Optional[Path] = typer.Option(None)):
     """ Reset local KB """
 
@@ -39,7 +38,7 @@ def reset(root: Optional[Path] = typer.Option(None)):
     finish("Reset", success)
 
 
-@app.command()
+@cli.command()
 def info(root: Optional[Path] = typer.Option(None)):
     """ Display information for local KB """
     kb = KB(root=root)
@@ -48,7 +47,7 @@ def info(root: Optional[Path] = typer.Option(None)):
     typer.echo(output)
 
 
-@app.command()
+@cli.command()
 def load(
     root: Optional[Path] = typer.Option(None),
     in_file: Path = typer.Argument(None),
@@ -74,21 +73,49 @@ def load(
     kb.commit()
 
 
-@app.command()
-def rpc(
+@cli.command(name="rpc")
+def run_rpc(
     root: Optional[Path] = typer.Option(None),
     host: Optional[str] = typer.Option(None),
     port: int = typer.Option(None),
 ):
-    """ Launch RPC server calling local KB """
-    launch_rpc(root=root, host=host, port=port)
+    """ Launch RPC server using local KB """
+
+    rpc.launch(root=root, host=host, port=port)
 
 
-@app.command()
-def http():
-    """ Launch HTTP server calling RPC server """
-    launch_http()
+@cli.command(name="http")
+def run_http(
+    root: Optional[Path] = typer.Option(None),
+    host: Optional[str] = typer.Option(None),
+    port: int = typer.Option(None),
+    http_host: Optional[str] = typer.Option(None),
+    rpc_port: int = typer.Option(3477),
+):
+    """ Launch HTTP server using RPC KB. """
+    environ.root = root
+    environ.rpc_host = http_host
+    environ.rpc_port = rpc_port
+
+    http_app = "entitykb.http.prod:app"
+    uvicorn.run(http_app, host=host, port=port, reload=True)
+
+
+@cli.command(name="dev")
+def run_dev(
+    root: Optional[Path] = typer.Option(None),
+    host: str = typer.Option("127.0.0.1"),
+    rpc_port: int = typer.Option(3477),
+    http_port: int = typer.Option(8000),
+):
+    """ Hot reloading local HTTP and RPC servers. """
+    environ.root = root
+    environ.rpc_host = host
+    environ.rpc_port = rpc_port
+
+    http_app = "entitykb.http.dev:app"
+    uvicorn.run(http_app, host=host, port=http_port, reload=True)
 
 
 if __name__ == "__main__":
-    app()
+    cli()

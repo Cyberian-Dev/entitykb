@@ -1,3 +1,5 @@
+from .config import Config, environ
+
 from . import logging
 from .logging import logger
 
@@ -27,7 +29,6 @@ from .models import (
 )
 
 from .base import BaseKB
-from .config import Config
 from .graph import Graph
 from .terms import TermsIndex
 from .pipeline import (
@@ -39,27 +40,18 @@ from .pipeline import (
     Normalizer,
 )
 from .kb import KB
+from .cli import cli
 from . import contrib
 
 __all__ = (
+    "AttrCriteria",
     "BaseKB",
     "Config",
+    "Criteria",
     "DefaultExtractor",
     "DefaultNormalizer",
     "DefaultResolver",
     "DefaultTokenizer",
-    "Graph",
-    "KB",
-    "Normalizer",
-    "Pipeline",
-    "TermsIndex",
-    "contrib",
-    "logger",
-    "logging",
-    "models",
-    "pipeline",
-    "AttrCriteria",
-    "Criteria",
     "Doc",
     "DocEntity",
     "DocToken",
@@ -67,16 +59,28 @@ __all__ = (
     "Entity",
     "FilterStep",
     "FindResult",
+    "Graph",
+    "KB",
     "Node",
+    "Normalizer",
+    "Pipeline",
     "Query",
     "RelCriteria",
     "SlotBase",
     "Step",
+    "TermsIndex",
     "Token",
     "WalkStep",
+    "cli",
+    "contrib",
     "ensure_iterable",
+    "environ",
     "get_class_from_name",
     "import_module",
     "instantiate_class_from_name",
     "is_iterable",
+    "logger",
+    "logging",
+    "models",
+    "pipeline",
 )

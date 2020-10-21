@@ -7,7 +7,7 @@ from .funcs import (
 )
 from .enums import Direction, Comparison
 from .base import SlotBase
-from .graph import Node, Edge
+from .node import Node, Edge
 from .entity import Entity
 from .query import (
     Criteria,
