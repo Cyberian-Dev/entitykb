@@ -1,4 +1,4 @@
-from entitykb.models.entity import Entity
+from entitykb.models import Entity, Node
 
 
 def test_entity():
@@ -21,3 +21,10 @@ def test_entity():
         attrs={},
     )
     assert entity.terms == ("GenomOncology", "GO")
+
+    node = Node.create(entity.dict())
+    assert isinstance(node, Entity)
+
+
+def test_custom_entity_class(apple):
+    assert apple.label == "COMPANY"

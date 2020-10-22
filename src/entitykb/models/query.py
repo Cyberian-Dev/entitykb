@@ -68,11 +68,11 @@ class RelCriteria(Criteria, metaclass=RelCriteriaType):
     def __init__(self, tags: str, directions=None, nodes=None):
         self.tags = ensure_iterable(tags)
         self.directions = ensure_iterable(directions)
-        self.nodes = Node.to_key_tuple(nodes)
+        self.nodes = RelCriteria.to_key_tuple(nodes)
 
     def update(self, directions, nodes):
         self.directions = ensure_iterable(directions)
-        self.nodes = Node.to_key_tuple(nodes)
+        self.nodes = RelCriteria.to_key_tuple(nodes)
         return self
 
     def __rshift__(self, nodes):
@@ -83,6 +83,10 @@ class RelCriteria(Criteria, metaclass=RelCriteriaType):
 
     def __pow__(self, nodes):
         return self.update((Direction.incoming, Direction.outgoing), nodes)
+
+    @staticmethod
+    def to_key_tuple(nodes):
+        return tuple(Node.to_key(n) for n in ensure_iterable(nodes))
 
 
 class Step(SlotBase):

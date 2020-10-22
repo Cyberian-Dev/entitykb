@@ -1,18 +1,41 @@
 from typing import Union
 from uuid import uuid4
 
-from . import ensure_iterable, SlotBase
+from . import SlotBase, camel_to_snake
+
+
+class NodeLabelRegistry(object):
+
+    _instance = None
+
+    def __init__(self):
+        self.values = dict(NODE=Node)
+
+        for cls in Node.__all_subclasses__():
+            for label in cls.get_all_labels():
+                self.values[label] = cls
+
+    def get_node_cls(self, label):
+        return self.values.get(label)
+
+    @classmethod
+    def instance(cls):
+        if cls._instance is None:
+            cls._instance = NodeLabelRegistry()
+        return cls._instance
 
 
 class Node(SlotBase):
 
     __slots__ = ["key", "label", "attrs"]
+    __all_labels__ = {"NODE"}
+    __default_label__ = "NODE"
 
     def __init__(
         self, *, key: str = None, label: str = None, attrs: dict = None, **kw
     ):
         self.key = key or str(uuid4())
-        self.label = label
+        self.label = label or self.__default_label__
         self.attrs = {**(attrs or {}), **kw}
 
     def __rshift__(self, tag):
@@ -33,13 +56,34 @@ class Node(SlotBase):
         else:
             raise AttributeError
 
+    @classmethod
+    def __all_subclasses__(cls):
+        # reference: https://stackoverflow.com/a/33607093
+        for subclass in cls.__subclasses__():  # type: Node
+            yield subclass
+            yield from subclass.__all_subclasses__()
+
     @staticmethod
     def to_key(node_key: Union["Node", str]) -> str:
         return node_key.key if isinstance(node_key, Node) else node_key
 
-    @staticmethod
-    def to_key_tuple(nodes):
-        return tuple(Node.to_key(n) for n in ensure_iterable(nodes))
+    @classmethod
+    def get_default_label(cls):
+        default_label = cls.__dict__.get("__default_label__")
+        if default_label is None:
+            default_label = camel_to_snake(cls.__name__, upper=True)
+        return default_label
+
+    @classmethod
+    def get_all_labels(cls):
+        yield cls.get_default_label()
+        yield from cls.__dict__.get("__all_labels__", ())
+
+    @classmethod
+    def identify_klass(cls, kwargs):
+        label = kwargs.get("label")
+        klass = NodeLabelRegistry.instance().get_node_cls(label)
+        return klass
 
 
 class Edge(SlotBase):

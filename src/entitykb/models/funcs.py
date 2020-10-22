@@ -1,5 +1,14 @@
 import functools
 from importlib import import_module
+import re
+
+camel_pattern = re.compile(r"(?<!^)(?=[A-Z])")
+
+
+def camel_to_snake(name, upper=False):
+    name = camel_pattern.sub("_", name)
+    name = name.upper() if upper else name.lower()
+    return name
 
 
 @functools.lru_cache(maxsize=100)

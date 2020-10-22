@@ -1,5 +1,27 @@
+import pytest
 from pathlib import Path
-from entitykb.config import Config
+from entitykb.config import Config, environ
+from entitykb.deps import EnvironError
+
+
+def test_environ_defaults():
+    environ.root = "/opt/entitykb"
+    assert environ.root == "/opt/entitykb"
+
+    environ.rpc_host = "0.0.0.0"
+    assert environ.rpc_host == "0.0.0.0"
+
+    environ.rpc_port = 8001
+    assert environ.rpc_port == 8001
+
+    environ.rpc_timeout = 3
+    assert environ.rpc_timeout == 3
+
+    environ.rpc_retries = 10
+    assert environ.rpc_retries == 10
+
+    with pytest.raises(EnvironError):
+        environ.root = "/will/fail"
 
 
 def test_config_defaults():

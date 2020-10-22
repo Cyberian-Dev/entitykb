@@ -1,9 +1,9 @@
-from entitykb.models.graph import Node
-from entitykb.models.query import (
+from entitykb.models import (
     AttrCriteria,
     Criteria,
     Direction,
     FilterStep,
+    Node,
     Query,
     RelCriteria,
     WalkStep,

@@ -2,8 +2,13 @@ from typing import Tuple
 
 from . import Node
 
+ENTITY = "ENTITY"
+
 
 class Entity(Node):
+
+    __all_labels__ = {"ENTITY"}
+    __default_label__ = "ENTITY"
 
     __slots__ = ["key", "label", "attrs", "name", "synonyms"]
 
@@ -20,7 +25,7 @@ class Entity(Node):
         self.name = name
         self.synonyms = tuple(synonyms or ())
 
-        label = label or "ENTITY"
+        label = label or self.get_default_label()
         key = key or f"{name}|{label}"
 
         super().__init__(key=key, label=label, attrs=attrs, **kw)

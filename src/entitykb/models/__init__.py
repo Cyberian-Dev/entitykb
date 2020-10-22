@@ -1,4 +1,5 @@
 from .funcs import (
+    camel_to_snake,
     get_class_from_name,
     ensure_iterable,
     instantiate_class_from_name,
@@ -40,6 +41,7 @@ __all__ = (
     "Step",
     "Token",
     "WalkStep",
+    "camel_to_snake",
     "ensure_iterable",
     "get_class_from_name",
     "import_module",

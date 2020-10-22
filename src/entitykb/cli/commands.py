@@ -5,7 +5,7 @@ import typer
 import uvicorn
 from tabulate import tabulate
 
-from entitykb import KB, Config, logger, environ, rpc, http
+from entitykb import KB, Config, logger, environ, rpc
 from . import services
 
 cli = typer.Typer()

@@ -1,10 +1,10 @@
-from entitykb.models.graph import Node, Edge
+from entitykb.models import Node, Edge
 
 
 def test_node():
     empty = Node()
     assert 36 == len(empty.key)
-    assert empty.dict() == dict(key=empty.key, label=None, attrs={})
+    assert empty.dict() == dict(key=empty.key, label="NODE", attrs={})
 
     node = Node(key="ENTITY|LABEL", label="LABEL")
     assert node.dict() == dict(key="ENTITY|LABEL", label="LABEL", attrs={},)

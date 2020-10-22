@@ -51,7 +51,6 @@ the_the = Entity(name="The The", label="BAND")
 def apple():
     return Company(
         name="Apple, Inc.",
-        label="COMPANY",
         synonyms=("Apple", "AAPL"),
         meta=dict(top_product="iPhone"),
         headquarters=Location(city="Cupertino"),
@@ -67,7 +66,6 @@ def google():
 def amazon():
     return Company(
         name="Amazon, Inc.",
-        label="COMPANY",
         synonyms=("Amazon", "AMZN"),
         meta=dict(top_product="Prime"),
         headquarters=Location(city="Seattle"),
@@ -78,7 +76,6 @@ def amazon():
 def microsoft():
     return Company(
         name="Microsoft Corporation",
-        label="COMPANY",
         synonyms=[
             "Microsoft Corp",
             "MSFT",
