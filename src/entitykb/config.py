@@ -129,7 +129,7 @@ class Config:
 
     def info(self) -> dict:
         info = self.dict()
-        info["path"] = self.file_path
+        info["root"] = self.root
         info["resolvers"] = self.resolvers
         info["filterers"] = self.filterers
         return info

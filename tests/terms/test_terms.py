@@ -11,7 +11,7 @@ def terms():
     return terms
 
 
-def test_length_reset_info(terms):
+def test_length_clear_info(terms):
     assert 0 == len(terms)
     assert terms.info() == {
         "links_count": 0,
@@ -33,7 +33,7 @@ def test_length_reset_info(terms):
         "words_count": 1,
     }
 
-    terms.reset_data()
+    terms.clear_data()
     assert 0 == len(terms)
     assert terms.info() == {
         "links_count": 0,

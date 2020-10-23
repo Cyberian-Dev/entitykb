@@ -1,5 +1,6 @@
-from entitykb.models import Entity, FindResult
-from entitykb import Config, BaseKB, Graph
+from typing import Optional, Union
+
+from entitykb import Config, BaseKB, Graph, Node, Entity
 from entitykb.pipeline import Pipeline, Normalizer
 from entitykb.terms import TermsIndex
 from .storage import DefaultStorage
@@ -21,20 +22,21 @@ class KB(BaseKB):
     def __len__(self):
         return len(self.graph)
 
-    def get_node(self, key: str):
+    def get_node(self, key: str) -> Optional[Node]:
         return self.graph.get_node(key)
 
-    def save_node(self, node):
+    def save_node(self, node: Union[Node, dict]) -> Node:
+        node = Node.create(node)
+
         self.graph.save_node(node)
 
         if isinstance(node, Entity):
             self.terms.add_entity(node)
 
-        self.uncommitted += 1
-        return self.uncommitted
+        return node
 
-    def remove_node(self, key):
-        raise NotImplementedError
+    def remove_node(self, key) -> bool:
+        return self.graph.remove_node(key)
 
     def save_edge(self, edge):
         return self.graph.save_edge(edge)
@@ -42,19 +44,21 @@ class KB(BaseKB):
     def suggest(self, term, query=None):
         raise NotImplementedError
 
-    def parse(self, text, labels=None):
+    def parse(self, text, *labels):
         doc = self.pipeline(text=text, labels=labels)
         return doc
+
+    # admin
 
     def commit(self):
         self.storage.archive()
         py_data = self.terms.get_data(), self.graph.get_data()
         self.storage.save(py_data)
+        return True
 
-    def reset(self):
-        self.terms.reset_data()
-        self.graph.reset_data()
-        self.commit()
+    def clear(self):
+        self.terms.clear_data()
+        self.graph.clear_data()
         return True
 
     def reload(self):
@@ -63,6 +67,7 @@ class KB(BaseKB):
             terms_core, graph_core = py_data
             self.terms.put_data(terms_core)
             self.graph.put_data(graph_core)
+        return True
 
     def info(self) -> dict:
         return {
@@ -71,18 +76,3 @@ class KB(BaseKB):
             "graph": self.graph.info(),
             "terms": self.terms.info(),
         }
-
-    # Local-only KB functions
-
-    def is_prefix(self, prefix) -> bool:
-        return self.terms.is_prefix(prefix=prefix)
-
-    def find(self, term: str) -> FindResult:
-        term_iter = self.terms.iterate_term_keys(term=term)
-
-        entities = []
-        for key in term_iter:
-            entity = self.graph.get_node(key)
-            entities.append(entity)
-
-        return FindResult(term=term, entities=entities)

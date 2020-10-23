@@ -83,6 +83,9 @@ class Node(SlotBase):
     def identify_klass(cls, kwargs):
         label = kwargs.get("label")
         klass = NodeLabelRegistry.instance().get_node_cls(label)
+        if klass is None and cls == Node and "name" in kwargs:
+            from .entity import Entity
+            return Entity
         return klass
 
 
@@ -108,8 +111,7 @@ class Edge(SlotBase):
 
     def __repr__(self):
         return (
-            "<entitykb.graph.model.Edge: "
-            f"start={self.start}, tag={self.tag}, end={self.end}>"
+            f"<Edge: start={self.start}, tag={self.tag}, end={self.end}>"
         )
 
     def __rshift__(self, end: Union[Node, str]):

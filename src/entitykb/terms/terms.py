@@ -1,5 +1,7 @@
 from typing import Callable, Iterable
+
 from ahocorasick import Automaton as Trie
+
 from entitykb.models import Entity
 
 
@@ -20,7 +22,7 @@ class TermsIndex(object):
     def put_data(self, trie: Trie):
         self.trie = trie
 
-    def reset_data(self):
+    def clear_data(self):
         self.trie = Trie()
 
     def info(self) -> dict:

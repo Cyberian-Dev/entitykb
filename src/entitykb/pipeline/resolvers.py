@@ -42,10 +42,17 @@ class Resolver(object):
 
 class DefaultResolver(Resolver):
     def find(self, term: str) -> FindResult:
-        return self.kb.find(term)
+        term_iter = self.kb.terms.iterate_term_keys(term=term)
+
+        entities = []
+        for key in term_iter:
+            entity = self.kb.graph.get_node(key)
+            entities.append(entity)
+
+        return FindResult(term=term, entities=entities)
 
     def is_prefix(self, term: str) -> bool:
-        return self.kb.is_prefix(term)
+        return self.kb.terms.is_prefix(term)
 
 
 ResolverType = Optional[Union[Type[Resolver], Resolver, str]]

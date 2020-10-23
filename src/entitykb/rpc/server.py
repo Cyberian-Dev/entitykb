@@ -1,8 +1,9 @@
 import asyncio
+from typing import Optional
 
 import aio_msgpack_rpc
 
-from entitykb import logger, KB, BaseKB, Node
+from entitykb import logger, KB, BaseKB
 from .connection import RPCConnection
 
 
@@ -11,22 +12,21 @@ class HandlerKB(BaseKB):
 
     def __init__(self, _kb):
         self._kb: KB = _kb
-        logger.info(f"Handler initialized with {self._kb.config.root}")
 
     def __len__(self):
         raise NotImplementedError
 
-    def get_node(self, key: str) -> dict:
+    def get_node(self, key: str) -> Optional[dict]:
         node = self._kb.get_node(key)
-        data = node.dict()
+        data = None if node is None else node.dict()
         return data
 
-    def save_node(self, node) -> int:
-        node = Node.create(node)
-        return self._kb.save_node(node)
+    def save_node(self, node) -> dict:
+        node = self._kb.save_node(node)
+        return node.dict()
 
-    def remove_node(self, key):
-        raise NotImplementedError
+    def remove_node(self, key) -> bool:
+        return self._kb.remove_node(key)
 
     def save_edge(self, edge):
         raise NotImplementedError
@@ -34,26 +34,23 @@ class HandlerKB(BaseKB):
     def suggest(self, term, query=None):
         raise NotImplementedError
 
-    def parse(self, text, labels=None) -> dict:
-        doc = self._kb.parse(text, labels)
+    def parse(self, text, *labels) -> dict:
+        doc = self._kb.parse(text, *labels)
         return doc.dict()
 
-    def commit(self):
-        try:
-            count = self._kb.commit()
-            return count
-        except Exception as e:
-            logger.exception(e)
-            raise e
+    def commit(self) -> bool:
+        count = self._kb.commit()
+        return count
 
-    def reset(self):
-        success = self._kb.reset()
+    def clear(self) -> bool:
+        success = self._kb.clear()
         return success
 
-    def reload(self):
-        raise NotImplementedError
+    def reload(self) -> bool:
+        success = self._kb.reload()
+        return success
 
-    def info(self):
+    def info(self) -> dict:
         data = self._kb.info()
         return data
 
@@ -72,8 +69,7 @@ class RPCServer(object):
 
     def serve(self):
         self.loop = asyncio.get_event_loop()
-        logger.info(f"Loading Local Knowledge Base: {self.kb.config}")
-        logger.info(f"Launching RPC Server on {self.conn}")
+        logger.info(f"RPC Server LAUNCHED {self.conn} for {self.kb.config}")
         future = asyncio.start_server(
             self.rpc_server, self.conn.host, self.conn.port, loop=self.loop
         )
@@ -81,8 +77,8 @@ class RPCServer(object):
         self.loop.run_forever()
 
     def close(self):
+        logger.info(f"RPC Server EXITING {self.conn} for {self.kb.config}")
         if self.stream:
-            logger.info("User terminated. Exiting RPC Server.")
             self.stream.close()
             self.loop.run_until_complete(self.stream.wait_closed())
 

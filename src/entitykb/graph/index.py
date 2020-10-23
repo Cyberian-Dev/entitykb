@@ -32,6 +32,12 @@ class NodeIndex(object):
         self.nodes_by_key[node.key] = node
         self.nodes_by_label[node.label].add(node)
 
+    def remove(self, key: str) -> bool:
+        node = self.nodes_by_key.pop(key)
+        nodes = self.nodes_by_label[node.label]
+        nodes.remove(node)
+        return True
+
 
 class EdgeIndex(object):
     def __init__(self):
@@ -56,7 +62,7 @@ class EdgeIndex(object):
                 self.count += 1
         return any_add
 
-    def delete(self, edge):
+    def remove(self, edge):
         any_del = False
         with lock:
             for a, dir, tag, b in self._edge_keys(edge):
@@ -132,5 +138,5 @@ class EdgeIndex(object):
 
     @classmethod
     def _do_iter_other(cls, other_map):
-        for other, edge in other_map.items():
+        for other, edge in list(other_map.items()):
             yield other, edge

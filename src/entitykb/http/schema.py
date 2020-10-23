@@ -1,11 +1,18 @@
-from typing import List, Union
+from dataclasses import field
+from typing import List
 
 from pydantic.dataclasses import dataclass
-from dataclasses import field
 
 Tag = str
 Label = str
 Token = str
+
+
+@dataclass
+class Node:
+    label: str = None
+    key: str = None
+    attrs: dict = None
 
 
 @dataclass
@@ -15,12 +22,9 @@ class DocToken:
 
 
 @dataclass
-class Entity:
-    name: str
-    label: str
-    key: str = None
+class Entity(Node):
+    name: str = None
     synonyms: List[str] = None
-    attrs: dict = None
 
 
 @dataclass
@@ -47,14 +51,16 @@ class Resource:
     data: dict
 
 
-Node = Union[Entity, Resource, Label]
-
-
 @dataclass
 class Relationship:
     a: Node
     tag: Tag
     b: Node
+
+
+@dataclass
+class SuggestRequest:
+    term: str
 
 
 @dataclass

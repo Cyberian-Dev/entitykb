@@ -1,3 +1,5 @@
+from typing import Optional
+from entitykb import Doc, Node
 from abc import abstractmethod
 
 
@@ -13,15 +15,15 @@ class BaseKB(object):
     # nodes
 
     @abstractmethod
-    def get_node(self, key: str):
+    def get_node(self, key: str) -> Optional[Node]:
         """ Retrieve node using key from KB. """
 
     @abstractmethod
-    def save_node(self, node):
+    def save_node(self, node: Node) -> Node:
         """ Save node to KB. """
 
     @abstractmethod
-    def remove_node(self, key):
+    def remove_node(self, key) -> bool:
         """ Remove node and relationships from KB. """
 
     # edges
@@ -37,23 +39,23 @@ class BaseKB(object):
         """ Suggest term auto-completes, filtered by query. """
 
     @abstractmethod
-    def parse(self, text, labels=None):
+    def parse(self, text, labels=None) -> Doc:
         """ Parse text into Doc with entities, filtered by query. """
 
-    # state
+    # admin
 
     @abstractmethod
-    def commit(self):
+    def commit(self) -> bool:
         """ Commit KB to disk. """
 
     @abstractmethod
-    def reset(self):
+    def clear(self) -> bool:
         """ Clear KB of all data. """
 
     @abstractmethod
-    def reload(self):
+    def reload(self) -> bool:
         """ Reload KB from disk. """
 
     @abstractmethod
-    def info(self):
+    def info(self) -> dict:
         """ Return KB's state and meta info. """

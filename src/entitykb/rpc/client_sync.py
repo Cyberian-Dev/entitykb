@@ -1,3 +1,4 @@
+from typing import Optional
 import asyncio
 
 from entitykb import Doc, Node
@@ -16,16 +17,22 @@ class SyncKB(AsyncKB):
     def __len__(self):
         pass
 
-    def get_node(self, key: str) -> Node:
-        raise NotImplementedError
+    # nodes
 
-    def save_node(self, node: Node):
+    def get_node(self, key: str) -> Optional[Node]:
+        future = super(SyncKB, self).get_node(key)
+        node = run_future(future)
+        return node
+
+    def save_node(self, node: Node) -> Node:
         future = super(SyncKB, self).save_node(node)
-        doc = run_future(future)
-        return doc
+        uncommitted = run_future(future)
+        return uncommitted
 
-    def remove_node(self, key):
-        raise NotImplementedError
+    def remove_node(self, key) -> bool:
+        future = super(SyncKB, self).remove_node(key)
+        success = run_future(future)
+        return success
 
     def save_edge(self, edge):
         raise NotImplementedError
@@ -33,25 +40,29 @@ class SyncKB(AsyncKB):
     def suggest(self, term, query=None):
         raise NotImplementedError
 
-    def parse(self, text, labels=None) -> Doc:
-        future = super(SyncKB, self).parse(text, labels=labels)
+    def parse(self, text, *labels) -> Doc:
+        future = super(SyncKB, self).parse(text, *labels)
         doc = run_future(future)
         return doc
 
-    def commit(self):
-        future = super(SyncKB, self).commit()
-        count = run_future(future)
-        return count
+    # admin
 
-    def reset(self):
-        future = super(SyncKB, self).reset()
+    def commit(self) -> bool:
+        future = super(SyncKB, self).commit()
         success = run_future(future)
         return success
 
-    def reload(self):
-        raise NotImplementedError
+    def clear(self) -> bool:
+        future = super(SyncKB, self).clear()
+        success = run_future(future)
+        return success
 
-    def info(self):
+    def reload(self) -> bool:
+        future = super(SyncKB, self).reload()
+        success = run_future(future)
+        return success
+
+    def info(self) -> dict:
         future = super(SyncKB, self).info()
         data = run_future(future)
         return data

@@ -38,14 +38,14 @@ class RPCConnection(object):
     async def __aexit__(self, *_):
         pass
 
-    async def call(self, name: str, *args):
+    async def call(self, name: str, *args, **kwargs):
         last_e = None
         for retry in range(self.retries):
             try:
                 if self._client is None:
                     raise ConnectionRefusedError
 
-                response = await self._client.call(name, *args)
+                response = await self._client.call(name, *args, **kwargs)
                 return response
 
             except Exception as e:

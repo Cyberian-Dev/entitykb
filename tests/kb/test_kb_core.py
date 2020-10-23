@@ -46,15 +46,28 @@ def test_save_load_sync(root, kb: KB, apple):
     assert (kb.parse("Apple,Inc.")).entities[0].entity == apple
 
 
-def test_save_edge(kb: KB, apple):
-    assert 1 == kb.save_node(apple)
+def test_save_edge_remove_node(kb: KB, apple):
+    assert apple == kb.save_node(apple)
     assert 1 == len(kb)
     assert apple == kb.get_node(apple.key)
 
     edge = Edge(start=apple, end=apple, tag="IS_A")
     kb.save_edge(edge)
 
-    assert kb.info().keys() == {"graph", "storage", "terms", "config"}
+    assert kb.info()["graph"] == {
+        "nodes": 1,
+        "edges": 1,
+    }
 
-    kb.reset()
+    kb.remove_node(apple.key)
+    assert kb.info()["graph"] == {
+        "nodes": 0,
+        "edges": 0,
+    }
+
+
+def test_kb_clear(kb: KB, apple):
+    assert apple == kb.save_node(apple)
+    assert 1 == len(kb)
+    kb.clear()
     assert 0 == len(kb)

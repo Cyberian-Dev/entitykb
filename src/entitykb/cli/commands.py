@@ -27,15 +27,15 @@ def init(root: Optional[Path] = typer.Option(None)):
 
 
 @cli.command()
-def reset(root: Optional[Path] = typer.Option(None)):
-    """ Reset local KB """
+def clear(root: Optional[Path] = typer.Option(None)):
+    """ Clear local KB """
 
     root = Config.get_root(root)
-    typer.confirm(f"Are you sure you want to reset: {root}?", abort=True)
+    typer.confirm(f"Are you sure you want to clear: {root}?", abort=True)
 
     kb = KB(root=root)
-    success = kb.reset()
-    finish("Reset", success)
+    success = kb.clear()
+    finish("Clear", success)
 
 
 @cli.command()
@@ -115,7 +115,3 @@ def run_dev(
 
     http_app = "entitykb.http.dev:app"
     uvicorn.run(http_app, host=host, port=http_port, reload=True)
-
-
-if __name__ == "__main__":
-    cli()

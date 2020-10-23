@@ -14,8 +14,14 @@ def test_connect_nodes():
         "edges": 1,
     }
 
+    graph.remove_node(start.key)
+    assert graph.info() == {
+        "nodes": 1,
+        "edges": 0,
+    }
 
-def test_reset_info():
+
+def test_clear_info():
     graph = Graph()
 
     graph.save_node(node=Node())
@@ -24,7 +30,7 @@ def test_reset_info():
         "edges": 0,
     }
 
-    graph.reset_data()
+    graph.clear_data()
     assert graph.info() == {
         "nodes": 0,
         "edges": 0,

@@ -15,7 +15,7 @@ def test_nested_dict():
     assert nested == {"a": {1: {"IS_A": {"b": "Edge()"}}}}
 
 
-def test_edge_index_save_delete():
+def test_edge_index_save_remove():
     node_a = Node()
     node_b = Node()
     node_c = Node()
@@ -35,18 +35,18 @@ def test_edge_index_save_delete():
     assert 4 == len(list(edge_index.iterate(tags="IS_A")))
     assert 1 == len(list(edge_index.iterate(nodes=node_b)))
 
-    # delete edge 1 (twice)
-    edge_index.delete(edge_1)
+    # remove edge 1 (twice)
+    edge_index.remove(edge_1)
     assert edge_index.count == 1
-    edge_index.delete(edge_1)
+    edge_index.remove(edge_1)
     assert edge_index.count == 1
     assert len(edge_index.by_node_key) == 2
     assert len(edge_index.by_edge_tag) == 1
 
-    # delete edge 2 (twice)
-    edge_index.delete(edge_2)
+    # remove edge 2 (twice)
+    edge_index.remove(edge_2)
     assert edge_index.count == 0
-    edge_index.delete(edge_2)
+    edge_index.remove(edge_2)
     assert edge_index.count == 0
     assert len(edge_index.by_node_key) == 0
     assert len(edge_index.by_edge_tag) == 0
