@@ -5,6 +5,44 @@ from .index import NodeIndex, EdgeIndex
 
 
 class Graph(object):
+    def __len__(self):
+        raise NotImplementedError
+
+    def __iter__(self):
+        raise NotImplementedError
+
+    def iterate_edges(self, tags=None, directions=None, nodes=None):
+        raise NotImplementedError
+
+    def save_node(self, node: Node):
+        raise NotImplementedError
+
+    def get_node(self, key: str):
+        raise NotImplementedError
+
+    def save_edge(self, edge: Edge):
+        raise NotImplementedError
+
+    def remove_node(self, key: str) -> bool:
+        raise NotImplementedError
+
+    def connect(self, *, start: Node, tag: str, end: Node, **attrs):
+        raise NotImplementedError
+
+    def info(self):
+        raise NotImplementedError
+
+    def get_data(self):
+        raise NotImplementedError
+
+    def put_data(self, data):
+        raise NotImplementedError
+
+    def clear_data(self):
+        raise NotImplementedError
+
+
+class InMemoryGraph(Graph):
     def __init__(self):
         self.nodes = NodeIndex()
         self.edges = EdgeIndex()

@@ -31,7 +31,7 @@ class Entity(Node):
         super().__init__(key=key, label=label, attrs=attrs, **kw)
 
     def __repr__(self):
-        return "<Entity: " f"name={self.name}, label={self.label}>"
+        return f"<Entity: name={self.name}, label={self.label}>"
 
     @property
     def terms(self):

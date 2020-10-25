@@ -1,19 +1,19 @@
 from typing import Optional, Union
 
-from entitykb import Config, BaseKB, Graph, Node, Entity
+from entitykb import Config, BaseKB, InMemoryGraph, Node, Entity
 from entitykb.pipeline import Pipeline, Normalizer
 from entitykb.terms import TermsIndex
-from .storage import DefaultStorage
+from .storage import PickleStorage
 
 
 class KB(BaseKB):
     def __init__(self, root: str = None):
         self.uncommitted = 0
         self.config = Config.create(root=root)
-        self.storage = DefaultStorage(root=self.config.root)
+        self.storage = PickleStorage(root=self.config.root)
         self.normalizer = Normalizer.create(self.config.normalizer)
         self.terms = TermsIndex(normalizer=self.normalizer)
-        self.graph = Graph()
+        self.graph = InMemoryGraph()
         self.pipeline = Pipeline.create(
             kb=self, config=self.config, normalizer=self.normalizer
         )

@@ -1,6 +1,6 @@
-from .normalizers import Normalizer, DefaultNormalizer, NormalizerType
+from .normalizers import Normalizer, LatinLowercaseNormalizer, NormalizerType
 
-from .tokenizers import Tokenizer, DefaultTokenizer, TokenizerType
+from .tokenizers import Tokenizer, WhitespaceTokenizer, TokenizerType
 
 from .filterers import (
     Filterer,
@@ -13,7 +13,7 @@ from .filterers import (
 
 from .handlers import TokenHandler
 
-from .resolvers import Resolver, DefaultResolver, ResolverType
+from .resolvers import Resolver, TermResolver, ResolverType
 
 from .extractors import Extractor, DefaultExtractor, ExtractorType
 
@@ -21,9 +21,9 @@ from .pipeline import Pipeline
 
 __all__ = (
     "DefaultExtractor",
-    "DefaultNormalizer",
-    "DefaultResolver",
-    "DefaultTokenizer",
+    "LatinLowercaseNormalizer",
+    "TermResolver",
+    "WhitespaceTokenizer",
     "ExactOnlyFilterer",
     "Extractor",
     "ExtractorType",

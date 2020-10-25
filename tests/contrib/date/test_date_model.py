@@ -14,7 +14,7 @@ def test_create_from_dict_via_label_to_date():
     entity = Node.create(dict(year=2000, month=1, day=2, label="DATE"))
     assert isinstance(entity, Date)
     assert entity.name == "2000-01-02"
-    assert repr(entity) == "<Entity: name=2000-01-02, label=DATE>"
+    assert repr(entity) == "<Date: year=2000 month=1 day=2>"
 
 
 def test_create_from_dict_via_cls():
@@ -22,7 +22,7 @@ def test_create_from_dict_via_cls():
     assert date.year == 2000
     assert date.month == 1
     assert date.day == 2
-    assert repr(date) == "<Entity: name=2000-01-02, label=DATE>"
+    assert repr(date) == "<Date: year=2000 month=1 day=2>"
 
 
 def test_init_date():

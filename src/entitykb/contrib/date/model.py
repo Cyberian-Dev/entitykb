@@ -35,6 +35,9 @@ class Date(Entity):
         kwargs = {"label": "DATE", **kwargs}
         super().__init__(meta=meta, **kwargs)
 
+    def __repr__(self):
+        return f"<Date: year={self.year} month={self.month} day={self.day}>"
+
     @property
     def as_date(self) -> date:
         return date(self.year, self.month, self.day)

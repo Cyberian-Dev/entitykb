@@ -1,15 +1,15 @@
 from entitykb.contrib.date import DateResolver, Date
 from entitykb.pipeline import (
-    DefaultResolver,
+    TermResolver,
     Resolver,
-    DefaultNormalizer,
-    DefaultTokenizer,
+    LatinLowercaseNormalizer,
+    WhitespaceTokenizer,
 )
 
 
 def test_resolver_construct(kb):
-    tokenizer = DefaultTokenizer()
-    normalizer = DefaultNormalizer()
+    tokenizer = WhitespaceTokenizer()
+    normalizer = LatinLowercaseNormalizer()
 
     assert isinstance(
         Resolver.create(
@@ -19,18 +19,18 @@ def test_resolver_construct(kb):
             normalizer=normalizer,
             kb=kb,
         ),
-        DefaultResolver,
+        TermResolver,
     )
 
     assert isinstance(
         Resolver.create(
-            DefaultResolver,
+            TermResolver,
             name="default",
             tokenizer=tokenizer,
             normalizer=normalizer,
             kb=kb,
         ),
-        DefaultResolver,
+        TermResolver,
     )
 
     assert isinstance(
@@ -58,7 +58,9 @@ def test_resolver_construct(kb):
 
 def test_date_resolver_is_prefix(kb):
     resolver = DateResolver(
-        tokenizer=DefaultTokenizer(), normalizer=DefaultNormalizer(), kb=kb
+        tokenizer=WhitespaceTokenizer(),
+        normalizer=LatinLowercaseNormalizer(),
+        kb=kb,
     )
 
     assert resolver.is_prefix("2019")
@@ -75,7 +77,9 @@ def test_date_resolver_is_prefix(kb):
 
 def test_date_resolver_find_valid(kb):
     resolver = DateResolver(
-        tokenizer=DefaultTokenizer(), normalizer=DefaultNormalizer(), kb=kb
+        tokenizer=WhitespaceTokenizer(),
+        normalizer=LatinLowercaseNormalizer(),
+        kb=kb,
     )
 
     result = resolver.find("2019-01-01")
@@ -94,7 +98,9 @@ def test_date_resolver_find_valid(kb):
 
 def test_date_resolver_fail_invalid(kb):
     resolver = DateResolver(
-        tokenizer=DefaultTokenizer(), normalizer=DefaultNormalizer(), kb=kb
+        tokenizer=WhitespaceTokenizer(),
+        normalizer=LatinLowercaseNormalizer(),
+        kb=kb,
     )
 
     result = resolver.find("Nonsense!")
@@ -111,9 +117,9 @@ def test_date_resolver_fail_invalid(kb):
 
 
 def test_default_resolver(kb, apple):
-    tokenizer = DefaultTokenizer()
-    normalizer = DefaultNormalizer()
-    resolver = DefaultResolver(
+    tokenizer = WhitespaceTokenizer()
+    normalizer = LatinLowercaseNormalizer()
+    resolver = TermResolver(
         name="default", tokenizer=tokenizer, normalizer=normalizer, kb=kb,
     )
     kb.save_node(apple)

@@ -2,24 +2,7 @@ import os
 from io import StringIO
 from unittest.mock import MagicMock
 
-from entitykb.cli import services
-
-
-def test_file_format_dialect():
-    assert services.FileFormat.csv.dialect == "excel"
-    assert services.FileFormat.tsv.dialect == "excel-tab"
-
-
-def test_iterate_entities():
-    file_obj = StringIO(data)
-    it = services.iterate_entities(
-        file_obj, services.FileFormat.csv, default_label="MISSING"
-    )
-    entities = list(it)
-    assert 3 == len(entities)
-    assert entities[0].name == "New York City"
-    assert entities[0].synonyms == ("NYC", "New York (NY)")
-    assert entities[0].label == "CITY"
+from entitykb.cli import services, readers
 
 
 def test_preview_mode():
@@ -27,14 +10,14 @@ def test_preview_mode():
     preview = services.PreviewKB(echo=echo)
 
     file_obj = StringIO(data)
-    it = services.iterate_entities(file_obj, services.FileFormat.csv)
+    it = readers.iterate_csv(file_obj)
     for entity in it:
         preview.save_node(entity)
 
     assert 3 == len(preview.dry_run)
 
     preview.commit()
-    echo.assert_called_once_with(output)
+    assert 3 == echo.call_count
 
 
 def test_flatten_dict():

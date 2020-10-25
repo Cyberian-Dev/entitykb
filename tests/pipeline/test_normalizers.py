@@ -1,21 +1,21 @@
 from string import punctuation
 
 
-from entitykb.pipeline import Normalizer, DefaultNormalizer
+from entitykb.pipeline import Normalizer, LatinLowercaseNormalizer
 
 
 def test_construct():
     normalizer = Normalizer.create()
-    assert isinstance(normalizer, DefaultNormalizer)
+    assert isinstance(normalizer, LatinLowercaseNormalizer)
 
-    normalizer = Normalizer.create(DefaultNormalizer)
-    assert isinstance(normalizer, DefaultNormalizer)
+    normalizer = Normalizer.create(LatinLowercaseNormalizer)
+    assert isinstance(normalizer, LatinLowercaseNormalizer)
 
-    class_name = "entitykb.pipeline.DefaultNormalizer"
-    normalizer = DefaultNormalizer.create(class_name)
-    assert isinstance(normalizer, DefaultNormalizer)
+    class_name = "entitykb.pipeline.LatinLowercaseNormalizer"
+    normalizer = LatinLowercaseNormalizer.create(class_name)
+    assert isinstance(normalizer, LatinLowercaseNormalizer)
 
-    argument = DefaultNormalizer()
+    argument = LatinLowercaseNormalizer()
     normalizer = Normalizer.create(argument)
     assert argument is normalizer
 

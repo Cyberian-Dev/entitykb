@@ -35,12 +35,12 @@ class Resolver(object):
             resolver = instantiate_class_from_name(resolver, **kwargs)
 
         elif not isinstance(resolver, Resolver):
-            resolver = (resolver or DefaultResolver)(**kwargs)
+            resolver = (resolver or TermResolver)(**kwargs)
 
         return resolver
 
 
-class DefaultResolver(Resolver):
+class TermResolver(Resolver):
     def find(self, term: str) -> FindResult:
         term_iter = self.kb.terms.iterate_term_keys(term=term)
 

@@ -39,7 +39,7 @@ class Storage(object):
 
 
 @dataclass
-class DefaultStorage(Storage):
+class PickleStorage(Storage):
     def info(self) -> dict:
         last_commit = self.file_updated(self.index_path)
         return {

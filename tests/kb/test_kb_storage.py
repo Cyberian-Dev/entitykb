@@ -1,19 +1,19 @@
 import os
 import time
-from entitykb.kb.storage import DefaultStorage
+from entitykb.kb.storage import PickleStorage
 
 
 def test_backup_dirs(root):
     expected = os.path.join(root, "backups")
     assert os.path.exists(expected) is False
 
-    storage = DefaultStorage(root=root)
+    storage = PickleStorage(root=root)
     assert expected == storage.backup_dir
     assert os.path.exists(expected)
 
 
 def test_info(root):
-    storage = DefaultStorage(root=root)
+    storage = PickleStorage(root=root)
     info = storage.info()
     assert {"path", "disk_space", "last_commit"} == info.keys()
     assert os.path.join(root, "index.db") == storage.index_path
@@ -21,7 +21,7 @@ def test_info(root):
 
 
 def test_save_load(root):
-    storage = DefaultStorage(root=root)
+    storage = PickleStorage(root=root)
     assert storage.exists is False
 
     # good save
@@ -37,7 +37,7 @@ def test_save_load(root):
 
 
 def test_archive_clean_backups(root):
-    storage = DefaultStorage(root=root)
+    storage = PickleStorage(root=root)
     assert 5 == storage.max_backups
 
     for i in range(storage.max_backups + 5):
@@ -57,10 +57,10 @@ def test_archive_clean_backups(root):
 
 
 def test_sizeof(root):
-    assert DefaultStorage.sizeof({}) == "248.00 B"
-    assert DefaultStorage.sizeof("abc") == "52.00 B"
-    assert DefaultStorage.sizeof("a" * 1000) == "1.02 KiB"
+    assert PickleStorage.sizeof({}) == "248.00 B"
+    assert PickleStorage.sizeof("abc") == "52.00 B"
+    assert PickleStorage.sizeof("a" * 1000) == "1.02 KiB"
 
-    storage = DefaultStorage(root=root)
+    storage = PickleStorage(root=root)
     storage.save("abc")
-    assert DefaultStorage.sizeof(storage.index_path) == "13.00 B"
+    assert PickleStorage.sizeof(storage.index_path) == "13.00 B"

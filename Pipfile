@@ -15,7 +15,7 @@ pytest-mccabe = "*"
 tox = "*"
 
 [packages]
-entitykb = {editable = true, path = "./", extras = ["http", "rpc"]}
+entitykb = {editable = true, path = "./"}
 
 [requires]
 python_version = "3.7"

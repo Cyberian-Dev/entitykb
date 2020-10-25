@@ -2,14 +2,14 @@ import os
 
 from fastapi import FastAPI, staticfiles
 from starlette.middleware.cors import CORSMiddleware
-from starlette.responses import UJSONResponse
+from starlette.responses import JSONResponse
 
 from . import routes
 
 app = FastAPI(
     title="EntityKB HTTP API",
     description="EntityKB HTTP API",
-    default_response_class=UJSONResponse,
+    default_response_class=JSONResponse,
 )
 
 app.add_middleware(
@@ -32,6 +32,6 @@ app.mount(
 
 @app.exception_handler(ConnectionRefusedError)
 async def rpc_connection_handler(*_):
-    return UJSONResponse(
+    return JSONResponse(
         status_code=503, content="Connection Refused. Check RPC server.",
     )

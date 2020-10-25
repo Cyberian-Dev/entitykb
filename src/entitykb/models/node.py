@@ -38,14 +38,17 @@ class Node(SlotBase):
         self.label = label or self.__default_label__
         self.attrs = {**(attrs or {}), **kw}
 
+    def __hash__(self):
+        return hash((self.label, self.key))
+
     def __rshift__(self, tag):
         return Edge(start=self.key, tag=tag, end=None)
 
     def __lshift__(self, tag):
         return Edge(start=None, tag=tag, end=self.key)
 
-    def __repr__(self):
-        return f"<Node: key={self.key} attrs={self.attrs}>"
+    # def __repr__(self):
+    #     return f"<Node: key={self.key} attrs={self.attrs}>"
 
     def __getattr__(self, item):
         if item == "attrs":
@@ -85,6 +88,7 @@ class Node(SlotBase):
         klass = NodeLabelRegistry.instance().get_node_cls(label)
         if klass is None and cls == Node and "name" in kwargs:
             from .entity import Entity
+
             return Entity
         return klass
 
@@ -110,9 +114,7 @@ class Edge(SlotBase):
         self.attrs = {**(attrs or {}), **kw}
 
     def __repr__(self):
-        return (
-            f"<Edge: start={self.start}, tag={self.tag}, end={self.end}>"
-        )
+        return f"<Edge: start={self.start}, tag={self.tag}, end={self.end}>"
 
     def __rshift__(self, end: Union[Node, str]):
         self.end = Node.to_key(end)

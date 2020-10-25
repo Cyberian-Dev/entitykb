@@ -1,8 +1,8 @@
-from entitykb import Graph, Node, Edge
+from entitykb import InMemoryGraph, Node, Edge
 
 
 def test_connect_nodes():
-    graph = Graph()
+    graph = InMemoryGraph()
     start = Node()
 
     edge = graph.connect(start=start, tag="IS_A", end=Node(), some_val=1)
@@ -22,7 +22,7 @@ def test_connect_nodes():
 
 
 def test_clear_info():
-    graph = Graph()
+    graph = InMemoryGraph()
 
     graph.save_node(node=Node())
     assert graph.info() == {

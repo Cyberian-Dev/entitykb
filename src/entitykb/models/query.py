@@ -114,12 +114,6 @@ class WalkStep(Step):
         self.max_hops = max_hops
         self.passthru = passthru
 
-    def __hash__(self):
-        return hash(repr(self))
-
-    def __eq__(self, other):
-        return hash(self) == hash(other)
-
 
 class FilterStep(Step):
 

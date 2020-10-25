@@ -23,7 +23,7 @@ class Tokenizer(object):
         if isinstance(tokenizer, str):
             tokenizer = instantiate_class_from_name(tokenizer)
         elif not isinstance(tokenizer, Tokenizer):
-            tokenizer = (tokenizer or DefaultTokenizer)()
+            tokenizer = (tokenizer or WhitespaceTokenizer)()
         return tokenizer
 
 
@@ -90,7 +90,7 @@ class State(object):
         return iter(tokens)
 
 
-class DefaultTokenizer(Tokenizer):
+class WhitespaceTokenizer(Tokenizer):
     def __init__(
         self,
         word_chars: Optional[Set[str]] = None,

@@ -3,21 +3,20 @@ import sys
 from setuptools import setup, find_packages
 
 install_requires = [
+    "aiofiles",
+    "aio-msgpack-rpc",
+    "fastapi",
     "pyahocorasick",
     "translitcodec",
     "lark-parser==0.8.9",
     "python-dateutil",
     "tabulate",
     "typer",
+    "uvicorn >=0.11.7",
 ]
 
 if sys.version_info[:2] == (3, 6):
     install_requires.append("dataclasses")
-
-extras_require = {
-    "rpc": ["aio-msgpack-rpc"],
-    "http": ["fastapi", "aiofiles", "uvicorn >=0.11.7"],
-}
 
 setup(
     name="entitykb",
@@ -30,9 +29,8 @@ setup(
     include_package_data=True,
     entry_points={"console_scripts": ["entitykb=entitykb:cli"]},
     install_requires=install_requires,
-    extras_require=extras_require,
-    description="Rules-based Named Entity Recognition and Linking",
-    long_description="Rules-based Named Entity Recognition and Linking",
+    description="Python toolkit for building Knowledge Bases",
+    long_description="Python toolkit for building Knowledge Bases",
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Development Status :: 4 - Beta",

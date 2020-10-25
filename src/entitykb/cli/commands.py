@@ -4,6 +4,7 @@ from typing import Optional
 import typer
 import uvicorn
 from tabulate import tabulate
+from io import FileIO
 
 from entitykb import KB, Config, logger, environ, rpc
 from . import services
@@ -34,7 +35,7 @@ def clear(root: Optional[Path] = typer.Option(None)):
     typer.confirm(f"Are you sure you want to clear: {root}?", abort=True)
 
     kb = KB(root=root)
-    success = kb.clear()
+    success = kb.clear() and kb.commit()
     finish("Clear", success)
 
 
@@ -49,20 +50,22 @@ def info(root: Optional[Path] = typer.Option(None)):
 
 @cli.command()
 def load(
-    root: Optional[Path] = typer.Option(None),
     in_file: Path = typer.Argument(None),
-    format: services.FileFormat = services.FileFormat.csv,
+    root: Optional[Path] = typer.Option(None),
+    format: str = typer.Option("csv"),
     dry_run: bool = typer.Option(False, "--dry-run"),
+    mv_split: str = typer.Option("|"),
 ):
     """ Load data into local KB """
+    environ.mv_split = mv_split
 
     if not dry_run:
         kb = KB(root=root)
     else:
-        kb = services.PreviewKB(length=10)
+        kb = services.PreviewKB(count=10)
 
     file_obj = in_file.open("r")
-    it = services.iterate_entities(file_obj=file_obj, file_format=format)
+    it = iterate_file(file_format=format, file_obj=file_obj)
 
     total = 0
     with typer.progressbar(it) as progress:
@@ -115,3 +118,23 @@ def run_dev(
 
     http_app = "entitykb.http.dev:app"
     uvicorn.run(http_app, host=host, port=http_port, reload=True)
+
+
+ff_registry = {}
+
+
+def register_format(file_format: str):
+    def decorator_register(func):
+        assert file_format not in ff_registry, f"Duplicate: {file_format}"
+        ff_registry[file_format] = func
+        return func
+
+    return decorator_register
+
+
+def iterate_file(file_format: str, file_obj: FileIO):
+    func = ff_registry[file_format]
+    yield from func(file_obj)
+
+
+cli.register_format = register_format

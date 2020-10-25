@@ -1,19 +1,19 @@
-from entitykb.pipeline import Tokenizer, DefaultTokenizer
+from entitykb.pipeline import Tokenizer, WhitespaceTokenizer
 from entitykb.models import Token
 
 
 def test_construct():
     tokenizer = Tokenizer.create()
-    assert isinstance(tokenizer, DefaultTokenizer)
+    assert isinstance(tokenizer, WhitespaceTokenizer)
 
-    tokenizer = Tokenizer.create(DefaultTokenizer)
-    assert isinstance(tokenizer, DefaultTokenizer)
+    tokenizer = Tokenizer.create(WhitespaceTokenizer)
+    assert isinstance(tokenizer, WhitespaceTokenizer)
 
-    class_name = "entitykb.pipeline.DefaultTokenizer"
+    class_name = "entitykb.pipeline.WhitespaceTokenizer"
     tokenizer = Tokenizer.create(class_name)
-    assert isinstance(tokenizer, DefaultTokenizer)
+    assert isinstance(tokenizer, WhitespaceTokenizer)
 
-    argument = DefaultTokenizer()
+    argument = WhitespaceTokenizer()
     tokenizer = Tokenizer.create(argument)
     assert argument is tokenizer
 

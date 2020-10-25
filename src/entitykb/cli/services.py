@@ -1,63 +1,25 @@
 import collections
-import csv
-import enum
 import os
 
 import typer
-from tabulate import tabulate
 
-from entitykb import Config, KB, logger, Entity
-
-
-class FileFormat(str, enum.Enum):
-    csv = "csv"
-    tsv = "tsv"
-
-    @property
-    def dialect(self):
-        return {"csv": "excel", "tsv": "excel-tab"}.get(self.value)
-
-
-def iterate_entities(file_obj, file_format, default_label=None, multi=None):
-    reader = csv.DictReader(file_obj, dialect=file_format.dialect)
-    mv_keys, mv_sep = multi if multi else ({"synonyms"}, "|")
-
-    for record in reader:
-
-        for mv_key in mv_keys:
-            value = record.get(mv_key)
-            if isinstance(value, str):
-                value = value.strip()
-                record[mv_key] = tuple(filter(None, value.split(mv_sep)))
-
-        if default_label:
-            record.setdefault("label", default_label)
-
-        item = Entity.create(record)
-        yield item
+from entitykb import Config, KB, logger
 
 
 class PreviewKB(object):
-    def __init__(self, echo=None, *_, **kwargs):
+    def __init__(self, count=10, echo=None):
         self.dry_run = []
-        self.length = kwargs.get("length", 10)
+        self.count = count
         self.echo = echo or typer.echo
 
-    def save_node(self, entity):
-        if len(self.dry_run) < self.length:
-            d = entity.dict()
-            d.pop("key", None)
-            d.pop("attrs", None)
-            self.dry_run.append(d)
+    def save_node(self, node):
+        if self.count > 0:
+            self.count -= 1
+            self.dry_run.append(node)
 
     def commit(self):
-        output = tabulate(
-            self.dry_run,
-            headers="keys",
-            tablefmt="pretty",
-            colalign=("left",) * 3,
-        )
-        self.echo(output)
+        for item in self.dry_run:
+            self.echo(item)
 
 
 def init_kb(root, exist_ok=False) -> bool:

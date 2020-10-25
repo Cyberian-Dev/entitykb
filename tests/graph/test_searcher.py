@@ -1,6 +1,6 @@
 import pytest
 
-from entitykb.graph import A, Graph, QB, R, SearchResults, Searcher
+from entitykb.graph import A, InMemoryGraph, QB, R, SearchResults, Searcher
 from entitykb.models import Entity, Query
 
 food = Entity(name="Food")
@@ -42,7 +42,7 @@ edges = [
 
 @pytest.fixture
 def graph():
-    graph = Graph()
+    graph = InMemoryGraph()
     assert "<Graph: 0 nodes, 0 edges>" == repr(graph)
 
     for entity in entities:

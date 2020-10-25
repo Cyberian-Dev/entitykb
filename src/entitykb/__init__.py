@@ -29,13 +29,13 @@ from .models import (
 )
 
 from .base import BaseKB
-from .graph import Graph
+from .graph import Graph, InMemoryGraph
 from .terms import TermsIndex
 from .pipeline import (
     DefaultExtractor,
-    DefaultNormalizer,
-    DefaultResolver,
-    DefaultTokenizer,
+    LatinLowercaseNormalizer,
+    TermResolver,
+    WhitespaceTokenizer,
     Pipeline,
     Normalizer,
 )
@@ -49,9 +49,6 @@ __all__ = (
     "Config",
     "Criteria",
     "DefaultExtractor",
-    "DefaultNormalizer",
-    "DefaultResolver",
-    "DefaultTokenizer",
     "Doc",
     "DocEntity",
     "DocToken",
@@ -60,7 +57,9 @@ __all__ = (
     "FilterStep",
     "FindResult",
     "Graph",
+    "InMemoryGraph",
     "KB",
+    "LatinLowercaseNormalizer",
     "Node",
     "Normalizer",
     "Pipeline",
@@ -68,9 +67,11 @@ __all__ = (
     "RelCriteria",
     "SlotBase",
     "Step",
+    "TermResolver",
     "TermsIndex",
     "Token",
     "WalkStep",
+    "WhitespaceTokenizer",
     "cli",
     "contrib",
     "ensure_iterable",

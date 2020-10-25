@@ -20,6 +20,9 @@ def test_environ_defaults():
     environ.rpc_retries = 10
     assert environ.rpc_retries == 10
 
+    environ.mv_split = "|"
+    assert environ.mv_split == "|"
+
     with pytest.raises(EnvironError):
         environ.root = "/will/fail"
 
@@ -29,9 +32,10 @@ def test_config_defaults():
     assert config.dict() == {
         "extractor": "entitykb.DefaultExtractor",
         "filterers": (),
-        "normalizer": "entitykb.DefaultNormalizer",
-        "resolvers": ("entitykb.DefaultResolver",),
-        "tokenizer": "entitykb.DefaultTokenizer",
+        "graph": "entitykb.InMemoryGraph",
+        "normalizer": "entitykb.LatinLowercaseNormalizer",
+        "resolvers": ("entitykb.TermResolver",),
+        "terms": "entitykb.TermsIndex",
     }
 
 
@@ -39,11 +43,12 @@ def test_config_roundtrip():
     config = Config(extractor="my_custom.Extractor")
     data = config.dict()
     assert set(data.keys()) == {
-        "resolvers",
         "normalizer",
         "filterers",
+        "resolvers",
+        "graph",
         "extractor",
-        "tokenizer",
+        "terms",
     }
 
     roundtrip = Config.construct(file_path="/tmp/config.json", data=data)

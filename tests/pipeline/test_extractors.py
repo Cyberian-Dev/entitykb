@@ -3,9 +3,9 @@ import pytest
 from entitykb.contrib.date import DateResolver, Date
 from entitykb import Entity
 from entitykb.pipeline import (
-    DefaultResolver,
-    DefaultTokenizer,
-    DefaultNormalizer,
+    TermResolver,
+    WhitespaceTokenizer,
+    LatinLowercaseNormalizer,
     Extractor,
     DefaultExtractor,
 )
@@ -29,10 +29,10 @@ def test_construct():
 
 @pytest.fixture(scope="function")
 def extractor(kb, apple, google, amazon, microsoft):
-    tokenizer = DefaultTokenizer()
-    normalizer = DefaultNormalizer()
+    tokenizer = WhitespaceTokenizer()
+    normalizer = LatinLowercaseNormalizer()
 
-    resolver = DefaultResolver(
+    resolver = TermResolver(
         name="default", tokenizer=tokenizer, normalizer=normalizer, kb=kb,
     )
 

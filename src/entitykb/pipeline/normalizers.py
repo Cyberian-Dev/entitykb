@@ -21,7 +21,7 @@ class Normalizer(object):
     @classmethod
     def create(cls, normalizer=None):
         if normalizer is None:
-            normalizer = DefaultNormalizer()
+            normalizer = LatinLowercaseNormalizer()
         elif isinstance(normalizer, str):
             normalizer = instantiate_class_from_name(normalizer)
         elif not isinstance(normalizer, Normalizer):
@@ -29,7 +29,7 @@ class Normalizer(object):
         return normalizer
 
 
-class DefaultNormalizer(Normalizer):
+class LatinLowercaseNormalizer(Normalizer):
     """ Normalizes to lowercase ascii characters only. """
 
     def __init__(self):

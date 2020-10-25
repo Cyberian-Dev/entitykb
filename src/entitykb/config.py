@@ -17,9 +17,17 @@ from .deps import CheckEnviron
 
 
 class Environ(CheckEnviron):
+    class DEFAULTS:
+        ROOT = os.path.expanduser("~/.entitykb")
+        RPC_HOST = "localhost"
+        RPC_PORT = 3477
+        RPC_TIMEOUT = 2
+        RPC_RETRIES = 5
+        MV_SPLIT = "|"
+
     @property
     def root(self) -> str:
-        return self.get("ENTITYKB_ROOT", os.path.expanduser("~/.entitykb"))
+        return self.get("ENTITYKB_ROOT", self.DEFAULTS.ROOT)
 
     @root.setter
     def root(self, value: str):
@@ -27,7 +35,7 @@ class Environ(CheckEnviron):
 
     @property
     def rpc_host(self) -> str:
-        return self.get("ENTITYKB_RPC_HOST", "localhost")
+        return self.get("ENTITYKB_RPC_HOST", self.DEFAULTS.RPC_HOST)
 
     @rpc_host.setter
     def rpc_host(self, value: str):
@@ -35,7 +43,7 @@ class Environ(CheckEnviron):
 
     @property
     def rpc_port(self) -> int:
-        return int(self.get("ENTITYKB_RPC_PORT", 3477))
+        return int(self.get("ENTITYKB_RPC_PORT", self.DEFAULTS.RPC_PORT))
 
     @rpc_port.setter
     def rpc_port(self, value: int):
@@ -43,7 +51,7 @@ class Environ(CheckEnviron):
 
     @property
     def rpc_timeout(self) -> int:
-        return int(self.get("ENTITYKB_RPC_TIMEOUT", 2))
+        return int(self.get("ENTITYKB_RPC_TIMEOUT", self.DEFAULTS.RPC_TIMEOUT))
 
     @rpc_timeout.setter
     def rpc_timeout(self, value: int):
@@ -51,11 +59,19 @@ class Environ(CheckEnviron):
 
     @property
     def rpc_retries(self) -> int:
-        return int(self.get("ENTITYKB_RPC_RETRIES", 5))
+        return int(self.get("ENTITYKB_RPC_RETRIES", self.DEFAULTS.RPC_RETRIES))
 
     @rpc_retries.setter
     def rpc_retries(self, value: int):
         self["ENTITYKB_RPC_RETRIES"] = str(value)
+
+    @property
+    def mv_split(self) -> str:
+        return self.get("ENTITYKB_MV_SPLIT", self.DEFAULTS.MV_SPLIT)
+
+    @mv_split.setter
+    def mv_split(self, value: str):
+        self["ENTITYKB_MV_SPLIT"] = value
 
 
 environ = Environ()
@@ -66,9 +82,11 @@ class Config:
     file_path: str = None
     extractor: str = "entitykb.DefaultExtractor"
     filterers: List[str] = ()
-    normalizer: str = "entitykb.DefaultNormalizer"
-    resolvers: List[str] = ("entitykb.DefaultResolver",)
-    tokenizer: str = "entitykb.DefaultTokenizer"
+    normalizer: str = "entitykb.LatinLowercaseNormalizer"
+    resolvers: List[str] = ("entitykb.TermResolver",)
+    tokenizer: str = "entitykb.WhitespaceTokenizer"
+    terms: str = "entitykb.TermsIndex"
+    graph: str = "entitykb.InMemoryGraph"
 
     def __str__(self):
         return f"<Config: {self.file_path}>"
@@ -107,7 +125,8 @@ class Config:
             "filterers": self.filterers,
             "normalizer": self.normalizer,
             "resolvers": self.resolvers,
-            "tokenizer": self.tokenizer,
+            "terms": self.terms,
+            "graph": self.graph,
         }
 
         return dict((k, v) for k, v in kw.items())
