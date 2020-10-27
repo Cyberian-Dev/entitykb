@@ -27,16 +27,16 @@ class NodeLabelRegistry(object):
 
 class Node(SlotBase):
 
-    __slots__ = ["key", "label", "attrs"]
+    __slots__ = ["key", "label", "data"]
     __all_labels__ = {"NODE"}
     __default_label__ = "NODE"
 
     def __init__(
-        self, *, key: str = None, label: str = None, attrs: dict = None, **kw
+        self, *, key: str = None, label: str = None, data: dict = None
     ):
         self.key = key or str(uuid4())
         self.label = label or self.__default_label__
-        self.attrs = {**(attrs or {}), **kw}
+        self.data = data
 
     def __hash__(self):
         return hash((self.label, self.key))
@@ -46,18 +46,6 @@ class Node(SlotBase):
 
     def __lshift__(self, tag):
         return Edge(start=None, tag=tag, end=self.key)
-
-    # def __repr__(self):
-    #     return f"<Node: key={self.key} attrs={self.attrs}>"
-
-    def __getattr__(self, item):
-        if item == "attrs":
-            raise AttributeError
-
-        if item in self.attrs:
-            return self.attrs.get(item)
-        else:
-            raise AttributeError
 
     @classmethod
     def __all_subclasses__(cls):
@@ -95,7 +83,7 @@ class Node(SlotBase):
 
 class Edge(SlotBase):
 
-    __slots__ = ["start", "tag", "end", "weight", "attrs"]
+    __slots__ = ["start", "tag", "end", "weight", "data"]
 
     def __init__(
         self,
@@ -104,14 +92,14 @@ class Edge(SlotBase):
         tag: str,
         end: str,
         weight: int = 1,
-        attrs: dict = None,
+        data: dict = None,
         **kw,
     ):
         self.start = Node.to_key(start)
         self.tag = tag.upper()
         self.end = Node.to_key(end)
         self.weight = weight
-        self.attrs = {**(attrs or {}), **kw}
+        self.data = data
 
     def __repr__(self):
         return f"<Edge: start={self.start}, tag={self.tag}, end={self.end}>"

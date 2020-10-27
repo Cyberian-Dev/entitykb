@@ -4,10 +4,10 @@ from entitykb.models import Node, Edge
 def test_node():
     empty = Node()
     assert 36 == len(empty.key)
-    assert empty.dict() == dict(key=empty.key, label="NODE", attrs={})
+    assert empty.dict() == dict(key=empty.key, label="NODE", data=None)
 
     node = Node(key="ENTITY|LABEL", label="LABEL")
-    assert node.dict() == dict(key="ENTITY|LABEL", label="LABEL", attrs={},)
+    assert node.dict() == dict(key="ENTITY|LABEL", label="LABEL", data=None)
 
 
 def test_edge():
@@ -15,7 +15,7 @@ def test_edge():
     end = Node()
     edge = Edge(start=start, end=end, tag="IS_A")
     assert edge.dict() == dict(
-        start=start.key, tag="IS_A", end=end.key, weight=1, attrs={},
+        start=start.key, tag="IS_A", end=end.key, weight=1, data=None,
     )
 
     two = start >> "IS_A" >> end

@@ -12,7 +12,7 @@ Token = str
 class Node:
     label: str = None
     key: str = None
-    attrs: dict = None
+    data: dict = None
 
 
 @dataclass

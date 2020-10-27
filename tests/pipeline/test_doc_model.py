@@ -13,11 +13,11 @@ def test_entity_create():
     assert entity.name == "Barack Obama"
     assert entity.synonyms == ()
     assert entity.dict() == {
-        "attrs": {},
         "key": "Barack Obama|ENTITY",
         "label": "ENTITY",
         "name": "Barack Obama",
         "synonyms": (),
+        "data": None,
     }
     assert entity == entity
 
@@ -63,11 +63,11 @@ def test_doc_create():
     assert doc_ent.last_offset == 3
     assert doc_ent.dict() == {
         "entity": {
-            "attrs": {},
             "key": "Barack Obama|PRESIDENT",
             "label": "PRESIDENT",
             "name": "Barack Obama",
             "synonyms": (),
+            "data": None,
         },
         "entity_key": "Barack Obama|PRESIDENT",
         "text": "Barack Obama",

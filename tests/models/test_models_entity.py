@@ -8,7 +8,7 @@ def test_entity():
         synonyms=tuple(),
         key="empty|ENTITY",
         label="ENTITY",
-        attrs={},
+        data=None,
     )
     assert empty.terms == ("empty",)
 
@@ -18,7 +18,7 @@ def test_entity():
         synonyms=("GO",),
         key="GenomOncology|COMPANY",
         label="COMPANY",
-        attrs={},
+        data=None,
     )
     assert entity.terms == ("GenomOncology", "GO")
 

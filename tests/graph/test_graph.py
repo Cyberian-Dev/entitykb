@@ -5,7 +5,7 @@ def test_connect_nodes():
     graph = InMemoryGraph()
     start = Node()
 
-    edge = graph.connect(start=start, tag="IS_A", end=Node(), some_val=1)
+    edge = graph.connect(start=start, tag="IS_A", end=Node())
     assert isinstance(edge, Edge)
 
     assert start == graph.get_node(start.key)

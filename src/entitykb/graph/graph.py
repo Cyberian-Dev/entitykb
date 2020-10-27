@@ -26,7 +26,7 @@ class Graph(object):
     def remove_node(self, key: str) -> bool:
         raise NotImplementedError
 
-    def connect(self, *, start: Node, tag: str, end: Node, **attrs):
+    def connect(self, *, start: Node, tag: str, end: Node, data: dict = None):
         raise NotImplementedError
 
     def info(self):
@@ -79,10 +79,10 @@ class InMemoryGraph(Graph):
         success = self.nodes.remove(key)
         return success
 
-    def connect(self, *, start: Node, tag: str, end: Node, **attrs):
+    def connect(self, *, start: Node, tag: str, end: Node, data: dict = None):
         self.save_node(start)
         self.save_node(end)
-        edge = Edge(start=start, tag=tag, end=end, attrs=attrs)
+        edge = Edge(start=start, tag=tag, end=end, data=data)
         self.save_edge(edge)
         return edge
 

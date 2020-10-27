@@ -1,13 +1,7 @@
 import datetime
 
 from entitykb.contrib.date import Date
-from entitykb import Node, Entity
-
-
-def test_create_from_dict_via_name_to_entity():
-    entity = Node.create(dict(name="2000-01-02", year=2000, month=1, day=2))
-    assert isinstance(entity, Entity)
-    assert repr(entity) == "<Entity: name=2000-01-02, label=ENTITY>"
+from entitykb import Node
 
 
 def test_create_from_dict_via_label_to_date():
@@ -36,6 +30,6 @@ def test_init_date():
         month=2,
         day=3,
         label="DATE",
-        meta=None,
         synonyms=(),
+        data=None,
     )

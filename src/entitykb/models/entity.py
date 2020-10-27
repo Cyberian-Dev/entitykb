@@ -10,17 +10,16 @@ class Entity(Node):
     __all_labels__ = {"ENTITY"}
     __default_label__ = "ENTITY"
 
-    __slots__ = ["key", "label", "attrs", "name", "synonyms"]
+    __slots__ = ["key", "label", "data", "name", "synonyms"]
 
     def __init__(
         self,
         *,
         name: str,
-        label: str = None,
-        synonyms: Tuple[str] = None,
         key: str = None,
-        attrs: dict = None,
-        **kw,
+        label: str = None,
+        data: dict = None,
+        synonyms: Tuple[str] = None,
     ):
         self.name = name
         self.synonyms = tuple(synonyms or ())
@@ -28,7 +27,7 @@ class Entity(Node):
         label = label or self.get_default_label()
         key = key or f"{name}|{label}"
 
-        super().__init__(key=key, label=label, attrs=attrs, **kw)
+        super().__init__(key=key, label=label, data=data)
 
     def __repr__(self):
         return f"<Entity: name={self.name}, label={self.label}>"

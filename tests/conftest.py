@@ -52,7 +52,6 @@ def apple():
     return Company(
         name="Apple, Inc.",
         synonyms=("Apple", "AAPL"),
-        meta=dict(top_product="iPhone"),
         headquarters=Location(city="Cupertino"),
     )
 
@@ -67,7 +66,6 @@ def amazon():
     return Company(
         name="Amazon, Inc.",
         synonyms=("Amazon", "AMZN"),
-        meta=dict(top_product="Prime"),
         headquarters=Location(city="Seattle"),
     )
 

@@ -59,21 +59,22 @@ def load(
     """ Load data into local KB """
     environ.mv_split = mv_split
 
-    if not dry_run:
-        kb = KB(root=root)
-    else:
-        kb = services.PreviewKB(count=10)
+    kb = KB(root=root) if not dry_run else None
 
     file_obj = in_file.open("r")
     it = iterate_file(file_format=format, file_obj=file_obj)
 
-    total = 0
+    count = 0
     with typer.progressbar(it) as progress:
-        for entity in progress:
-            kb.save_node(entity)
-            total += 1
+        for obj in progress:
+            if kb:
+                kb.save_node(obj)
+            elif count < 10:
+                typer.echo(obj)
+            count += 1
 
-    kb.commit()
+    if kb:
+        kb.commit()
 
 
 @cli.command(name="rpc")
@@ -132,9 +133,9 @@ def register_format(file_format: str):
     return decorator_register
 
 
-def iterate_file(file_format: str, file_obj: FileIO):
+def iterate_file(file_format: str, file_obj: FileIO, kb: KB):
     func = ff_registry[file_format]
-    yield from func(file_obj)
+    yield from func(file_obj, kb)
 
 
 cli.register_format = register_format

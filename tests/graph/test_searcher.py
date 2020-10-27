@@ -3,11 +3,20 @@ import pytest
 from entitykb.graph import A, InMemoryGraph, QB, R, SearchResults, Searcher
 from entitykb.models import Entity, Query
 
+
+class Product(Entity):
+    __slots__ = ["key", "label", "data", "name", "synonyms", "price"]
+
+    def __init__(self, *, price: float, **kwargs):
+        self.price = price
+        super().__init__(**kwargs)
+
+
 food = Entity(name="Food")
 fruit = Entity(name="Fruit")
 apple = Entity(name="Apple")
-granny_smith = Entity(name="Granny Smith", price=1.99)
-honeycrisp = Entity(name="Honeycrisp", price=3.99)
+granny_smith = Product(name="Granny Smith", price=1.99)
+honeycrisp = Product(name="Honeycrisp", price=3.99)
 dessert = Entity(name="Dessert")
 pie = Entity(name="Pie")
 apple_pie = Entity(name="Apple Pie")

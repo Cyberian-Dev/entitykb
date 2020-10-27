@@ -9,8 +9,8 @@ class Date(Entity):
         "key",
         "name",
         "label",
+        "data",
         "synonyms",
-        "meta",
         "year",
         "month",
         "day",
@@ -22,18 +22,17 @@ class Date(Entity):
         year: int = None,
         month: int = None,
         day: int = None,
-        meta: dict = None,
         **kwargs,
     ):
-        self.year = year or meta.pop("year")
-        self.month = month or meta.pop("month")
-        self.day = day or meta.pop("day")
+        self.year = year
+        self.month = month
+        self.day = day
 
         if "name" not in kwargs:
             kwargs["name"] = self.as_date.strftime("%Y-%m-%d")
 
         kwargs = {"label": "DATE", **kwargs}
-        super().__init__(meta=meta, **kwargs)
+        super().__init__(**kwargs)
 
     def __repr__(self):
         return f"<Date: year={self.year} month={self.month} day={self.day}>"
