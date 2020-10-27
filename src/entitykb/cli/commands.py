@@ -133,9 +133,9 @@ def register_format(file_format: str):
     return decorator_register
 
 
-def iterate_file(file_format: str, file_obj: FileIO, kb: KB):
+def iterate_file(file_format: str, file_obj: FileIO):
     func = ff_registry[file_format]
-    yield from func(file_obj, kb)
+    yield from func(file_obj)
 
 
 cli.register_format = register_format
