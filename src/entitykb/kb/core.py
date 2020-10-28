@@ -1,8 +1,17 @@
 from typing import Optional, Union
 
-from entitykb import Config, BaseKB, InMemoryGraph, Node, Entity, Edge
-from entitykb.pipeline import Pipeline, Normalizer
-from entitykb.terms import TermsIndex
+from entitykb import (
+    Config,
+    BaseKB,
+    InMemoryGraph,
+    Node,
+    Entity,
+    Edge,
+    Searcher,
+    Pipeline,
+    Normalizer,
+    TermsIndex,
+)
 from .storage import PickleStorage
 
 
@@ -14,6 +23,7 @@ class KB(BaseKB):
         self.normalizer = Normalizer.create(self.config.normalizer)
         self.terms = TermsIndex(normalizer=self.normalizer)
         self.graph = InMemoryGraph()
+        self.searcher = Searcher(graph=self.graph)
         self.pipeline = Pipeline.create(
             kb=self, config=self.config, normalizer=self.normalizer
         )

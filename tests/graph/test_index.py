@@ -19,8 +19,8 @@ def test_edge_index_save_remove():
     node_a = Node()
     node_b = Node()
     node_c = Node()
-    edge_1 = Edge(start=node_b, tag="IS_A", end=node_a, some_val=1)
-    edge_2 = Edge(start=node_c, tag="IS_A", end=node_a, some_val=2)
+    edge_1 = Edge(start=node_b, tag="IS_A", end=node_a)
+    edge_2 = Edge(start=node_c, tag="IS_A", end=node_a)
 
     # add edge 1 or 2
     edge_index = EdgeIndex()

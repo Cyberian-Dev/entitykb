@@ -1,7 +1,7 @@
 from typing import Union
 from uuid import uuid4
 
-from . import SlotBase, camel_to_snake
+from . import SlotBase, camel_to_snake, Tag
 
 
 class NodeLabelRegistry(object):
@@ -89,14 +89,13 @@ class Edge(SlotBase):
         self,
         *,
         start: str,
-        tag: str,
+        tag: Tag,
         end: str,
         weight: int = 1,
         data: dict = None,
-        **kw,
     ):
         self.start = Node.to_key(start)
-        self.tag = tag.upper()
+        self.tag = Tag(tag)
         self.end = Node.to_key(end)
         self.weight = weight
         self.data = data

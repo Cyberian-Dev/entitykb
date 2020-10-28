@@ -230,4 +230,3 @@ class QueryBuilder(object):
 
 QB = QueryBuilder
 A = AttrCriteria
-R = RelCriteria

@@ -6,7 +6,7 @@ from .funcs import (
     is_iterable,
     import_module,
 )
-from .enums import Direction, Comparison
+from .enums import Direction, Comparison, Tag
 from .base import SlotBase
 from .node import Node, Edge
 from .entity import Entity
@@ -21,7 +21,6 @@ from .query import (
     QueryBuilder,
     QB,
     A,
-    R,
 )
 from .doc import Token, DocToken, Doc, DocEntity
 from .results import FindResult, SearchHop, SearchResult, SearchResults
@@ -43,7 +42,6 @@ __all__ = (
     "QB",
     "Query",
     "QueryBuilder",
-    "R",
     "RelCriteria",
     "SearchHop",
     "SearchResult",
@@ -51,6 +49,7 @@ __all__ = (
     "SearchHop",
     "SlotBase",
     "Step",
+    "Tag",
     "Token",
     "WalkStep",
     "camel_to_snake",

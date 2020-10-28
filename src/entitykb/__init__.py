@@ -5,8 +5,11 @@ from .logging import logger
 
 from . import models
 from .models import (
+    A,
     AttrCriteria,
+    Comparison,
     Criteria,
+    Direction,
     Doc,
     DocEntity,
     DocToken,
@@ -15,10 +18,16 @@ from .models import (
     FilterStep,
     FindResult,
     Node,
+    QB,
     Query,
+    QueryBuilder,
     RelCriteria,
+    SearchHop,
+    SearchResult,
+    SearchResults,
     SlotBase,
     Step,
+    Tag,
     Token,
     WalkStep,
     ensure_iterable,
@@ -29,7 +38,7 @@ from .models import (
 )
 
 from .base import BaseKB
-from .graph import Graph, InMemoryGraph
+from .graph import Graph, InMemoryGraph, Searcher
 from .terms import TermsIndex
 from .pipeline import (
     DefaultExtractor,
@@ -44,11 +53,14 @@ from .cli import cli
 from . import contrib
 
 __all__ = (
+    "A",
     "AttrCriteria",
     "BaseKB",
     "Config",
+    "Comparison",
     "Criteria",
     "DefaultExtractor",
+    "Direction",
     "Doc",
     "DocEntity",
     "DocToken",
@@ -63,10 +75,17 @@ __all__ = (
     "Node",
     "Normalizer",
     "Pipeline",
+    "QB",
     "Query",
+    "QueryBuilder",
     "RelCriteria",
+    "SearchHop",
+    "SearchResult",
+    "SearchResults",
+    "Searcher",
     "SlotBase",
     "Step",
+    "Tag",
     "TermResolver",
     "TermsIndex",
     "Token",

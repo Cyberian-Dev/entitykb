@@ -1,7 +1,7 @@
 import pytest
 
 from entitykb.graph import InMemoryGraph, SearchResults, Searcher
-from entitykb.models import Entity, Query, QB, A, R
+from entitykb.models import Entity, Query, QB, A, Tag
 
 
 class Product(Entity):
@@ -35,17 +35,17 @@ entities = [
 ]
 
 edges = [
-    fruit >> "IS_A" >> food,
-    apple >> "IS_A" >> fruit,
-    granny_smith >> "IS_A" >> apple,
-    honeycrisp >> "IS_A" >> apple,
-    dessert >> "IS_A" >> food,
-    pie >> "IS_A" >> dessert,
-    apple_pie >> "IS_A" >> pie,
-    apple_pie >> "KIND_OF" >> pie,
-    apple_pie >> "HAS_A" >> apple,
-    apple_sauce >> "IS_A" >> dessert,
-    apple_sauce >> "HAS_A" >> apple,
+    fruit >> Tag.IS_A >> food,
+    apple >> Tag.IS_A >> fruit,
+    granny_smith >> Tag.IS_A >> apple,
+    honeycrisp >> Tag.IS_A >> apple,
+    dessert >> Tag.IS_A >> food,
+    pie >> Tag.IS_A >> dessert,
+    apple_pie >> Tag.IS_A >> pie,
+    apple_pie >> Tag.KIND_OF >> pie,
+    apple_pie >> Tag.HAS_A >> apple,
+    apple_sauce >> Tag.IS_A >> dessert,
+    apple_sauce >> Tag.HAS_A >> apple,
 ]
 
 
@@ -125,7 +125,7 @@ def test_start_one_goal_all(searcher, graph):
 
 
 def test_in_nodes(searcher, graph):
-    query = QB().in_nodes("is_a").all()
+    query = QB().in_nodes(Tag.IS_A).all()
     results = searcher.search(query, apple)
 
     assert {granny_smith.key, honeycrisp.key} == set(results.ends)
@@ -133,7 +133,7 @@ def test_in_nodes(searcher, graph):
 
 
 def test_in_nodes_with_max_hops(searcher, graph):
-    query = QB().in_nodes("is_a", max_hops=2).all()
+    query = QB().in_nodes(Tag.IS_A, max_hops=2).all()
     results = searcher.search(query, food)
 
     assert {
@@ -147,7 +147,7 @@ def test_in_nodes_with_max_hops(searcher, graph):
 
 
 def test_in_nodes_with_passthru(searcher, graph):
-    query = QB().in_nodes("is_a", passthru=True).all()
+    query = QB().in_nodes(Tag.IS_A, passthru=True).all()
     results = searcher.search(query, apple)
 
     assert {apple.key, granny_smith.key, honeycrisp.key} == set(results.ends)
@@ -155,7 +155,7 @@ def test_in_nodes_with_passthru(searcher, graph):
 
 
 def test_out_nodes(searcher):
-    query = QB().out_nodes("is_a").all()
+    query = QB().out_nodes(Tag.IS_A).all()
     results = searcher.search(query, apple)
 
     assert {fruit.key} == set(results.ends)
@@ -185,7 +185,7 @@ def test_all_nodes_all_tags_no_max(searcher):
 
 
 def test_in_has_a_apple_out_is_a(searcher):
-    query = QB().in_nodes("has_a").out_nodes("is_a").all()
+    query = QB().in_nodes(Tag.HAS_A).out_nodes(Tag.IS_A).all()
     results = searcher.search(query, apple)
 
     assert {dessert.key, pie.key} == set(results.ends)
@@ -217,27 +217,27 @@ def test_query_exclude_by_label(searcher):
 
 
 def test_comparison_options(searcher):
-    query = QB().in_nodes("is_a").include(A.price < 3.00).all()
+    query = QB().in_nodes(Tag.IS_A).include(A.price < 3.00).all()
     assert {granny_smith.key} == set(searcher(query, apple).ends)
 
-    query = QB().in_nodes("is_a").include(A.price <= 1.99).all()
+    query = QB().in_nodes(Tag.IS_A).include(A.price <= 1.99).all()
     assert {granny_smith.key} == set(searcher(query, apple).ends)
 
-    query = QB().in_nodes("is_a").include(A.price < 1.99).all()
+    query = QB().in_nodes(Tag.IS_A).include(A.price < 1.99).all()
     assert set() == set(searcher(query, apple).ends)
 
-    query = QB().in_nodes("is_a").include(A.price > 3.00).all()
+    query = QB().in_nodes(Tag.IS_A).include(A.price > 3.00).all()
     assert {honeycrisp.key} == set(searcher(query, apple).ends)
 
-    query = QB().in_nodes("is_a").include(A.price >= 3.99).all()
+    query = QB().in_nodes(Tag.IS_A).include(A.price >= 3.99).all()
     assert {honeycrisp.key} == set(searcher(query, apple).ends)
 
-    query = QB().in_nodes("is_a").include(A.price > 3.99).all()
+    query = QB().in_nodes(Tag.IS_A).include(A.price > 3.99).all()
     assert set() == set(searcher(query, apple).ends)
 
     query = (
         QB()
-        .in_nodes("is_a")
+        .in_nodes(Tag.IS_A)
         .include(A.price > 2.00, A.price < 3.00, all=True)
         .all()
     )
@@ -245,7 +245,7 @@ def test_comparison_options(searcher):
 
     query = (
         QB()
-        .in_nodes("is_a")
+        .in_nodes(Tag.IS_A)
         .include(A.price > 2.00, A.price < 3.00, all=False)
         .all()
     )
@@ -255,7 +255,7 @@ def test_comparison_options(searcher):
 
 
 def test_has_apple_include_pies(searcher):
-    query = QB().in_nodes("HAS_A").include(R.is_a >> pie).all()
+    query = QB().in_nodes(Tag.HAS_A).include(Tag.is_a >> pie).all()
     results = searcher.search(query, apple)
 
     assert {apple_pie.key} == set(results.ends)
@@ -263,24 +263,24 @@ def test_has_apple_include_pies(searcher):
 
 
 def test_include_what_an_apple_is(searcher):
-    query = QB().in_nodes(max_hops=3).include(R.is_a << apple).all()
+    query = QB().in_nodes(max_hops=3).include(Tag.is_a << apple).all()
     results = searcher.search(query, food)
     assert {fruit.key} == set(results.ends)
 
 
 def test_include_adjacent_to_pie(searcher):
-    query = QB().in_nodes(max_hops=3).include(R.is_a ** pie).all()
+    query = QB().in_nodes(max_hops=3).include(Tag.is_a ** pie).all()
     results = searcher.search(query, food)
     assert {dessert.key, apple_pie.key} == set(results.ends)
 
 
 def test_exclude_is_a(searcher):
-    query = QB().in_nodes("HAS_A").exclude(R.IS_A >> pie).all()
+    query = QB().in_nodes(Tag.HAS_A).exclude(Tag.is_a >> pie).all()
     results = searcher.search(query, apple)
     assert {apple_sauce.key} == set(results.ends)
 
 
 def test_multi_result_hops(searcher):
-    query = QB().out_nodes("IS_A", max_hops=4).all()
+    query = QB().out_nodes(Tag.IS_A, max_hops=4).all()
     results = searcher.search(query, apple_pie, apple_sauce)
     assert set(results.ends).issuperset({dessert.key})
