@@ -2,7 +2,11 @@ from dataclasses import dataclass
 from typing import Tuple, List, Iterable
 
 from entitykb import BaseKB, Config, get_class_from_name, DocEntity
-from . import Tokenizer, Normalizer, Extractor, Filterer, Resolver
+from .extractors import Extractor
+from .filterers import Filterer
+from .normalizers import Normalizer
+from .resolvers import Resolver
+from .tokenizers import Tokenizer
 
 
 @dataclass

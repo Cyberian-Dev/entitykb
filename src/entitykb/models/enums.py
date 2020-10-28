@@ -1,6 +1,6 @@
 import enum
 
-from . import ensure_iterable
+from .funcs import ensure_iterable
 
 
 class TagType(type):

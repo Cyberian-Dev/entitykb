@@ -1,7 +1,4 @@
-from .normalizers import Normalizer, LatinLowercaseNormalizer, NormalizerType
-
-from .tokenizers import Tokenizer, WhitespaceTokenizer, TokenizerType
-
+from .extractors import Extractor, DefaultExtractor, ExtractorType
 from .filterers import (
     Filterer,
     FiltererType,
@@ -10,14 +7,11 @@ from .filterers import (
     KeepLongestByLabel,
     KeepLongestByOffset,
 )
-
 from .handlers import TokenHandler
-
-from .resolvers import Resolver, TermResolver, ResolverType
-
-from .extractors import Extractor, DefaultExtractor, ExtractorType
-
+from .normalizers import Normalizer, LatinLowercaseNormalizer, NormalizerType
 from .pipeline import Pipeline
+from .resolvers import Resolver, TermResolver, ResolverType
+from .tokenizers import Tokenizer, WhitespaceTokenizer, TokenizerType
 
 __all__ = (
     "DefaultExtractor",

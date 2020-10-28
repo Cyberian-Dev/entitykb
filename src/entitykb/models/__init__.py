@@ -1,3 +1,7 @@
+from .base import SlotBase
+from .doc import Token, DocToken, Doc, DocEntity
+from .entity import Entity
+from .enums import Direction, Comparison, Tag
 from .funcs import (
     camel_to_snake,
     get_class_from_name,
@@ -6,10 +10,7 @@ from .funcs import (
     is_iterable,
     import_module,
 )
-from .enums import Direction, Comparison, Tag
-from .base import SlotBase
 from .node import Node, Edge
-from .entity import Entity
 from .query import (
     Criteria,
     AttrCriteria,
@@ -22,7 +23,6 @@ from .query import (
     QB,
     A,
 )
-from .doc import Token, DocToken, Doc, DocEntity
 from .results import FindResult, SearchHop, SearchResult, SearchResults
 
 __all__ = (

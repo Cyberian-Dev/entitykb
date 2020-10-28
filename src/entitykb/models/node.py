@@ -1,7 +1,9 @@
 from typing import Union
 from uuid import uuid4
 
-from . import SlotBase, camel_to_snake, Tag
+from .base import SlotBase
+from .enums import Tag
+from .funcs import camel_to_snake
 
 
 class NodeLabelRegistry(object):

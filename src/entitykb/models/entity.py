@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from . import Node
+from .node import Node
 
 ENTITY = "ENTITY"
 

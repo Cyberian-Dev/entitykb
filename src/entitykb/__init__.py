@@ -50,14 +50,16 @@ from .pipeline import (
 )
 from .kb import KB
 from .cli import cli
+from .rpc import AsyncKB, SyncKB
 from . import contrib
 
 __all__ = (
     "A",
+    "AsyncKB",
     "AttrCriteria",
     "BaseKB",
-    "Config",
     "Comparison",
+    "Config",
     "Criteria",
     "DefaultExtractor",
     "Direction",
@@ -85,6 +87,7 @@ __all__ = (
     "Searcher",
     "SlotBase",
     "Step",
+    "SyncKB",
     "Tag",
     "TermResolver",
     "TermsIndex",

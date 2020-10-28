@@ -1,6 +1,7 @@
 from typing import Tuple, Union, Optional, Iterable
 
-from . import SlotBase, Entity
+from .base import SlotBase
+from .entity import Entity
 
 
 class Token(str):

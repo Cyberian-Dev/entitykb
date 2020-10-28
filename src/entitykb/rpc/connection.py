@@ -2,6 +2,7 @@ import asyncio
 from dataclasses import dataclass
 
 from aio_msgpack_rpc import Client
+
 from entitykb import environ
 
 

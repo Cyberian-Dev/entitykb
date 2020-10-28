@@ -1,4 +1,5 @@
 from typing import Optional
+
 from entitykb import BaseKB, Doc, Node
 from .connection import RPCConnection
 

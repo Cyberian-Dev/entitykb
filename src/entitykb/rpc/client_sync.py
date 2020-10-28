@@ -1,5 +1,5 @@
-from typing import Optional
 import asyncio
+from typing import Optional
 
 from entitykb import Doc, Node
 from .client_async import AsyncKB
