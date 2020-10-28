@@ -1,6 +1,6 @@
 from typing import Optional, Union
 
-from entitykb import Config, BaseKB, InMemoryGraph, Node, Entity
+from entitykb import Config, BaseKB, InMemoryGraph, Node, Entity, Edge
 from entitykb.pipeline import Pipeline, Normalizer
 from entitykb.terms import TermsIndex
 from .storage import PickleStorage
@@ -44,8 +44,17 @@ class KB(BaseKB):
     def save_edge(self, edge):
         return self.graph.save_edge(edge)
 
+    def save(self, item):
+        if isinstance(item, Node):
+            return self.save_node(item)
+        elif isinstance(item, Edge):
+            return self.save_edge(item)
+        else:
+            raise RuntimeError(f"Unknown item type: {type(item)}")
+
     def suggest(self, term, query=None):
-        raise NotImplementedError
+        # todo...
+        raise RuntimeError("Not implemented.")
 
     def parse(self, text, *labels):
         doc = self.pipeline(text=text, labels=labels)

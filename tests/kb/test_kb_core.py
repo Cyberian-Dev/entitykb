@@ -1,3 +1,4 @@
+import pytest
 import os
 
 from entitykb import KB, Doc, Edge
@@ -46,13 +47,13 @@ def test_save_load_sync(root, kb: KB, apple):
     assert (kb.parse("Apple,Inc.")).entities[0].entity == apple
 
 
-def test_save_edge_remove_node(kb: KB, apple):
-    assert apple == kb.save_node(apple)
+def test_save_for_entity_and_edge(kb: KB, apple):
+    assert apple == kb.save(apple)
     assert 1 == len(kb)
     assert apple == kb.get_node(apple.key)
 
     edge = Edge(start=apple, end=apple, tag="IS_A")
-    kb.save_edge(edge)
+    kb.save(edge)
 
     assert kb.info()["graph"] == {
         "nodes": 1,
@@ -66,8 +67,17 @@ def test_save_edge_remove_node(kb: KB, apple):
     }
 
 
-def test_kb_clear(kb: KB, apple):
-    assert apple == kb.save_node(apple)
+def test_kb_save_bool_clear(kb: KB, apple):
+    assert bool(kb)
+
+    assert apple == kb.save(apple)
     assert 1 == len(kb)
     kb.clear()
+
     assert 0 == len(kb)
+    assert bool(kb)
+
+
+def test_kb_save_invalid(kb: KB):
+    with pytest.raises(RuntimeError):
+        kb.save("invalid!")

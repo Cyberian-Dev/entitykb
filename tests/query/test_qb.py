@@ -1,11 +1,11 @@
-from entitykb.graph import QB, A
-
 from entitykb.models.query import (
     Query,
     WalkStep,
     FilterStep,
     Direction,
     Comparison,
+    QB,
+    A,
 )
 
 
@@ -29,5 +29,10 @@ def test_walk_nodes():
 
 
 def test_filter_nodes():
-    q = QB().keep(A.label == "PERSON").all()
+    q = QB().include(A.label == "PERSON").all()
     assert q[0] == FilterStep(criteria=A("label", Comparison.eq, "PERSON"))
+
+    q = QB().exclude(A.label == "PERSON").all()
+    assert q[0] == FilterStep(
+        criteria=A("label", Comparison.eq, "PERSON"), exclude=True
+    )

@@ -1,7 +1,7 @@
 import pytest
 
-from entitykb.graph import A, InMemoryGraph, QB, R, SearchResults, Searcher
-from entitykb.models import Entity, Query
+from entitykb.graph import InMemoryGraph, SearchResults, Searcher
+from entitykb.models import Entity, Query, QB, A, R
 
 
 class Product(Entity):
@@ -64,21 +64,25 @@ def graph():
     return graph
 
 
-def test_searcher(graph):
+@pytest.fixture
+def searcher(graph):
+    return Searcher(graph=graph)
+
+
+def test_searcher(searcher):
     query = Query()
-    searcher = Searcher(graph=graph, query=query)
-    results = searcher.search(apple)
+    results = searcher.search(query, apple)
     assert 1 == len(results)
     assert {apple.key} == set(results.ends)
 
-    results = searcher.search(apple.key)
+    results = searcher.search(query, apple.key)
     assert 1 == len(results)
     assert {apple.key} == set(results.ends)
 
 
-def test_start_all_goal_all(graph):
+def test_start_all_goal_all(searcher, graph):
     query = QB().all()
-    results = Searcher(graph=graph, query=query).search(graph)
+    results = searcher.search(query, graph)
 
     assert isinstance(results, SearchResults)
     assert 9 == len(results)
@@ -87,32 +91,32 @@ def test_start_all_goal_all(graph):
         assert result.start == result.end
 
 
-def test_limit_goal(graph):
+def test_limit_goal(searcher, graph):
     query = QB().limit(5)
-    results = Searcher(graph=graph, query=query).search(graph)
+    results = searcher.search(query, graph)
     assert isinstance(results, SearchResults)
     assert 5 == len(results)
 
 
-def test_limit_page(graph):
+def test_limit_page(searcher, graph):
     query = QB().page(2, 2)
-    results = Searcher(graph=graph, query=query).search(graph)
+    results = searcher.search(query, graph)
     assert isinstance(results, SearchResults)
     assert 2 == len(results)
 
 
-def test_start_all_goal_first(graph):
+def test_start_all_goal_first(searcher, graph):
     query = QB().first()
-    results = Searcher(graph=graph, query=query).search(graph)
+    results = searcher.search(query, graph)
 
     assert 1 == len(results)
     assert 0 == len(results[0])
     assert set(results.starts) == set(results.ends)
 
 
-def test_start_one_goal_all(graph):
+def test_start_one_goal_all(searcher, graph):
     query = QB().all()
-    results = Searcher(graph=graph, query=query).search(apple)
+    results = searcher.search(query, apple)
 
     assert 1 == len(results)
     assert 0 == len(results[0])
@@ -120,17 +124,17 @@ def test_start_one_goal_all(graph):
     assert {apple.key} == set(results.ends)
 
 
-def test_in_nodes(graph):
+def test_in_nodes(searcher, graph):
     query = QB().in_nodes("is_a").all()
-    results = Searcher(graph=graph, query=query).search(apple)
+    results = searcher.search(query, apple)
 
     assert {granny_smith.key, honeycrisp.key} == set(results.ends)
     assert {apple.key} == {r.start for r in results}
 
 
-def test_in_nodes_with_max_hops(graph):
+def test_in_nodes_with_max_hops(searcher, graph):
     query = QB().in_nodes("is_a", max_hops=2).all()
-    results = Searcher(graph=graph, query=query).search(food)
+    results = searcher.search(query, food)
 
     assert {
         fruit.key,
@@ -142,25 +146,25 @@ def test_in_nodes_with_max_hops(graph):
     assert {food.key} == set(results.starts)
 
 
-def test_in_nodes_with_passthru(graph):
+def test_in_nodes_with_passthru(searcher, graph):
     query = QB().in_nodes("is_a", passthru=True).all()
-    results = Searcher(graph=graph, query=query).search(apple)
+    results = searcher.search(query, apple)
 
     assert {apple.key, granny_smith.key, honeycrisp.key} == set(results.ends)
     assert {apple.key} == set(results.starts)
 
 
-def test_out_nodes(graph):
+def test_out_nodes(searcher):
     query = QB().out_nodes("is_a").all()
-    results = Searcher(graph=graph, query=query).search(apple)
+    results = searcher.search(query, apple)
 
     assert {fruit.key} == set(results.ends)
     assert {apple.key} == set(results.starts)
 
 
-def test_in_nodes_all_tags(graph):
+def test_in_nodes_all_tags(searcher, graph):
     query = QB().in_nodes().all()
-    results = Searcher(graph=graph, query=query).search(apple)
+    results = searcher.search(query, apple)
 
     assert {
         granny_smith.key,
@@ -171,114 +175,112 @@ def test_in_nodes_all_tags(graph):
     assert {apple.key} == set(results.starts)
 
 
-def test_all_nodes_all_tags_no_max(graph):
+def test_all_nodes_all_tags_no_max(searcher):
     query = QB().all_nodes(max_hops=None).all()
-    results = Searcher(graph=graph, query=query).search(apple)
+    results = searcher.search(query, apple)
 
     assert 8 == len(results)
     assert apple.key not in set(results.ends)
     assert {apple.key} == set(results.starts)
 
 
-def test_in_has_a_apple_out_is_a(graph):
+def test_in_has_a_apple_out_is_a(searcher):
     query = QB().in_nodes("has_a").out_nodes("is_a").all()
-    results = Searcher(graph=graph, query=query).search(apple)
+    results = searcher.search(query, apple)
 
     assert {dessert.key, pie.key} == set(results.ends)
     assert {apple.key} == set(results.starts)
 
 
-def test_is_keep_label(graph):
-    query = QB().in_nodes().keep(A.label == "SAUCE").all()
-    results = Searcher(graph=graph, query=query).search(dessert)
+def test_is_include_label(searcher):
+    query = QB().in_nodes().include(A.label == "SAUCE").all()
+    results = searcher.search(query, dessert)
     assert {apple_sauce.key} == {r.end for r in results}
     assert {dessert.key} == {r.start for r in results}
 
-    query = QB().in_nodes().keep(A.label != "SAUCE").all()
-    results = Searcher(graph=graph, query=query).search(dessert)
+    query = QB().in_nodes().include(A.label != "SAUCE").all()
+    results = searcher.search(query, dessert)
     assert {pie.key} == {r.end for r in results}
     assert {dessert.key} == {r.start for r in results}
 
 
-def test_is_remove_label(graph):
-    query = QB().in_nodes().remove(A.label == "SAUCE").all()
-    results = Searcher(graph=graph, query=query).search(dessert)
+def test_query_exclude_by_label(searcher):
+    query = QB().in_nodes().exclude(A.label == "SAUCE").all()
+    results = searcher.search(query, dessert)
     assert {pie.key} == {r.end for r in results}
     assert {dessert.key} == {r.start for r in results}
 
-    query = QB().in_nodes().remove(A.label != "SAUCE").all()
-    results = Searcher(graph=graph, query=query).search(dessert)
+    query = QB().in_nodes().exclude(A.label != "SAUCE").all()
+    results = searcher.search(query, dessert)
     assert {apple_sauce.key} == {r.end for r in results}
     assert {dessert.key} == {r.start for r in results}
 
 
-def test_comparison_options(graph):
-    searcher = Searcher(graph=graph, query=None)
+def test_comparison_options(searcher):
+    query = QB().in_nodes("is_a").include(A.price < 3.00).all()
+    assert {granny_smith.key} == set(searcher(query, apple).ends)
 
-    query = QB().in_nodes("is_a").keep(A.price < 3.00).all()
-    assert {granny_smith.key} == set(searcher(apple, query=query).ends)
+    query = QB().in_nodes("is_a").include(A.price <= 1.99).all()
+    assert {granny_smith.key} == set(searcher(query, apple).ends)
 
-    query = QB().in_nodes("is_a").keep(A.price <= 1.99).all()
-    assert {granny_smith.key} == set(searcher(apple, query=query).ends)
+    query = QB().in_nodes("is_a").include(A.price < 1.99).all()
+    assert set() == set(searcher(query, apple).ends)
 
-    query = QB().in_nodes("is_a").keep(A.price < 1.99).all()
-    assert set() == set(searcher(apple, query=query).ends)
+    query = QB().in_nodes("is_a").include(A.price > 3.00).all()
+    assert {honeycrisp.key} == set(searcher(query, apple).ends)
 
-    query = QB().in_nodes("is_a").keep(A.price > 3.00).all()
-    assert {honeycrisp.key} == set(searcher(apple, query=query).ends)
+    query = QB().in_nodes("is_a").include(A.price >= 3.99).all()
+    assert {honeycrisp.key} == set(searcher(query, apple).ends)
 
-    query = QB().in_nodes("is_a").keep(A.price >= 3.99).all()
-    assert {honeycrisp.key} == set(searcher(apple, query=query).ends)
-
-    query = QB().in_nodes("is_a").keep(A.price > 3.99).all()
-    assert set() == set(searcher(apple, query=query).ends)
+    query = QB().in_nodes("is_a").include(A.price > 3.99).all()
+    assert set() == set(searcher(query, apple).ends)
 
     query = (
         QB()
         .in_nodes("is_a")
-        .keep(A.price > 2.00, A.price < 3.00, all=True)
+        .include(A.price > 2.00, A.price < 3.00, all=True)
         .all()
     )
-    assert set() == set(searcher(apple, query=query).ends)
+    assert set() == set(searcher(query, apple).ends)
 
     query = (
         QB()
         .in_nodes("is_a")
-        .keep(A.price > 2.00, A.price < 3.00, all=False)
+        .include(A.price > 2.00, A.price < 3.00, all=False)
         .all()
     )
     assert {honeycrisp.key, granny_smith.key} == set(
-        searcher(apple, query=query).ends
+        searcher(query, apple).ends
     )
 
 
-def test_has_apple_keep_pies(graph):
-    query = QB().in_nodes("HAS_A").keep(R.is_a >> pie).all()
-    results = Searcher(graph=graph, query=query).search(apple)
+def test_has_apple_include_pies(searcher):
+    query = QB().in_nodes("HAS_A").include(R.is_a >> pie).all()
+    results = searcher.search(query, apple)
 
     assert {apple_pie.key} == set(results.ends)
     assert {apple.key} == {r.start for r in results}
 
 
-def test_keep_what_an_apple_is(graph):
-    query = QB().in_nodes(max_hops=3).keep(R.is_a << apple).all()
-    results = Searcher(graph=graph, query=query).search(food)
+def test_include_what_an_apple_is(searcher):
+    query = QB().in_nodes(max_hops=3).include(R.is_a << apple).all()
+    results = searcher.search(query, food)
     assert {fruit.key} == set(results.ends)
 
 
-def test_keep_adjacent_to_pie(graph):
-    query = QB().in_nodes(max_hops=3).keep(R.is_a ** pie).all()
-    results = Searcher(graph=graph, query=query).search(food)
+def test_include_adjacent_to_pie(searcher):
+    query = QB().in_nodes(max_hops=3).include(R.is_a ** pie).all()
+    results = searcher.search(query, food)
     assert {dessert.key, apple_pie.key} == set(results.ends)
 
 
-def test_remove_is_a(graph):
-    query = QB().in_nodes("HAS_A").remove(R.IS_A >> pie).all()
-    results = Searcher(graph=graph, query=query).search(apple)
+def test_exclude_is_a(searcher):
+    query = QB().in_nodes("HAS_A").exclude(R.IS_A >> pie).all()
+    results = searcher.search(query, apple)
     assert {apple_sauce.key} == set(results.ends)
 
 
-def test_multi_result_hops(graph):
+def test_multi_result_hops(searcher):
     query = QB().out_nodes("IS_A", max_hops=4).all()
-    results = Searcher(graph=graph, query=query).search(apple_pie, apple_sauce)
+    results = searcher.search(query, apple_pie, apple_sauce)
     assert set(results.ends).issuperset({dessert.key})

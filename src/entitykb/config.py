@@ -107,8 +107,10 @@ class Config:
         config = cls.construct(file_path=config_file_path, data=data)
 
         if not os.path.isfile(config_file_path):
+            os.makedirs(os.path.dirname(config_file_path), exist_ok=True)
             with open(config_file_path, "w") as fp:
                 json.dump(config.dict(), fp, indent=4)
+                fp.write("\n")
 
         return config
 

@@ -3,6 +3,8 @@ from typing import Optional
 
 import typer
 import uvicorn
+import time
+
 from tabulate import tabulate
 from io import FileIO
 
@@ -57,6 +59,7 @@ def load(
     mv_split: str = typer.Option("|"),
 ):
     """ Load data into local KB """
+    start = time.time()
     environ.mv_split = mv_split
 
     kb = KB(root=root) if not dry_run else None
@@ -68,13 +71,15 @@ def load(
     with typer.progressbar(it) as progress:
         for obj in progress:
             if kb:
-                kb.save_node(obj)
+                kb.save(obj)
             elif count < 10:
                 typer.echo(obj)
             count += 1
 
     if kb:
         kb.commit()
+        timer = time.time() - start
+        typer.echo(f"Loaded {count} in {timer:.2f}s [{in_file}, {format}]")
 
 
 @cli.command(name="rpc")

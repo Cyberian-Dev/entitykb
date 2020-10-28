@@ -18,11 +18,16 @@ from .query import (
     WalkStep,
     FilterStep,
     Query,
+    QueryBuilder,
+    QB,
+    A,
+    R,
 )
 from .doc import Token, DocToken, Doc, DocEntity
-from .results import FindResult
+from .results import FindResult, SearchHop, SearchResult, SearchResults
 
 __all__ = (
+    "A",
     "AttrCriteria",
     "Comparison",
     "Criteria",
@@ -35,8 +40,15 @@ __all__ = (
     "FilterStep",
     "FindResult",
     "Node",
+    "QB",
     "Query",
+    "QueryBuilder",
+    "R",
     "RelCriteria",
+    "SearchHop",
+    "SearchResult",
+    "SearchResults",
+    "SearchHop",
     "SlotBase",
     "Step",
     "Token",
