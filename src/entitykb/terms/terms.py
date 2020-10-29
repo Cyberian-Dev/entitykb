@@ -7,8 +7,6 @@ from entitykb.models import Entity
 
 class TermsIndex(object):
 
-    __slots__ = ("trie", "normalizer")
-
     def __init__(self, normalizer: Callable, trie: Trie = None):
         self.normalizer = normalizer
         self.trie = trie or Trie()

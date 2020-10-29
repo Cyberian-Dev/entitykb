@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 from typing import Optional
 
@@ -36,8 +37,11 @@ def clear(root: Optional[Path] = typer.Option(None)):
     root = Config.get_root(root)
     typer.confirm(f"Are you sure you want to clear: {root}?", abort=True)
 
+    shutil.rmtree(root)
+
     kb = KB(root=root)
-    success = kb.clear() and kb.commit()
+    success = kb.commit()
+
     finish("Clear", success)
 
 
@@ -118,9 +122,13 @@ def run_dev(
     http_port: int = typer.Option(8000),
 ):
     """ Hot reloading local HTTP and RPC servers. """
+
+    # set environment variables
+    # commit to os.environ for HTTP/RPC processes
     environ.root = root
     environ.rpc_host = host
     environ.rpc_port = rpc_port
+    environ.commit()
 
     http_app = "entitykb.http.dev:app"
     uvicorn.run(http_app, host=host, port=http_port, reload=True)

@@ -66,7 +66,7 @@ class PickleStorage(Storage):
                 try:
                     py_data = pickle.loads(pickle_data)
 
-                except (AttributeError, pickle.UnpicklingError):
+                except (AttributeError, pickle.UnpicklingError, TypeError):
                     logger.error("Failed to load index: " + self.index_path)
 
         return py_data

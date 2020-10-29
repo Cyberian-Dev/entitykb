@@ -1,13 +1,3 @@
-"""
-This module contains Environ class from the Starlette project.
-
-
-Original Code:
-
-BSD License:
-    https://github.com/encode/starlette/blob/master/LICENSE.md
-"""
-
 import json
 import os
 from dataclasses import dataclass, fields
@@ -18,16 +8,22 @@ from .deps import CheckEnviron
 
 class Environ(CheckEnviron):
     class DEFAULTS:
-        ROOT = os.path.expanduser("~/.entitykb")
-        RPC_HOST = "localhost"
-        RPC_PORT = 3477
-        RPC_TIMEOUT = 2
-        RPC_RETRIES = 5
-        MV_SPLIT = "|"
+        ENTITYKB_ROOT = os.path.expanduser("~/.entitykb")
+        ENTITYKB_RPC_HOST = "localhost"
+        ENTITYKB_RPC_PORT = 3477
+        ENTITYKB_RPC_TIMEOUT = 2
+        ENTITYKB_RPC_RETRIES = 5
+        ENTITYKB_MV_SPLIT = "|"
+
+    def commit(self):
+        # lock in any environ variables that are not set
+        for i in vars(self.DEFAULTS):
+            if not i.startswith("_"):
+                self.__getitem__(i)
 
     @property
     def root(self) -> str:
-        return self.get("ENTITYKB_ROOT", self.DEFAULTS.ROOT)
+        return self["ENTITYKB_ROOT"]
 
     @root.setter
     def root(self, value: str):
@@ -35,7 +31,7 @@ class Environ(CheckEnviron):
 
     @property
     def rpc_host(self) -> str:
-        return self.get("ENTITYKB_RPC_HOST", self.DEFAULTS.RPC_HOST)
+        return self["ENTITYKB_RPC_HOST"]
 
     @rpc_host.setter
     def rpc_host(self, value: str):
@@ -43,7 +39,7 @@ class Environ(CheckEnviron):
 
     @property
     def rpc_port(self) -> int:
-        return int(self.get("ENTITYKB_RPC_PORT", self.DEFAULTS.RPC_PORT))
+        return int(self["ENTITYKB_RPC_PORT"])
 
     @rpc_port.setter
     def rpc_port(self, value: int):
@@ -51,7 +47,7 @@ class Environ(CheckEnviron):
 
     @property
     def rpc_timeout(self) -> int:
-        return int(self.get("ENTITYKB_RPC_TIMEOUT", self.DEFAULTS.RPC_TIMEOUT))
+        return int(self["ENTITYKB_RPC_TIMEOUT"])
 
     @rpc_timeout.setter
     def rpc_timeout(self, value: int):
@@ -59,7 +55,7 @@ class Environ(CheckEnviron):
 
     @property
     def rpc_retries(self) -> int:
-        return int(self.get("ENTITYKB_RPC_RETRIES", self.DEFAULTS.RPC_RETRIES))
+        return int(self["ENTITYKB_RPC_RETRIES"])
 
     @rpc_retries.setter
     def rpc_retries(self, value: int):
@@ -67,7 +63,7 @@ class Environ(CheckEnviron):
 
     @property
     def mv_split(self) -> str:
-        return self.get("ENTITYKB_MV_SPLIT", self.DEFAULTS.MV_SPLIT)
+        return self["ENTITYKB_MV_SPLIT"]
 
     @mv_split.setter
     def mv_split(self, value: str):

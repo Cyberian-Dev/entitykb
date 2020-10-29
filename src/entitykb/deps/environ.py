@@ -17,13 +17,21 @@ class EnvironError(Exception):
 
 
 class CheckEnviron(MutableMapping):
+    class DEFAULTS:
+        pass
+
     def __init__(self, _environ: typing.MutableMapping = os.environ):
         self._environ = _environ
         self._has_been_read: typing.Set = set()
 
     def __getitem__(self, key: typing.Any) -> typing.Any:
         self._has_been_read.add(key)
-        return self._environ.__getitem__(key)
+        value = self._environ.get(key)
+        if value is None:
+            value = getattr(self.DEFAULTS, key, None)
+            if value:
+                self._environ.__setitem__(key, str(value))
+        return value
 
     def __setitem__(self, key: typing.Any, value: typing.Any) -> None:
         if value is None:

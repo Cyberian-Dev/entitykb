@@ -1,6 +1,9 @@
-from typing import Tuple, Union, Optional, Iterable
+from __future__ import annotations
 
-from .base import SlotBase
+from typing import Tuple, Union, Optional, Any
+
+from pydantic import BaseModel
+
 from .entity import Entity
 
 
@@ -32,48 +35,9 @@ class Token(str):
         return new_token
 
 
-class DocToken(SlotBase):
-
-    __slots__ = ("doc", "token", "offset")
-
-    def __init__(self, *, doc: "Doc", token: Token, offset: int):
-        self.doc = doc
-        self.token = token
-        self.offset = offset
-
-    def __str__(self):
-        return self.token
-
-    def __repr__(self):
-        return f"{self.token} [offset: {self.offset}]"
-
-    def __lt__(self, other):
-        return self.offset < other.offset
-
-    def dict(self, **_):
-        return dict(offset=self.offset, token=self.token)
-
-
-class HasTokens(SlotBase):
-
-    __slots__ = ("text", "tokens")
-
-    def __init__(
-        self, *, text: str, tokens: Iterable[DocToken] = None, doc=None
-    ):
-        self.text = text
-
-        if tokens:
-            tokens = [
-                DocToken(doc=doc, **token)
-                if isinstance(token, dict)
-                else token
-                for token in tokens
-            ]
-
-        tokens = tupilify(tokens)
-
-        self.tokens = tokens
+class HasTokens(BaseModel):
+    text: str
+    tokens: Tuple[DocToken, ...]
 
     def __str__(self):
         return self.text
@@ -104,31 +68,26 @@ class HasTokens(SlotBase):
         return len(self.tokens)
 
 
+class DocToken(BaseModel):
+    token: Token
+    offset: int
+
+    def __str__(self):
+        return self.token
+
+    def __repr__(self):
+        return f"{self.token} [offset: {self.offset}]"
+
+
 class DocEntity(HasTokens):
-    __slots__ = (
-        "text",
-        "tokens",
-        "doc",
-        "entity",
-        "entity_key",
-        "_sort_order",
-    )
+    entity_key: str
+    tokens: Tuple[DocToken, ...]
+    entity: Entity = None
 
-    def __init__(
-        self,
-        *,
-        text: str,
-        doc: "Doc",
-        entity_key: str = None,
-        entity: Optional["EntityValue"] = None,
-        tokens: Iterable[DocToken] = None,
-    ):
-        super().__init__(text=text, tokens=tokens, doc=doc)
-
-        self.doc = doc
-        self.entity = Entity.create(entity)
-        self.entity_key = entity_key or self.entity.key
-        self._sort_order = None
+    def __init__(self, **data: Any):
+        entity = Entity.create(data.get("entity"))
+        data.setdefault("entity_key", entity and entity.key)
+        super().__init__(**data)
 
     def __str__(self):
         return f"{self.text} [{self.entity_key}]"
@@ -154,57 +113,19 @@ class DocEntity(HasTokens):
 
     @property
     def sort_order(self):
-        if self._sort_order is None:
-            self._sort_order = (
-                -self.num_tokens,
-                0 if self.is_match_exact else 1,
-                0 if self.is_lower_match else 1,
-                # 0 if self.is_synonym_exact else 1,
-                self.offset,
-                self.label,
-            )
-        return self._sort_order
-
-    def dict(self, **_):
-        return dict(
-            text=self.text,
-            entity_key=self.entity_key,
-            entity=self.entity.dict() if self.entity else None,
-            tokens=[t.dict() for t in self.tokens],
+        return (
+            -self.num_tokens,
+            0 if self.is_match_exact else 1,
+            0 if self.is_lower_match else 1,
+            self.offset,
+            self.label,
         )
 
 
 class Doc(HasTokens):
-
-    __slots__ = ("text", "tokens", "entities")
-
-    def __init__(
-        self,
-        *,
-        text: str,
-        entities: Tuple[DocEntity] = None,
-        tokens: Tuple[DocToken] = None,
-    ):
-        super().__init__(text=text, tokens=tokens, doc=self)
-
-        if entities:
-            entities = [
-                DocEntity(doc=self, **entity)
-                if isinstance(entity, dict)
-                else entity
-                for entity in entities
-            ]
-
-        self.entities = tupilify(entities)
+    text: str
+    entities: Tuple[DocEntity, ...] = None
+    tokens: Tuple[DocToken, ...] = None
 
 
 EntityValue = Union[Entity, dict, DocEntity, str, float]
-
-
-def tupilify(values: Union[list, tuple, set]) -> tuple:
-    """ Converts values to a sorted, unique tuple. """
-    if values:
-        values = tuple(sorted(set(values)))
-    else:
-        values = tuple()
-    return values

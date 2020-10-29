@@ -3,35 +3,6 @@ import enum
 from .funcs import ensure_iterable
 
 
-class TagType(type):
-    def __getattr__(self, tag_name: str):
-        return Tag(tag_name)
-
-
-class Tag(str, metaclass=TagType):
-    def __new__(cls, string):
-        string = string.upper()
-        obj = super(Tag, cls).__new__(cls, string)
-        return obj
-
-    def __rshift__(self, nodes):
-        from . import RelCriteria
-
-        return RelCriteria((self,), (Direction.outgoing,), nodes)
-
-    def __lshift__(self, nodes):
-        from . import RelCriteria
-
-        return RelCriteria((self,), (Direction.incoming,), nodes)
-
-    def __pow__(self, nodes):
-        from . import RelCriteria
-
-        return RelCriteria(
-            (self,), (Direction.incoming, Direction.outgoing), nodes
-        )
-
-
 @enum.unique
 class Direction(str, enum.Enum):
     outgoing = "outgoing"

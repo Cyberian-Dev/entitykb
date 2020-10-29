@@ -1,32 +1,29 @@
-from typing import Iterable
+from typing import Any, List, Optional
 
-from . import ensure_iterable, SlotBase, Direction, Comparison, Node
+from pydantic import validator, BaseModel
+
+from . import ensure_iterable, Direction, Comparison, Node
 
 
-class Criteria(SlotBase):
+class Criteria(BaseModel):
     @classmethod
-    def identify_klass(cls, kwargs):
-        if kwargs.keys() == set(AttrCriteria.__slots__):
-            return AttrCriteria
+    def create(cls, _item=None, **kwargs):
+        if isinstance(_item, cls):
+            return _item
+
+        if isinstance(_item, dict):
+            kwargs = {**_item, **kwargs}
+
+        if "attr_name" in kwargs.keys():
+            return AttrCriteria(**kwargs)
         else:
-            return RelCriteria
+            return RelCriteria(**kwargs)
 
 
-class AttrCriteriaType(type):
-    def __getattr__(self, attr_name: str):
-        return AttrCriteria(attr_name)
-
-
-class AttrCriteria(Criteria, metaclass=AttrCriteriaType):
-
-    __slots__ = ["attr_name", "compare", "value"]
-
-    def __init__(
-        self, attr_name: str, compare: Comparison = None, value=None,
-    ):
-        self.attr_name = attr_name
-        self.compare = compare
-        self.value = value
+class AttrCriteria(Criteria):
+    attr_name: str
+    compare: Comparison = None
+    value: Any = None
 
     def set(self, compare: Comparison, value):
         self.compare = compare
@@ -55,87 +52,70 @@ class AttrCriteria(Criteria, metaclass=AttrCriteriaType):
         return self.compare.eval(self.value, other)
 
 
-class RelCriteriaType(type):
-    def __getattr__(self, tag: str):
-        tag = tag.upper()
-        return RelCriteria(tag)
+class RelCriteria(Criteria):
+    tags: List[str]
+    directions: List[Direction]
+    nodes: List[str]
+
+    @validator("tags", "directions", pre=True, always=True)
+    def to_list(cls, v):
+        return ensure_iterable(v, f=list)
+
+    @validator("nodes", pre=True, always=True)
+    def to_key_tuple(cls, v):
+        return list(Node.to_key(n) for n in ensure_iterable(v))
 
 
-class RelCriteria(Criteria, metaclass=RelCriteriaType):
-
-    __slots__ = ["tags", "nodes", "directions"]
-
-    def __init__(self, tags: str, directions=None, nodes=None):
-        self.tags = ensure_iterable(tags)
-        self.directions = ensure_iterable(directions)
-        self.nodes = RelCriteria.to_key_tuple(nodes)
-
-    def update(self, directions, nodes):
-        self.directions = ensure_iterable(directions)
-        self.nodes = RelCriteria.to_key_tuple(nodes)
-        return self
-
-    def __rshift__(self, nodes):
-        return self.update((Direction.outgoing,), nodes)
-
-    def __lshift__(self, nodes):
-        return self.update((Direction.incoming,), nodes)
-
-    def __pow__(self, nodes):
-        return self.update((Direction.incoming, Direction.outgoing), nodes)
-
-    @staticmethod
-    def to_key_tuple(nodes):
-        return tuple(Node.to_key(n) for n in ensure_iterable(nodes))
-
-
-class Step(SlotBase):
+class Step(BaseModel):
     @classmethod
-    def identify_klass(cls, kwargs):
-        if kwargs.keys() == set(WalkStep.__slots__):
-            return WalkStep
+    def create(cls, _item=None, **kwargs):
+        if isinstance(_item, cls):
+            return _item
+
+        if isinstance(_item, dict):
+            kwargs = {**_item, **kwargs}
+
+        if "max_hops" in kwargs.keys():
+            return WalkStep(**kwargs)
         else:
-            return FilterStep
+            return FilterStep(**kwargs)
 
 
 class WalkStep(Step):
+    tags: List[str] = None
+    directions: List[Direction] = [
+        Direction.incoming,
+    ]
+    max_hops: Optional[int] = 1
+    passthru: bool = False
 
-    __slots__ = ["tags", "directions", "max_hops", "passthru"]
+    @validator("tags", pre=True, always=True)
+    def ensure_tags(cls, v):
+        return [Tag(t) for t in ensure_iterable(v or ())]
 
-    def __init__(
-        self,
-        tags=None,
-        directions=Direction.incoming,
-        max_hops=1,
-        passthru=False,
-    ):
-        self.tags = tuple(t.upper() for t in ensure_iterable(tags or ()))
-        self.directions = Direction.as_tuple(directions, all_if_none=True)
-        self.max_hops = max_hops
-        self.passthru = passthru
+    @validator("directions", pre=True, always=True)
+    def ensure_directions(cls, v):
+        return list(ensure_iterable(v or ()))
 
 
 class FilterStep(Step):
+    criteria: List[Any] = []
+    all: bool = False
+    exclude: bool = False
 
-    __slots__ = ["criteria", "all", "exclude"]
-
-    def __init__(self, *, criteria=None, all=False, exclude=False):
-        criteria = ensure_iterable(criteria, explode_first=True)
-        self.criteria = [Criteria.create(c) for c in criteria]
-        self.all = all
-        self.exclude = exclude
+    @validator("criteria", pre=True, always=True)
+    def ensure_criteria(cls, v):
+        return [Criteria.create(c) for c in ensure_iterable(v or ())]
 
 
-class Query(SlotBase):
+class Query(BaseModel):
+    steps: List[Step] = []
+    limit: int = None
+    offset: int = 0
 
-    __slots__ = ["steps", "limit", "offset"]
-
-    def __init__(
-        self, steps: Iterable = None, limit: int = None, offset: int = 0,
-    ):
-        self.steps = [Step.create(s) for s in ensure_iterable(steps or ())]
-        self.limit = limit
-        self.offset = offset
+    @validator("steps", pre=True, always=True)
+    def ensure_steps(cls, v):
+        return [Step.create(s) for s in ensure_iterable(v or ())]
 
     def __len__(self):
         return len(self.steps)
@@ -229,4 +209,44 @@ class QueryBuilder(object):
 
 
 QB = QueryBuilder
-A = AttrCriteria
+
+
+class AttrCriteriaBuilderType(type):
+    def __getattr__(self, attr_name: str):
+        return AttrCriteria(attr_name=attr_name)
+
+
+class AttrCriteriaBuilder(object, metaclass=AttrCriteriaBuilderType):
+    pass
+
+
+A = AttrCriteriaBuilder
+
+
+class TagType(type):
+    def __getattr__(self, tag_name: str):
+        return Tag(tag_name)
+
+
+class Tag(str, metaclass=TagType):
+    def __new__(cls, string):
+        string = string.upper()
+        obj = super(Tag, cls).__new__(cls, string)
+        return obj
+
+    def __rshift__(self, nodes):
+        return RelCriteria(
+            tags=(self,), directions=(Direction.outgoing,), nodes=nodes
+        )
+
+    def __lshift__(self, nodes):
+        return RelCriteria(
+            tags=(self,), directions=(Direction.incoming,), nodes=nodes
+        )
+
+    def __pow__(self, nodes):
+        return RelCriteria(
+            tags=(self,),
+            directions=(Direction.incoming, Direction.outgoing),
+            nodes=nodes,
+        )

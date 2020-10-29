@@ -1,12 +1,11 @@
 from entitykb.models import (
-    AttrCriteria,
+    A,
     Criteria,
     Direction,
     FilterStep,
-    Node,
     Query,
-    RelCriteria,
     WalkStep,
+    Tag,
 )
 
 
@@ -18,7 +17,7 @@ def test_create_query_single_node():
     assert q.dict() == {
         "limit": None,
         "offset": 0,
-        "steps": (),
+        "steps": [],
     }
 
 
@@ -31,17 +30,17 @@ def test_create_walk_step_only():
     assert q.dict() == {
         "limit": None,
         "offset": 0,
-        "steps": (
+        "steps": [
             {
-                "directions": ("incoming",),
+                "directions": [Direction.incoming],
                 "max_hops": 1,
                 "passthru": False,
-                "tags": (),
+                "tags": [],
             },
-        ),
+        ],
     }
 
-    q2 = Query.create(q.dict())
+    q2 = Query(**q.dict())
     assert q2.dict() == q.dict()
 
 
@@ -54,15 +53,15 @@ def test_create_filter_step_only():
     assert q.dict() == {
         "limit": None,
         "offset": 0,
-        "steps": ({"criteria": (None,), "exclude": False, "all": False},),
+        "steps": [{"all": False, "criteria": [], "exclude": False}],
     }
 
-    q2 = Query.create(q.dict())
+    q2 = Query(**q.dict())
     assert q2.dict() == q.dict()
 
 
 def test_simple_attr_criteria():
-    a = AttrCriteria.label == "FOOD"
+    a = A.label == "FOOD"
     assert a.dict() == {
         "attr_name": "label",
         "compare": "==",
@@ -73,11 +72,13 @@ def test_simple_attr_criteria():
     assert a.dict() == a2.dict()
 
 
-def test_simple_rel_criteria():
-    n = Node()
-    r = RelCriteria.is_a >> n
-    compare = RelCriteria(tags="IS_A", directions=Direction.outgoing, nodes=n)
-    assert r.dict() == compare.dict()
+def test_rel_criteria():
+    r = Tag.is_a >> "Fruit|FOOD"
+    assert r.dict() == {
+        "tags": ["IS_A"],
+        "directions": [Direction.outgoing],
+        "nodes": ["Fruit|FOOD"],
+    }
 
-    r2 = Criteria.create(**r.dict())
+    r2 = Criteria.create(r.dict())
     assert r.dict() == r2.dict()

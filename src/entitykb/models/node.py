@@ -1,8 +1,8 @@
-from typing import Union
+from typing import Union, Any
 from uuid import uuid4
 
-from .base import SlotBase
-from .enums import Tag
+from pydantic import BaseModel, validator, Field
+
 from .funcs import camel_to_snake
 
 
@@ -27,18 +27,18 @@ class NodeLabelRegistry(object):
         return cls._instance
 
 
-class Node(SlotBase):
+class Node(BaseModel):
+    key: str = Field(default_factory=lambda: str(uuid4()))
+    label: str
+    data: dict = None
 
-    __slots__ = ["key", "label", "data"]
     __all_labels__ = {"NODE"}
     __default_label__ = "NODE"
 
-    def __init__(
-        self, *, key: str = None, label: str = None, data: dict = None
-    ):
-        self.key = key or str(uuid4())
-        self.label = label or self.__default_label__
-        self.data = data
+    def __init__(self, **data: Any):
+        if not data.get("label"):
+            data["label"] = self.get_default_label()
+        super().__init__(**data)
 
     def __hash__(self):
         return hash((self.label, self.key))
@@ -82,25 +82,28 @@ class Node(SlotBase):
             return Entity
         return klass
 
+    @classmethod
+    def create(cls, _item=None, **kwargs):
+        if isinstance(_item, cls):
+            return _item
 
-class Edge(SlotBase):
+        if isinstance(_item, dict):
+            kwargs = {**_item, **kwargs}
 
-    __slots__ = ["start", "tag", "end", "weight", "data"]
+        klass = cls.identify_klass(kwargs) or cls
+        return klass(**kwargs)
 
-    def __init__(
-        self,
-        *,
-        start: str,
-        tag: Tag,
-        end: str,
-        weight: int = 1,
-        data: dict = None,
-    ):
-        self.start = Node.to_key(start)
-        self.tag = Tag(tag)
-        self.end = Node.to_key(end)
-        self.weight = weight
-        self.data = data
+
+class Edge(BaseModel):
+    start: str = None
+    tag: str = None
+    end: str = None
+    weight: int = 1
+    data: dict = None
+
+    @validator("start", "end", pre=True, always=True)
+    def node_to_key(cls, v):
+        return Node.to_key(v)
 
     def __repr__(self):
         return f"<Edge: start={self.start}, tag={self.tag}, end={self.end}>"

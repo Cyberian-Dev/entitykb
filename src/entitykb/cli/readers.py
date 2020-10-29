@@ -12,5 +12,5 @@ def iterate_csv(file_obj: FileIO):
         synonyms = data.get("synonyms")
         if isinstance(synonyms, str):
             data["synonyms"] = synonyms.split(environ.mv_split)
-        entity = Entity.create(data)
+        entity = Entity.construct(data)
         yield entity

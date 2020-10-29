@@ -63,8 +63,7 @@ class KB(BaseKB):
             raise RuntimeError(f"Unknown item type: {type(item)}")
 
     def suggest(self, term, query=None):
-        # todo...
-        raise RuntimeError("Not implemented.")
+        raise NotImplementedError
 
     def parse(self, text, *labels):
         doc = self.pipeline(text=text, labels=labels)

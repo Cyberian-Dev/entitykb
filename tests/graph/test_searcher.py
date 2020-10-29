@@ -1,15 +1,12 @@
 import pytest
 
 from entitykb.graph import InMemoryGraph, SearchResults, Searcher
+from entitykb.graph.searcher import chain
 from entitykb.models import Entity, Query, QB, A, Tag
 
 
 class Product(Entity):
-    __slots__ = ["key", "label", "data", "name", "synonyms", "price"]
-
-    def __init__(self, *, price: float, **kwargs):
-        self.price = price
-        super().__init__(**kwargs)
+    price: float
 
 
 food = Entity(name="Food")
@@ -65,7 +62,7 @@ def graph():
 
 
 @pytest.fixture
-def searcher(graph):
+def searcher(graph) -> Searcher:
     return Searcher(graph=graph)
 
 
@@ -184,6 +181,20 @@ def test_all_nodes_all_tags_no_max(searcher):
     assert {apple.key} == set(results.starts)
 
 
+def test_all_nodes_optional_attribute(searcher):
+    query = QB().all_nodes(max_hops=None).include(A.price > 3.00).all()
+    results = searcher.search(query, apple)
+
+    assert 1 == len(results)
+    assert {honeycrisp.key} == set(results.ends)
+
+    query = QB().all_nodes(max_hops=None).exclude(A.price > 3.00).all()
+    results = searcher.search(query, apple)
+
+    assert 7 == len(results)
+    assert honeycrisp.key not in set(results.ends)
+
+
 def test_in_has_a_apple_out_is_a(searcher):
     query = QB().in_nodes(Tag.HAS_A).out_nodes(Tag.IS_A).all()
     results = searcher.search(query, apple)
@@ -284,3 +295,7 @@ def test_multi_result_hops(searcher):
     query = QB().out_nodes(Tag.IS_A, max_hops=4).all()
     results = searcher.search(query, apple_pie, apple_sauce)
     assert set(results.ends).issuperset({dessert.key})
+
+
+def test_chain():
+    assert list(chain(0, 1, 2)) == [0, 1, 2]

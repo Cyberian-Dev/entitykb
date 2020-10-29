@@ -1,7 +1,6 @@
-from .base import SlotBase
 from .doc import Token, DocToken, Doc, DocEntity
 from .entity import Entity
-from .enums import Direction, Comparison, Tag
+from .enums import Direction, Comparison
 from .funcs import (
     camel_to_snake,
     get_class_from_name,
@@ -12,16 +11,17 @@ from .funcs import (
 )
 from .node import Node, Edge
 from .query import (
-    Criteria,
+    A,
     AttrCriteria,
-    RelCriteria,
-    Step,
-    WalkStep,
+    Criteria,
     FilterStep,
+    QB,
     Query,
     QueryBuilder,
-    QB,
-    A,
+    RelCriteria,
+    Step,
+    Tag,
+    WalkStep,
 )
 from .results import FindResult, SearchHop, SearchResult, SearchResults
 
@@ -44,10 +44,9 @@ __all__ = (
     "QueryBuilder",
     "RelCriteria",
     "SearchHop",
+    "SearchHop",
     "SearchResult",
     "SearchResults",
-    "SearchHop",
-    "SlotBase",
     "Step",
     "Tag",
     "Token",

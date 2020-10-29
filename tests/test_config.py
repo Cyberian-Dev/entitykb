@@ -1,10 +1,25 @@
+import os
 import pytest
 from pathlib import Path
-from entitykb.config import Config, environ
+from entitykb.config import Config, Environ
 from entitykb.deps import EnvironError
 
 
 def test_environ_defaults():
+    assert "ENTITYKB_ROOT" not in os.environ
+    assert "ENTITYKB_RPC_PORT" not in os.environ
+
+    environ = Environ()
+    assert os.path.expanduser("~/.entitykb") == environ.root
+    assert "ENTITYKB_ROOT" in os.environ
+    assert "ENTITYKB_RPC_PORT" not in os.environ
+
+    environ.commit()
+    assert "ENTITYKB_RPC_PORT" in os.environ
+
+
+def test_environ_set_get():
+    environ = Environ()
     environ.root = "/opt/entitykb"
     assert environ.root == "/opt/entitykb"
 

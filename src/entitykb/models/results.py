@@ -1,15 +1,12 @@
-from typing import List
-from .base import SlotBase
+from typing import List, Iterator
 from .node import Edge
+from .entity import Entity
+from pydantic import BaseModel
 
 
-class FindResult(SlotBase):
-
-    __slots__ = ("term", "entities")
-
-    def __init__(self, term: str, entities=None):
-        self.term = term
-        self.entities = entities or ()
+class FindResult(BaseModel):
+    term: str
+    entities: List[Entity] = []
 
     def __repr__(self):
         keys = ", ".join(map(lambda e: e.key, self.entities))
@@ -22,23 +19,15 @@ class FindResult(SlotBase):
         return iter(self.entities)
 
 
-class SearchHop(object):
-
-    __slots__ = ["start", "end", "edges"]
-
-    def __init__(self, start, end, edge: Edge):
-        self.start = start
-        self.end = end
-        self.edges = [edge]
+class SearchHop(BaseModel):
+    start: str
+    end: str
+    edges: List[Edge] = []
 
 
-class SearchResult(object):
-
-    __slots__ = ["start", "hops"]
-
-    def __init__(self, start, hops: List[SearchHop] = None):
-        self.start = start
-        self.hops: List[SearchHop] = hops or []
+class SearchResult(BaseModel):
+    start: str
+    hops: List[SearchHop] = []
 
     def __hash__(self):
         return hash((self.start, self.end))
@@ -59,26 +48,23 @@ class SearchResult(object):
         else:
             return self.start
 
-    def copy(self):
+    def copy(self, **kwargs):
         return SearchResult(start=self.start, hops=self.hops[:])
 
     def push(self, end, edge: Edge) -> "SearchResult":
         copy = self.copy()
-        next_hop = SearchHop(start=self.end, end=end, edge=edge)
+        next_hop = SearchHop(start=self.end, end=end, edges=[edge])
         copy.hops.append(next_hop)
         return copy
 
 
-class SearchResults(object):
-    __slots__ = ["results"]
-
-    def __init__(self, results: List[SearchResult]):
-        self.results = results
+class SearchResults(BaseModel):
+    results: List[SearchResult]
 
     def __len__(self):
         return len(self.results)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[SearchResult]:
         return iter(self.results)
 
     def __getitem__(self, index: int):

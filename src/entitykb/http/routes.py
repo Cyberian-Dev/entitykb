@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Body, HTTPException, status
 
-from entitykb import rpc
+from entitykb import rpc, Doc
 from . import schema
 
 router = APIRouter()
@@ -47,13 +47,13 @@ async def remove_node(key: str):
 
 
 @router.post("/suggest", tags=["query"])
-async def suggest(request: schema.SuggestRequest = Body(...)) -> schema.Doc:
+async def suggest(request: schema.SuggestRequest = Body(...)):
     """ Parse text and return document object. """
     raise NotImplementedError
 
 
-@router.post("/parse", tags=["query"])
-async def parse(request: schema.ParseRequest = Body(...)) -> dict:
+@router.post("/parse", tags=["query"], response_model=Doc)
+async def parse(request: schema.ParseRequest = Body(...)) -> Doc:
     """ Parse text and return document object. """
     async with connection as client:
         return await client.call("parse", request.text, *request.labels)

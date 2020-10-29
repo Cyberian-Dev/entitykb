@@ -87,13 +87,15 @@ def test_date_resolver_find_valid(kb):
     assert result.entities[0] == Date(year=2019, month=1, day=1)
 
     result = resolver.find("Jan 1st, 2019")
-    assert str(result) == "Jan 1st, 2019 [2019-01-01|DATE]"
+    assert result.term, result.entities == ()
+    assert result.term == "Jan 1st, 2019"
+    assert result.entities[0].key == "2019-01-01|DATE"
 
     result = resolver.find("01/01/19")
-    assert str(result) == "01/01/19 [2019-01-01|DATE]"
+    assert result.entities[0].key == "2019-01-01|DATE"
 
     result = resolver.find("2019-JAN-01")
-    assert str(result) == "2019-JAN-01 [2019-01-01|DATE]"
+    assert result.entities[0].key == "2019-01-01|DATE"
 
 
 def test_date_resolver_fail_invalid(kb):
@@ -133,7 +135,7 @@ def test_default_resolver(kb, apple):
     assert (apple,) == tuple(resolver.find("apple, inc.").entities)
 
     assert resolver.find("apple, inc.").dict() == dict(
-        term="apple, inc.", entities=(apple.dict(),)
+        term="apple, inc.", entities=[apple.dict()]
     )
 
     assert not resolver.find("banana").entities

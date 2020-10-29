@@ -77,8 +77,11 @@ class FilterLayer(Layer):
 
     def evaluate_attr_criteria(self, criteria, result: SearchResult):
         node = self.graph.get_node(result.end)
-        other = getattr(node, criteria.attr_name)
-        return criteria.do_compare(other)
+        try:
+            other = getattr(node, criteria.attr_name)
+            return criteria.do_compare(other)
+        except AttributeError:
+            return False
 
     def evaluate_rel_criteria(self, criteria, result: SearchResult):
         it = self.graph.iterate_edges(
@@ -159,7 +162,7 @@ class Searcher(object):
 
 def chain(*items):
     for item in items:
-        if isinstance(item, (str, dict)):
+        if isinstance(item, (Node, str, dict)):
             yield item
         elif isinstance(item, (Iterable, Iterator)):
             yield from chain(*item)
