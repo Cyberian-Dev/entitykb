@@ -83,6 +83,7 @@ class Config:
     tokenizer: str = "entitykb.WhitespaceTokenizer"
     terms: str = "entitykb.TermsIndex"
     graph: str = "entitykb.InMemoryGraph"
+    modules: List[str] = ()
 
     def __str__(self):
         return f"<Config: {self.file_path}>"

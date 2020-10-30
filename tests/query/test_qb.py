@@ -5,8 +5,8 @@ from entitykb.models.query import (
     Direction,
     Comparison,
     QB,
-    A,
-    AttrCriteria,
+    F,
+    FieldCriteria,
 )
 
 
@@ -36,19 +36,19 @@ def test_walk_nodes():
 
 
 def test_filter_nodes():
-    q = QB().include(A.label == "PERSON").all()
+    q = QB().include(F.label == "PERSON").all()
     assert q[0] == FilterStep(
         criteria=(
-            AttrCriteria(
+            FieldCriteria(
                 attr_name="label", compare=Comparison.eq, value="PERSON"
             )
         )
     )
 
-    q = QB().exclude(A.label == "PERSON").all()
+    q = QB().exclude(F.label == "PERSON").all()
     assert q[0] == FilterStep(
         criteria=(
-            AttrCriteria(
+            FieldCriteria(
                 attr_name="label", compare=Comparison.eq, value="PERSON"
             )
         ),

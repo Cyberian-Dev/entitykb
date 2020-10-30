@@ -5,8 +5,8 @@ from .logging import logger
 
 from . import models
 from .models import (
-    A,
-    AttrCriteria,
+    F,
+    FieldCriteria,
     Comparison,
     Criteria,
     Direction,
@@ -21,7 +21,8 @@ from .models import (
     QB,
     Query,
     QueryBuilder,
-    RelCriteria,
+    Registry,
+    EdgeCriteria,
     SearchHop,
     SearchResult,
     SearchResults,
@@ -53,9 +54,9 @@ from .rpc import AsyncKB, SyncKB
 from . import contrib
 
 __all__ = (
-    "A",
+    "F",
     "AsyncKB",
-    "AttrCriteria",
+    "FieldCriteria",
     "BaseKB",
     "Comparison",
     "Config",
@@ -79,7 +80,8 @@ __all__ = (
     "QB",
     "Query",
     "QueryBuilder",
-    "RelCriteria",
+    "Registry",
+    "EdgeCriteria",
     "SearchHop",
     "SearchResult",
     "SearchResults",

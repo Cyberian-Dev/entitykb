@@ -34,6 +34,8 @@ class SyncKB(AsyncKB):
         success = run_future(future)
         return success
 
+    # edges
+
     def save_edge(self, edge):
         raise NotImplementedError
 
@@ -64,5 +66,10 @@ class SyncKB(AsyncKB):
 
     def info(self) -> dict:
         future = super(SyncKB, self).info()
+        data = run_future(future)
+        return data
+
+    def get_schema(self) -> dict:
+        future = super(SyncKB, self).get_schema()
         data = run_future(future)
         return data

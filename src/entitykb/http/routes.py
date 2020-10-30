@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Body, HTTPException, status
 
-from entitykb import rpc, Doc
-from . import schema
+from entitykb import rpc, Doc, models
 
 router = APIRouter()
 connection = rpc.RPCConnection()
@@ -47,13 +46,13 @@ async def remove_node(key: str):
 
 
 @router.post("/suggest", tags=["query"])
-async def suggest(request: schema.SuggestRequest = Body(...)):
+async def suggest(request: models.SuggestRequest = Body(...)):
     """ Parse text and return document object. """
     raise NotImplementedError
 
 
 @router.post("/parse", tags=["query"], response_model=Doc)
-async def parse(request: schema.ParseRequest = Body(...)) -> Doc:
+async def parse(request: models.ParseRequest = Body(...)) -> Doc:
     """ Parse text and return document object. """
     async with connection as client:
         return await client.call("parse", request.text, *request.labels)
@@ -83,11 +82,20 @@ async def reload() -> bool:
         return await client.call("reload")
 
 
-@router.post("/admin/info", tags=["admin"])
+# meta
+
+
+@router.get("/meta/info", tags=["meta"])
 async def info() -> dict:
     """ Return KB's state and meta info. """
     async with connection as client:
         return await client.call("info")
+
+
+@router.get("/meta/schema", tags=["meta"])
+async def get_schema() -> dict:
+    async with connection as client:
+        return await client.call("get_schema")
 
 
 class HTTP404(HTTPException):

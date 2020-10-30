@@ -2,11 +2,11 @@ from dataclasses import dataclass, field
 from typing import Iterable, Iterator, Set, List
 
 from entitykb.models import (
-    AttrCriteria,
+    FieldCriteria,
     FilterStep,
     Node,
     Query,
-    RelCriteria,
+    EdgeCriteria,
     SearchResult,
     SearchResults,
     WalkStep,
@@ -101,10 +101,10 @@ class FilterLayer(Layer):
         return found
 
     def evaluate_criteria(self, criteria, result: SearchResult):
-        if isinstance(criteria, AttrCriteria):
+        if isinstance(criteria, FieldCriteria):
             return self.evaluate_attr_criteria(criteria, result)
 
-        if isinstance(criteria, RelCriteria):
+        if isinstance(criteria, EdgeCriteria):
             return self.evaluate_rel_criteria(criteria, result)
 
         raise NotImplementedError(f"Unknown Criteria: {criteria}")

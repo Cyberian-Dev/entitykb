@@ -5,6 +5,7 @@ from typing import Tuple, Union, Optional, Any
 from pydantic import BaseModel
 
 from .entity import Entity
+from .registry import Registry
 
 
 class Token(str):
@@ -85,7 +86,7 @@ class DocEntity(HasTokens):
     entity: Entity = None
 
     def __init__(self, **data: Any):
-        entity = Entity.create(data.get("entity"))
+        entity = Registry.instance().create(Entity, data.get("entity"))
         data.setdefault("entity_key", entity and entity.key)
         super().__init__(**data)
 

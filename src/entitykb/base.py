@@ -59,3 +59,7 @@ class BaseKB(object):
     @abstractmethod
     def info(self) -> dict:
         """ Return KB's state and meta info. """
+
+    @abstractmethod
+    def get_schema(self) -> dict:
+        """ Return schema of nodes and edges. """

@@ -1,5 +1,5 @@
 from entitykb.models import (
-    A,
+    F,
     Criteria,
     Direction,
     FilterStep,
@@ -45,7 +45,7 @@ def test_create_walk_step_only():
 
 
 def test_create_filter_step_only():
-    filter_step = FilterStep()
+    filter_step = FilterStep(criteria=F.number >= 3)
     q = Query(steps=filter_step)
     assert q.steps == [filter_step]
     assert q.limit is None
@@ -53,7 +53,20 @@ def test_create_filter_step_only():
     assert q.dict() == {
         "limit": None,
         "offset": 0,
-        "steps": [{"all": False, "criteria": [], "exclude": False}],
+        "steps": [
+            {
+                "all": False,
+                "criteria": [
+                    {
+                        "attr_name": "number",
+                        "compare": ">=",
+                        "type": "field",
+                        "value": 3,
+                    }
+                ],
+                "exclude": False,
+            }
+        ],
     }
 
     q2 = Query(**q.dict())
@@ -61,11 +74,12 @@ def test_create_filter_step_only():
 
 
 def test_simple_attr_criteria():
-    a = A.label == "FOOD"
+    a = F.label == "FOOD"
     assert a.dict() == {
         "attr_name": "label",
         "compare": "==",
         "value": "FOOD",
+        "type": "field",
     }
 
     a2 = Criteria.create(**a.dict())
@@ -78,6 +92,7 @@ def test_rel_criteria():
         "tags": ["IS_A"],
         "directions": [Direction.outgoing],
         "nodes": ["Fruit|FOOD"],
+        "type": "edge",
     }
 
     r2 = Criteria.create(r.dict())

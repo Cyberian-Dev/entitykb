@@ -1,3 +1,4 @@
+import os
 import shutil
 from pathlib import Path
 from typing import Optional
@@ -130,8 +131,17 @@ def run_dev(
     environ.rpc_port = rpc_port
     environ.commit()
 
+    # check working directory and the entitykb directory
+    reload_dirs = [os.getcwd(), os.path.dirname(os.path.dirname(__file__))]
+
     http_app = "entitykb.http.dev:app"
-    uvicorn.run(http_app, host=host, port=http_port, reload=True)
+    uvicorn.run(
+        http_app,
+        host=host,
+        port=http_port,
+        reload=True,
+        reload_dirs=reload_dirs,
+    )
 
 
 ff_registry = {}

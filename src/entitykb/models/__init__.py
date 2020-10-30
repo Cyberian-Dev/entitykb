@@ -11,23 +11,25 @@ from .funcs import (
 )
 from .node import Node, Edge
 from .query import (
-    A,
-    AttrCriteria,
+    F,
+    FieldCriteria,
     Criteria,
     FilterStep,
     QB,
     Query,
     QueryBuilder,
-    RelCriteria,
+    EdgeCriteria,
     Step,
     Tag,
     WalkStep,
 )
 from .results import FindResult, SearchHop, SearchResult, SearchResults
+from .api import ParseRequest, SuggestRequest
+from .registry import Registry
 
 __all__ = (
-    "A",
-    "AttrCriteria",
+    "F",
+    "FieldCriteria",
     "Comparison",
     "Criteria",
     "Direction",
@@ -39,15 +41,18 @@ __all__ = (
     "FilterStep",
     "FindResult",
     "Node",
+    "ParseRequest",
     "QB",
     "Query",
     "QueryBuilder",
-    "RelCriteria",
+    "Registry",
+    "EdgeCriteria",
     "SearchHop",
     "SearchHop",
     "SearchResult",
     "SearchResults",
     "Step",
+    "SuggestRequest",
     "Tag",
     "Token",
     "WalkStep",

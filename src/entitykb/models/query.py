@@ -6,6 +6,16 @@ from . import ensure_iterable, Direction, Comparison, Node
 
 
 class Criteria(BaseModel):
+    type: str = None
+
+    __mapping__ = None
+
+    @classmethod
+    def identify_class(cls, type: str, **_):
+        if cls.__mapping__ is None:
+            cls.__mapping__ = dict(field=FieldCriteria, edge=EdgeCriteria)
+        return cls.__mapping__.get(type)
+
     @classmethod
     def create(cls, _item=None, **kwargs):
         if isinstance(_item, cls):
@@ -14,16 +24,15 @@ class Criteria(BaseModel):
         if isinstance(_item, dict):
             kwargs = {**_item, **kwargs}
 
-        if "attr_name" in kwargs.keys():
-            return AttrCriteria(**kwargs)
-        else:
-            return RelCriteria(**kwargs)
+        klass = cls.identify_class(**kwargs)
+        return klass(**kwargs)
 
 
-class AttrCriteria(Criteria):
+class FieldCriteria(Criteria):
     attr_name: str
     compare: Comparison = None
     value: Any = None
+    type: str = "field"
 
     def set(self, compare: Comparison, value):
         self.compare = compare
@@ -52,10 +61,11 @@ class AttrCriteria(Criteria):
         return self.compare.eval(self.value, other)
 
 
-class RelCriteria(Criteria):
+class EdgeCriteria(Criteria):
     tags: List[str]
     directions: List[Direction]
     nodes: List[str]
+    type: str = "edge"
 
     @validator("tags", "directions", pre=True, always=True)
     def to_list(cls, v):
@@ -211,16 +221,16 @@ class QueryBuilder(object):
 QB = QueryBuilder
 
 
-class AttrCriteriaBuilderType(type):
+class FieldCriteriaBuilderType(type):
     def __getattr__(self, attr_name: str):
-        return AttrCriteria(attr_name=attr_name)
+        return FieldCriteria(attr_name=attr_name)
 
 
-class AttrCriteriaBuilder(object, metaclass=AttrCriteriaBuilderType):
+class FieldCriteriaBuilder(object, metaclass=FieldCriteriaBuilderType):
     pass
 
 
-A = AttrCriteriaBuilder
+F = FieldCriteriaBuilder
 
 
 class TagType(type):
@@ -235,17 +245,17 @@ class Tag(str, metaclass=TagType):
         return obj
 
     def __rshift__(self, nodes):
-        return RelCriteria(
+        return EdgeCriteria(
             tags=(self,), directions=(Direction.outgoing,), nodes=nodes
         )
 
     def __lshift__(self, nodes):
-        return RelCriteria(
+        return EdgeCriteria(
             tags=(self,), directions=(Direction.incoming,), nodes=nodes
         )
 
     def __pow__(self, nodes):
-        return RelCriteria(
+        return EdgeCriteria(
             tags=(self,),
             directions=(Direction.incoming, Direction.outgoing),
             nodes=nodes,

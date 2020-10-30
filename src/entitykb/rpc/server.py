@@ -16,6 +16,8 @@ class HandlerKB(BaseKB):
     def __len__(self):
         raise NotImplementedError
 
+    # nodes
+
     def get_node(self, key: str) -> Optional[dict]:
         node = self._kb.get_node(key)
         data = None if node is None else node.dict()
@@ -28,8 +30,12 @@ class HandlerKB(BaseKB):
     def remove_node(self, key) -> bool:
         return self._kb.remove_node(key)
 
+    # edges
+
     def save_edge(self, edge):
         raise NotImplementedError
+
+    # query
 
     def suggest(self, term, query=None):
         raise NotImplementedError
@@ -37,6 +43,8 @@ class HandlerKB(BaseKB):
     def parse(self, text, *labels) -> dict:
         doc = self._kb.parse(text, *labels)
         return doc.dict()
+
+    # admin
 
     def commit(self) -> bool:
         count = self._kb.commit()
@@ -52,6 +60,10 @@ class HandlerKB(BaseKB):
 
     def info(self) -> dict:
         data = self._kb.info()
+        return data
+
+    def get_schema(self) -> dict:
+        data = self._kb.get_schema()
         return data
 
 

@@ -29,6 +29,8 @@ class AsyncKB(BaseKB):
         async with self.connection as client:
             return await client.call("remove_node", key)
 
+    # edges
+
     async def save_edge(self, edge):
         raise NotImplementedError
 
@@ -57,3 +59,7 @@ class AsyncKB(BaseKB):
     async def info(self) -> dict:
         async with self.connection as client:
             return await client.call("info")
+
+    async def get_schema(self) -> dict:
+        async with self.connection as client:
+            return await client.call("get_schema")

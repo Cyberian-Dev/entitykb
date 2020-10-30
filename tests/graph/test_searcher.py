@@ -2,7 +2,7 @@ import pytest
 
 from entitykb.graph import InMemoryGraph, SearchResults, Searcher
 from entitykb.graph.searcher import chain
-from entitykb.models import Entity, Query, QB, A, Tag
+from entitykb.models import Entity, Query, QB, F, Tag
 
 
 class Product(Entity):
@@ -182,13 +182,13 @@ def test_all_nodes_all_tags_no_max(searcher):
 
 
 def test_all_nodes_optional_attribute(searcher):
-    query = QB().all_nodes(max_hops=None).include(A.price > 3.00).all()
+    query = QB().all_nodes(max_hops=None).include(F.price > 3.00).all()
     results = searcher.search(query, apple)
 
     assert 1 == len(results)
     assert {honeycrisp.key} == set(results.ends)
 
-    query = QB().all_nodes(max_hops=None).exclude(A.price > 3.00).all()
+    query = QB().all_nodes(max_hops=None).exclude(F.price > 3.00).all()
     results = searcher.search(query, apple)
 
     assert 7 == len(results)
@@ -204,52 +204,52 @@ def test_in_has_a_apple_out_is_a(searcher):
 
 
 def test_is_include_label(searcher):
-    query = QB().in_nodes().include(A.label == "SAUCE").all()
+    query = QB().in_nodes().include(F.label == "SAUCE").all()
     results = searcher.search(query, dessert)
     assert {apple_sauce.key} == {r.end for r in results}
     assert {dessert.key} == {r.start for r in results}
 
-    query = QB().in_nodes().include(A.label != "SAUCE").all()
+    query = QB().in_nodes().include(F.label != "SAUCE").all()
     results = searcher.search(query, dessert)
     assert {pie.key} == {r.end for r in results}
     assert {dessert.key} == {r.start for r in results}
 
 
 def test_query_exclude_by_label(searcher):
-    query = QB().in_nodes().exclude(A.label == "SAUCE").all()
+    query = QB().in_nodes().exclude(F.label == "SAUCE").all()
     results = searcher.search(query, dessert)
     assert {pie.key} == {r.end for r in results}
     assert {dessert.key} == {r.start for r in results}
 
-    query = QB().in_nodes().exclude(A.label != "SAUCE").all()
+    query = QB().in_nodes().exclude(F.label != "SAUCE").all()
     results = searcher.search(query, dessert)
     assert {apple_sauce.key} == {r.end for r in results}
     assert {dessert.key} == {r.start for r in results}
 
 
 def test_comparison_options(searcher):
-    query = QB().in_nodes(Tag.IS_A).include(A.price < 3.00).all()
+    query = QB().in_nodes(Tag.IS_A).include(F.price < 3.00).all()
     assert {granny_smith.key} == set(searcher(query, apple).ends)
 
-    query = QB().in_nodes(Tag.IS_A).include(A.price <= 1.99).all()
+    query = QB().in_nodes(Tag.IS_A).include(F.price <= 1.99).all()
     assert {granny_smith.key} == set(searcher(query, apple).ends)
 
-    query = QB().in_nodes(Tag.IS_A).include(A.price < 1.99).all()
+    query = QB().in_nodes(Tag.IS_A).include(F.price < 1.99).all()
     assert set() == set(searcher(query, apple).ends)
 
-    query = QB().in_nodes(Tag.IS_A).include(A.price > 3.00).all()
+    query = QB().in_nodes(Tag.IS_A).include(F.price > 3.00).all()
     assert {honeycrisp.key} == set(searcher(query, apple).ends)
 
-    query = QB().in_nodes(Tag.IS_A).include(A.price >= 3.99).all()
+    query = QB().in_nodes(Tag.IS_A).include(F.price >= 3.99).all()
     assert {honeycrisp.key} == set(searcher(query, apple).ends)
 
-    query = QB().in_nodes(Tag.IS_A).include(A.price > 3.99).all()
+    query = QB().in_nodes(Tag.IS_A).include(F.price > 3.99).all()
     assert set() == set(searcher(query, apple).ends)
 
     query = (
         QB()
         .in_nodes(Tag.IS_A)
-        .include(A.price > 2.00, A.price < 3.00, all=True)
+        .include(F.price > 2.00, F.price < 3.00, all=True)
         .all()
     )
     assert set() == set(searcher(query, apple).ends)
@@ -257,7 +257,7 @@ def test_comparison_options(searcher):
     query = (
         QB()
         .in_nodes(Tag.IS_A)
-        .include(A.price > 2.00, A.price < 3.00, all=False)
+        .include(F.price > 2.00, F.price < 3.00, all=False)
         .all()
     )
     assert {honeycrisp.key, granny_smith.key} == set(

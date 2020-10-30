@@ -1,11 +1,12 @@
 import datetime
 
 from entitykb.contrib.date import Date
-from entitykb import Node
+from entitykb import Node, Registry
 
 
 def test_create_from_dict_via_label_to_date():
-    date = Node.create(dict(year=2000, month=1, day=2, label="DATE"))
+    registry = Registry.instance()
+    date = registry.create(Node, dict(year=2000, month=1, day=2, label="DATE"))
     assert isinstance(date, Date)
     assert date.year == 2000
     assert date.month == 1
@@ -17,7 +18,8 @@ def test_create_from_dict_via_label_to_date():
 
 
 def test_create_from_dict_via_cls():
-    date = Date.create(dict(year=2000, month=1, day=2))
+    registry = Registry.instance()
+    date = registry.create(Date, dict(year=2000, month=1, day=2))
     assert isinstance(date, Date)
     assert date.year == 2000
     assert date.month == 1

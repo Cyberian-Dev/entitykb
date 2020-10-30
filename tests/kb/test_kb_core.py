@@ -81,3 +81,10 @@ def test_kb_save_bool_clear(kb: KB, apple):
 def test_kb_save_invalid(kb: KB):
     with pytest.raises(RuntimeError):
         kb.save("invalid!")
+
+
+def test_get_schema(kb: KB):
+    schema = kb.get_schema()
+    assert schema.keys() == {"nodes", "edges"}
+    assert {"NODE", "ENTITY"}.issubset(schema["nodes"].keys())
+    assert schema["edges"].keys() == {"EDGE"}

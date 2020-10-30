@@ -6,27 +6,6 @@ from pydantic import BaseModel, validator, Field
 from .funcs import camel_to_snake
 
 
-class NodeLabelRegistry(object):
-
-    _instance = None
-
-    def __init__(self):
-        self.values = dict(NODE=Node)
-
-        for cls in Node.__all_subclasses__():
-            for label in cls.get_all_labels():
-                self.values[label] = cls
-
-    def get_node_cls(self, label):
-        return self.values.get(label)
-
-    @classmethod
-    def instance(cls):
-        if cls._instance is None:
-            cls._instance = NodeLabelRegistry()
-        return cls._instance
-
-
 class Node(BaseModel):
     key: str = Field(default_factory=lambda: str(uuid4()))
     label: str
@@ -44,17 +23,16 @@ class Node(BaseModel):
         return hash((self.label, self.key))
 
     def __rshift__(self, tag):
-        return Edge(start=self.key, tag=tag, end=None)
+        from .registry import Registry
+
+        registry = Registry.instance()
+        return registry.create(Edge, start=self.key, tag=tag, end=None)
 
     def __lshift__(self, tag):
-        return Edge(start=None, tag=tag, end=self.key)
+        from .registry import Registry
 
-    @classmethod
-    def __all_subclasses__(cls):
-        # reference: https://stackoverflow.com/a/33607093
-        for subclass in cls.__subclasses__():  # type: Node
-            yield subclass
-            yield from subclass.__all_subclasses__()
+        registry = Registry.instance()
+        return registry.create(Edge, start=None, tag=tag, end=self.key)
 
     @staticmethod
     def to_key(node_key: Union["Node", str]) -> str:
@@ -69,29 +47,16 @@ class Node(BaseModel):
 
     @classmethod
     def get_all_labels(cls):
-        yield cls.get_default_label()
-        yield from cls.__dict__.get("__all_labels__", ())
+        labels = set(cls.__dict__.get("__all_labels__", ()))
+        labels.add(cls.get_default_label())
+        return labels
 
     @classmethod
-    def identify_klass(cls, kwargs):
-        label = kwargs.get("label")
-        klass = NodeLabelRegistry.instance().get_node_cls(label)
-        if klass is None and cls == Node and "name" in kwargs:
-            from .entity import Entity
+    def create(cls, *args, **kwargs):
+        from .registry import Registry
 
-            return Entity
-        return klass
-
-    @classmethod
-    def create(cls, _item=None, **kwargs):
-        if isinstance(_item, cls):
-            return _item
-
-        if isinstance(_item, dict):
-            kwargs = {**_item, **kwargs}
-
-        klass = cls.identify_klass(kwargs) or cls
-        return klass(**kwargs)
+        registry = Registry.instance()
+        return registry.create(cls, *args, **kwargs)
 
 
 class Edge(BaseModel):
@@ -101,9 +66,16 @@ class Edge(BaseModel):
     weight: int = 1
     data: dict = None
 
+    __all_tags__ = ()
+
     @validator("start", "end", pre=True, always=True)
     def node_to_key(cls, v):
         return Node.to_key(v)
+
+    @classmethod
+    def get_all_tags(cls):
+        tags = set(cls.__dict__.get("__all_tags__", ()))
+        return tags
 
     def __repr__(self):
         return f"<Edge: start={self.start}, tag={self.tag}, end={self.end}>"
@@ -115,3 +87,10 @@ class Edge(BaseModel):
     def __lshift__(self, start: Union[Node, str]):
         self.start = Node.to_key(start)
         return self
+
+    @classmethod
+    def create(cls, *args, **kwargs):
+        from .registry import Registry
+
+        registry = Registry.instance()
+        return registry.create(cls, *args, **kwargs)

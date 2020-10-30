@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from entitykb.models import Node, Edge
+from entitykb.models import Node, Edge, Registry
 from .index import NodeIndex, EdgeIndex
 
 
@@ -70,6 +70,7 @@ class InMemoryGraph(Graph):
 
     def save_edge(self, edge: Edge):
         self.edges.save(edge)
+        return edge
 
     def remove_node(self, key: str) -> bool:
         edges = [edge for _, edge in self.edges.iterate(nodes=[key])]
@@ -80,9 +81,10 @@ class InMemoryGraph(Graph):
         return success
 
     def connect(self, *, start: Node, tag: str, end: Node, data: dict = None):
+        registry = Registry.instance()
         self.save_node(start)
         self.save_node(end)
-        edge = Edge(start=start, tag=tag, end=end, data=data)
+        edge = registry.create(Edge, data, start=start, tag=tag, end=end)
         self.save_edge(edge)
         return edge
 

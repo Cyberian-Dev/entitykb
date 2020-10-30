@@ -1,26 +1,26 @@
-from entitykb import Node, Entity
+from entitykb import Node, Entity, Edge
 
 
 class CustomNode(Node):
-    pass
+    __default_label__ = "SOMETHING_ELSE"
 
 
-def test_default_label():
-    assert CustomNode.__dict__.get("__default_label__") is None
-    assert "CUSTOM_NODE" == CustomNode.get_default_label()
+def test_labels():
+    assert Node.get_default_label() == "NODE"
+    assert Node.get_all_labels() == {"NODE"}
+
+    assert Entity.get_default_label() == "ENTITY"
+    assert Entity.get_all_labels() == {"ENTITY"}
+
+    assert CustomNode.get_default_label() == "SOMETHING_ELSE"
+    assert CustomNode.get_all_labels() == {"SOMETHING_ELSE"}
 
 
-def test_identify_klass():
-    assert Node.identify_klass({}) is None
-    assert Node.identify_klass(dict(key=1)) is None
-    assert Node.identify_klass(dict(label="ENTITY")) == Entity
-    assert Node.identify_klass(dict(name="Entity Name")) == Entity
-    assert Node.identify_klass(dict(label="CUSTOM_NODE")) == CustomNode
+def test_create_node():
+    assert isinstance(Node.create(), Node)
+    assert isinstance(CustomNode.create(), CustomNode)
+    assert Node.create(name="abc").key == "abc|ENTITY"
 
 
-def round_trip_create():
-    custom_node = CustomNode()
-    data = custom_node.dict()
-    roundtrip = Node.create(data)
-    assert isinstance(roundtrip, CustomNode)
-    assert roundtrip.key == custom_node.key
+def test_create_edge():
+    assert isinstance(Edge.create(), Edge)

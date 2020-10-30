@@ -7,12 +7,14 @@ from entitykb import (
     Node,
     Entity,
     Edge,
+    Registry,
     Searcher,
     Pipeline,
     Normalizer,
     TermsIndex,
 )
 from .storage import PickleStorage
+from importlib import import_module
 
 
 class KB(BaseKB):
@@ -27,7 +29,11 @@ class KB(BaseKB):
         self.pipeline = Pipeline.create(
             kb=self, config=self.config, normalizer=self.normalizer
         )
+        self.modules = [import_module(m) for m in self.config.modules]
+
         self.reload()
+
+    # common
 
     def __bool__(self):
         return True
@@ -35,11 +41,21 @@ class KB(BaseKB):
     def __len__(self):
         return len(self.graph)
 
+    def save(self, item):
+        if isinstance(item, Node):
+            return self.save_node(item)
+        elif isinstance(item, Edge):
+            return self.save_edge(item)
+        else:
+            raise RuntimeError(f"Unknown item type: {type(item)}")
+
+    # nodes
+
     def get_node(self, key: str) -> Optional[Node]:
         return self.graph.get_node(key)
 
     def save_node(self, node: Union[Node, dict]) -> Node:
-        node = Node.create(node)
+        node = Registry.instance().create(Node, node)
 
         self.graph.save_node(node)
 
@@ -51,16 +67,10 @@ class KB(BaseKB):
     def remove_node(self, key) -> bool:
         return self.graph.remove_node(key)
 
+    # edges
+
     def save_edge(self, edge):
         return self.graph.save_edge(edge)
-
-    def save(self, item):
-        if isinstance(item, Node):
-            return self.save_node(item)
-        elif isinstance(item, Edge):
-            return self.save_edge(item)
-        else:
-            raise RuntimeError(f"Unknown item type: {type(item)}")
 
     def suggest(self, term, query=None):
         raise NotImplementedError
@@ -97,3 +107,7 @@ class KB(BaseKB):
             "graph": self.graph.info(),
             "terms": self.terms.info(),
         }
+
+    @classmethod
+    def get_schema(cls) -> dict:
+        return Registry.instance().schema.dict()
