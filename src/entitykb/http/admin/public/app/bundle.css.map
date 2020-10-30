@@ -2,11 +2,15 @@
   "version": 3,
   "file": "bundle.css",
   "sources": [
-    "../../Header.svelte"
+    "../../App.svelte",
+    "../../Header.svelte",
+    "../../Menu.svelte"
   ],
   "sourcesContent": [
-    "<script>\n\n\n</script>\n\n<div class=\"ui top menu\">\n    <span id=\"logo\">\n        <img src=\"images/logo.png\" height=\"50px\" alt=\"header logo\">\n    </span>\n    <div class=\"right menu\">\n        <a href=\"docs\" title=\"API Documentation (Swagger UI)\">[API]</a>\n    </div>\n</div>\n\n<style>\n    div.top.menu {\n        border: 0;\n        font-size: 1.4em;\n    }\n</style>"
+    "<script>\n    import Menu from \"./Menu.svelte\";\n    import Bottom from \"./Bottom.svelte\";\n    import Admin from \"./Admin.svelte\";\n\n    let choice = \"admin\";\n</script>\n\n<main>\n    <Menu bind:choice={choice} />\n\n    {#if (choice === \"admin\")}\n    <div id=\"content\">\n        <Admin />\n    </div>\n    {:else if (choice === \"api\")}\n        <iframe src=\"/docs\"></iframe>\n    {:else if (choice === \"docs\")}\n        <iframe src=\"https://www.entitykb.org/\"></iframe>\n    {:else if (choice === \"docs\")}\n        <iframe src=\"https://www.entitykb.org/\"></iframe>\n    {/if}\n\n    <Bottom />\n</main>\n\n<style>\n    iframe {\n        width: 100%;\n        height: calc(85vh);\n        border: 0;\n    }\n    #content {\n        padding: 1em;\n        margin: 1em;\n    }\n</style>",
+    "<script>\n    export let action = null;\n\n    function setAction(value) {\n        console.log(action);\n        // action = value;\n    }\n\n</script>\n\n<div class=\"ui top menu\">\n  <div class=\"item\">\n      <i class=\"large lightbulb outline icon\"></i>\n  </div>\n  <a id=\"admin\" class=\"item\" on:click={setAction}>Admin</a>\n  <a id=\"api\" class=\"item\" on:click={setAction}>API</a>\n</div>\n\n<style>\n    div.top.menu {\n        border: 0;\n        font-size: 1.4em;\n    }\n</style>",
+    "<script>\n    export let choice = \"admin\";\n\n    function setChoice(e) {\n        window.$(\".menu .active\").removeClass(\"active\");\n        choice = e.target.id;\n    }\n\n    $: window.$(\"#\" + choice).addClass(\"active\");\n\n</script>\n\n<div class=\"ui top menu\">\n  <div class=\"item\">\n      <i class=\"large lightbulb outline icon\"></i>\n  </div>\n  <a id=\"admin\" class=\"active item\" on:click={setChoice}>Admin</a>\n  <a id=\"api\" class=\"item\" on:click={setChoice}>API</a>\n  <a id=\"docs\" class=\"item\" on:click={setChoice}>Docs</a>\n</div>\n\n<style>\ndiv.top.menu {\n    border: 0;\n    font-size: 1.4em;\n}\n</style>"
   ],
   "names": [],
-  "mappings": "AAeI,GAAG,IAAI,KAAK,cAAC,CAAC,AACV,MAAM,CAAE,CAAC,CACT,SAAS,CAAE,KAAK,AACpB,CAAC"
+  "mappings": "AA2BI,MAAM,eAAC,CAAC,AACJ,KAAK,CAAE,IAAI,CACX,MAAM,CAAE,KAAK,IAAI,CAAC,CAClB,MAAM,CAAE,CAAC,AACb,CAAC,AACD,QAAQ,eAAC,CAAC,AACN,OAAO,CAAE,GAAG,CACZ,MAAM,CAAE,GAAG,AACf,CAAC;AChBD,GAAG,IAAI,KAAK,cAAC,CAAC,AACV,MAAM,CAAE,CAAC,CACT,SAAS,CAAE,KAAK,AACpB,CAAC;ACAL,GAAG,IAAI,KAAK,eAAC,CAAC,AACV,MAAM,CAAE,CAAC,CACT,SAAS,CAAE,KAAK,AACpB,CAAC"
 }
