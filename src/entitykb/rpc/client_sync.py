@@ -42,8 +42,8 @@ class SyncKB(AsyncKB):
     def suggest(self, term, query=None):
         raise NotImplementedError
 
-    def parse(self, text, *labels) -> Doc:
-        future = super(SyncKB, self).parse(text, *labels)
+    def parse(self, text, pipeline=None, *labels) -> Doc:
+        future = super(SyncKB, self).parse(text, pipeline, *labels)
         doc = run_future(future)
         return doc
 

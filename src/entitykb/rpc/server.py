@@ -40,8 +40,8 @@ class HandlerKB(BaseKB):
     def suggest(self, term, query=None):
         raise NotImplementedError
 
-    def parse(self, text, *labels) -> dict:
-        doc = self._kb.parse(text, *labels)
+    def parse(self, text, pipeline=None, *labels) -> dict:
+        doc = self._kb.parse(text, pipeline, *labels)
         return doc.dict()
 
     # admin

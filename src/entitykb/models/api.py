@@ -9,4 +9,5 @@ class SuggestRequest(BaseModel):
 
 class ParseRequest(BaseModel):
     text: str
+    pipeline: str = "default"
     labels: List[str] = []

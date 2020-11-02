@@ -39,7 +39,7 @@ class BaseKB(object):
         """ Suggest term auto-completes, filtered by query. """
 
     @abstractmethod
-    def parse(self, text, labels=None) -> Doc:
+    def parse(self, text, pipeline: str = None, *labels: str) -> Doc:
         """ Parse text into Doc with entities, filtered by query. """
 
     # admin

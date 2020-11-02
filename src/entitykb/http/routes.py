@@ -55,7 +55,9 @@ async def suggest(request: models.SuggestRequest = Body(...)):
 async def parse(request: models.ParseRequest = Body(...)) -> Doc:
     """ Parse text and return document object. """
     async with connection as client:
-        return await client.call("parse", request.text, *request.labels)
+        return await client.call(
+            "parse", request.text, request.pipeline, *request.labels
+        )
 
 
 # admin

@@ -42,11 +42,17 @@ from .graph import Graph, InMemoryGraph
 from .searcher import Searcher, DefaultSearcher
 from .pipeline import (
     DefaultExtractor,
+    ExactOnlyFilterer,
+    Filterer,
+    KeepLongestByKey,
+    KeepLongestByLabel,
+    KeepLongestByOffset,
     LatinLowercaseNormalizer,
-    TermResolver,
-    WhitespaceTokenizer,
-    Pipeline,
     Normalizer,
+    Pipeline,
+    TermResolver,
+    Tokenizer,
+    WhitespaceTokenizer,
 )
 from .terms import TermsIndex, TrieTermsIndex
 from .storage import Storage, PickleStorage
@@ -70,6 +76,7 @@ __all__ = (
     "Edge",
     "EdgeCriteria",
     "Entity",
+    "ExactOnlyFilterer",
     "F",
     "FieldCriteria",
     "FilterStep",
@@ -77,6 +84,9 @@ __all__ = (
     "Graph",
     "InMemoryGraph",
     "KB",
+    "KeepLongestByKey",
+    "KeepLongestByLabel",
+    "KeepLongestByOffset",
     "LatinLowercaseNormalizer",
     "Node",
     "Normalizer",
@@ -97,6 +107,7 @@ __all__ = (
     "TermResolver",
     "TermsIndex",
     "Token",
+    "Tokenizer",
     "TrieTermsIndex",
     "Verb",
     "WalkStep",

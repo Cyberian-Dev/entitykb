@@ -87,5 +87,4 @@ class Config(BaseModel):
     def info(self) -> dict:
         info = self.dict()
         info["root"] = self.root
-        info["pipelines"] = sorted(self.pipelines.keys())
         return info

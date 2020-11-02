@@ -37,9 +37,9 @@ class AsyncKB(BaseKB):
     async def suggest(self, term, query=None):
         raise NotImplementedError
 
-    async def parse(self, text, *labels):
+    async def parse(self, text, pipeline=None, *labels):
         async with self.connection as client:
-            data: dict = await client.call("parse", text, *labels)
+            data: dict = await client.call("parse", text, pipeline, *labels)
             return Doc(**data)
 
     # admin

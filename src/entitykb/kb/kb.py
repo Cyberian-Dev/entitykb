@@ -99,8 +99,13 @@ class KB(BaseKB):
     def suggest(self, term, query=None):
         raise NotImplementedError
 
-    def parse(self, text, *labels, pipeline: str = "default"):
-        pipeline = self.pipelines.get(pipeline)
+    def parse(self, text, pipeline=None, *labels):
+        pipeline = "default" if pipeline is None else pipeline
+
+        if isinstance(pipeline, str):
+            assert pipeline in self.pipelines, f"Unknown Pipeline: {pipeline}"
+            pipeline = self.pipelines.get(pipeline)
+
         doc = pipeline(text=text, labels=labels)
         return doc
 
