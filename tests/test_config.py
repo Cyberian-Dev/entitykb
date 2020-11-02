@@ -1,7 +1,8 @@
 import os
 import pytest
 from pathlib import Path
-from entitykb.config import Config, Environ
+from entitykb.env import Environ
+from entitykb.config import Config
 from entitykb.deps import EnvironError
 
 

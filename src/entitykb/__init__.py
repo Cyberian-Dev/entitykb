@@ -1,4 +1,5 @@
-from .config import Config, environ
+from .env import environ
+from .config import Config
 
 from . import logging
 from .logging import logger
