@@ -47,22 +47,22 @@ class FieldCriteria(Criteria):
     # https://docs.python.org/3/library/operator.html
 
     def __eq__(self, value):
-        return self.set(Comparison.exact, value)
+        return self.exact(value)
 
     def __ge__(self, value):
-        return self.set(Comparison.gte, value)
+        return self.gte(value)
 
     def __gt__(self, value):
-        return self.set(Comparison.gt, value)
+        return self.gt(value)
 
     def __le__(self, value):
-        return self.set(Comparison.lte, value)
+        return self.lte(value)
 
     def __lt__(self, value):
-        return self.set(Comparison.lt, value)
+        return self.lt(value)
 
     def __ne__(self, value):
-        return self.set(Comparison.not_equal, value)
+        return self.not_equal(value)
 
     # name methods
     # reference:

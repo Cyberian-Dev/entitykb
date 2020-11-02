@@ -304,6 +304,11 @@ def test_comparison_options(searcher):
     query = QB().in_nodes(Verb.IS_A).include(F.name.regex("^[A-Za-z]*$")).all()
     assert {honeycrisp.key} == set(searcher(query, apple).ends)
 
+    query = QB().in_nodes(Verb.IS_A).include(F.name.iregex(r"^[\w\s]+$")).all()
+    assert {honeycrisp.key, granny_smith.key} == set(
+        searcher(query, apple).ends
+    )
+
 
 def test_has_apple_include_pies(searcher):
     query = QB().in_nodes(Verb.HAS_A).include(Verb.is_a >> pie).all()
