@@ -9,7 +9,7 @@ connection = rpc.RPCConnection()
 # nodes
 
 
-@router.get("/nodes/{key}", tags=["nodes"])
+@router.get("/nodes/{key}", verbs=["nodes"])
 async def get_node(key: str) -> dict:
     """ Parse text and return document object. """
     async with connection as client:
@@ -19,14 +19,14 @@ async def get_node(key: str) -> dict:
         return data
 
 
-@router.post("/nodes", tags=["nodes"])
+@router.post("/nodes", verbs=["nodes"])
 async def save_node(node: dict = Body(...)) -> dict:
     """ Parse text and return document object. """
     async with connection as client:
         return await client.call("save_node", node)
 
 
-@router.delete("/nodes/{key}/", tags=["nodes"])
+@router.delete("/nodes/{key}/", verbs=["nodes"])
 async def remove_node(key: str):
     """ Remove node and relationships from KB. """
     async with connection as client:
@@ -45,13 +45,13 @@ async def remove_node(key: str):
 #
 
 
-@router.post("/suggest", tags=["query"])
+@router.post("/suggest", verbs=["query"])
 async def suggest(request: models.SuggestRequest = Body(...)):
     """ Parse text and return document object. """
     raise NotImplementedError
 
 
-@router.post("/parse", tags=["query"], response_model=Doc)
+@router.post("/parse", verbs=["query"], response_model=Doc)
 async def parse(request: models.ParseRequest = Body(...)) -> Doc:
     """ Parse text and return document object. """
     async with connection as client:
@@ -61,21 +61,21 @@ async def parse(request: models.ParseRequest = Body(...)) -> Doc:
 # admin
 
 
-@router.post("/admin/commit", tags=["admin"])
+@router.post("/admin/commit", verbs=["admin"])
 async def commit() -> bool:
     """ Commit KB to disk. """
     async with connection as client:
         return await client.call("commit")
 
 
-@router.post("/admin/clear", tags=["admin"])
+@router.post("/admin/clear", verbs=["admin"])
 async def clear() -> bool:
     """ Clear KB of all data. """
     async with connection as client:
         return await client.call("clear")
 
 
-@router.post("/admin/reload", tags=["admin"])
+@router.post("/admin/reload", verbs=["admin"])
 async def reload() -> bool:
     """ Reload KB from disk. """
     async with connection as client:
@@ -85,14 +85,14 @@ async def reload() -> bool:
 # meta
 
 
-@router.get("/meta/info", tags=["meta"])
+@router.get("/meta/info", verbs=["meta"])
 async def info() -> dict:
     """ Return KB's state and meta info. """
     async with connection as client:
         return await client.call("info")
 
 
-@router.get("/meta/schema", tags=["meta"])
+@router.get("/meta/schema", verbs=["meta"])
 async def get_schema() -> dict:
     async with connection as client:
         return await client.call("get_schema")

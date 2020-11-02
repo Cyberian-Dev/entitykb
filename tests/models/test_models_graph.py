@@ -13,9 +13,9 @@ def test_node():
 def test_edge():
     start = Node()
     end = Node()
-    edge = Edge(start=start, end=end, tag="IS_A")
+    edge = Edge(start=start, end=end, verb="IS_A")
     assert edge.dict() == dict(
-        start=start.key, tag="IS_A", end=end.key, weight=1, data=None,
+        start=start.key, verb="IS_A", end=end.key, weight=1, data=None,
     )
 
     two = start >> "IS_A" >> end

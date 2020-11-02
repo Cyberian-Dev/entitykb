@@ -21,7 +21,7 @@ from .query import (
     QueryBuilder,
     EdgeCriteria,
     Step,
-    Tag,
+    Verb,
     WalkStep,
 )
 from .results import FindResult, SearchHop, SearchResult, SearchResults
@@ -54,7 +54,7 @@ __all__ = (
     "SearchResults",
     "Step",
     "SuggestRequest",
-    "Tag",
+    "Verb",
     "Token",
     "WalkStep",
     "camel_to_snake",

@@ -42,7 +42,7 @@ class NodeIndex(object):
 class EdgeIndex(object):
     def __init__(self):
         self.by_node_key = NestedDict()
-        self.by_edge_tag = NestedDict()
+        self.by_edge_verb = NestedDict()
         self.count = 0
 
     def __len__(self):
@@ -51,11 +51,11 @@ class EdgeIndex(object):
     def save(self, edge):
         any_add = False
         with lock:
-            for a, dir, tag, b in self._edge_keys(edge):
-                bottom = self.by_node_key[a][dir][tag]
+            for a, dir, verb, b in self._edge_keys(edge):
+                bottom = self.by_node_key[a][dir][verb]
                 any_add = self._do_add(bottom, b, edge) or any_add
 
-                bottom = self.by_edge_tag[tag][dir][a]
+                bottom = self.by_edge_verb[verb][dir][a]
                 any_add = self._do_add(bottom, b, edge) or any_add
 
             if any_add:
@@ -65,34 +65,34 @@ class EdgeIndex(object):
     def remove(self, edge):
         any_del = False
         with lock:
-            for a, dir, tag, b in self._edge_keys(edge):
-                keys = (a, dir, tag, b)
+            for a, dir, verb, b in self._edge_keys(edge):
+                keys = (a, dir, verb, b)
                 any_del = self._do_delete(self.by_node_key, keys) or any_del
 
-                keys = (tag, dir, a, b)
-                any_del = self._do_delete(self.by_edge_tag, keys) or any_del
+                keys = (verb, dir, a, b)
+                any_del = self._do_delete(self.by_edge_verb, keys) or any_del
 
             if any_del:
                 self.count -= 1
         return any_del
 
-    def iterate(self, tags=None, directions=None, nodes=None):
-        tags = (None,) if not tags else tags
+    def iterate(self, verbs=None, directions=None, nodes=None):
+        verbs = (None,) if not verbs else verbs
         directions = Direction.as_tuple(directions, all_if_none=True)
         nodes = (None,) if nodes is None else nodes
 
-        for tag in ensure_iterable(tags):
+        for verb in ensure_iterable(verbs):
             for direction in ensure_iterable(directions):
                 for node in ensure_iterable(nodes):
                     node_key = Node.to_key(node)
-                    yield from self._do_iter(tag, direction, node_key)
+                    yield from self._do_iter(verb, direction, node_key)
 
     # private methods
 
     @classmethod
     def _edge_keys(cls, edge: Edge):
-        yield edge.start, Direction.outgoing, edge.tag, edge.end
-        yield edge.end, Direction.incoming, edge.tag, edge.start
+        yield edge.start, Direction.outgoing, edge.verb, edge.end
+        yield edge.end, Direction.incoming, edge.verb, edge.start
 
     @classmethod
     def _do_add(cls, data, key, value):
@@ -120,9 +120,9 @@ class EdgeIndex(object):
 
         return was_deleted
 
-    def _do_iter(self, tag, direction, node):
-        if tag:
-            other_by_node = self.by_edge_tag.get(tag, {}).get(direction, {})
+    def _do_iter(self, verb, direction, node):
+        if verb:
+            other_by_node = self.by_edge_verb.get(verb, {}).get(direction, {})
 
             if node:
                 other_map = other_by_node.get(node, {})
@@ -132,8 +132,8 @@ class EdgeIndex(object):
                     yield from self._do_iter_other(other_map)
 
         elif node:
-            other_by_tag = self.by_node_key.get(node, {}).get(direction, {})
-            for other_map in other_by_tag.values():
+            other_by_verb = self.by_node_key.get(node, {}).get(direction, {})
+            for other_map in other_by_verb.values():
                 yield from self._do_iter_other(other_map)
 
     @classmethod

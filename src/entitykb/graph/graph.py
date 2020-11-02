@@ -11,7 +11,7 @@ class Graph(object):
     def __iter__(self):
         raise NotImplementedError
 
-    def iterate_edges(self, tags=None, directions=None, nodes=None):
+    def iterate_edges(self, verbs=None, directions=None, nodes=None):
         raise NotImplementedError
 
     def save_node(self, node: Node):
@@ -26,7 +26,7 @@ class Graph(object):
     def remove_node(self, key: str) -> bool:
         raise NotImplementedError
 
-    def connect(self, *, start: Node, tag: str, end: Node, data: dict = None):
+    def connect(self, *, start: Node, verb: str, end: Node, data: dict = None):
         raise NotImplementedError
 
     def info(self):
@@ -57,9 +57,9 @@ class InMemoryGraph(Graph):
     def __iter__(self):
         return iter(self.nodes)
 
-    def iterate_edges(self, tags=None, directions=None, nodes=None):
+    def iterate_edges(self, verbs=None, directions=None, nodes=None):
         yield from self.edges.iterate(
-            tags=tags, directions=directions, nodes=nodes
+            verbs=verbs, directions=directions, nodes=nodes
         )
 
     def save_node(self, node: Node):
@@ -80,11 +80,11 @@ class InMemoryGraph(Graph):
         success = self.nodes.remove(key)
         return success
 
-    def connect(self, *, start: Node, tag: str, end: Node, data: dict = None):
+    def connect(self, *, start: Node, verb: str, end: Node, data: dict = None):
         registry = Registry.instance()
         self.save_node(start)
         self.save_node(end)
-        edge = registry.create(Edge, data, start=start, tag=tag, end=end)
+        edge = registry.create(Edge, data, start=start, verb=verb, end=end)
         self.save_edge(edge)
         return edge
 

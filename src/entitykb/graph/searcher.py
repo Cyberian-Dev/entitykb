@@ -44,7 +44,7 @@ class WalkLayer(Layer):
 
         if result.end is not None:
             others_it = self.graph.iterate_edges(
-                tags=self.step.tags,
+                verbs=self.step.verbs,
                 directions=self.step.directions,
                 nodes=result.end,
             )
@@ -58,7 +58,7 @@ class WalkLayer(Layer):
                     if under_limit(next_result.hops, self.step.max_hops):
                         yield from self.descend(next_result)
 
-        # yield last, handle case of parallel rel w/ multiple tags
+        # yield last, handle case of parallel rel w/ multiple verbs
         yield from children
 
     def __iter__(self) -> Iterator[SearchResult]:
@@ -86,7 +86,7 @@ class FilterLayer(Layer):
 
     def evaluate_rel_criteria(self, criteria, result: SearchResult):
         it = self.graph.iterate_edges(
-            tags=criteria.tags,
+            verbs=criteria.verbs,
             directions=criteria.directions,
             nodes=result.end,
         )

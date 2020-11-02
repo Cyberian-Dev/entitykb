@@ -19,19 +19,19 @@ def test_empty_qb():
 def test_walk_nodes():
     q = QB().all_nodes("IS_A").all()
     assert q[0] == WalkStep(
-        tags=["IS_A"],
+        verbs=["IS_A"],
         max_hops=1,
         directions=(Direction.outgoing, Direction.incoming),
     )
 
     q = QB().out_nodes("IS_A").all()
     assert q[0] == WalkStep(
-        tags=["IS_A"], max_hops=1, directions=Direction.outgoing
+        verbs=["IS_A"], max_hops=1, directions=Direction.outgoing
     )
 
     q = QB().in_nodes("IS_A").all()
     assert q[0] == WalkStep(
-        tags=["IS_A"], max_hops=1, directions=Direction.incoming
+        verbs=["IS_A"], max_hops=1, directions=Direction.incoming
     )
 
 

@@ -8,26 +8,26 @@ class CustomNode(Node):
 
 class HasNine(Edge):
     value: int = 9
-    __all_tags__ = ("HAS_NINE",)
+    __all_verbs__ = ("HAS_NINE",)
 
 
-def test_edge_tags():
-    assert Edge.get_all_tags() == set()
-    assert HasNine.get_all_tags() == {"HAS_NINE"}
+def test_edge_verbs():
+    assert Edge.get_all_verbs() == set()
+    assert HasNine.get_all_verbs() == {"HAS_NINE"}
 
 
 def test_edge_create():
     registry = Registry()
     assert isinstance(registry.create(Edge, Edge()), Edge)
     assert isinstance(registry.create(Edge, {}), Edge)
-    assert isinstance(registry.create(Edge, tag="HAS_A"), Edge)
-    assert isinstance(registry.create(Edge, tag="HAS_NINE"), HasNine)
+    assert isinstance(registry.create(Edge, verb="HAS_A"), Edge)
+    assert isinstance(registry.create(Edge, verb="HAS_NINE"), HasNine)
 
-    assert isinstance(registry.create(Edge, {"tag": "HAS_NINE"}), HasNine)
+    assert isinstance(registry.create(Edge, {"verb": "HAS_NINE"}), HasNine)
     assert isinstance(HasNine.create(), HasNine)
 
-    assert registry.create(Edge, {"tag": "HAS_NINE"}).value == 9
-    assert registry.create(Edge, {"tag": "HAS_NINE", "value": 11}).value == 11
+    assert registry.create(Edge, {"verb": "HAS_NINE"}).value == 9
+    assert registry.create(Edge, {"verb": "HAS_NINE", "value": 11}).value == 11
 
 
 def test_node_create():
@@ -78,7 +78,7 @@ def test_schema():
             "data": {"title": "Data", "type": "object"},
             "end": {"title": "End", "type": "string"},
             "start": {"title": "Start", "type": "string"},
-            "tag": {"title": "Tag", "type": "string"},
+            "verb": {"title": "Verb", "type": "string"},
             "weight": {"default": 1, "title": "Weight", "type": "integer"},
         },
         "title": "Edge",

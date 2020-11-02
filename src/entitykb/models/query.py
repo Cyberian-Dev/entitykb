@@ -126,12 +126,12 @@ class FieldCriteria(Criteria):
 
 
 class EdgeCriteria(Criteria):
-    tags: List[str]
+    verbs: List[str]
     directions: List[Direction]
     nodes: List[str]
     type: str = "edge"
 
-    @validator("tags", "directions", pre=True, always=True)
+    @validator("verbs", "directions", pre=True, always=True)
     def to_list(cls, v):
         return ensure_iterable(v, f=list)
 
@@ -156,16 +156,16 @@ class Step(BaseModel):
 
 
 class WalkStep(Step):
-    tags: List[str] = None
+    verbs: List[str] = None
     directions: List[Direction] = [
         Direction.incoming,
     ]
     max_hops: Optional[int] = 1
     passthru: bool = False
 
-    @validator("tags", pre=True, always=True)
-    def ensure_tags(cls, v):
-        return [Tag(t) for t in ensure_iterable(v or ())]
+    @validator("verbs", pre=True, always=True)
+    def ensure_verbs(cls, v):
+        return [Verb(t) for t in ensure_iterable(v or ())]
 
     @validator("directions", pre=True, always=True)
     def ensure_directions(cls, v):
@@ -204,25 +204,29 @@ class QueryBuilder(object):
 
     # walk nodes
 
-    def all_nodes(self, *tags: str, max_hops: int = 1, passthru: bool = False):
+    def all_nodes(
+        self, *verbs: str, max_hops: int = 1, passthru: bool = False
+    ):
         return self._walk_nodes(
-            *tags,
+            *verbs,
             max_hops=max_hops,
             passthru=passthru,
             directions=(Direction.outgoing, Direction.incoming),
         )
 
-    def out_nodes(self, *tags: str, max_hops: int = 1, passthru: bool = False):
+    def out_nodes(
+        self, *verbs: str, max_hops: int = 1, passthru: bool = False
+    ):
         return self._walk_nodes(
-            *tags,
+            *verbs,
             max_hops=max_hops,
             passthru=passthru,
             directions=(Direction.outgoing,),
         )
 
-    def in_nodes(self, *tags: str, max_hops: int = 1, passthru: bool = False):
+    def in_nodes(self, *verbs: str, max_hops: int = 1, passthru: bool = False):
         return self._walk_nodes(
-            *tags,
+            *verbs,
             max_hops=max_hops,
             passthru=passthru,
             directions=(Direction.incoming,),
@@ -247,13 +251,13 @@ class QueryBuilder(object):
 
     def _walk_nodes(
         self,
-        *tags: str,
+        *verbs: str,
         max_hops: int = None,
         passthru: bool = False,
         directions=None,
     ):
         walk = WalkStep(
-            tags=tags,
+            verbs=verbs,
             directions=Direction.as_tuple(directions, all_if_none=True),
             max_hops=max_hops,
             passthru=passthru,
@@ -297,30 +301,30 @@ class FieldCriteriaBuilder(object, metaclass=FieldCriteriaBuilderType):
 F = FieldCriteriaBuilder
 
 
-class TagType(type):
-    def __getattr__(self, tag_name: str):
-        return Tag(tag_name)
+class VerbType(type):
+    def __getattr__(self, verb_name: str):
+        return Verb(verb_name)
 
 
-class Tag(str, metaclass=TagType):
+class Verb(str, metaclass=VerbType):
     def __new__(cls, string):
         string = string.upper()
-        obj = super(Tag, cls).__new__(cls, string)
+        obj = super(Verb, cls).__new__(cls, string)
         return obj
 
     def __rshift__(self, nodes):
         return EdgeCriteria(
-            tags=(self,), directions=(Direction.outgoing,), nodes=nodes
+            verbs=(self,), directions=(Direction.outgoing,), nodes=nodes
         )
 
     def __lshift__(self, nodes):
         return EdgeCriteria(
-            tags=(self,), directions=(Direction.incoming,), nodes=nodes
+            verbs=(self,), directions=(Direction.incoming,), nodes=nodes
         )
 
     def __pow__(self, nodes):
         return EdgeCriteria(
-            tags=(self,),
+            verbs=(self,),
             directions=(Direction.incoming, Direction.outgoing),
             nodes=nodes,
         )

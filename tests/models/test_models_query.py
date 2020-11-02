@@ -5,7 +5,7 @@ from entitykb.models import (
     FilterStep,
     Query,
     WalkStep,
-    Tag,
+    Verb,
 )
 
 
@@ -35,7 +35,7 @@ def test_create_walk_step_only():
                 "directions": [Direction.incoming],
                 "max_hops": 1,
                 "passthru": False,
-                "tags": [],
+                "verbs": [],
             },
         ],
     }
@@ -87,9 +87,9 @@ def test_simple_attr_criteria():
 
 
 def test_rel_criteria():
-    r = Tag.is_a >> "Fruit|FOOD"
+    r = Verb.is_a >> "Fruit|FOOD"
     assert r.dict() == {
-        "tags": ["IS_A"],
+        "verbs": ["IS_A"],
         "directions": [Direction.outgoing],
         "nodes": ["Fruit|FOOD"],
         "type": "edge",

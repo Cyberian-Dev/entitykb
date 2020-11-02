@@ -52,7 +52,7 @@ def test_save_for_entity_and_edge(kb: KB, apple):
     assert 1 == len(kb)
     assert apple == kb.get_node(apple.key)
 
-    edge = Edge(start=apple, end=apple, tag="IS_A")
+    edge = Edge(start=apple, verb="IS_A", end=apple)
     kb.save(edge)
 
     assert kb.info()["graph"] == {

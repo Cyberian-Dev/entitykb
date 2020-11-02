@@ -22,17 +22,17 @@ class Node(BaseModel):
     def __hash__(self):
         return hash((self.label, self.key))
 
-    def __rshift__(self, tag):
+    def __rshift__(self, verb):
         from .registry import Registry
 
         registry = Registry.instance()
-        return registry.create(Edge, start=self.key, tag=tag, end=None)
+        return registry.create(Edge, start=self.key, verb=verb, end=None)
 
-    def __lshift__(self, tag):
+    def __lshift__(self, verb):
         from .registry import Registry
 
         registry = Registry.instance()
-        return registry.create(Edge, start=None, tag=tag, end=self.key)
+        return registry.create(Edge, start=None, verb=verb, end=self.key)
 
     @staticmethod
     def to_key(node_key: Union["Node", str]) -> str:
@@ -61,24 +61,24 @@ class Node(BaseModel):
 
 class Edge(BaseModel):
     start: str = None
-    tag: str = None
+    verb: str = None
     end: str = None
     weight: int = 1
     data: dict = None
 
-    __all_tags__ = ()
+    __all_verbs__ = ()
 
     @validator("start", "end", pre=True, always=True)
     def node_to_key(cls, v):
         return Node.to_key(v)
 
     @classmethod
-    def get_all_tags(cls):
-        tags = set(cls.__dict__.get("__all_tags__", ()))
-        return tags
+    def get_all_verbs(cls):
+        verbs = set(cls.__dict__.get("__all_verbs__", ()))
+        return verbs
 
     def __repr__(self):
-        return f"<Edge: start={self.start}, tag={self.tag}, end={self.end}>"
+        return f"<Edge: start={self.start}, verb={self.verb}, end={self.end}>"
 
     def __rshift__(self, end: Union[Node, str]):
         self.end = Node.to_key(end)

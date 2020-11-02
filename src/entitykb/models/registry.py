@@ -42,15 +42,15 @@ class Lookup(BaseModel):
     # edges
 
     def get_edge_class(self, cls: Type[Edge], data: dict):
-        tag = data.get("tag")
-        found = self.edges.get(tag)
+        verb = data.get("verb")
+        found = self.edges.get(verb)
         return found or cls
 
     def load_edges(self):
         edges = dict(EDGE=Edge)
         for edge_cls in self.get_subclasses(Edge):
-            for tag in edge_cls.get_all_tags():
-                edges[tag] = edge_cls
+            for verb in edge_cls.get_all_verbs():
+                edges[verb] = edge_cls
         return edges
 
 
@@ -73,8 +73,8 @@ class Schema(BaseModel):
     @classmethod
     def load_edges(cls, lookup: Lookup):
         edges = {}
-        for (tag, edge) in lookup.edges.items():
-            edges[tag] = edge.schema()
+        for (verb, edge) in lookup.edges.items():
+            edges[verb] = edge.schema()
         return edges
 
 
