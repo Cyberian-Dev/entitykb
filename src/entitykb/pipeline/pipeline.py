@@ -1,7 +1,13 @@
 from dataclasses import dataclass
 from typing import Tuple, List, Iterable
 
-from entitykb import BaseKB, Config, DocEntity, get_class_from_name
+from entitykb import (
+    BaseKB,
+    Config,
+    PipelineConfig,
+    DocEntity,
+    get_class_from_name,
+)
 
 from .extractors import Extractor
 from .filterers import Filterer
@@ -12,42 +18,37 @@ from .tokenizers import Tokenizer
 
 @dataclass
 class Pipeline(object):
-    tokenizer: Tokenizer
-    normalizer: Normalizer
-
-    config: Config = None
-    kb: BaseKB = None
     extractor: Extractor = None
     filterers: Tuple[Filterer, ...] = tuple
     resolvers: Tuple[Resolver, ...] = tuple
 
     @classmethod
-    def create(cls, kb: BaseKB, config: Config, normalizer: Normalizer):
+    def create(
+        cls,
+        kb: BaseKB,
+        config: Config,
+        pipeline: PipelineConfig,
+        normalizer: Normalizer,
+    ):
         tokenizer = Tokenizer.create(config.tokenizer)
 
         resolvers = tuple(
             Resolver.create(
                 resolver, tokenizer=tokenizer, normalizer=normalizer, kb=kb,
             )
-            for resolver in config.resolvers or [None]
+            for resolver in pipeline.resolvers or [None]
         )
         assert resolvers, f"No resolvers found. ({config})"
 
-        filterers = config.filterers or []
+        filterers = pipeline.filterers or []
         filterers = tuple(get_class_from_name(f) for f in filterers)
 
         extractor = Extractor.create(
-            config.extractor, tokenizer=tokenizer, resolvers=resolvers,
+            pipeline.extractor, tokenizer=tokenizer, resolvers=resolvers,
         )
 
         pipeline = cls(
-            config=config,
-            kb=kb,
-            extractor=extractor,
-            filterers=filterers,
-            normalizer=normalizer,
-            resolvers=resolvers,
-            tokenizer=tokenizer,
+            extractor=extractor, filterers=filterers, resolvers=resolvers,
         )
 
         return pipeline

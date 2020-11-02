@@ -1,3 +1,4 @@
+from importlib import import_module
 from typing import Optional, Union
 
 from entitykb import (
@@ -14,7 +15,6 @@ from entitykb import (
     TermsIndex,
     Storage,
 )
-from importlib import import_module
 
 
 class KB(BaseKB):
@@ -37,9 +37,15 @@ class KB(BaseKB):
 
         self.searcher = Searcher.create(self.config.searcher, graph=self.graph)
 
-        self.pipeline = Pipeline.create(
-            kb=self, config=self.config, normalizer=self.normalizer
-        )
+        self.pipelines = {}
+        for name, pipeline in self.config.pipelines.items():
+            pipeline = Pipeline.create(
+                kb=self,
+                config=self.config,
+                pipeline=pipeline,
+                normalizer=self.normalizer,
+            )
+            self.pipelines[name] = pipeline
 
         self.modules = [import_module(m) for m in self.config.modules]
 
@@ -93,8 +99,9 @@ class KB(BaseKB):
     def suggest(self, term, query=None):
         raise NotImplementedError
 
-    def parse(self, text, *labels):
-        doc = self.pipeline(text=text, labels=labels)
+    def parse(self, text, *labels, pipeline: str = "default"):
+        pipeline = self.pipelines.get(pipeline)
+        doc = pipeline(text=text, labels=labels)
         return doc
 
     # admin

@@ -1,3 +1,3 @@
-from .core import KB
+from .kb import KB
 
 __all__ = ("KB",)

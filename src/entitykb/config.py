@@ -1,26 +1,37 @@
 import json
 import os
-from dataclasses import dataclass, fields
 from pathlib import Path
-from typing import List
+from typing import List, Dict
+
+from pydantic import BaseModel, Field
 
 from .env import environ
 
 
-@dataclass
-class Config:
+class PipelineConfig(BaseModel):
+    extractor: str = "entitykb.DefaultExtractor"
+    resolvers: List[str] = Field(default=["entitykb.TermResolver"])
+    filterers: List[str] = Field(default_factory=list)
+
+    @classmethod
+    def default_factory(cls):
+        return dict(default=PipelineConfig())
+
+
+class Config(BaseModel):
     file_path: str = None
 
-    extractor: str = "entitykb.DefaultExtractor"
-    filterers: List[str] = ()
     graph: str = "entitykb.InMemoryGraph"
-    modules: List[str] = ()
+    modules: List[str] = Field(default_factory=list)
     normalizer: str = "entitykb.LatinLowercaseNormalizer"
-    resolvers: List[str] = ("entitykb.TermResolver",)
     searcher: str = "entitykb.DefaultSearcher"
     storage: str = "entitykb.PickleStorage"
     terms: str = "entitykb.TrieTermsIndex"
     tokenizer: str = "entitykb.WhitespaceTokenizer"
+
+    pipelines: Dict[str, PipelineConfig] = Field(
+        default_factory=PipelineConfig.default_factory
+    )
 
     def __str__(self):
         return f"<Config: {self.file_path}>"
@@ -50,26 +61,13 @@ class Config:
 
     @classmethod
     def construct(cls, *, file_path: str, data: dict) -> "Config":
-        field_names = {class_field.name for class_field in fields(cls)}
-        data = {k: v for k, v in data.items() if k in field_names}
         config = Config(file_path=file_path, **data)
         return config
 
     def dict(self) -> dict:
-        kw = {
-            "extractor": self.extractor,
-            "filterers": self.filterers,
-            "graph": self.graph,
-            "modules": self.modules,
-            "normalizer": self.normalizer,
-            "resolvers": self.resolvers,
-            "searcher": self.searcher,
-            "storage": self.storage,
-            "terms": self.terms,
-            "tokenizer": self.tokenizer,
-        }
-
-        return dict((k, v) for k, v in kw.items())
+        data = super(Config, self).dict()
+        data.pop("file_path", None)
+        return data
 
     @classmethod
     def get_file_path(cls, root=None, file_name="config.json"):
@@ -89,6 +87,5 @@ class Config:
     def info(self) -> dict:
         info = self.dict()
         info["root"] = self.root
-        info["resolvers"] = self.resolvers
-        info["filterers"] = self.filterers
+        info["pipelines"] = sorted(self.pipelines.keys())
         return info

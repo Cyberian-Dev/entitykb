@@ -62,7 +62,5 @@ def test_longest_filters(doc_entities):
 
 
 def test_pipeline_filter_entities(doc_entities):
-    pipeline = Pipeline(
-        tokenizer=None, normalizer=None, filterers=[ExactOnlyFilterer()],
-    )
+    pipeline = Pipeline(filterers=[ExactOnlyFilterer()])
     assert 3 == len(pipeline.filter_entities(doc_entities))

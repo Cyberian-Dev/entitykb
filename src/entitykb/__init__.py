@@ -1,5 +1,5 @@
 from .env import environ
-from .config import Config
+from .config import Config, PipelineConfig
 from .construct import create_component, get_class_from_name
 
 from . import logging
@@ -7,8 +7,6 @@ from .logging import logger
 
 from . import models
 from .models import (
-    F,
-    FieldCriteria,
     Comparison,
     Criteria,
     Direction,
@@ -16,7 +14,10 @@ from .models import (
     DocEntity,
     DocToken,
     Edge,
+    EdgeCriteria,
     Entity,
+    F,
+    FieldCriteria,
     FilterStep,
     FindResult,
     Node,
@@ -24,13 +25,12 @@ from .models import (
     Query,
     QueryBuilder,
     Registry,
-    EdgeCriteria,
     SearchHop,
     SearchResult,
     SearchResults,
     Step,
-    Verb,
     Token,
+    Verb,
     WalkStep,
     chain,
     ensure_iterable,
@@ -82,6 +82,7 @@ __all__ = (
     "Normalizer",
     "PickleStorage",
     "Pipeline",
+    "PipelineConfig",
     "QB",
     "Query",
     "QueryBuilder",
@@ -95,8 +96,8 @@ __all__ = (
     "SyncKB",
     "TermResolver",
     "TermsIndex",
-    "TrieTermsIndex",
     "Token",
+    "TrieTermsIndex",
     "Verb",
     "WalkStep",
     "WhitespaceTokenizer",

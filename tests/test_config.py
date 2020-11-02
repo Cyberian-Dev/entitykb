@@ -1,9 +1,10 @@
 import os
-import pytest
 from pathlib import Path
-from entitykb.env import Environ
+
+import pytest
 from entitykb.config import Config
 from entitykb.deps import EnvironError
+from entitykb.env import Environ
 
 
 def test_environ_defaults():
@@ -46,12 +47,16 @@ def test_environ_set_get():
 def test_config_defaults():
     config = Config()
     assert config.dict() == {
-        "extractor": "entitykb.DefaultExtractor",
-        "filterers": (),
         "graph": "entitykb.InMemoryGraph",
-        "modules": (),
+        "modules": [],
         "normalizer": "entitykb.LatinLowercaseNormalizer",
-        "resolvers": ("entitykb.TermResolver",),
+        "pipelines": {
+            "default": {
+                "extractor": "entitykb.DefaultExtractor",
+                "filterers": [],
+                "resolvers": ["entitykb.TermResolver"],
+            }
+        },
         "searcher": "entitykb.DefaultSearcher",
         "storage": "entitykb.PickleStorage",
         "terms": "entitykb.TrieTermsIndex",
@@ -60,15 +65,13 @@ def test_config_defaults():
 
 
 def test_config_roundtrip():
-    config = Config(extractor="my_custom.Extractor")
+    config = Config()
     data = config.dict()
     assert set(data.keys()) == {
-        "extractor",
-        "filterers",
+        "pipelines",
         "graph",
         "modules",
         "normalizer",
-        "resolvers",
         "searcher",
         "storage",
         "terms",
