@@ -7,7 +7,7 @@ from entitykb.pipeline import Normalizer
 @pytest.fixture()
 def terms():
     normalizer = Normalizer.create()
-    terms = TermsIndex(normalizer=normalizer)
+    terms = TermsIndex.create(normalizer=normalizer)
     return terms
 
 

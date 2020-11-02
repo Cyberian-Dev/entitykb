@@ -1,3 +1,3 @@
-from .terms import TermsIndex
+from .terms import TermsIndex, TrieTermsIndex
 
-__all__ = ("TermsIndex",)
+__all__ = ("TermsIndex", "TrieTermsIndex")

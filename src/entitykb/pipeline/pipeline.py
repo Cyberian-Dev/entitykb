@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from typing import Tuple, List, Iterable
 
-from entitykb import BaseKB, Config, get_class_from_name, DocEntity
+from entitykb import BaseKB, Config, DocEntity, get_class_from_name
+
 from .extractors import Extractor
 from .filterers import Filterer
 from .normalizers import Normalizer
@@ -36,9 +37,7 @@ class Pipeline(object):
         filterers = tuple(get_class_from_name(f) for f in filterers)
 
         extractor = Extractor.create(
-            extractor=config.extractor,
-            tokenizer=tokenizer,
-            resolvers=resolvers,
+            config.extractor, tokenizer=tokenizer, resolvers=resolvers,
         )
 
         pipeline = cls(

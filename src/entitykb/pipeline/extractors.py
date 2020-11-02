@@ -1,11 +1,7 @@
-from typing import Optional, Union, Type, List, Tuple, Iterable
+from typing import List, Tuple, Iterable
 
-from entitykb.models import (
-    instantiate_class_from_name,
-    Doc,
-    DocToken,
-    DocEntity,
-)
+from entitykb import Doc, DocToken, DocEntity, create_component
+
 from .handlers import TokenHandler
 from .resolvers import Resolver
 from .tokenizers import Tokenizer
@@ -27,12 +23,8 @@ class Extractor(object):
         raise NotImplementedError
 
     @classmethod
-    def create(cls, extractor: "ExtractorType" = None, **kwargs):
-        if isinstance(extractor, str):
-            extractor = instantiate_class_from_name(extractor, **kwargs)
-        elif not isinstance(extractor, Extractor):
-            extractor = (extractor or DefaultExtractor)(**kwargs)
-        return extractor
+    def create(cls, value=None, **kw):
+        return create_component(value, Extractor, DefaultExtractor, **kw)
 
 
 class DefaultExtractor(Extractor):
@@ -77,6 +69,3 @@ class DefaultExtractor(Extractor):
                 doc_ent for doc_ent in doc_entities if doc_ent.label in labels
             )
         doc.entities = tuple(doc_entities)
-
-
-ExtractorType = Optional[Union[Type[Extractor], Extractor, str]]

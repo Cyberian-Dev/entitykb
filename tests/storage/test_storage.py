@@ -1,6 +1,6 @@
 import os
 import time
-from entitykb.kb.storage import PickleStorage
+from entitykb.storage import PickleStorage
 
 
 def test_backup_dirs(root):

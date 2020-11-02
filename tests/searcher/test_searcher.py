@@ -1,7 +1,8 @@
 import pytest
 
-from entitykb.graph import InMemoryGraph, SearchResults, Searcher
-from entitykb.models import Entity, Query, QB, F, Verb, chain
+from entitykb.graph import InMemoryGraph
+from entitykb.models import Entity, Query, QB, F, Verb, chain, SearchResults
+from entitykb.searcher import DefaultSearcher
 
 
 class Product(Entity):
@@ -61,8 +62,8 @@ def graph():
 
 
 @pytest.fixture
-def searcher(graph) -> Searcher:
-    return Searcher(graph=graph)
+def searcher(graph) -> DefaultSearcher:
+    return DefaultSearcher(graph=graph)
 
 
 def test_searcher(searcher):

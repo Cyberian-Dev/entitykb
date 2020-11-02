@@ -1,7 +1,7 @@
 import string
-from typing import Optional, Union, Type, Iterator, Set, Iterable
+from typing import Optional, Union, Iterator, Set, Iterable
 
-from entitykb.models import instantiate_class_from_name, Token, DocToken
+from entitykb import Token, DocToken, create_component
 
 
 class Tokenizer(object):
@@ -19,12 +19,8 @@ class Tokenizer(object):
         return tuples
 
     @classmethod
-    def create(cls, tokenizer: "TokenizerType" = None):
-        if isinstance(tokenizer, str):
-            tokenizer = instantiate_class_from_name(tokenizer)
-        elif not isinstance(tokenizer, Tokenizer):
-            tokenizer = (tokenizer or WhitespaceTokenizer)()
-        return tokenizer
+    def create(cls, value=None):
+        return create_component(value, Tokenizer, WhitespaceTokenizer)
 
 
 class State(object):
@@ -122,6 +118,5 @@ class WhitespaceTokenizer(Tokenizer):
         return text
 
 
-TokenizerType = Optional[Union[Type[Tokenizer], Tokenizer, str]]
 DEFAULT_WORD_CHARS = set(string.digits + string.ascii_letters + "_" + "-")
 DEFAULT_WHITESPACE = {" ", "\n", "\t"}

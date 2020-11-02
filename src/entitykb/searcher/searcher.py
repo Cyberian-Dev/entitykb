@@ -1,9 +1,10 @@
 from dataclasses import dataclass, field
 from typing import Iterable, Iterator, Set, List
 
-from entitykb.models import (
+from entitykb import (
     FieldCriteria,
     FilterStep,
+    Graph,
     Node,
     Query,
     EdgeCriteria,
@@ -11,8 +12,8 @@ from entitykb.models import (
     SearchResults,
     WalkStep,
     chain,
+    create_component,
 )
-from . import Graph
 
 
 @dataclass
@@ -138,6 +139,15 @@ class Searcher(object):
         return self.search(query, *starts)
 
     def search(self, query: Query, *starts) -> SearchResults:
+        raise NotImplementedError
+
+    @classmethod
+    def create(cls, value=None, **kwargs):
+        return create_component(value, Searcher, DefaultSearcher, **kwargs)
+
+
+class DefaultSearcher(Searcher):
+    def search(self, query: Query, *starts):
         starts = chain(starts)
         layer = StartLayer(self.graph, starts=starts)
 

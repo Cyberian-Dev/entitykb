@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from entitykb.models import Node, Edge, Registry
+from entitykb import Node, Edge, Registry, create_component
 from .index import NodeIndex, EdgeIndex
 
 
@@ -40,6 +40,10 @@ class Graph(object):
 
     def clear_data(self):
         raise NotImplementedError
+
+    @classmethod
+    def create(cls, value=None):
+        return create_component(value, Graph, InMemoryGraph)
 
 
 class InMemoryGraph(Graph):

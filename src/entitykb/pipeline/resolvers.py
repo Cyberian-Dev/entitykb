@@ -1,6 +1,7 @@
-from typing import Optional, Union, Type, Iterable
+from typing import Iterable
 
-from entitykb import instantiate_class_from_name, FindResult
+from entitykb import create_component, FindResult
+
 from .handlers import TokenHandler
 from .normalizers import Normalizer
 from .tokenizers import Tokenizer
@@ -32,14 +33,8 @@ class Resolver(object):
         raise NotImplementedError
 
     @classmethod
-    def create(cls, resolver: "ResolverType" = None, **kwargs) -> "Resolver":
-        if isinstance(resolver, str):
-            resolver = instantiate_class_from_name(resolver, **kwargs)
-
-        elif not isinstance(resolver, Resolver):
-            resolver = (resolver or TermResolver)(**kwargs)
-
-        return resolver
+    def create(cls, value=None, **kwargs) -> "Resolver":
+        return create_component(value, Resolver, TermResolver, **kwargs)
 
 
 class TermResolver(Resolver):
@@ -55,6 +50,3 @@ class TermResolver(Resolver):
 
     def is_prefix(self, term: str) -> bool:
         return self.kb.terms.is_prefix(term)
-
-
-ResolverType = Optional[Union[Type[Resolver], Resolver, str]]

@@ -10,14 +10,17 @@ from .env import environ
 @dataclass
 class Config:
     file_path: str = None
+
     extractor: str = "entitykb.DefaultExtractor"
     filterers: List[str] = ()
-    normalizer: str = "entitykb.LatinLowercaseNormalizer"
-    resolvers: List[str] = ("entitykb.TermResolver",)
-    tokenizer: str = "entitykb.WhitespaceTokenizer"
-    terms: str = "entitykb.TermsIndex"
     graph: str = "entitykb.InMemoryGraph"
     modules: List[str] = ()
+    normalizer: str = "entitykb.LatinLowercaseNormalizer"
+    resolvers: List[str] = ("entitykb.TermResolver",)
+    searcher: str = "entitykb.DefaultSearcher"
+    storage: str = "entitykb.PickleStorage"
+    terms: str = "entitykb.TrieTermsIndex"
+    tokenizer: str = "entitykb.WhitespaceTokenizer"
 
     def __str__(self):
         return f"<Config: {self.file_path}>"
@@ -56,10 +59,14 @@ class Config:
         kw = {
             "extractor": self.extractor,
             "filterers": self.filterers,
+            "graph": self.graph,
+            "modules": self.modules,
             "normalizer": self.normalizer,
             "resolvers": self.resolvers,
+            "searcher": self.searcher,
+            "storage": self.storage,
             "terms": self.terms,
-            "graph": self.graph,
+            "tokenizer": self.tokenizer,
         }
 
         return dict((k, v) for k, v in kw.items())

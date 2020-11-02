@@ -87,4 +87,4 @@ def test_get_schema(kb: KB):
     schema = kb.get_schema()
     assert schema.keys() == {"nodes", "edges"}
     assert {"NODE", "ENTITY"}.issubset(schema["nodes"].keys())
-    assert schema["edges"].keys() == {"EDGE"}
+    assert {"EDGE"}.issubset(schema["edges"].keys())

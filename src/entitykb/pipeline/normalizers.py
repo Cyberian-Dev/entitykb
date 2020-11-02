@@ -1,10 +1,8 @@
 import codecs
 from string import ascii_lowercase, digits, punctuation
-from typing import Optional, Union, Type
 
 import translitcodec
-
-from entitykb.models import instantiate_class_from_name
+from entitykb import create_component
 
 
 class Normalizer(object):
@@ -19,14 +17,8 @@ class Normalizer(object):
         raise NotImplementedError
 
     @classmethod
-    def create(cls, normalizer=None):
-        if normalizer is None:
-            normalizer = LatinLowercaseNormalizer()
-        elif isinstance(normalizer, str):
-            normalizer = instantiate_class_from_name(normalizer)
-        elif not isinstance(normalizer, Normalizer):
-            normalizer = normalizer()
-        return normalizer
+    def create(cls, value=None):
+        return create_component(value, Normalizer, LatinLowercaseNormalizer)
 
 
 class LatinLowercaseNormalizer(Normalizer):
@@ -44,7 +36,5 @@ class LatinLowercaseNormalizer(Normalizer):
         text = text.lower()
         return text
 
-
-NormalizerType = Optional[Union[Type[Normalizer], Normalizer, str]]
 
 assert translitcodec

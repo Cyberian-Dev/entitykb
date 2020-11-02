@@ -49,9 +49,13 @@ def test_config_defaults():
         "extractor": "entitykb.DefaultExtractor",
         "filterers": (),
         "graph": "entitykb.InMemoryGraph",
+        "modules": (),
         "normalizer": "entitykb.LatinLowercaseNormalizer",
         "resolvers": ("entitykb.TermResolver",),
-        "terms": "entitykb.TermsIndex",
+        "searcher": "entitykb.DefaultSearcher",
+        "storage": "entitykb.PickleStorage",
+        "terms": "entitykb.TrieTermsIndex",
+        "tokenizer": "entitykb.WhitespaceTokenizer",
     }
 
 
@@ -59,12 +63,16 @@ def test_config_roundtrip():
     config = Config(extractor="my_custom.Extractor")
     data = config.dict()
     assert set(data.keys()) == {
-        "normalizer",
-        "filterers",
-        "resolvers",
-        "graph",
         "extractor",
+        "filterers",
+        "graph",
+        "modules",
+        "normalizer",
+        "resolvers",
+        "searcher",
+        "storage",
         "terms",
+        "tokenizer",
     }
 
     roundtrip = Config.construct(file_path="/tmp/config.json", data=data)

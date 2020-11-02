@@ -6,7 +6,7 @@ import tempfile
 from dataclasses import dataclass
 from typing import Optional, Any
 
-from entitykb import logger
+from entitykb import logger, create_component
 
 
 @dataclass
@@ -36,6 +36,10 @@ class Storage(object):
         if not os.path.exists(backup_dir):
             os.makedirs(backup_dir, exist_ok=True)
         return backup_dir
+
+    @classmethod
+    def create(cls, value=None, **kwargs):
+        return create_component(value, Storage, PickleStorage, **kwargs)
 
 
 @dataclass

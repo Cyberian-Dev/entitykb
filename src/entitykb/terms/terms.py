@@ -1,14 +1,40 @@
-from typing import Callable, Iterable
+from typing import Iterable
 
 from ahocorasick import Automaton as Trie
-
-from entitykb.models import Entity
+from entitykb import Entity, Normalizer, create_component
 
 
 class TermsIndex(object):
-    def __init__(self, normalizer: Callable, trie: Trie = None):
+    def __init__(self, normalizer: Normalizer):
         self.normalizer = normalizer
-        self.trie = trie or Trie()
+
+    def info(self) -> dict:
+        raise NotImplementedError
+
+    def add_entity(self, entity: Entity, **kwargs):
+        raise NotImplementedError
+
+    def add_term(self, key: str, term: str, **kwargs):
+        raise NotImplementedError
+
+    def is_prefix(self, prefix: str) -> bool:
+        raise NotImplementedError
+
+    def iterate_prefix_keys(self, prefix: str) -> Iterable[str]:
+        raise NotImplementedError
+
+    def iterate_term_keys(self, term: str) -> Iterable[str]:
+        raise NotImplementedError
+
+    @classmethod
+    def create(cls, value=None, **kwargs):
+        return create_component(value, TermsIndex, TrieTermsIndex, **kwargs)
+
+
+class TrieTermsIndex(TermsIndex):
+    def __init__(self, normalizer: Normalizer):
+        super().__init__(normalizer)
+        self.trie = Trie()
 
     def __len__(self):
         return len(self.trie)

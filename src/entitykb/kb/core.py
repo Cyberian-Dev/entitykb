@@ -3,7 +3,7 @@ from typing import Optional, Union
 from entitykb import (
     Config,
     BaseKB,
-    InMemoryGraph,
+    Graph,
     Node,
     Entity,
     Edge,
@@ -12,23 +12,35 @@ from entitykb import (
     Pipeline,
     Normalizer,
     TermsIndex,
+    Storage,
 )
-from .storage import PickleStorage
 from importlib import import_module
 
 
 class KB(BaseKB):
     def __init__(self, root: str = None):
         self.uncommitted = 0
+
         self.config = Config.create(root=root)
-        self.storage = PickleStorage(root=self.config.root)
+
+        self.storage = Storage.create(
+            self.config.storage, root=self.config.root
+        )
+
         self.normalizer = Normalizer.create(self.config.normalizer)
-        self.terms = TermsIndex(normalizer=self.normalizer)
-        self.graph = InMemoryGraph()
-        self.searcher = Searcher(graph=self.graph)
+
+        self.terms = TermsIndex.create(
+            self.config.terms, normalizer=self.normalizer
+        )
+
+        self.graph = Graph.create(self.config.graph)
+
+        self.searcher = Searcher.create(self.config.searcher, graph=self.graph)
+
         self.pipeline = Pipeline.create(
             kb=self, config=self.config, normalizer=self.normalizer
         )
+
         self.modules = [import_module(m) for m in self.config.modules]
 
         self.reload()

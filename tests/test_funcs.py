@@ -1,9 +1,4 @@
-from entitykb.models import get_class_from_name, ensure_iterable, Entity
-
-
-def test_get_class_from_name():
-    assert Entity == get_class_from_name("entitykb.Entity")
-    assert Entity == get_class_from_name("entitykb.models.Entity")
+from entitykb.models import ensure_iterable
 
 
 def test_ensure_iterable():
