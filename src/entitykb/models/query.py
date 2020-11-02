@@ -2,7 +2,7 @@ from typing import Any, List, Optional
 
 from pydantic import validator, BaseModel
 
-from . import ensure_iterable, Direction, Comparison, Node
+from . import ensure_iterable, Direction, Comparison, Node, chain
 
 
 class Criteria(BaseModel):
@@ -39,26 +39,90 @@ class FieldCriteria(Criteria):
         self.value = value
         return self
 
-    def __eq__(self, other):
-        return self.set(Comparison.eq, other)
+    def do_compare(self, value) -> bool:
+        return self.compare.eval(self.value, value)
 
-    def __ge__(self, other):
-        return self.set(Comparison.ge, other)
+    # operator-based
+    # references:
+    # https://docs.python.org/3/library/operator.html
 
-    def __gt__(self, other):
-        return self.set(Comparison.gt, other)
+    def __eq__(self, value):
+        return self.set(Comparison.exact, value)
 
-    def __le__(self, other):
-        return self.set(Comparison.le, other)
+    def __ge__(self, value):
+        return self.set(Comparison.gte, value)
 
-    def __lt__(self, other):
-        return self.set(Comparison.lt, other)
+    def __gt__(self, value):
+        return self.set(Comparison.gt, value)
 
-    def __ne__(self, other):
-        return self.set(Comparison.ne, other)
+    def __le__(self, value):
+        return self.set(Comparison.lte, value)
 
-    def do_compare(self, other) -> bool:
-        return self.compare.eval(self.value, other)
+    def __lt__(self, value):
+        return self.set(Comparison.lt, value)
+
+    def __ne__(self, value):
+        return self.set(Comparison.not_equal, value)
+
+    # name methods
+    # reference:
+    # https://docs.djangoproject.com/en/3.1/ref/models/querysets/#field-lookups
+
+    def exact(self, value):
+        return self.set(Comparison.exact, value)
+
+    def iexact(self, value):
+        return self.set(Comparison.iexact, value)
+
+    def contains(self, value):
+        return self.set(Comparison.contains, value)
+
+    def icontains(self, value):
+        return self.set(Comparison.icontains, value)
+
+    def is_in(self, *args):
+        value = set(chain(args))
+        return self.set(Comparison.is_in, value)
+
+    def gt(self, value):
+        return self.set(Comparison.gt, value)
+
+    def gte(self, value):
+        return self.set(Comparison.gte, value)
+
+    def lte(self, value):
+        return self.set(Comparison.lte, value)
+
+    def lt(self, value):
+        return self.set(Comparison.lt, value)
+
+    def startswith(self, value: str):
+        return self.set(Comparison.startswith, value)
+
+    def istartswith(self, value: str):
+        return self.set(Comparison.istartswith, value)
+
+    def endswith(self, value: str):
+        return self.set(Comparison.endswith, value)
+
+    def iendswith(self, value: str):
+        return self.set(Comparison.iendswith, value)
+
+    def range(self, *args):
+        value = tuple(chain(args))
+        assert len(value), f"Range requires exactly 2 values. {value}"
+        return self.set(Comparison.range, value)
+
+    def regex(self, value):
+        return self.set(Comparison.regex, value)
+
+    def iregex(self, value):
+        return self.set(Comparison.iregex, value)
+
+    # named methods
+
+    def not_equal(self, value):
+        return self.set(Comparison.not_equal, value)
 
 
 class EdgeCriteria(Criteria):
@@ -145,7 +209,7 @@ class QueryBuilder(object):
             *tags,
             max_hops=max_hops,
             passthru=passthru,
-            directions=(Direction.outgoing, Direction.incoming)
+            directions=(Direction.outgoing, Direction.incoming),
         )
 
     def out_nodes(self, *tags: str, max_hops: int = 1, passthru: bool = False):
@@ -153,7 +217,7 @@ class QueryBuilder(object):
             *tags,
             max_hops=max_hops,
             passthru=passthru,
-            directions=(Direction.outgoing,)
+            directions=(Direction.outgoing,),
         )
 
     def in_nodes(self, *tags: str, max_hops: int = 1, passthru: bool = False):
@@ -161,7 +225,7 @@ class QueryBuilder(object):
             *tags,
             max_hops=max_hops,
             passthru=passthru,
-            directions=(Direction.incoming,)
+            directions=(Direction.incoming,),
         )
 
     # filter
@@ -186,7 +250,7 @@ class QueryBuilder(object):
         *tags: str,
         max_hops: int = None,
         passthru: bool = False,
-        directions=None
+        directions=None,
     ):
         walk = WalkStep(
             tags=tags,

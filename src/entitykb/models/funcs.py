@@ -1,6 +1,8 @@
 import functools
-from importlib import import_module
 import re
+from importlib import import_module
+from typing import Iterable, Iterator
+from pydantic import BaseModel
 
 camel_pattern = re.compile(r"(?<!^)(?=[A-Z])")
 
@@ -38,3 +40,13 @@ def ensure_iterable(items, f=tuple, explode_first=False):
             items = f(first_item)
 
     return items
+
+
+def chain(*items):
+    for item in items:
+        if isinstance(item, (BaseModel, str, dict)):
+            yield item
+        elif isinstance(item, (Iterable, Iterator)):
+            yield from chain(*item)
+        else:
+            yield item

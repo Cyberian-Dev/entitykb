@@ -10,6 +10,7 @@ from entitykb.models import (
     SearchResult,
     SearchResults,
     WalkStep,
+    chain,
 )
 from . import Graph
 
@@ -158,16 +159,6 @@ class Searcher(object):
                 results.append(result)
 
         return SearchResults(results=results)
-
-
-def chain(*items):
-    for item in items:
-        if isinstance(item, (Node, str, dict)):
-            yield item
-        elif isinstance(item, (Iterable, Iterator)):
-            yield from chain(*item)
-        else:
-            yield item
 
 
 def under_limit(items: List, limit: int):

@@ -6,14 +6,14 @@ class CustomNode(Node):
     pass
 
 
-class IsA(Edge):
+class HasNine(Edge):
     value: int = 9
-    __all_tags__ = ("IS_A",)
+    __all_tags__ = ("HAS_NINE",)
 
 
 def test_edge_tags():
     assert Edge.get_all_tags() == set()
-    assert IsA.get_all_tags() == {"IS_A"}
+    assert HasNine.get_all_tags() == {"HAS_NINE"}
 
 
 def test_edge_create():
@@ -21,13 +21,13 @@ def test_edge_create():
     assert isinstance(registry.create(Edge, Edge()), Edge)
     assert isinstance(registry.create(Edge, {}), Edge)
     assert isinstance(registry.create(Edge, tag="HAS_A"), Edge)
-    assert isinstance(registry.create(Edge, tag="IS_A"), IsA)
+    assert isinstance(registry.create(Edge, tag="HAS_NINE"), HasNine)
 
-    assert isinstance(registry.create(Edge, {"tag": "IS_A"}), IsA)
-    assert isinstance(IsA.create(), IsA)
+    assert isinstance(registry.create(Edge, {"tag": "HAS_NINE"}), HasNine)
+    assert isinstance(HasNine.create(), HasNine)
 
-    assert registry.create(Edge, {"tag": "IS_A"}).value == 9
-    assert registry.create(Edge, {"tag": "IS_A", "value": 11}).value == 11
+    assert registry.create(Edge, {"tag": "HAS_NINE"}).value == 9
+    assert registry.create(Edge, {"tag": "HAS_NINE", "value": 11}).value == 11
 
 
 def test_node_create():

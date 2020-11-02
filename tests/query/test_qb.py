@@ -40,7 +40,7 @@ def test_filter_nodes():
     assert q[0] == FilterStep(
         criteria=(
             FieldCriteria(
-                attr_name="label", compare=Comparison.eq, value="PERSON"
+                attr_name="label", compare=Comparison.exact, value="PERSON"
             )
         )
     )
@@ -49,7 +49,7 @@ def test_filter_nodes():
     assert q[0] == FilterStep(
         criteria=(
             FieldCriteria(
-                attr_name="label", compare=Comparison.eq, value="PERSON"
+                attr_name="label", compare=Comparison.exact, value="PERSON"
             )
         ),
         exclude=True,

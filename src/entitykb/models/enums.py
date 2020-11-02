@@ -1,3 +1,4 @@
+import re
 import enum
 
 from .funcs import ensure_iterable
@@ -26,12 +27,23 @@ class Direction(str, enum.Enum):
 
 @enum.unique
 class Comparison(str, enum.Enum):
-    eq = "=="
-    ge = ">="
-    gt = ">"
-    le = "<="
-    lt = "<"
-    ne = "!="
+    contains = "contains"
+    exact = "exact"
+    gt = "gt"
+    gte = "gte"
+    icontains = "icontains"
+    iexact = "iexact"
+    is_in = "is_in"
+    lt = "lt"
+    lte = "lte"
+    not_equal = "not_equal"
+    startswith = "startswith"
+    istartswith = "istartswith"
+    endswith = "endswith"
+    iendswith = "iendswith"
+    range = "range"
+    regex = "regex"
+    iregex = "iregex"
 
     @property
     def eval(self):
@@ -40,25 +52,72 @@ class Comparison(str, enum.Enum):
         return method_func
 
     @classmethod
-    def do_eq(cls, my_val, other_val):
-        return other_val == my_val
+    def do_exact(cls, compare_value, field_value):
+        return field_value == compare_value
 
     @classmethod
-    def do_ge(cls, my_val, other_val):
-        return other_val >= my_val
+    def do_iexact(cls, compare_value, field_value):
+        return field_value.lower() == compare_value.lower()
 
     @classmethod
-    def do_gt(cls, my_val, other_val):
-        return other_val > my_val
+    def do_gte(cls, compare_value, field_value):
+        return field_value >= compare_value
 
     @classmethod
-    def do_le(cls, my_val, other_val):
-        return other_val <= my_val
+    def do_gt(cls, compare_value, field_value):
+        return field_value > compare_value
 
     @classmethod
-    def do_lt(cls, my_val, other_val):
-        return other_val < my_val
+    def do_lte(cls, compare_value, field_value):
+        return field_value <= compare_value
 
     @classmethod
-    def do_ne(cls, my_val, other_val):
-        return other_val != my_val
+    def do_lt(cls, compare_value, field_value):
+        return field_value < compare_value
+
+    @classmethod
+    def do_not_equal(cls, compare_value, field_value):
+        return field_value != compare_value
+
+    @classmethod
+    def do_is_in(cls, compare_value, field_value):
+        return field_value in compare_value
+
+    @classmethod
+    def do_contains(cls, compare_value, field_value):
+        return compare_value in field_value
+
+    @classmethod
+    def do_icontains(cls, compare_value: str, field_value: str):
+        return compare_value.lower() in field_value.lower()
+
+    @classmethod
+    def do_startswith(cls, compare_value: str, field_value: str):
+        return field_value.startswith(compare_value)
+
+    @classmethod
+    def do_istartswith(cls, compare_value: str, field_value: str):
+        return field_value.lower().startswith(compare_value.lower())
+
+    @classmethod
+    def do_endswith(cls, compare_value: str, field_value: str):
+        return field_value.endswith(compare_value)
+
+    @classmethod
+    def do_iendswith(cls, compare_value: str, field_value: str):
+        return field_value.lower().endswith(compare_value.lower())
+
+    @classmethod
+    def do_range(cls, compare_value, field_value):
+        start, end = compare_value
+        return start <= field_value <= end
+
+    @classmethod
+    def do_regex(cls, compare_value: re, field_value: str):
+        pattern = re.compile(compare_value)
+        return pattern.match(field_value) is not None
+
+    @classmethod
+    def do_iregex(cls, compare_value: re, field_value: str):
+        pattern = re.compile(compare_value, re.IGNORECASE)
+        return pattern.match(field_value) is not None

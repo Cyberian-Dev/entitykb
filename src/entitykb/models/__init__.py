@@ -3,6 +3,7 @@ from .entity import Entity
 from .enums import Direction, Comparison
 from .funcs import (
     camel_to_snake,
+    chain,
     get_class_from_name,
     ensure_iterable,
     instantiate_class_from_name,
@@ -57,6 +58,7 @@ __all__ = (
     "Token",
     "WalkStep",
     "camel_to_snake",
+    "chain",
     "ensure_iterable",
     "get_class_from_name",
     "import_module",

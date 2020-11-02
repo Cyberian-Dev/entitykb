@@ -1,8 +1,7 @@
 import pytest
 
 from entitykb.graph import InMemoryGraph, SearchResults, Searcher
-from entitykb.graph.searcher import chain
-from entitykb.models import Entity, Query, QB, F, Tag
+from entitykb.models import Entity, Query, QB, F, Tag, chain
 
 
 class Product(Entity):
@@ -243,6 +242,11 @@ def test_comparison_options(searcher):
     query = QB().in_nodes(Tag.IS_A).include(F.price >= 3.99).all()
     assert {honeycrisp.key} == set(searcher(query, apple).ends)
 
+    query = QB().in_nodes(Tag.IS_A).include(F.price.is_in(3.99, 1.99)).all()
+    assert {granny_smith.key, honeycrisp.key} == set(
+        searcher(query, apple).ends
+    )
+
     query = QB().in_nodes(Tag.IS_A).include(F.price > 3.99).all()
     assert set() == set(searcher(query, apple).ends)
 
@@ -263,6 +267,41 @@ def test_comparison_options(searcher):
     assert {honeycrisp.key, granny_smith.key} == set(
         searcher(query, apple).ends
     )
+
+    query = QB().in_nodes(Tag.IS_A).include(F.name.contains("Smith")).all()
+    assert {granny_smith.key} == set(searcher(query, apple).ends)
+
+    query = QB().in_nodes(Tag.IS_A).include(F.name.contains("smith")).all()
+    assert set() == set(searcher(query, apple).ends)
+
+    query = QB().in_nodes(Tag.IS_A).include(F.name.icontains("SMITH")).all()
+    assert {granny_smith.key} == set(searcher(query, apple).ends)
+
+    query = QB().in_nodes(Tag.IS_A).exclude(F.name.iexact("honeycrisp")).all()
+    assert {granny_smith.key} == set(searcher(query, apple).ends)
+
+    query = QB().in_nodes(Tag.IS_A).exclude(F.name.startswith("Hone")).all()
+    assert {granny_smith.key} == set(searcher(query, apple).ends)
+
+    query = QB().in_nodes(Tag.IS_A).exclude(F.name.istartswith("hone")).all()
+    assert {granny_smith.key} == set(searcher(query, apple).ends)
+
+    query = QB().in_nodes(Tag.IS_A).include(F.name.endswith("Smith")).all()
+    assert {granny_smith.key} == set(searcher(query, apple).ends)
+
+    query = QB().in_nodes(Tag.IS_A).include(F.name.iendswith("SMITH")).all()
+    assert {granny_smith.key} == set(searcher(query, apple).ends)
+
+    query = QB().in_nodes(Tag.IS_A).include(F.price.range((1.50, 5))).all()
+    assert {granny_smith.key, honeycrisp.key} == set(
+        searcher(query, apple).ends
+    )
+
+    query = QB().in_nodes(Tag.IS_A).include(F.name.iendswith("SMITH")).all()
+    assert {granny_smith.key} == set(searcher(query, apple).ends)
+
+    query = QB().in_nodes(Tag.IS_A).include(F.name.regex("^[A-Za-z]*$")).all()
+    assert {honeycrisp.key} == set(searcher(query, apple).ends)
 
 
 def test_has_apple_include_pies(searcher):

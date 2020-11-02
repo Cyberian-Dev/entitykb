@@ -59,7 +59,7 @@ def test_create_filter_step_only():
                 "criteria": [
                     {
                         "attr_name": "number",
-                        "compare": ">=",
+                        "compare": "gte",
                         "type": "field",
                         "value": 3,
                     }
@@ -74,10 +74,10 @@ def test_create_filter_step_only():
 
 
 def test_simple_attr_criteria():
-    a = F.label == "FOOD"
+    a = F.label.exact("FOOD")
     assert a.dict() == {
         "attr_name": "label",
-        "compare": "==",
+        "compare": "exact",
         "value": "FOOD",
         "type": "field",
     }

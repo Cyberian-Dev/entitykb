@@ -72,6 +72,12 @@ class KB(BaseKB):
     def save_edge(self, edge):
         return self.graph.save_edge(edge)
 
+    # query
+
+    def search(self, query, *, term=None, keys=None, label=None):
+        # starts: term->keys, keys, nothing (=graph)
+        results = query
+
     def suggest(self, term, query=None):
         raise NotImplementedError
 
