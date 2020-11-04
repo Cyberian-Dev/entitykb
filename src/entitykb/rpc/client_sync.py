@@ -1,7 +1,8 @@
 import asyncio
 from typing import Optional
 
-from entitykb import Doc, Node
+from entitykb import Node, ParseRequest, Doc, SearchRequest, SearchResponse
+
 from .client_async import AsyncKB
 
 
@@ -39,11 +40,17 @@ class SyncKB(AsyncKB):
     def save_edge(self, edge):
         raise NotImplementedError
 
-    def suggest(self, term, query=None):
-        raise NotImplementedError
+    # pipeline
 
-    def parse(self, text, pipeline=None, *labels) -> Doc:
-        future = super(SyncKB, self).parse(text, pipeline, *labels)
+    def parse(self, request: ParseRequest) -> Doc:
+        future = super(SyncKB, self).parse(request)
+        doc = run_future(future)
+        return doc
+
+    # graph
+
+    def search(self, request: SearchRequest) -> SearchResponse:
+        future = super(SyncKB, self).search(request)
         doc = run_future(future)
         return doc
 

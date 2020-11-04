@@ -2,7 +2,9 @@ from typing import Any, List, Optional
 
 from pydantic import validator, BaseModel
 
-from . import ensure_iterable, Direction, Comparison, Node, chain
+from .funcs import ensure_iterable, chain
+from .enums import Direction, Comparison
+from .node import Node
 
 
 class Criteria(BaseModel):
@@ -29,7 +31,7 @@ class Criteria(BaseModel):
 
 
 class FieldCriteria(Criteria):
-    attr_name: str
+    field: str
     compare: Comparison = None
     value: Any = None
     type: str = "field"
@@ -290,8 +292,8 @@ QB = QueryBuilder
 
 
 class FieldCriteriaBuilderType(type):
-    def __getattr__(self, attr_name: str):
-        return FieldCriteria(attr_name=attr_name)
+    def __getattr__(self, field: str):
+        return FieldCriteria(field=field)
 
 
 class FieldCriteriaBuilder(object, metaclass=FieldCriteriaBuilderType):

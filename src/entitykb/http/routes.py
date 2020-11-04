@@ -33,31 +33,24 @@ async def remove_node(key: str):
         return await client.call("remove_node", key)
 
 
-# # edges
-#
-#
-# @abstractmethod
-# def save_edge(self, edge):
-#     """ Save edge to KB. """
-#
-#
-# # queries
-#
+# pipeline
 
 
-@router.post("/suggest", tags=["query"])
-async def suggest(request: models.SuggestRequest = Body(...)):
-    """ Parse text and return document object. """
-    raise NotImplementedError
-
-
-@router.post("/parse", tags=["query"], response_model=Doc)
+@router.post("/parse", tags=["pipeline"], response_model=Doc)
 async def parse(request: models.ParseRequest = Body(...)) -> Doc:
     """ Parse text and return document object. """
     async with connection as client:
-        return await client.call(
-            "parse", request.text, request.pipeline, *request.labels
-        )
+        return await client.call("parse", request.dict())
+
+
+# graph
+
+
+@router.post("/search", tags=["graph"], response_model=models.SearchResponse)
+async def search(request: models.SearchRequest = Body(...)):
+    """ Parse text and return document object. """
+    async with connection as client:
+        return await client.call("search", request.dict())
 
 
 # admin

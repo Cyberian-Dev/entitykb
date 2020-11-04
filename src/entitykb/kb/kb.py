@@ -2,18 +2,21 @@ from importlib import import_module
 from typing import Optional, Union
 
 from entitykb import (
-    Config,
     BaseKB,
+    Config,
+    Edge,
+    Entity,
     Graph,
     Node,
-    Entity,
-    Edge,
-    Registry,
-    Searcher,
-    Pipeline,
     Normalizer,
-    TermsIndex,
+    ParseRequest,
+    Pipeline,
+    Registry,
+    SearchRequest,
+    Searcher,
+    SearchResponse,
     Storage,
+    TermsIndex,
 )
 
 
@@ -90,24 +93,23 @@ class KB(BaseKB):
     def save_edge(self, edge):
         return self.graph.save_edge(edge)
 
-    # query
+    # pipeline
 
-    def search(self, query, *, term=None, keys=None, label=None):
-        # starts: term->keys, keys, nothing (=graph)
-        results = query
-
-    def suggest(self, term, query=None):
-        raise NotImplementedError
-
-    def parse(self, text, pipeline=None, *labels):
-        pipeline = "default" if pipeline is None else pipeline
-
-        if isinstance(pipeline, str):
-            assert pipeline in self.pipelines, f"Unknown Pipeline: {pipeline}"
-            pipeline = self.pipelines.get(pipeline)
-
-        doc = pipeline(text=text, labels=labels)
+    def parse(self, request: Union[str, ParseRequest]):
+        if isinstance(request, str):
+            request = ParseRequest(text=request)
+        pipeline = self.pipelines.get(request.pipeline)
+        assert pipeline, f"Could not find pipeline: {request.pipeline}"
+        doc = pipeline(text=request.text, labels=request.labels)
         return doc
+
+    # graph
+
+    def search(self, request: SearchRequest) -> SearchResponse:
+        starts = self._get_starts(request)
+        trails = self.searcher.search(request.query, starts)
+        nodes = [self.get_node(t.end) for t in trails]
+        return SearchResponse(nodes=nodes, trails=trails)
 
     # admin
 
@@ -141,3 +143,21 @@ class KB(BaseKB):
     @classmethod
     def get_schema(cls) -> dict:
         return Registry.instance().schema.dict()
+
+    # private methods
+
+    def _get_starts(self, request):
+        starts = []
+        if not request.q:
+            starts = self.graph
+
+        elif request.input is None or request.input.is_prefix:
+            starts = self.terms.iterate_prefix_keys(prefix=request.q)
+
+        elif request.input.is_term:
+            starts = self.terms.iterate_term_keys(term=request.q)
+
+        elif request.input.is_key:
+            starts = self.graph.iterate_keys(keys=request.q)
+
+        return starts

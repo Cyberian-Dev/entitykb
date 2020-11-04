@@ -1,7 +1,7 @@
-import pytest
 import os
 
-from entitykb import KB, Doc, Edge
+import pytest
+from entitykb import KB, Doc, Edge, SearchRequest, SearchInput
 
 
 def test_parse(kb: KB):
@@ -88,3 +88,58 @@ def test_get_schema(kb: KB):
     assert schema.keys() == {"nodes", "edges"}
     assert {"NODE", "ENTITY"}.issubset(schema["nodes"].keys())
     assert {"EDGE"}.issubset(schema["edges"].keys())
+
+
+def test_search_with_results(kb: KB, apple):
+    kb.save_node(apple)
+
+    # default (all nodes, no filter, etc.)
+    response = kb.search(request=SearchRequest())
+    assert [apple] == response.nodes
+
+    # prefix
+    request = SearchRequest(q="a", input=SearchInput.prefix)
+    response = kb.search(request=request)
+    assert [apple] == response.nodes
+
+    # term
+    request = SearchRequest(q="apple", input=SearchInput.term)
+    response = kb.search(request=request)
+    assert [apple] == response.nodes
+
+    # key
+    request = SearchRequest(q="Apple, Inc.|COMPANY", input=SearchInput.key)
+    response = kb.search(request=request)
+    assert [apple] == response.nodes
+
+    # dict
+    assert response.dict() == {
+        "nodes": [
+            {
+                "data": None,
+                "headquarters": {
+                    "city": "Cupertino",
+                    "data": None,
+                    "key": "1",
+                    "label": "LOCATION",
+                },
+                "key": "Apple, Inc.|COMPANY",
+                "label": "COMPANY",
+                "name": "Apple, Inc.",
+                "synonyms": ("Apple", "AAPL"),
+            }
+        ],
+        "trails": [
+            {
+                "end": "Apple, Inc.|COMPANY",
+                "hops": [],
+                "start": "Apple, Inc.|COMPANY",
+            }
+        ],
+    }
+
+
+def test_search_no_results(kb: KB):
+    request = SearchRequest(q="invalid", input=SearchInput.key)
+    response = kb.search(request=request)
+    assert [] == response.nodes

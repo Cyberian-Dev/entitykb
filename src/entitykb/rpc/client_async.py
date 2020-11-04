@@ -1,6 +1,14 @@
 from typing import Optional
 
-from entitykb import BaseKB, Doc, Node
+from entitykb import (
+    BaseKB,
+    Node,
+    ParseRequest,
+    Doc,
+    SearchRequest,
+    SearchResponse,
+)
+
 from .connection import RPCConnection
 
 
@@ -34,13 +42,17 @@ class AsyncKB(BaseKB):
     async def save_edge(self, edge):
         raise NotImplementedError
 
-    async def suggest(self, term, query=None):
-        raise NotImplementedError
+    # search
 
-    async def parse(self, text, pipeline=None, *labels):
+    async def parse(self, request: ParseRequest) -> Doc:
         async with self.connection as client:
-            data: dict = await client.call("parse", text, pipeline, *labels)
+            data: dict = await client.call("parse", request.dict())
             return Doc(**data)
+
+    async def search(self, request: SearchRequest) -> SearchResponse:
+        async with self.connection as client:
+            data: dict = await client.call("search", request.dict())
+            return SearchResponse(**data)
 
     # admin
 

@@ -1,5 +1,5 @@
 from typing import Optional
-from entitykb import Doc, Node
+from entitykb import Node, ParseRequest, Doc, SearchRequest, SearchResponse
 from abc import abstractmethod
 
 
@@ -32,15 +32,17 @@ class BaseKB(object):
     def save_edge(self, edge):
         """ Save edge to KB. """
 
-    # queries
+    # pipeline
 
     @abstractmethod
-    def suggest(self, term, query=None):
-        """ Suggest term auto-completes, filtered by query. """
-
-    @abstractmethod
-    def parse(self, text, pipeline: str = None, *labels: str) -> Doc:
+    def parse(self, request: ParseRequest) -> Doc:
         """ Parse text into Doc with entities, filtered by query. """
+
+    # graph
+
+    @abstractmethod
+    def search(self, request: SearchRequest) -> SearchResponse:
+        """ Suggest term auto-completes, filtered by query. """
 
     # admin
 

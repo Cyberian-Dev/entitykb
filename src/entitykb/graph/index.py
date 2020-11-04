@@ -25,6 +25,9 @@ class NodeIndex(object):
     def __iter__(self):
         return iter(self.nodes_by_key.values())
 
+    def __contains__(self, key):
+        return key in self.nodes_by_key
+
     def get(self, key: str):
         return self.nodes_by_key.get(key)
 

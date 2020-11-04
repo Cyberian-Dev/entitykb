@@ -8,6 +8,15 @@ class TermsIndex(object):
     def __init__(self, normalizer: Normalizer):
         self.normalizer = normalizer
 
+    def get_data(self):
+        raise NotImplementedError
+
+    def put_data(self, trie: Trie):
+        raise NotImplementedError
+
+    def clear_data(self):
+        raise NotImplementedError
+
     def info(self) -> dict:
         raise NotImplementedError
 
@@ -27,7 +36,7 @@ class TermsIndex(object):
         raise NotImplementedError
 
     @classmethod
-    def create(cls, value=None, **kwargs):
+    def create(cls, value=None, **kwargs) -> "TermsIndex":
         return create_component(value, TermsIndex, TrieTermsIndex, **kwargs)
 
 

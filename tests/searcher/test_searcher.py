@@ -1,8 +1,17 @@
-import pytest
+from typing import List
 
-from entitykb.graph import InMemoryGraph
-from entitykb.models import Entity, Query, QB, F, Verb, chain, SearchResults
-from entitykb.searcher import DefaultSearcher
+import pytest
+from entitykb import (
+    Entity,
+    Query,
+    QB,
+    F,
+    Verb,
+    chain,
+    Trail,
+    InMemoryGraph,
+    DefaultSearcher,
+)
 
 
 class Product(Entity):
@@ -46,6 +55,14 @@ edges = [
 ]
 
 
+def ends(trails: List[Trail]):
+    return set([t.end for t in trails])
+
+
+def starts(trails: List[Trail]):
+    return set([t.start for t in trails])
+
+
 @pytest.fixture
 def graph():
     graph = InMemoryGraph()
@@ -68,70 +85,67 @@ def searcher(graph) -> DefaultSearcher:
 
 def test_searcher(searcher):
     query = Query()
-    results = searcher.search(query, apple)
-    assert 1 == len(results)
-    assert {apple.key} == set(results.ends)
+    trails = searcher.search(query, apple)
+    assert 1 == len(trails)
+    assert {apple.key} == ends(trails)
 
-    results = searcher.search(query, apple.key)
-    assert 1 == len(results)
-    assert {apple.key} == set(results.ends)
+    trails = searcher.search(query, apple.key)
+    assert 1 == len(trails)
+    assert {apple.key} == ends(trails)
 
 
 def test_start_all_goal_all(searcher, graph):
     query = QB().all()
-    results = searcher.search(query, graph)
+    trails = searcher.search(query, graph)
 
-    assert isinstance(results, SearchResults)
-    assert 9 == len(results)
-    for result in results:
+    assert 9 == len(trails)
+    for result in trails:
         assert 0 == len(result)
         assert result.start == result.end
 
 
 def test_limit_goal(searcher, graph):
     query = QB().limit(5)
-    results = searcher.search(query, graph)
-    assert isinstance(results, SearchResults)
-    assert 5 == len(results)
+    trails = searcher.search(query, graph)
+    assert 5 == len(trails)
 
 
 def test_limit_page(searcher, graph):
     query = QB().page(2, 2)
-    results = searcher.search(query, graph)
-    assert isinstance(results, SearchResults)
-    assert 2 == len(results)
+    trails = searcher.search(query, graph)
+    assert 2 == len(trails)
 
 
 def test_start_all_goal_first(searcher, graph):
     query = QB().first()
-    results = searcher.search(query, graph)
+    trails = searcher.search(query, graph)
 
-    assert 1 == len(results)
-    assert 0 == len(results[0])
-    assert set(results.starts) == set(results.ends)
+    assert 1 == len(trails)
+    assert 0 == len(trails[0])
+    assert starts(trails) == ends(trails)
 
 
 def test_start_one_goal_all(searcher, graph):
     query = QB().all()
-    results = searcher.search(query, apple)
+    trails = searcher.search(query, apple)
 
-    assert 1 == len(results)
-    assert 0 == len(results[0])
-    assert set(results.starts) == set(results.ends)
-    assert {apple.key} == set(results.ends)
+    assert 1 == len(trails)
+    assert 0 == len(trails[0])
+    assert starts(trails) == ends(trails)
+    assert {apple.key} == ends(trails)
 
 
 def test_in_nodes(searcher, graph):
     query = QB().in_nodes(Verb.IS_A).all()
-    results = searcher.search(query, apple)
+    trails = searcher.search(query, apple)
 
-    assert {granny_smith.key, honeycrisp.key} == set(results.ends)
-    assert {apple.key} == {r.start for r in results}
+    assert {granny_smith.key, honeycrisp.key} == ends(trails)
+    assert {apple.key} == {r.start for r in trails}
 
 
 def test_in_nodes_with_max_hops(searcher, graph):
     query = QB().in_nodes(Verb.IS_A, max_hops=2).all()
-    results = searcher.search(query, food)
+    trails = searcher.search(query, food)
 
     assert {
         fruit.key,
@@ -139,117 +153,115 @@ def test_in_nodes_with_max_hops(searcher, graph):
         dessert.key,
         pie.key,
         apple_sauce.key,
-    } == set(results.ends)
-    assert {food.key} == set(results.starts)
+    } == ends(trails)
+    assert {food.key} == starts(trails)
 
 
 def test_in_nodes_with_passthru(searcher, graph):
     query = QB().in_nodes(Verb.IS_A, passthru=True).all()
-    results = searcher.search(query, apple)
+    trails = searcher.search(query, apple)
 
-    assert {apple.key, granny_smith.key, honeycrisp.key} == set(results.ends)
-    assert {apple.key} == set(results.starts)
+    assert {apple.key, granny_smith.key, honeycrisp.key} == ends(trails)
+    assert {apple.key} == starts(trails)
 
 
 def test_out_nodes(searcher):
     query = QB().out_nodes(Verb.IS_A).all()
-    results = searcher.search(query, apple)
+    trails = searcher.search(query, apple)
 
-    assert {fruit.key} == set(results.ends)
-    assert {apple.key} == set(results.starts)
+    assert {fruit.key} == ends(trails)
+    assert {apple.key} == starts(trails)
 
 
 def test_in_nodes_all_verbs(searcher, graph):
     query = QB().in_nodes().all()
-    results = searcher.search(query, apple)
+    trails = searcher.search(query, apple)
 
     assert {
         granny_smith.key,
         honeycrisp.key,
         apple_sauce.key,
         apple_pie.key,
-    } == set(results.ends)
-    assert {apple.key} == set(results.starts)
+    } == ends(trails)
+    assert {apple.key} == starts(trails)
 
 
 def test_all_nodes_all_verbs_no_max(searcher):
     query = QB().all_nodes(max_hops=None).all()
-    results = searcher.search(query, apple)
+    trails = searcher.search(query, apple)
 
-    assert 8 == len(results)
-    assert apple.key not in set(results.ends)
-    assert {apple.key} == set(results.starts)
+    assert 8 == len(trails)
+    assert apple.key not in ends(trails)
+    assert {apple.key} == starts(trails)
 
 
 def test_all_nodes_optional_attribute(searcher):
     query = QB().all_nodes(max_hops=None).include(F.price > 3.00).all()
-    results = searcher.search(query, apple)
+    trails = searcher.search(query, apple)
 
-    assert 1 == len(results)
-    assert {honeycrisp.key} == set(results.ends)
+    assert 1 == len(trails)
+    assert {honeycrisp.key} == ends(trails)
 
     query = QB().all_nodes(max_hops=None).exclude(F.price > 3.00).all()
-    results = searcher.search(query, apple)
+    trails = searcher.search(query, apple)
 
-    assert 7 == len(results)
-    assert honeycrisp.key not in set(results.ends)
+    assert 7 == len(trails)
+    assert honeycrisp.key not in ends(trails)
 
 
 def test_in_has_a_apple_out_is_a(searcher):
     query = QB().in_nodes(Verb.HAS_A).out_nodes(Verb.IS_A).all()
-    results = searcher.search(query, apple)
+    trails = searcher.search(query, apple)
 
-    assert {dessert.key, pie.key} == set(results.ends)
-    assert {apple.key} == set(results.starts)
+    assert {dessert.key, pie.key} == ends(trails)
+    assert {apple.key} == starts(trails)
 
 
 def test_is_include_label(searcher):
     query = QB().in_nodes().include(F.label == "SAUCE").all()
-    results = searcher.search(query, dessert)
-    assert {apple_sauce.key} == {r.end for r in results}
-    assert {dessert.key} == {r.start for r in results}
+    trails = searcher.search(query, dessert)
+    assert {apple_sauce.key} == {r.end for r in trails}
+    assert {dessert.key} == {r.start for r in trails}
 
     query = QB().in_nodes().include(F.label != "SAUCE").all()
-    results = searcher.search(query, dessert)
-    assert {pie.key} == {r.end for r in results}
-    assert {dessert.key} == {r.start for r in results}
+    trails = searcher.search(query, dessert)
+    assert {pie.key} == {r.end for r in trails}
+    assert {dessert.key} == {r.start for r in trails}
 
 
 def test_query_exclude_by_label(searcher):
     query = QB().in_nodes().exclude(F.label == "SAUCE").all()
-    results = searcher.search(query, dessert)
-    assert {pie.key} == {r.end for r in results}
-    assert {dessert.key} == {r.start for r in results}
+    trails = searcher.search(query, dessert)
+    assert {pie.key} == {r.end for r in trails}
+    assert {dessert.key} == {r.start for r in trails}
 
     query = QB().in_nodes().exclude(F.label != "SAUCE").all()
-    results = searcher.search(query, dessert)
-    assert {apple_sauce.key} == {r.end for r in results}
-    assert {dessert.key} == {r.start for r in results}
+    trails = searcher.search(query, dessert)
+    assert {apple_sauce.key} == {r.end for r in trails}
+    assert {dessert.key} == {r.start for r in trails}
 
 
 def test_comparison_options(searcher):
     query = QB().in_nodes(Verb.IS_A).include(F.price < 3.00).all()
-    assert {granny_smith.key} == set(searcher(query, apple).ends)
+    assert {granny_smith.key} == ends(searcher(query, apple))
 
     query = QB().in_nodes(Verb.IS_A).include(F.price <= 1.99).all()
-    assert {granny_smith.key} == set(searcher(query, apple).ends)
+    assert {granny_smith.key} == ends(searcher(query, apple))
 
     query = QB().in_nodes(Verb.IS_A).include(F.price < 1.99).all()
-    assert set() == set(searcher(query, apple).ends)
+    assert set() == ends(searcher(query, apple))
 
     query = QB().in_nodes(Verb.IS_A).include(F.price > 3.00).all()
-    assert {honeycrisp.key} == set(searcher(query, apple).ends)
+    assert {honeycrisp.key} == ends(searcher(query, apple))
 
     query = QB().in_nodes(Verb.IS_A).include(F.price >= 3.99).all()
-    assert {honeycrisp.key} == set(searcher(query, apple).ends)
+    assert {honeycrisp.key} == ends(searcher(query, apple))
 
     query = QB().in_nodes(Verb.IS_A).include(F.price.is_in(3.99, 1.99)).all()
-    assert {granny_smith.key, honeycrisp.key} == set(
-        searcher(query, apple).ends
-    )
+    assert {granny_smith.key, honeycrisp.key} == ends(searcher(query, apple))
 
     query = QB().in_nodes(Verb.IS_A).include(F.price > 3.99).all()
-    assert set() == set(searcher(query, apple).ends)
+    assert set() == ends(searcher(query, apple))
 
     query = (
         QB()
@@ -257,7 +269,7 @@ def test_comparison_options(searcher):
         .include(F.price > 2.00, F.price < 3.00, all=True)
         .all()
     )
-    assert set() == set(searcher(query, apple).ends)
+    assert set() == ends(searcher(query, apple))
 
     query = (
         QB()
@@ -265,81 +277,75 @@ def test_comparison_options(searcher):
         .include(F.price > 2.00, F.price < 3.00, all=False)
         .all()
     )
-    assert {honeycrisp.key, granny_smith.key} == set(
-        searcher(query, apple).ends
-    )
+    assert {honeycrisp.key, granny_smith.key} == ends(searcher(query, apple))
 
     query = QB().in_nodes(Verb.IS_A).include(F.name.contains("Smith")).all()
-    assert {granny_smith.key} == set(searcher(query, apple).ends)
+    assert {granny_smith.key} == ends(searcher(query, apple))
 
     query = QB().in_nodes(Verb.IS_A).include(F.name.contains("smith")).all()
-    assert set() == set(searcher(query, apple).ends)
+    assert set() == ends(searcher(query, apple))
 
     query = QB().in_nodes(Verb.IS_A).include(F.name.icontains("SMITH")).all()
-    assert {granny_smith.key} == set(searcher(query, apple).ends)
+    assert {granny_smith.key} == ends(searcher(query, apple))
 
     query = QB().in_nodes(Verb.IS_A).exclude(F.name.iexact("honeycrisp")).all()
-    assert {granny_smith.key} == set(searcher(query, apple).ends)
+    assert {granny_smith.key} == ends(searcher(query, apple))
 
     query = QB().in_nodes(Verb.IS_A).exclude(F.name.startswith("Hone")).all()
-    assert {granny_smith.key} == set(searcher(query, apple).ends)
+    assert {granny_smith.key} == ends(searcher(query, apple))
 
     query = QB().in_nodes(Verb.IS_A).exclude(F.name.istartswith("hone")).all()
-    assert {granny_smith.key} == set(searcher(query, apple).ends)
+    assert {granny_smith.key} == ends(searcher(query, apple))
 
     query = QB().in_nodes(Verb.IS_A).include(F.name.endswith("Smith")).all()
-    assert {granny_smith.key} == set(searcher(query, apple).ends)
+    assert {granny_smith.key} == ends(searcher(query, apple))
 
     query = QB().in_nodes(Verb.IS_A).include(F.name.iendswith("SMITH")).all()
-    assert {granny_smith.key} == set(searcher(query, apple).ends)
+    assert {granny_smith.key} == ends(searcher(query, apple))
 
     query = QB().in_nodes(Verb.IS_A).include(F.price.range((1.50, 5))).all()
-    assert {granny_smith.key, honeycrisp.key} == set(
-        searcher(query, apple).ends
-    )
+    assert {granny_smith.key, honeycrisp.key} == ends(searcher(query, apple))
 
     query = QB().in_nodes(Verb.IS_A).include(F.name.iendswith("SMITH")).all()
-    assert {granny_smith.key} == set(searcher(query, apple).ends)
+    assert {granny_smith.key} == ends(searcher(query, apple))
 
     query = QB().in_nodes(Verb.IS_A).include(F.name.regex("^[A-Za-z]*$")).all()
-    assert {honeycrisp.key} == set(searcher(query, apple).ends)
+    assert {honeycrisp.key} == ends(searcher(query, apple))
 
     query = QB().in_nodes(Verb.IS_A).include(F.name.iregex(r"^[\w\s]+$")).all()
-    assert {honeycrisp.key, granny_smith.key} == set(
-        searcher(query, apple).ends
-    )
+    assert {honeycrisp.key, granny_smith.key} == ends(searcher(query, apple))
 
 
 def test_has_apple_include_pies(searcher):
     query = QB().in_nodes(Verb.HAS_A).include(Verb.is_a >> pie).all()
-    results = searcher.search(query, apple)
+    trails = searcher.search(query, apple)
 
-    assert {apple_pie.key} == set(results.ends)
-    assert {apple.key} == {r.start for r in results}
+    assert {apple_pie.key} == ends(trails)
+    assert {apple.key} == {r.start for r in trails}
 
 
 def test_include_what_an_apple_is(searcher):
     query = QB().in_nodes(max_hops=3).include(Verb.is_a << apple).all()
-    results = searcher.search(query, food)
-    assert {fruit.key} == set(results.ends)
+    trails = searcher.search(query, food)
+    assert {fruit.key} == ends(trails)
 
 
 def test_include_adjacent_to_pie(searcher):
     query = QB().in_nodes(max_hops=3).include(Verb.is_a ** pie).all()
-    results = searcher.search(query, food)
-    assert {dessert.key, apple_pie.key} == set(results.ends)
+    trails = searcher.search(query, food)
+    assert {dessert.key, apple_pie.key} == ends(trails)
 
 
 def test_exclude_is_a(searcher):
     query = QB().in_nodes(Verb.HAS_A).exclude(Verb.is_a >> pie).all()
-    results = searcher.search(query, apple)
-    assert {apple_sauce.key} == set(results.ends)
+    trails = searcher.search(query, apple)
+    assert {apple_sauce.key} == ends(trails)
 
 
 def test_multi_result_hops(searcher):
     query = QB().out_nodes(Verb.IS_A, max_hops=4).all()
-    results = searcher.search(query, apple_pie, apple_sauce)
-    assert set(results.ends).issuperset({dessert.key})
+    trails = searcher.search(query, apple_pie, apple_sauce)
+    assert ends(trails).issuperset({dessert.key})
 
 
 def test_chain():

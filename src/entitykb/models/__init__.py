@@ -1,7 +1,6 @@
-from .api import ParseRequest, SuggestRequest
-from .doc import Token, DocToken, Doc, DocEntity
+from .doc import Token, DocToken, Doc, DocEntity, ParseRequest
 from .entity import Entity
-from .enums import Direction, Comparison
+from .enums import Direction, Comparison, SearchInput
 from .funcs import (
     camel_to_snake,
     chain,
@@ -23,7 +22,7 @@ from .query import (
     WalkStep,
 )
 from .registry import Registry
-from .results import FindResult, SearchHop, SearchResult, SearchResults
+from .search import SearchRequest, Hop, Trail, SearchResponse
 
 __all__ = (
     "Comparison",
@@ -38,20 +37,19 @@ __all__ = (
     "F",
     "FieldCriteria",
     "FilterStep",
-    "FindResult",
+    "Hop",
     "Node",
     "ParseRequest",
     "QB",
     "Query",
     "QueryBuilder",
     "Registry",
-    "SearchHop",
-    "SearchHop",
-    "SearchResult",
-    "SearchResults",
+    "SearchRequest",
+    "SearchInput",
+    "SearchResponse",
     "Step",
-    "SuggestRequest",
     "Token",
+    "Trail",
     "Verb",
     "WalkStep",
     "camel_to_snake",

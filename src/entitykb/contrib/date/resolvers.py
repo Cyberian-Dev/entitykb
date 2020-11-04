@@ -1,6 +1,5 @@
-from typing import Iterable
+from typing import Iterable, List
 from entitykb.pipeline import Resolver
-from entitykb.models import FindResult
 from . import grammar, Date
 
 DATE = "DATE"
@@ -13,18 +12,16 @@ class DateResolver(Resolver):
         is_relevant = is_relevant or (DATE in set(labels))
         return is_relevant
 
-    def find(self, term: str) -> FindResult:
+    def resolve(self, term: str) -> List[Date]:
         dt = grammar.parse_date(term)
 
+        entities = []
         if dt:
             name = dt.strftime("%Y-%m-%d")
             date = Date(name=name, year=dt.year, month=dt.month, day=dt.day)
-            entities = (date,)
-            result = FindResult(term=term, entities=entities)
-        else:
-            result = FindResult(term=term)
+            entities.append(date)
 
-        return result
+        return entities
 
     def is_prefix(self, term: str) -> bool:
         is_prefix = grammar.is_prefix(term)

@@ -1,6 +1,6 @@
-from typing import Tuple
+from typing import Tuple, Iterable
 
-from entitykb import Node, Edge, Registry, create_component
+from entitykb import Node, Edge, Registry, create_component, ensure_iterable
 from .index import NodeIndex, EdgeIndex
 
 
@@ -9,6 +9,9 @@ class Graph(object):
         raise NotImplementedError
 
     def __iter__(self):
+        raise NotImplementedError
+
+    def iterate_keys(self, keys: Iterable[str]):
         raise NotImplementedError
 
     def iterate_edges(self, verbs=None, directions=None, nodes=None):
@@ -60,6 +63,12 @@ class InMemoryGraph(Graph):
 
     def __iter__(self):
         return iter(self.nodes)
+
+    def iterate_keys(self, keys: Iterable[str]):
+        keys = ensure_iterable(keys)
+        for key in keys:
+            if key in self.nodes:
+                yield key
 
     def iterate_edges(self, verbs=None, directions=None, nodes=None):
         yield from self.edges.iterate(

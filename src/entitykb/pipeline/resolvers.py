@@ -1,6 +1,6 @@
-from typing import Iterable
+from typing import Iterable, List
 
-from entitykb import create_component, FindResult
+from entitykb import create_component, Entity
 
 from .handlers import TokenHandler
 from .normalizers import Normalizer
@@ -26,7 +26,7 @@ class Resolver(object):
     def is_relevant(cls, labels: Iterable[str]):
         return True
 
-    def find(self, term: str) -> FindResult:
+    def resolve(self, term: str) -> List[Entity]:
         raise NotImplementedError
 
     def is_prefix(self, term: str) -> bool:
@@ -38,7 +38,7 @@ class Resolver(object):
 
 
 class TermResolver(Resolver):
-    def find(self, term: str) -> FindResult:
+    def resolve(self, term: str) -> List[Entity]:
         term_iter = self.kb.terms.iterate_term_keys(term=term)
 
         entities = []
@@ -46,7 +46,7 @@ class TermResolver(Resolver):
             entity = self.kb.graph.get_node(key)
             entities.append(entity)
 
-        return FindResult(term=term, entities=entities)
+        return entities
 
     def is_prefix(self, term: str) -> bool:
         return self.kb.terms.is_prefix(term)

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Tuple, Union, Optional, Any
+from typing import Tuple, Optional, Any, List
 
 from pydantic import BaseModel
 
@@ -129,4 +129,7 @@ class Doc(HasTokens):
     tokens: Tuple[DocToken, ...] = None
 
 
-EntityValue = Union[Entity, dict, DocEntity, str, float]
+class ParseRequest(BaseModel):
+    text: str
+    pipeline: str = "default"
+    labels: List[str] = []

@@ -44,8 +44,8 @@ class TokenHandler(object):
         any_found = False
 
         while not any_found and prefix:
-            find_result = self.resolver.find(term=prefix)
-            for entity in find_result:
+            entities = self.resolver.resolve(term=prefix)
+            for entity in entities:
                 doc_entity = DocEntity(
                     text=prefix,
                     doc=self.doc,

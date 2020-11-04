@@ -3,7 +3,6 @@ from entitykb.models import (
     DocToken,
     DocEntity,
     Doc,
-    FindResult,
     Token,
 )
 
@@ -82,10 +81,3 @@ def test_doc_create():
     doc_data = doc.dict()
     new_doc = Doc(**doc_data)
     assert new_doc.dict() == doc_data
-
-
-def test_create_find_result():
-    result = FindResult(
-        term="aaa", entities=[Entity(name="AAA", label="ENTITY")]
-    )
-    assert len(result) == 1

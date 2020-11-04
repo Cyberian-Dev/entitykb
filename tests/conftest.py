@@ -32,7 +32,7 @@ def apple():
     return Company(
         name="Apple, Inc.",
         synonyms=("Apple", "AAPL"),
-        headquarters=Location(city="Cupertino"),
+        headquarters=Location(key=1, city="Cupertino"),
     )
 
 

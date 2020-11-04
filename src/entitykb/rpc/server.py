@@ -3,7 +3,7 @@ from typing import Optional
 
 import aio_msgpack_rpc
 
-from entitykb import logger, KB, BaseKB
+from entitykb import logger, KB, BaseKB, ParseRequest, SearchRequest
 from .connection import RPCConnection
 
 
@@ -35,14 +35,19 @@ class HandlerKB(BaseKB):
     def save_edge(self, edge):
         raise NotImplementedError
 
-    # query
+    # pipeline
 
-    def suggest(self, term, query=None):
-        raise NotImplementedError
-
-    def parse(self, text, pipeline=None, *labels) -> dict:
-        doc = self._kb.parse(text, pipeline, *labels)
+    def parse(self, request: dict) -> dict:
+        request = ParseRequest(**request)
+        doc = self._kb.parse(request)
         return doc.dict()
+
+    # graph
+
+    def search(self, request: dict) -> dict:
+        request = SearchRequest(**request)
+        response = self._kb.search(request)
+        return response.dict()
 
     # admin
 

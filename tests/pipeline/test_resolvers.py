@@ -82,20 +82,11 @@ def test_date_resolver_find_valid(kb):
         kb=kb,
     )
 
-    result = resolver.find("2019-01-01")
-    assert result
-    assert result.entities[0] == Date(year=2019, month=1, day=1)
-
-    result = resolver.find("Jan 1st, 2019")
-    assert result.term, result.entities == ()
-    assert result.term == "Jan 1st, 2019"
-    assert result.entities[0].key == "2019-01-01|DATE"
-
-    result = resolver.find("01/01/19")
-    assert result.entities[0].key == "2019-01-01|DATE"
-
-    result = resolver.find("2019-JAN-01")
-    assert result.entities[0].key == "2019-01-01|DATE"
+    expected = [Date(year=2019, month=1, day=1)]
+    assert expected == resolver.resolve("2019-01-01")
+    assert expected == resolver.resolve("Jan 1st, 2019")
+    assert expected == resolver.resolve("01/01/19")
+    assert expected == resolver.resolve("2019-JAN-01")
 
 
 def test_date_resolver_fail_invalid(kb):
@@ -105,16 +96,16 @@ def test_date_resolver_fail_invalid(kb):
         kb=kb,
     )
 
-    result = resolver.find("Nonsense!")
+    result = resolver.resolve("Nonsense!")
     assert not result
 
-    result = resolver.find("2017 07 19 J")
+    result = resolver.resolve("2017 07 19 J")
     assert not result
 
-    result = resolver.find("3")
+    result = resolver.resolve("3")
     assert not result
 
-    result = resolver.find("15t")
+    result = resolver.resolve("15t")
     assert not result
 
 
@@ -131,13 +122,9 @@ def test_default_resolver(kb, apple):
     assert not resolver.is_prefix("b")
     assert not resolver.is_prefix("apple, ink.")
 
-    assert (apple,) == tuple(resolver.find("apple").entities)
-    assert (apple,) == tuple(resolver.find("apple, inc.").entities)
+    assert [apple] == resolver.resolve("apple")
+    assert [apple] == resolver.resolve("apple, inc.")
 
-    assert resolver.find("apple, inc.").dict() == dict(
-        term="apple, inc.", entities=[apple.dict()]
-    )
-
-    assert not resolver.find("banana").entities
-    assert not resolver.find("apple, ink.").entities
+    assert not resolver.resolve("banana")
+    assert not resolver.resolve("apple, ink.")
     assert not resolver.is_prefix("apple, ink")

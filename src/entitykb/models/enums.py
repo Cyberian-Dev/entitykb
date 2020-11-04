@@ -121,3 +121,22 @@ class Comparison(str, enum.Enum):
     def do_iregex(cls, compare_value: re, field_value: str):
         pattern = re.compile(compare_value, re.IGNORECASE)
         return pattern.match(field_value) is not None
+
+
+@enum.unique
+class SearchInput(str, enum.Enum):
+    prefix = "prefix"
+    term = "term"
+    key = "key"
+
+    @property
+    def is_prefix(self):
+        return self == SearchInput.prefix
+
+    @property
+    def is_term(self):
+        return self == SearchInput.term
+
+    @property
+    def is_key(self):
+        return self == SearchInput.key
