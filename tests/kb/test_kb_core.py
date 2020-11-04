@@ -97,6 +97,10 @@ def test_search_with_results(kb: KB, apple):
     response = kb.search(request=SearchRequest())
     assert [apple] == response.nodes
 
+    # offset = 1, skips 1 node
+    response = kb.search(request=SearchRequest(offset=1))
+    assert [] == response.nodes
+
     # prefix
     request = SearchRequest(q="a", input=SearchInput.prefix)
     response = kb.search(request=request)

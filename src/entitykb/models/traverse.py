@@ -1,6 +1,6 @@
 from typing import Any, List, Optional
 
-from pydantic import validator, BaseModel
+from pydantic import validator, BaseModel, Field
 
 from .funcs import ensure_iterable, chain
 from .enums import Direction, Comparison
@@ -184,25 +184,31 @@ class FilterStep(Step):
         return [Criteria.create(c) for c in ensure_iterable(v or ())]
 
 
-class Query(BaseModel):
-    steps: List[Step] = []
-    limit: int = None
-    offset: int = 0
+class Traversal(BaseModel):
+    __root__: List[Step] = Field(default_factory=list)
 
-    @validator("steps", pre=True, always=True)
-    def ensure_steps(cls, v):
-        return [Step.create(s) for s in ensure_iterable(v or ())]
+    def __init__(self, **kwargs):
+        steps = kwargs.get("__root__", [])
+        steps = [Step.create(s) for s in steps]
+        super().__init__(__root__=steps)
 
     def __len__(self):
-        return len(self.steps)
+        return len(self.__root__)
+
+    def append(self, item):
+        return self.__root__.append(item)
 
     def __getitem__(self, item):
-        return self.steps[item]
+        return self.__root__[item]
 
+    def __iter__(self):
+        return iter(self.__root__)
 
-class QueryBuilder(object):
-    def __init__(self):
-        self.query = Query()
+    def copy(self):
+        return Traversal(__root__=self.__root__)
+
+    def dict(self, *args, **kwargs):
+        return [step.dict() for step in self.__root__]
 
     # walk nodes
 
@@ -248,7 +254,7 @@ class QueryBuilder(object):
         self, *criteria: Criteria, all: bool = False, exclude: bool = False
     ):
         filter = FilterStep(criteria=criteria, all=all, exclude=exclude)
-        self.query.steps.append(filter)
+        self.append(filter)
         return self
 
     def _walk_nodes(
@@ -264,31 +270,11 @@ class QueryBuilder(object):
             max_hops=max_hops,
             passthru=passthru,
         )
-        self.query.steps.append(walk)
+        self.append(walk)
         return self
 
-    # limit (and offset)
 
-    def all(self):
-        self.query.limit = None
-        return self.query
-
-    def limit(self, limit: int):
-        self.query.limit = limit
-        return self.query
-
-    def first(self):
-        self.query.limit = 1
-        return self.query
-
-    def page(self, number: int = 0, size: int = 20):
-        offset = number * size
-        self.query.offset = offset
-        self.query.limit = size
-        return self.query
-
-
-QB = QueryBuilder
+T = Traversal
 
 
 class FieldCriteriaBuilderType(type):
@@ -330,3 +316,6 @@ class Verb(str, metaclass=VerbType):
             directions=(Direction.incoming, Direction.outgoing),
             nodes=nodes,
         )
+
+
+V = Verb

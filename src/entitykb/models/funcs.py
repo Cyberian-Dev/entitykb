@@ -1,5 +1,5 @@
 import re
-from typing import Iterable, Iterator
+from typing import Iterable, Iterator, List
 
 from pydantic import BaseModel
 
@@ -36,3 +36,10 @@ def chain(*items):
             yield from chain(*item)
         else:
             yield item
+
+
+def under_limit(items: List, limit: int):
+    if limit is None:
+        return True
+
+    return len(items) < limit

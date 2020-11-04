@@ -1,16 +1,18 @@
 from typing import List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .enums import SearchInput
 from .node import Edge
-from .query import Query
+from .traverse import Traversal
 
 
 class SearchRequest(BaseModel):
     q: str = None
     input: SearchInput = SearchInput.prefix
-    query: Query = None
+    traversal: Traversal = Field(default_factory=Traversal)
+    limit: int = 100
+    offset: int = 0
 
 
 class Hop(BaseModel):

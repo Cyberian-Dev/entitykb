@@ -17,6 +17,7 @@ from entitykb import (
     SearchResponse,
     Storage,
     TermsIndex,
+    under_limit,
 )
 
 
@@ -37,8 +38,6 @@ class KB(BaseKB):
         )
 
         self.graph = Graph.create(self.config.graph)
-
-        self.searcher = Searcher.create(self.config.searcher, graph=self.graph)
 
         self.pipelines = {}
         for name, pipeline in self.config.pipelines.items():
@@ -106,9 +105,8 @@ class KB(BaseKB):
     # graph
 
     def search(self, request: SearchRequest) -> SearchResponse:
-        starts = self._get_starts(request)
-        trails = self.searcher.search(request.query, starts)
-        nodes = [self.get_node(t.end) for t in trails]
+        searcher = self._create_searcher(request)
+        nodes, trails = self._get_page(request, searcher)
         return SearchResponse(nodes=nodes, trails=trails)
 
     # admin
@@ -146,7 +144,7 @@ class KB(BaseKB):
 
     # private methods
 
-    def _get_starts(self, request):
+    def _get_starts(self, request: SearchRequest):
         starts = []
         if not request.q:
             starts = self.graph
@@ -161,3 +159,34 @@ class KB(BaseKB):
             starts = self.graph.iterate_keys(keys=request.q)
 
         return starts
+
+    def _create_searcher(self, request: SearchRequest):
+        starts = self._get_starts(request)
+        searcher = Searcher.create(
+            self.config.searcher,
+            graph=self.graph,
+            traversal=request.traversal,
+            starts=starts,
+        )
+        return searcher
+
+    def _get_page(self, request, searcher):
+        # paginate request
+        # performance tuning opportunity
+        # store search with request as key
+        # refactor to keep last item for "has_more" logic
+        index = -1
+        trails = []
+        nodes = []
+
+        for trail in searcher:
+            index += 1
+
+            if index < request.offset:
+                continue
+
+            if under_limit(items=trails, limit=request.limit):
+                trails.append(trail)
+                nodes.append(self.get_node(trail.end))
+
+        return nodes, trails

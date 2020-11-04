@@ -1,17 +1,18 @@
 from dataclasses import dataclass, field
-from typing import Iterable, Iterator, Set, List
+from typing import Iterable, Iterator, Set
 
 from entitykb import (
     FieldCriteria,
     FilterStep,
     Graph,
     Node,
-    Query,
+    Traversal,
     EdgeCriteria,
     Trail,
     WalkStep,
     chain,
     create_component,
+    under_limit,
 )
 
 
@@ -135,12 +136,17 @@ class FilterLayer(Layer):
 
 @dataclass
 class Searcher(object):
-    graph: Graph = None
+    graph: Graph
+    starts: Iterable
+    traversal: Traversal
+    layer: Layer = None
 
-    def __call__(self, query: Query, *starts):
-        return self.search(query, *starts)
+    def __iter__(self):
+        self.layer = self.initialize()
+        for trail in self.layer:
+            yield trail
 
-    def search(self, query: Query, *starts) -> List[Trail]:
+    def initialize(self) -> Layer:
         raise NotImplementedError
 
     @classmethod
@@ -149,33 +155,14 @@ class Searcher(object):
 
 
 class DefaultSearcher(Searcher):
-    def search(self, query: Query, *starts) -> List[Trail]:
-        query = query if query is not None else Query()
-        starts = chain(starts)
+    def initialize(self) -> Layer:
+        starts = chain(self.starts)
         layer = StartLayer(self.graph, starts=starts)
 
-        for step in query.steps:
+        for step in self.traversal:
             if isinstance(step, WalkStep):
                 layer = WalkLayer(graph=self.graph, step=step, prev=layer)
             elif isinstance(step, FilterStep):
                 layer = FilterLayer(graph=self.graph, step=step, prev=layer)
 
-        index = -1
-        trails = []
-        for trail in layer:
-            index += 1
-
-            if index < query.offset:
-                continue
-
-            if under_limit(items=trails, limit=query.limit):
-                trails.append(trail)
-
-        return trails
-
-
-def under_limit(items: List, limit: int):
-    if limit is None:
-        return True
-
-    return len(items) < limit
+        return layer

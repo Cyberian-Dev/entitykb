@@ -3,8 +3,7 @@ from typing import List
 import pytest
 from entitykb import (
     Entity,
-    Query,
-    QB,
+    T,
     F,
     Verb,
     chain,
@@ -78,25 +77,21 @@ def graph():
     return graph
 
 
-@pytest.fixture
-def searcher(graph) -> DefaultSearcher:
-    return DefaultSearcher(graph=graph)
-
-
-def test_searcher(searcher):
-    query = Query()
-    trails = searcher.search(query, apple)
+def test_searcher(graph):
+    searcher = DefaultSearcher(graph=graph, traversal=T(), starts=apple)
+    trails = list(searcher)
     assert 1 == len(trails)
     assert {apple.key} == ends(trails)
 
-    trails = searcher.search(query, apple.key)
+    searcher = DefaultSearcher(graph=graph, traversal=T(), starts=apple.key)
+    trails = list(searcher)
     assert 1 == len(trails)
     assert {apple.key} == ends(trails)
 
 
-def test_start_all_goal_all(searcher, graph):
-    query = QB().all()
-    trails = searcher.search(query, graph)
+def test_start_all_goal_all(graph):
+    searcher = DefaultSearcher(graph=graph, traversal=T(), starts=graph)
+    trails = list(searcher)
 
     assert 9 == len(trails)
     for result in trails:
@@ -104,48 +99,19 @@ def test_start_all_goal_all(searcher, graph):
         assert result.start == result.end
 
 
-def test_limit_goal(searcher, graph):
-    query = QB().limit(5)
-    trails = searcher.search(query, graph)
-    assert 5 == len(trails)
-
-
-def test_limit_page(searcher, graph):
-    query = QB().page(2, 2)
-    trails = searcher.search(query, graph)
-    assert 2 == len(trails)
-
-
-def test_start_all_goal_first(searcher, graph):
-    query = QB().first()
-    trails = searcher.search(query, graph)
-
-    assert 1 == len(trails)
-    assert 0 == len(trails[0])
-    assert starts(trails) == ends(trails)
-
-
-def test_start_one_goal_all(searcher, graph):
-    query = QB().all()
-    trails = searcher.search(query, apple)
-
-    assert 1 == len(trails)
-    assert 0 == len(trails[0])
-    assert starts(trails) == ends(trails)
-    assert {apple.key} == ends(trails)
-
-
-def test_in_nodes(searcher, graph):
-    query = QB().in_nodes(Verb.IS_A).all()
-    trails = searcher.search(query, apple)
+def test_in_nodes(graph):
+    t = T().in_nodes(Verb.IS_A)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
 
     assert {granny_smith.key, honeycrisp.key} == ends(trails)
     assert {apple.key} == {r.start for r in trails}
 
 
-def test_in_nodes_with_max_hops(searcher, graph):
-    query = QB().in_nodes(Verb.IS_A, max_hops=2).all()
-    trails = searcher.search(query, food)
+def test_in_nodes_with_max_hops(graph):
+    t = T().in_nodes(Verb.IS_A, max_hops=2)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=food)
+    trails = list(searcher)
 
     assert {
         fruit.key,
@@ -157,25 +123,28 @@ def test_in_nodes_with_max_hops(searcher, graph):
     assert {food.key} == starts(trails)
 
 
-def test_in_nodes_with_passthru(searcher, graph):
-    query = QB().in_nodes(Verb.IS_A, passthru=True).all()
-    trails = searcher.search(query, apple)
+def test_in_nodes_with_passthru(graph):
+    t = T().in_nodes(Verb.IS_A, passthru=True)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
 
     assert {apple.key, granny_smith.key, honeycrisp.key} == ends(trails)
     assert {apple.key} == starts(trails)
 
 
-def test_out_nodes(searcher):
-    query = QB().out_nodes(Verb.IS_A).all()
-    trails = searcher.search(query, apple)
+def test_out_nodes(graph):
+    t = T().out_nodes(Verb.IS_A)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
 
     assert {fruit.key} == ends(trails)
     assert {apple.key} == starts(trails)
 
 
-def test_in_nodes_all_verbs(searcher, graph):
-    query = QB().in_nodes().all()
-    trails = searcher.search(query, apple)
+def test_in_nodes_all_verbs(graph):
+    t = T().in_nodes()
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
 
     assert {
         granny_smith.key,
@@ -186,165 +155,224 @@ def test_in_nodes_all_verbs(searcher, graph):
     assert {apple.key} == starts(trails)
 
 
-def test_all_nodes_all_verbs_no_max(searcher):
-    query = QB().all_nodes(max_hops=None).all()
-    trails = searcher.search(query, apple)
+def test_all_nodes_all_verbs_no_max(graph):
+    t = T().all_nodes(max_hops=None)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
 
     assert 8 == len(trails)
     assert apple.key not in ends(trails)
     assert {apple.key} == starts(trails)
 
 
-def test_all_nodes_optional_attribute(searcher):
-    query = QB().all_nodes(max_hops=None).include(F.price > 3.00).all()
-    trails = searcher.search(query, apple)
+def test_all_nodes_optional_attribute(graph):
+    t = T().all_nodes(max_hops=None).include(F.price > 3.00)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
 
     assert 1 == len(trails)
     assert {honeycrisp.key} == ends(trails)
 
-    query = QB().all_nodes(max_hops=None).exclude(F.price > 3.00).all()
-    trails = searcher.search(query, apple)
+    t = T().all_nodes(max_hops=None).exclude(F.price > 3.00)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
 
     assert 7 == len(trails)
     assert honeycrisp.key not in ends(trails)
 
 
-def test_in_has_a_apple_out_is_a(searcher):
-    query = QB().in_nodes(Verb.HAS_A).out_nodes(Verb.IS_A).all()
-    trails = searcher.search(query, apple)
+def test_in_has_a_apple_out_is_a(graph):
+    t = T().in_nodes(Verb.HAS_A).out_nodes(Verb.IS_A)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
 
     assert {dessert.key, pie.key} == ends(trails)
     assert {apple.key} == starts(trails)
 
 
-def test_is_include_label(searcher):
-    query = QB().in_nodes().include(F.label == "SAUCE").all()
-    trails = searcher.search(query, dessert)
+def test_is_include_label(graph):
+    t = T().in_nodes().include(F.label == "SAUCE")
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=dessert)
+    trails = list(searcher)
+
     assert {apple_sauce.key} == {r.end for r in trails}
     assert {dessert.key} == {r.start for r in trails}
 
-    query = QB().in_nodes().include(F.label != "SAUCE").all()
-    trails = searcher.search(query, dessert)
+    t = T().in_nodes().include(F.label != "SAUCE")
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=dessert)
+    trails = list(searcher)
+
     assert {pie.key} == {r.end for r in trails}
     assert {dessert.key} == {r.start for r in trails}
 
 
-def test_query_exclude_by_label(searcher):
-    query = QB().in_nodes().exclude(F.label == "SAUCE").all()
-    trails = searcher.search(query, dessert)
+def test_query_exclude_by_label(graph):
+    t = T().in_nodes().exclude(F.label == "SAUCE")
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=dessert)
+    trails = list(searcher)
+
     assert {pie.key} == {r.end for r in trails}
     assert {dessert.key} == {r.start for r in trails}
 
-    query = QB().in_nodes().exclude(F.label != "SAUCE").all()
-    trails = searcher.search(query, dessert)
+    t = T().in_nodes().exclude(F.label != "SAUCE")
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=dessert)
+    trails = list(searcher)
+
     assert {apple_sauce.key} == {r.end for r in trails}
     assert {dessert.key} == {r.start for r in trails}
 
 
-def test_comparison_options(searcher):
-    query = QB().in_nodes(Verb.IS_A).include(F.price < 3.00).all()
-    assert {granny_smith.key} == ends(searcher(query, apple))
+def test_comparison_options(graph):
+    t = T().in_nodes(Verb.IS_A).include(F.price < 3.00)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
+    assert {granny_smith.key} == ends(trails)
 
-    query = QB().in_nodes(Verb.IS_A).include(F.price <= 1.99).all()
-    assert {granny_smith.key} == ends(searcher(query, apple))
+    t = T().in_nodes(Verb.IS_A).include(F.price <= 1.99)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
+    assert {granny_smith.key} == ends(trails)
 
-    query = QB().in_nodes(Verb.IS_A).include(F.price < 1.99).all()
-    assert set() == ends(searcher(query, apple))
+    t = T().in_nodes(Verb.IS_A).include(F.price < 1.99)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
+    assert set() == ends(trails)
 
-    query = QB().in_nodes(Verb.IS_A).include(F.price > 3.00).all()
-    assert {honeycrisp.key} == ends(searcher(query, apple))
+    t = T().in_nodes(Verb.IS_A).include(F.price > 3.00)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
+    assert {honeycrisp.key} == ends(trails)
 
-    query = QB().in_nodes(Verb.IS_A).include(F.price >= 3.99).all()
-    assert {honeycrisp.key} == ends(searcher(query, apple))
+    t = T().in_nodes(Verb.IS_A).include(F.price >= 3.99)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
+    assert {honeycrisp.key} == ends(trails)
 
-    query = QB().in_nodes(Verb.IS_A).include(F.price.is_in(3.99, 1.99)).all()
-    assert {granny_smith.key, honeycrisp.key} == ends(searcher(query, apple))
+    t = T().in_nodes(Verb.IS_A).include(F.price.is_in(3.99, 1.99))
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
+    assert {granny_smith.key, honeycrisp.key} == ends(trails)
 
-    query = QB().in_nodes(Verb.IS_A).include(F.price > 3.99).all()
-    assert set() == ends(searcher(query, apple))
+    t = T().in_nodes(Verb.IS_A).include(F.price > 3.99)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
+    assert set() == ends(trails)
 
-    query = (
-        QB()
+    t = (
+        T()
         .in_nodes(Verb.IS_A)
         .include(F.price > 2.00, F.price < 3.00, all=True)
-        .all()
     )
-    assert set() == ends(searcher(query, apple))
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
+    assert set() == ends(trails)
 
-    query = (
-        QB()
+    t = (
+        T()
         .in_nodes(Verb.IS_A)
         .include(F.price > 2.00, F.price < 3.00, all=False)
-        .all()
     )
-    assert {honeycrisp.key, granny_smith.key} == ends(searcher(query, apple))
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
+    assert {honeycrisp.key, granny_smith.key} == ends(trails)
 
-    query = QB().in_nodes(Verb.IS_A).include(F.name.contains("Smith")).all()
-    assert {granny_smith.key} == ends(searcher(query, apple))
+    t = T().in_nodes(Verb.IS_A).include(F.name.contains("Smith"))
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
+    assert {granny_smith.key} == ends(trails)
 
-    query = QB().in_nodes(Verb.IS_A).include(F.name.contains("smith")).all()
-    assert set() == ends(searcher(query, apple))
+    t = T().in_nodes(Verb.IS_A).include(F.name.contains("smith"))
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
+    assert set() == ends(trails)
 
-    query = QB().in_nodes(Verb.IS_A).include(F.name.icontains("SMITH")).all()
-    assert {granny_smith.key} == ends(searcher(query, apple))
+    t = T().in_nodes(Verb.IS_A).include(F.name.icontains("SMITH"))
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
+    assert {granny_smith.key} == ends(trails)
 
-    query = QB().in_nodes(Verb.IS_A).exclude(F.name.iexact("honeycrisp")).all()
-    assert {granny_smith.key} == ends(searcher(query, apple))
+    t = T().in_nodes(Verb.IS_A).exclude(F.name.iexact("honeycrisp"))
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
+    assert {granny_smith.key} == ends(trails)
 
-    query = QB().in_nodes(Verb.IS_A).exclude(F.name.startswith("Hone")).all()
-    assert {granny_smith.key} == ends(searcher(query, apple))
+    t = T().in_nodes(Verb.IS_A).exclude(F.name.startswith("Hone"))
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
+    assert {granny_smith.key} == ends(trails)
 
-    query = QB().in_nodes(Verb.IS_A).exclude(F.name.istartswith("hone")).all()
-    assert {granny_smith.key} == ends(searcher(query, apple))
+    t = T().in_nodes(Verb.IS_A).exclude(F.name.istartswith("hone"))
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
+    assert {granny_smith.key} == ends(trails)
 
-    query = QB().in_nodes(Verb.IS_A).include(F.name.endswith("Smith")).all()
-    assert {granny_smith.key} == ends(searcher(query, apple))
+    t = T().in_nodes(Verb.IS_A).include(F.name.endswith("Smith"))
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
+    assert {granny_smith.key} == ends(trails)
 
-    query = QB().in_nodes(Verb.IS_A).include(F.name.iendswith("SMITH")).all()
-    assert {granny_smith.key} == ends(searcher(query, apple))
+    t = T().in_nodes(Verb.IS_A).include(F.name.iendswith("SMITH"))
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
+    assert {granny_smith.key} == ends(trails)
 
-    query = QB().in_nodes(Verb.IS_A).include(F.price.range((1.50, 5))).all()
-    assert {granny_smith.key, honeycrisp.key} == ends(searcher(query, apple))
+    t = T().in_nodes(Verb.IS_A).include(F.price.range((1.50, 5)))
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
+    assert {granny_smith.key, honeycrisp.key} == ends(trails)
 
-    query = QB().in_nodes(Verb.IS_A).include(F.name.iendswith("SMITH")).all()
-    assert {granny_smith.key} == ends(searcher(query, apple))
+    t = T().in_nodes(Verb.IS_A).include(F.name.iendswith("SMITH"))
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
+    assert {granny_smith.key} == ends(trails)
 
-    query = QB().in_nodes(Verb.IS_A).include(F.name.regex("^[A-Za-z]*$")).all()
-    assert {honeycrisp.key} == ends(searcher(query, apple))
+    t = T().in_nodes(Verb.IS_A).include(F.name.regex("^[A-Za-z]*$"))
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
+    assert {honeycrisp.key} == ends(trails)
 
-    query = QB().in_nodes(Verb.IS_A).include(F.name.iregex(r"^[\w\s]+$")).all()
-    assert {honeycrisp.key, granny_smith.key} == ends(searcher(query, apple))
+    t = T().in_nodes(Verb.IS_A).include(F.name.iregex(r"^[\w\s]+$"))
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
+    assert {honeycrisp.key, granny_smith.key} == ends(trails)
 
 
-def test_has_apple_include_pies(searcher):
-    query = QB().in_nodes(Verb.HAS_A).include(Verb.is_a >> pie).all()
-    trails = searcher.search(query, apple)
+def test_has_apple_include_pies(graph):
+    t = T().in_nodes(Verb.HAS_A).include(Verb.is_a >> pie)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
 
     assert {apple_pie.key} == ends(trails)
     assert {apple.key} == {r.start for r in trails}
 
 
-def test_include_what_an_apple_is(searcher):
-    query = QB().in_nodes(max_hops=3).include(Verb.is_a << apple).all()
-    trails = searcher.search(query, food)
+def test_include_what_an_apple_is(graph):
+    t = T().in_nodes(max_hops=3).include(Verb.is_a << apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=food)
+    trails = list(searcher)
     assert {fruit.key} == ends(trails)
 
 
-def test_include_adjacent_to_pie(searcher):
-    query = QB().in_nodes(max_hops=3).include(Verb.is_a ** pie).all()
-    trails = searcher.search(query, food)
+def test_include_adjacent_to_pie(graph):
+    t = T().in_nodes(max_hops=3).include(Verb.is_a ** pie)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=food)
+    trails = list(searcher)
     assert {dessert.key, apple_pie.key} == ends(trails)
 
 
-def test_exclude_is_a(searcher):
-    query = QB().in_nodes(Verb.HAS_A).exclude(Verb.is_a >> pie).all()
-    trails = searcher.search(query, apple)
+def test_exclude_is_a(graph):
+    t = T().in_nodes(Verb.HAS_A).exclude(Verb.is_a >> pie)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    trails = list(searcher)
     assert {apple_sauce.key} == ends(trails)
 
 
-def test_multi_result_hops(searcher):
-    query = QB().out_nodes(Verb.IS_A, max_hops=4).all()
-    trails = searcher.search(query, apple_pie, apple_sauce)
+def test_multi_result_hops(graph):
+    t = T().out_nodes(Verb.IS_A, max_hops=4)
+    searcher = DefaultSearcher(
+        graph=graph, traversal=t, starts=(apple_pie, apple_sauce)
+    )
+    trails = list(searcher)
     assert ends(trails).issuperset({dessert.key})
 
 
