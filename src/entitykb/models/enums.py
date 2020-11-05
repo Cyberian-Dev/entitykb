@@ -89,23 +89,23 @@ class Comparison(str, enum.Enum):
 
     @classmethod
     def do_icontains(cls, compare_value: str, field_value: str):
-        return compare_value.lower() in field_value.lower()
+        return str(compare_value).lower() in str(field_value).lower()
 
     @classmethod
     def do_startswith(cls, compare_value: str, field_value: str):
-        return field_value.startswith(compare_value)
+        return str(field_value).startswith(str(compare_value))
 
     @classmethod
     def do_istartswith(cls, compare_value: str, field_value: str):
-        return field_value.lower().startswith(compare_value.lower())
+        return str(field_value).lower().startswith(str(compare_value).lower())
 
     @classmethod
     def do_endswith(cls, compare_value: str, field_value: str):
-        return field_value.endswith(compare_value)
+        return str(field_value).endswith(str(compare_value))
 
     @classmethod
     def do_iendswith(cls, compare_value: str, field_value: str):
-        return field_value.lower().endswith(compare_value.lower())
+        return str(field_value).lower().endswith(str(compare_value).lower())
 
     @classmethod
     def do_range(cls, compare_value, field_value):
@@ -113,14 +113,14 @@ class Comparison(str, enum.Enum):
         return start <= field_value <= end
 
     @classmethod
-    def do_regex(cls, compare_value: re, field_value: str):
+    def do_regex(cls, compare_value: str, field_value: str):
         pattern = re.compile(compare_value)
-        return pattern.match(field_value) is not None
+        return pattern.match(str(field_value)) is not None
 
     @classmethod
-    def do_iregex(cls, compare_value: re, field_value: str):
+    def do_iregex(cls, compare_value: str, field_value: str):
         pattern = re.compile(compare_value, re.IGNORECASE)
-        return pattern.match(field_value) is not None
+        return pattern.match(str(field_value)) is not None
 
 
 @enum.unique

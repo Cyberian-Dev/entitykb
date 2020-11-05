@@ -32,6 +32,6 @@
     }
     #content {
         padding: 1em;
-        margin: 1em;
+        margin: 1em 3em 5em 3em;
     }
 </style>
