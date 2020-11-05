@@ -35,11 +35,12 @@ class NodeIndex(object):
         self.nodes_by_key[node.key] = node
         self.nodes_by_label[node.label].add(node)
 
-    def remove(self, key: str) -> bool:
-        node = self.nodes_by_key.pop(key)
-        nodes = self.nodes_by_label[node.label]
-        nodes.remove(node)
-        return True
+    def remove(self, key: str) -> Node:
+        node = self.nodes_by_key.pop(key, None)
+        if node:
+            nodes = self.nodes_by_label[node.label]
+            nodes.remove(node)
+        return node
 
 
 class EdgeIndex(object):

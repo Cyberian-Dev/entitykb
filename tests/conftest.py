@@ -37,6 +37,15 @@ def apple():
 
 
 @pytest.fixture(scope="function")
+def apple_records():
+    return Company(
+        name="Apple Records",
+        synonyms=("Apple",),
+        headquarters=Location(key=2, city="Abbey Road"),
+    )
+
+
+@pytest.fixture(scope="function")
 def google():
     return Company(name="Google, Inc.", label="COMPANY", synonyms=("Google",))
 

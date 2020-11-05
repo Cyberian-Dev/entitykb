@@ -26,6 +26,12 @@ class TermsIndex(object):
     def add_term(self, key: str, term: str, **kwargs):
         raise NotImplementedError
 
+    def remove_entity(self, entity: Entity):
+        raise NotImplementedError
+
+    def remove_term(self, key: str, term: str):
+        raise NotImplementedError
+
     def is_prefix(self, prefix: str) -> bool:
         raise NotImplementedError
 
@@ -77,6 +83,22 @@ class TrieTermsIndex(TermsIndex):
         entry.add((key, props))
 
         return normalized
+
+    def remove_entity(self, entity: Entity):
+        key = Entity.to_key(entity)
+        for term in entity.terms:
+            self.remove_term(key=key, term=term)
+
+    def remove_term(self, key: str, term: str):
+        normalized = self.normalizer(term)
+        entry = self.trie.get(normalized, None)
+
+        entry = {(k, p) for k, p in (entry or ()) if k != key}
+
+        if not entry:
+            self.trie.remove_word(normalized)
+        else:
+            self.trie.add_word(normalized, entry)
 
     def is_prefix(self, prefix: str) -> bool:
         normalized = self.normalizer(prefix)

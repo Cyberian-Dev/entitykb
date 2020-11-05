@@ -21,11 +21,32 @@ def test_creates_files(root, kb: KB, apple):
     assert os.path.isfile(os.path.join(root, "index.db"))
 
 
-def test_save_entity(kb: KB, apple):
+def test_save_entity(kb: KB, apple, apple_records):
     kb.save_node(apple)
+    kb.save_node(apple_records)
+
     assert (kb.parse("AAPL")).entities[0].entity == apple
     assert (kb.parse("Apple, Inc.")).entities[0].entity == apple
-    assert (kb.parse("Apple,Inc.")).entities[0].entity == apple
+    assert (kb.parse("Apple Computers")).entities[0].text == "Apple"
+    assert (kb.parse("Apple Records")).entities[0].entity == apple_records
+    assert 2 == len((kb.parse("Apple")).entities)
+
+    apple2 = apple.copy(update=dict(synonyms=("Apple", "Apple Computers")))
+
+    # should reset the terms
+    kb.save_node(apple2)
+
+    assert not (kb.parse("AAPL")).entities
+    assert (kb.parse("Apple, Inc.")).entities[0].entity == apple2
+    assert (kb.parse("Apple Computers")).entities[0].entity == apple2
+    assert (kb.parse("Apple Computers")).entities[0].text == "Apple Computers"
+    assert 2 == len((kb.parse("Apple")).entities)
+
+    kb.remove_node(apple2)
+
+    assert 1 == len((kb.parse("Apple")).entities)
+    assert 1 == len((kb.parse("Apple Computers")).entities)
+    assert (kb.parse("Apple Computers")).entities[0].text == "Apple"
 
 
 def test_save_load_sync(root, kb: KB, apple):

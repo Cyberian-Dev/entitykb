@@ -85,13 +85,13 @@ class InMemoryGraph(Graph):
         self.edges.save(edge)
         return edge
 
-    def remove_node(self, key: str) -> bool:
+    def remove_node(self, key: str) -> Node:
         edges = [edge for _, edge in self.edges.iterate(nodes=[key])]
         for edge in edges:
             self.edges.remove(edge)
 
-        success = self.nodes.remove(key)
-        return success
+        node = self.nodes.remove(key)
+        return node
 
     def connect(self, *, start: Node, verb: str, end: Node, data: dict = None):
         registry = Registry.instance()

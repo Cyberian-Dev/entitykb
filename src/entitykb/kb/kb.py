@@ -77,6 +77,8 @@ class KB(BaseKB):
     def save_node(self, node: Union[Node, dict]) -> Node:
         node = Registry.instance().create(Node, node)
 
+        self.remove_node(node.key)
+
         self.graph.save_node(node)
 
         if isinstance(node, Entity):
@@ -85,7 +87,11 @@ class KB(BaseKB):
         return node
 
     def remove_node(self, key) -> bool:
-        return self.graph.remove_node(key)
+        key = Node.to_key(key)
+        node = self.graph.remove_node(key)
+        if isinstance(node, Entity):
+            self.terms.remove_entity(node)
+        return node
 
     # edges
 
