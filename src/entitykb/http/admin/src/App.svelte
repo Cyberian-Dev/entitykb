@@ -1,9 +1,28 @@
 <script>
     import Menu from "./Menu.svelte";
     import Bottom from "./Bottom.svelte";
-    import Admin from "./Admin.svelte";
+    import ListView from "./ListView.svelte";
+    import DetailView from "./DetailView.svelte";
 
     let choice = "admin";
+    let selectKey = null;
+
+    const updateKey = () => {
+        if (selectKey !== null) {
+            choice = "detail"
+        } else {
+            choice = "admin";
+        }
+    };
+
+    const updateChoice = () => {
+        if (choice !== "detail") {
+            selectKey = null;
+        }
+    };
+
+    $: updateKey(selectKey);
+    $: updateChoice(choice);
 </script>
 
 <main>
@@ -11,7 +30,11 @@
 
     {#if (choice === "admin")}
     <div id="content">
-        <Admin />
+        <ListView bind:selectKey={selectKey} />
+    </div>
+    {:else if (choice === "detail")}
+    <div id="content">
+        <DetailView key={selectKey} />
     </div>
     {:else if (choice === "api")}
         <iframe src="/docs"></iframe>

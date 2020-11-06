@@ -192,7 +192,11 @@ class KB(BaseKB):
                 continue
 
             if under_limit(items=trails, limit=request.limit):
-                trails.append(trail)
-                nodes.append(self.get_node(trail.end))
+                node = self.get_node(trail.end)
+                if node:
+                    trails.append(trail)
+                    nodes.append(node)
+                else:
+                    index -= 1
 
         return nodes, trails

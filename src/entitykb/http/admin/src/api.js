@@ -1,58 +1,75 @@
 const baseURL = window.location.origin;
 const searchURL = baseURL + "/search";
+const getURL = baseURL + "/nodes/";
 const pageSize = 10;
 
-export const search = async (term, key, label, attr_name, attr_value, page) => {
+export const search = async (page, filters) => {
+
     let traversal = [];
 
-    if (key) {
-        traversal.push({
-            "criteria": [
-                {
-                    "type": "field",
-                    "field": "key",
-                    "compare": "icontains",
-                    "value": key,
-                }
-            ]
-        });
+    function addFieldFilter(field) {
+        let value = filters[field];
+
+        if (field && value) {
+            if (field === "attributes") {
+
+            } else {
+                traversal.push({
+                    "criteria": [
+                        {
+                            "type": "field",
+                            "field": field,
+                            "compare": "icontains",
+                            "value": value,
+                        }
+                    ]
+                });
+            }
+        }
     }
 
-    if (label) {
-        traversal.push({
-            "criteria": [
-                {
-                    "type": "field",
-                    "field": "label",
-                    "compare": "icontains",
-                    "value": label,
-                }
-            ]
-        });
-    }
-
-    if (attr_name && attr_value) {
-        traversal.push({
-            "criteria": [
-                {
-                    "type": "field",
-                    "field": attr_name,
-                    "compare": "icontains",
-                    "value": attr_value,
-                }
-            ]
-        });
-    }
+    Object.keys(filters).forEach(addFieldFilter);
 
     const body = {
-        'q': term,
-        'limit': pageSize,
-        'offset': page * pageSize,
-        'traversal': traversal,
+        q: '',
+        limit: pageSize,
+        offset: page * pageSize,
+        traversal: traversal,
     };
 
-    return await fetch(searchURL, {
-        method: 'POST',
+    console.log(body);
+
+    return await callSearch(searchURL, "POST", body);
+};
+
+export const getNeighbors = async (key, page) => {
+    const body = {
+        q: key,
+        input: 'key',
+        traversal: [
+            {
+                directions: ['incoming', 'outgoing'],
+                max_hops: 1,
+            }
+        ],
+        limit: pageSize,
+        offset: page * pageSize,
+    };
+    return await callSearch(searchURL, "POST", body);
+};
+
+
+export const getNode = async (key) => {
+    return await callSearch(getURL + key, "GET", null);
+};
+
+export const callSearch = async (url, method, body) => {
+    if (body) {
+        body = JSON.stringify(body);
+    }
+
+    return await fetch(url, {
+        method: method,
         mode: 'cors',
         cache: 'no-cache',
         credentials: 'same-origin',
@@ -62,7 +79,7 @@ export const search = async (term, key, label, attr_name, attr_value, page) => {
         },
         redirect: 'follow',
         referrerPolicy: 'no-referrer',
-        body: JSON.stringify(body),
+        body: body,
     })
         .then(response => {
             return response.json()

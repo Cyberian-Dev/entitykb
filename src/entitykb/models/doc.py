@@ -83,7 +83,7 @@ class DocToken(BaseModel):
 class DocEntity(HasTokens):
     entity_key: str
     tokens: Tuple[DocToken, ...]
-    entity: Entity = None
+    entity: dict = None
 
     def __init__(self, **data: Any):
         entity = Registry.instance().create(Entity, data.get("entity"))

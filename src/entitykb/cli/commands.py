@@ -36,9 +36,10 @@ def clear(root: Optional[Path] = typer.Option(None)):
     """ Clear local KB """
 
     root = Config.get_root(root)
-    typer.confirm(f"Are you sure you want to clear: {root}?", abort=True)
+    path = os.path.join(root, "index.db")
+    typer.confirm(f"Are you sure you want to clear: {path}?", abort=True)
 
-    shutil.rmtree(root)
+    os.remove(path)
 
     kb = KB(root=root)
     success = kb.commit()
