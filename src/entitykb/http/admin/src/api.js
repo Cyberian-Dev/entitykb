@@ -3,8 +3,7 @@ const searchURL = baseURL + "/search";
 const getURL = baseURL + "/nodes/";
 const pageSize = 10;
 
-export const search = async (page, filters) => {
-
+export const getNodes = async (q, page, filters) => {
     let traversal = [];
 
     function addFieldFilter(field) {
@@ -31,18 +30,16 @@ export const search = async (page, filters) => {
     Object.keys(filters).forEach(addFieldFilter);
 
     const body = {
-        q: '',
+        q: q,
         limit: pageSize,
         offset: page * pageSize,
         traversal: traversal,
     };
 
-    console.log(body);
-
     return await callSearch(searchURL, "POST", body);
 };
 
-export const getNeighbors = async (key, page) => {
+export const getEdges = async (key, page) => {
     const body = {
         q: key,
         input: 'key',

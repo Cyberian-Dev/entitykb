@@ -1,21 +1,29 @@
 <script>
-    import {search} from './api.js';
+    import {getNodes} from './api.js';
     import Pagination from "./Pagination.svelte";
     import ColumnFilter from "./ColumnFilter.svelte";
     import AttributeFilter from "./AttributeFilter.svelte";
 
     export let selectKey = null;
+
+    let q = '';
+    let page = 0;
     let filters = {
         "name": '',
         "key": '',
         "label": '',
     };
 
-    let page = 0;
     let data = {"nodes": [], "trails": []};
+
+    let labels = ["COUNTRY", "CONTINENT", "DIVISION"];
 
     const isAttribute = (fieldName) => {
         return !["key", "name", "label"].includes(fieldName);
+    };
+
+    const onUpdateName = async (event) => {
+        q = event.detail.value;
     };
 
     const onUpdate = async (event) => {
@@ -37,12 +45,8 @@
         page = 0;
     };
 
-    const onRefresh = async () => {
-        console.log(page);
-        console.log(filters);
-
-        data = await search(page, filters);
-        console.log(data);
+    const reloadData = async () => {
+        data = await getNodes(q, page, filters);
     };
 
     const openRow = (key) => {
@@ -68,7 +72,7 @@
         return attrs;
     };
 
-    $: onRefresh(page, filters);
+    $: reloadData(q, page, filters);
 </script>
 
 <div class="ui grid">
@@ -83,13 +87,13 @@
     <thead class="full-width">
     <tr>
         <th class="two wide">
-            <ColumnFilter name="name" display="Name" on:update={onUpdate} />
+            <ColumnFilter name="name" display="Name" on:update={onUpdateName} />
         </th>
         <th class="two wide">
             <ColumnFilter name="key" display="Key" on:update={onUpdate} />
         </th>
         <th class="two wide">
-            <ColumnFilter name="label" display="Label" on:update={onUpdate} />
+            <ColumnFilter name="label" display="Label" options={labels} on:update={onUpdate} />
         </th>
         <th class="four wide">
             <AttributeFilter on:update={onUpdate} />

@@ -37,11 +37,9 @@
         <DetailView key={selectKey} />
     </div>
     {:else if (choice === "api")}
-        <iframe src="/docs"></iframe>
+        <iframe title="Swagger API" src="/docs"></iframe>
     {:else if (choice === "docs")}
-        <iframe src="https://www.entitykb.org/"></iframe>
-    {:else if (choice === "docs")}
-        <iframe src="https://www.entitykb.org/"></iframe>
+        <iframe title="Docs" src="https://www.entitykb.org/"></iframe>
     {/if}
 
     <Bottom />

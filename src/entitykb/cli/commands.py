@@ -102,14 +102,14 @@ def run_rpc(
 @cli.command(name="http")
 def run_http(
     root: Optional[Path] = typer.Option(None),
-    host: Optional[str] = typer.Option(None),
-    port: int = typer.Option(None),
-    http_host: Optional[str] = typer.Option(None),
+    host: Optional[str] = typer.Option("127.0.0.1"),
+    port: int = typer.Option(8000),
+    rpc_host: Optional[str] = typer.Option("127.0.0.1"),
     rpc_port: int = typer.Option(3477),
 ):
     """ Launch HTTP server using RPC KB. """
     environ.root = root
-    environ.rpc_host = http_host
+    environ.rpc_host = rpc_host
     environ.rpc_port = rpc_port
 
     http_app = "entitykb.http.prod:app"

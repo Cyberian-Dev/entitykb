@@ -1,23 +1,28 @@
 <script>
-    import {getNode, getNeighbors} from './api.js';
+    import {getNode, getEdges} from './api.js';
+    import Pagination from "./Pagination.svelte";
 
     export let key = null;
 
     let node = {};
-    let neighbors = [];
+    let edges = [];
     let page = 0;
-    let edges = new Map();
+    let relationships = new Map();
 
     function addTrail(trail) {
-        let items = edges.get(trail.end);
-        if (!items) {
-            items = [];
-            edges.set(trail.end, items);
-        }
+        let neighbor = relationships.get(trail.end);
 
         function addEdge(edge) {
-            let direction = edge.end === trail.end ? ">>>" : "<<<";
-            items.push({verb: edge.verb, direction: direction});
+            const dir = edge.end === trail.end ? "outgoing" : "incoming";
+            edges = [...edges,
+                {
+                    direction: dir,
+                    verb: edge.verb,
+                    key: neighbor.key,
+                    label: neighbor.label,
+                    name: neighbor.name,
+                }
+            ];
         }
 
         trail && trail.hops && trail.hops[0].edges.forEach(addEdge);
@@ -25,12 +30,14 @@
 
     const onChange = async () => {
         node = await getNode(key);
-        let result = await getNeighbors(key, page);
+        edges = [];
 
-        neighbors = (result && result.nodes) || [];
-        edges = new Map();
-        let trails = (result && result.trails) || [];
-        trails.forEach(addTrail);
+        let result = await getEdges(key, page);
+        result.nodes.forEach(n => {
+            relationships.set(n.key, n);
+        });
+        result.trails.forEach(addTrail);
+        edges = edges;
     };
 
     const isAttribute = (fieldName) => {
@@ -41,17 +48,17 @@
         key = rowKey;
     };
 
-    $: onChange(key);
+    $: onChange(key, page);
 </script>
 
 <div class="ui grid">
-    <div class="eight wide column">
+    <div class="seven wide column">
         <h3>Node Details</h3>
         <table class="ui compact definition table">
             <tbody>
             <tr>
-                <td>key</td>
-                <td>{node['key']}</td>
+                <td class="two wide column">key</td>
+                <td class="five wide column">{node['key']}</td>
             </tr>
             <tr>
                 <td>name</td>
@@ -72,43 +79,35 @@
             </tbody>
         </table>
     </div>
-    <div class="eight wide column">
-        <h3>Neighbors</h3>
+    <div class="nine wide column">
+        <div class="ui grid">
+            <div class="one wide column">
+                <h3>Relationships</h3>
+            </div>
+            <div class="fifteen wide column right aligned">
+                <Pagination bind:page={page}/>
+            </div>
+        </div>
+
         <table class="ui compact striped celled table">
             <thead class="full-width">
             <tr>
-                <th class="two wide">Edges</th>
-                <th class="two wide">Key</th>
-                <th class="two wide">Label</th>
+                <th class="one wide">Direction</th>
+                <th class="one wide">Verb</th>
                 <th class="four wide">Name</th>
+                <th class="two wide">Label</th>
             </tr>
             </thead>
             <tbody>
-            {#each neighbors as neighbor}
-                <tr on:click={openRow(neighbor.key)}>
-                    <td>
-                        <ul class="edges">
-                            {#each edges.get(neighbor.key) as edge}
-                                <li class="edge">
-                                    {edge.verb} <b>{edge.direction}</b>
-                                </li>
-                            {/each}
-                        </ul>
-                    </td>
-                    <td>{neighbor.key}</td>
-                    <td>{neighbor.label}</td>
-                    <td>{neighbor.name}</td>
+            {#each edges as edge}
+                <tr on:click={openRow(edge.key)}>
+                    <td>{edge.direction}</td>
+                    <td>{edge.verb}</td>
+                    <td>{edge.name}</td>
+                    <td>{edge.label}</td>
                 </tr>
             {/each}
             </tbody>
         </table>
     </div>
 </div>
-
-<style>
-    ul.edges {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-    }
-</style>
