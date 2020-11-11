@@ -70,8 +70,10 @@ def test_node_lookup():
 
 
 def test_schema():
-    schema = Registry.instance().schema.dict()
-    assert schema.keys() == {"nodes", "edges"}
+    registry = Registry.instance()
+    schema = registry.create_schema(verbs=[], labels=[])
+    schema = schema.dict()
+    assert schema.keys() == {"nodes", "edges", "labels", "verbs"}
 
     assert schema.get("edges").get("EDGE") == {
         "properties": {

@@ -1,4 +1,7 @@
 <script>
+    import {createEventDispatcher} from 'svelte';
+    const dispatch = createEventDispatcher();
+
     export let page = 0;
     let items = [];
     let addedNull = false;
@@ -26,6 +29,7 @@
             items.push(null);
         }
 
+        dispatch("update", {"name": "page", "value": page});
     }
 
     $: changePage(page);

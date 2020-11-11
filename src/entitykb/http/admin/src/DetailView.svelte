@@ -1,54 +1,56 @@
 <script>
-    import {getNode, getEdges} from './api.js';
+    import {onMount} from 'svelte';
+    import {RequestManager} from './kb/manager';
+    import {Entity} from "./kb/nodes";
+
     import Pagination from "./Pagination.svelte";
+    import ColumnFilter from "./ColumnFilter.svelte";
 
-    export let key = null;
+    export let schema;
+    export let selectKey = null;
 
-    let node = {};
-    let edges = [];
+    const manager = new RequestManager();
+    const defaults = {direction: '', verb: '', name: '', label: ''};
+    const nextRequest = {...defaults, key: selectKey};
+
+    $: labels = (schema !== null && schema.labels) || [];
+    $: verbs = (schema !== null && schema.verbs) || [];
+
+    let entity = new Entity({});
+    let neighbors = [];
     let page = 0;
-    let relationships = new Map();
 
-    function addTrail(trail) {
-        let neighbor = relationships.get(trail.end);
+    const directions = ["Incoming", "Outgoing"];
 
-        function addEdge(edge) {
-            const dir = edge.end === trail.end ? "outgoing" : "incoming";
-            edges = [...edges,
-                {
-                    direction: dir,
-                    verb: edge.verb,
-                    key: neighbor.key,
-                    label: neighbor.label,
-                    name: neighbor.name,
-                }
-            ];
+    onMount(() => {
+        loadEntity();
+        loadNeighbors();
+        setInterval(loadNeighbors, 50);
+    });
+
+    const loadEntity = async () => {
+        entity = await manager.getEntity(selectKey);
+    };
+
+    const loadNeighbors = async () => {
+        if (manager.isAvailable(page, nextRequest)) {
+            neighbors = await manager.getNeighbors(page, nextRequest);
         }
-
-        trail && trail.hops && trail.hops[0].edges.forEach(addEdge);
-    }
-
-    const onChange = async () => {
-        node = await getNode(key);
-        edges = [];
-
-        let result = await getEdges(key, page);
-        result.nodes.forEach(n => {
-            relationships.set(n.key, n);
-        });
-        result.trails.forEach(addTrail);
-        edges = edges;
     };
 
-    const isAttribute = (fieldName) => {
-        return !["key", "name", "label"].includes(fieldName);
+    const onUpdate = async (event) => {
+        nextRequest[event.detail.name] = event.detail.value;
+        page = 0;
     };
+
 
     const openRow = (rowKey) => {
-        key = rowKey;
+        page = 0;
+        selectKey = rowKey;
+        nextRequest["key"] = rowKey;
+        loadEntity();
     };
 
-    $: onChange(key, page);
 </script>
 
 <div class="ui grid">
@@ -58,23 +60,21 @@
             <tbody>
             <tr>
                 <td class="two wide column">key</td>
-                <td class="five wide column">{node['key']}</td>
+                <td class="five wide column">{entity.key}</td>
             </tr>
             <tr>
                 <td>name</td>
-                <td>{node['name']}</td>
+                <td>{entity.name}</td>
             </tr>
             <tr>
                 <td>label</td>
-                <td>{node['label']}</td>
+                <td>{entity.label}</td>
             </tr>
-            {#each Object.keys(node) as fieldName}
-                {#if isAttribute(fieldName) && Boolean(node[fieldName])}
-                    <tr>
-                        <td>{fieldName}</td>
-                        <td>{node[fieldName]}</td>
-                    </tr>
-                {/if}
+            {#each Object.entries(entity.attributes) as [name, value]}
+            <tr>
+                <td>{name}</td>
+                <td>{value}</td>
+            </tr>
             {/each}
             </tbody>
         </table>
@@ -92,19 +92,35 @@
         <table class="ui compact striped celled table">
             <thead class="full-width">
             <tr>
-                <th class="one wide">Direction</th>
-                <th class="one wide">Verb</th>
-                <th class="four wide">Name</th>
-                <th class="two wide">Label</th>
+                <th class="two wide" nowrap="nowrap">
+                    <ColumnFilter name="direction"
+                                  display="Direction"
+                                  options={directions}
+                                  on:update={onUpdate}/>
+                </th>
+                <th class="two wide" nowrap="nowrap">
+                    <ColumnFilter name="verb" display="Verb"
+                                  options={verbs}
+                                  on:update={onUpdate}/>
+                </th>
+                <th class="three wide" nowrap="nowrap">
+                    <ColumnFilter name="name" display="Name"
+                                  on:update={onUpdate}/>
+                </th>
+                <th class="two wide">
+                    <ColumnFilter name="label" display="Label"
+                          options={labels}
+                          on:update={onUpdate}/>
+                </th>
             </tr>
             </thead>
             <tbody>
-            {#each edges as edge}
-                <tr on:click={openRow(edge.key)}>
-                    <td>{edge.direction}</td>
-                    <td>{edge.verb}</td>
-                    <td>{edge.name}</td>
-                    <td>{edge.label}</td>
+            {#each neighbors as neighbor}
+                <tr on:click={openRow(neighbor.key)}>
+                    <td>{neighbor.direction}</td>
+                    <td>{neighbor.verb}</td>
+                    <td>{neighbor.name}</td>
+                    <td>{neighbor.label}</td>
                 </tr>
             {/each}
             </tbody>

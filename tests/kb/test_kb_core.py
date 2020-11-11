@@ -106,7 +106,7 @@ def test_kb_save_invalid(kb: KB):
 
 def test_get_schema(kb: KB):
     schema = kb.get_schema()
-    assert schema.keys() == {"nodes", "edges"}
+    assert schema.keys() == {"nodes", "edges", "verbs", "labels"}
     assert {"NODE", "ENTITY"}.issubset(schema["nodes"].keys())
     assert {"EDGE"}.issubset(schema["edges"].keys())
 

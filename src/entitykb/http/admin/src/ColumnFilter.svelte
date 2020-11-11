@@ -3,22 +3,22 @@
     const dispatch = createEventDispatcher();
 
     export let name = null;
+    export let value = null;
     export let display = null;
     export let options = "";
 
-    let filterValue = "";
     let inFilterMode = false;
 
     const cancelFilter = () => {
         inFilterMode = false;
-        filterValue = "";
+        value = "";
     };
 
     const openFilter = () => {
         inFilterMode = true;
     };
 
-    $: dispatch("update", {"name": name, "value": filterValue});
+    $: dispatch("update", {"name": name, "value": value});
 </script>
 
 <div id="column">
@@ -26,16 +26,15 @@
         <a class="clickable" on:click={cancelFilter}>
             <i class="red window close icon"></i>
         </a>
-        &nbsp;
         {#if options}
-            <select bind:value={filterValue}>
-                <option value="">Select {display}</option>
+            <select bind:value={value}>
+                <option value="">Any {display}</option>
             {#each options as option}
                 <option>{option}</option>
             {/each}
             </select>
         {:else}
-            <input placeholder="{display}" bind:value={filterValue} autofocus>
+            <input placeholder="{display}" bind:value={value} autofocus>
         {/if}
     {:else}
         <a class="clickable" on:click={openFilter}>

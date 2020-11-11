@@ -17,11 +17,14 @@
     };
 
     const updateFilterValue = () => {
-        dispatch("update", {"name": name, "value": value});
+        let data = null;
+        if (Boolean(name) && Boolean(value)) {
+            data = {name: name, value:value};
+        }
+        dispatch("update", {"name": "attribute", "value": data});
     };
 
-    $: updateFilterValue(name);
-    $: updateFilterValue(value);
+    $: updateFilterValue(name, value);
 </script>
 
 <div id="column">

@@ -1,7 +1,9 @@
-from typing import Dict, Type
-from pydantic import BaseModel
-from .node import Node, Edge
+from typing import Dict, Type, List
+
+from pydantic import BaseModel, Field
+
 from .entity import Entity
+from .node import Node, Edge
 
 
 class Lookup(BaseModel):
@@ -57,11 +59,13 @@ class Lookup(BaseModel):
 class Schema(BaseModel):
     nodes: Dict[str, Dict]
     edges: Dict[str, Dict]
+    labels: List[str] = Field(default_factory=list)
+    verbs: List[str] = Field(default_factory=list)
 
-    def __init__(self, lookup: Lookup):
+    def __init__(self, lookup: Lookup, labels, verbs):
         nodes = self.load_nodes(lookup)
         edges = self.load_edges(lookup)
-        super().__init__(nodes=nodes, edges=edges)
+        super().__init__(nodes=nodes, edges=edges, labels=labels, verbs=verbs)
 
     @classmethod
     def load_nodes(cls, lookup: Lookup):
@@ -84,7 +88,6 @@ class Registry(object):
 
     def __init__(self):
         self.lookup = Lookup()
-        self.schema = Schema(self.lookup)
 
     def create(self, cls, item=None, **data):
         if isinstance(item, (Node, Edge)):
@@ -108,7 +111,10 @@ class Registry(object):
         return klass
 
     @classmethod
-    def instance(cls):
+    def instance(cls) -> "Registry":
         if cls._instance is None:
             cls._instance = Registry()
         return cls._instance
+
+    def create_schema(self, labels: List[str], verbs: List[str]):
+        return Schema(self.lookup, labels, verbs)

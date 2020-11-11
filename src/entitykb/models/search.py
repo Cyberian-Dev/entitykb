@@ -45,11 +45,11 @@ class Trail(BaseModel):
             return self.start
 
     def copy(self, **kwargs):
-        return Trail(start=self.start, hops=self.hops[:])
+        return Trail.construct(start=self.start, hops=self.hops[:])
 
     def push(self, end, edge: Edge) -> "Trail":
         copy = self.copy()
-        next_hop = Hop(start=self.end, end=end, edges=[edge])
+        next_hop = Hop.construct(start=self.end, end=end, edges=[edge])
         copy.hops.append(next_hop)
         return copy
 

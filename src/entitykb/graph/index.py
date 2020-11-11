@@ -42,6 +42,9 @@ class NodeIndex(object):
             nodes.remove(node)
         return node
 
+    def get_labels(self) -> Set[str]:
+        return sorted(self.nodes_by_label.keys())
+
 
 class EdgeIndex(object):
     def __init__(self):
@@ -90,6 +93,9 @@ class EdgeIndex(object):
                 for node in ensure_iterable(nodes):
                     node_key = Node.to_key(node)
                     yield from self._do_iter(verb, direction, node_key)
+
+    def get_verbs(self) -> Set[str]:
+        return sorted(self.by_edge_verb.keys())
 
     # private methods
 

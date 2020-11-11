@@ -204,7 +204,7 @@ class Traversal(BaseModel):
     def __iter__(self):
         return iter(self.__root__)
 
-    def copy(self):
+    def copy(self, **_):
         return Traversal(__root__=self.__root__)
 
     def dict(self, *args, **kwargs):

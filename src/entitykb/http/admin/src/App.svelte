@@ -1,4 +1,8 @@
 <script>
+    import {onMount} from 'svelte';
+
+    import {RequestManager} from "./kb/manager";
+
     import Menu from "./Menu.svelte";
     import Bottom from "./Bottom.svelte";
     import ListView from "./ListView.svelte";
@@ -6,6 +10,13 @@
 
     let choice = "admin";
     let selectKey = null;
+    let schema = null;
+    const manager = new RequestManager();
+
+    onMount(async () => {
+        schema = await manager.getSchema();
+    });
+
 
     const updateKey = () => {
         if (selectKey !== null) {
@@ -30,11 +41,11 @@
 
     {#if (choice === "admin")}
     <div id="content">
-        <ListView bind:selectKey={selectKey} />
+        <ListView bind:selectKey={selectKey} schema={schema} />
     </div>
     {:else if (choice === "detail")}
     <div id="content">
-        <DetailView key={selectKey} />
+        <DetailView bind:selectKey={selectKey} schema={schema} />
     </div>
     {:else if (choice === "api")}
         <iframe title="Swagger API" src="/docs"></iframe>

@@ -83,12 +83,18 @@ class DocToken(BaseModel):
 class DocEntity(HasTokens):
     entity_key: str
     tokens: Tuple[DocToken, ...]
-    entity: dict = None
+    entity: Entity = None
 
     def __init__(self, **data: Any):
-        entity = Registry.instance().create(Entity, data.get("entity"))
+        entity = Registry.instance().create(Entity, data.pop("entity"))
+
+        # populate entity_key if not provided
         data.setdefault("entity_key", entity and entity.key)
+
         super().__init__(**data)
+
+        # store after init to prevent stripping of subclass-specific attributes
+        self.entity = entity
 
     def __str__(self):
         return f"{self.text} [{self.entity_key}]"

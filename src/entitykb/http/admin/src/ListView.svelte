@@ -1,78 +1,40 @@
 <script>
-    import {getNodes} from './api.js';
+    import {onMount} from 'svelte';
+    import {RequestManager} from './kb/manager';
+
     import Pagination from "./Pagination.svelte";
     import ColumnFilter from "./ColumnFilter.svelte";
     import AttributeFilter from "./AttributeFilter.svelte";
 
+    export let schema;
     export let selectKey = null;
 
-    let q = '';
+    const manager = new RequestManager();
+    const nextRequest = {name: '', label: '', key: '', attribute: null};
+
+    let entities = [];
     let page = 0;
-    let filters = {
-        "name": '',
-        "key": '',
-        "label": '',
-    };
+    $: labels = (schema !== null && schema.labels) || [];
 
-    let data = {"nodes": [], "trails": []};
-
-    let labels = ["COUNTRY", "CONTINENT", "DIVISION"];
-
-    const isAttribute = (fieldName) => {
-        return !["key", "name", "label"].includes(fieldName);
-    };
-
-    const onUpdateName = async (event) => {
-        q = event.detail.value;
-    };
-
-    const onUpdate = async (event) => {
-        if (isAttribute(event.detail.name)) {
-            filters = {
-                "name": filters["name"],
-                "key": filters["key"],
-                "label": filters["label"],
-            };
-
-            if (event.detail.name && event.detail.value) {
-                filters[event.detail.name] = event.detail.value;
-            }
-
-        } else {
-            filters[event.detail.name] = event.detail.value;
-        }
-
-        page = 0;
-    };
-
-    const reloadData = async () => {
-        data = await getNodes(q, page, filters);
-    };
+    onMount(() => {
+        refreshData();
+        setInterval(refreshData, 10);
+    });
 
     const openRow = (key) => {
         selectKey = key;
     };
 
-    const iterateAttrs = (node) => {
-        let attrs = [];
-        const names = Object.keys(node);
-
-        for (let index = 0; index < names.length; ++index) {
-            let name = names[index];
-            if (!isAttribute(name)) continue;
-
-            let value = node[name];
-
-            if (!Boolean(value)) continue;
-            if (value instanceof Array && value.length === 0) continue;
-
-            attrs.push([name, value]);
-        }
-
-        return attrs;
+    const onUpdate = async (event) => {
+        nextRequest[event.detail.name] = event.detail.value;
+        page = 0;
     };
 
-    $: reloadData(q, page, filters);
+    const refreshData = async () => {
+        if (manager.isAvailable(page, nextRequest)) {
+            entities = await manager.getEntities(page, nextRequest);
+        }
+    };
 </script>
 
 <div class="ui grid">
@@ -87,31 +49,35 @@
     <thead class="full-width">
     <tr>
         <th class="two wide">
-            <ColumnFilter name="name" display="Name" on:update={onUpdateName} />
+            <ColumnFilter name="name" display="Name"
+                          on:update={onUpdate}/>
         </th>
         <th class="two wide">
-            <ColumnFilter name="key" display="Key" on:update={onUpdate} />
+            <ColumnFilter name="label" display="Label"
+                          options={labels}
+                          on:update={onUpdate}/>
         </th>
         <th class="two wide">
-            <ColumnFilter name="label" display="Label" options={labels} on:update={onUpdate} />
+            <ColumnFilter name="key" display="Key"
+                         on:update={onUpdate}/>
         </th>
         <th class="four wide">
-            <AttributeFilter on:update={onUpdate} />
+            <AttributeFilter on:update={onUpdate}/>
         </th>
     </tr>
     </thead>
     <tbody>
-    {#each data.nodes as node}
-        <tr on:click={openRow(node.key)}>
-            <td>{node.name}</td>
-            <td>{node.key}</td>
-            <td>{node.label}</td>
+    {#each entities as entity}
+        <tr on:click={openRow(entity.key)}>
+            <td>{entity.name}</td>
+            <td>{entity.label}</td>
+            <td>{entity.key}</td>
             <td>
                 <table class="ui compact celled table top aligned">
-                    {#each iterateAttrs(node) as kv}
+                    {#each Object.entries(entity.attributes) as [name, value]}
                         <tr class="top aligned">
-                            <td class="four wide field_name">{kv[0]}:</td>
-                            <td class="twelve wide">{kv[1]}</td>
+                            <td class="four wide field_name">{name}:</td>
+                            <td class="twelve wide">{value}</td>
                         </tr>
                     {/each}
                 </table>

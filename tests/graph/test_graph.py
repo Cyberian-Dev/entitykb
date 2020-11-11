@@ -4,15 +4,25 @@ from entitykb import InMemoryGraph, Node, Edge
 def test_connect_nodes():
     graph = InMemoryGraph()
     start = Node()
+    end = Node()
 
-    edge = graph.connect(start=start, verb="IS_A", end=Node())
+    edge = graph.connect(start=start, verb="NEIGHBORS", end=end)
     assert isinstance(edge, Edge)
-
-    assert start == graph.get_node(start.key)
     assert graph.info() == {
         "nodes": 2,
         "edges": 1,
     }
+    assert 2 == len(list(graph.edges.iterate("NEIGHBORS")))
+    assert 1 == len(list(graph.edges.iterate("NEIGHBORS", nodes=start)))
+
+    edge2 = graph.connect(start=end, verb="NEIGHBORS", end=start)
+    assert isinstance(edge2, Edge)
+    assert graph.info() == {
+        "nodes": 2,
+        "edges": 2,
+    }
+    assert 4 == len(list(graph.edges.iterate("NEIGHBORS")))
+    assert 2 == len(list(graph.edges.iterate("NEIGHBORS", nodes=start)))
 
     graph.remove_node(start.key)
     assert graph.info() == {

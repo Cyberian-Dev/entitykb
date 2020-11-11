@@ -77,11 +77,14 @@ class KB(BaseKB):
     def save_node(self, node: Union[Node, dict]) -> Node:
         node = Registry.instance().create(Node, node)
 
-        self.remove_node(node.key)
+        key = Node.to_key(node)
+        previous = self.get_node(key)
 
         self.graph.save_node(node)
 
         if isinstance(node, Entity):
+            if previous:
+                self.terms.remove_entity(previous)
             self.terms.add_entity(node)
 
         return node
@@ -144,16 +147,18 @@ class KB(BaseKB):
             "terms": self.terms.info(),
         }
 
-    @classmethod
-    def get_schema(cls) -> dict:
-        return Registry.instance().schema.dict()
+    def get_schema(self) -> dict:
+        verbs = self.graph.get_verbs()
+        labels = self.graph.get_labels()
+        schema = Registry.instance().create_schema(labels, verbs)
+        return schema.dict()
 
     # private methods
 
     def _get_starts(self, request: SearchRequest):
         starts = []
         if not request.q:
-            starts = self.graph
+            starts = self.graph.iterate_keys()
 
         elif request.input is None or request.input.is_prefix:
             starts = self.terms.iterate_prefix_keys(prefix=request.q)
@@ -198,5 +203,7 @@ class KB(BaseKB):
                     nodes.append(node)
                 else:
                     index -= 1
+            else:
+                break
 
         return nodes, trails

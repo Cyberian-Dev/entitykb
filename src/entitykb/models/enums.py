@@ -123,6 +123,10 @@ class Comparison(str, enum.Enum):
         return pattern.match(str(field_value)) is not None
 
 
+# todo!!!!! REMOVE... make this a "starts" field with multiple lists.
+# labels, prefix, keys, terms
+
+
 @enum.unique
 class SearchInput(str, enum.Enum):
     prefix = "prefix"

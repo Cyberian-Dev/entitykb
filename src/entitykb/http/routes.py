@@ -40,7 +40,8 @@ async def remove_node(key: str):
 async def parse(request: models.ParseRequest = Body(...)) -> Doc:
     """ Parse text and return document object. """
     async with connection as client:
-        return await client.call("parse", request.dict())
+        data = await client.call("parse", request.dict())
+        return data
 
 
 # graph

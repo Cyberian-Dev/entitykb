@@ -11,10 +11,9 @@ class Graph(object):
     def __iter__(self):
         raise NotImplementedError
 
-    def iterate_keys(self, keys: Iterable[str]):
-        raise NotImplementedError
+    # nodes
 
-    def iterate_edges(self, verbs=None, directions=None, nodes=None):
+    def iterate_keys(self, keys: Iterable[str]):
         raise NotImplementedError
 
     def save_node(self, node: Node):
@@ -23,14 +22,27 @@ class Graph(object):
     def get_node(self, key: str):
         raise NotImplementedError
 
-    def save_edge(self, edge: Edge):
+    def remove_node(self, key: str) -> bool:
         raise NotImplementedError
 
-    def remove_node(self, key: str) -> bool:
+    def get_labels(self):
+        raise NotImplementedError
+
+    # edges
+
+    def iterate_edges(self, verbs=None, directions=None, nodes=None):
+        raise NotImplementedError
+
+    def save_edge(self, edge: Edge):
         raise NotImplementedError
 
     def connect(self, *, start: Node, verb: str, end: Node, data: dict = None):
         raise NotImplementedError
+
+    def get_verbs(self):
+        raise NotImplementedError
+
+    # admin
 
     def info(self):
         raise NotImplementedError
@@ -64,26 +76,22 @@ class InMemoryGraph(Graph):
     def __iter__(self):
         return iter(self.nodes)
 
-    def iterate_keys(self, keys: Iterable[str]):
-        keys = ensure_iterable(keys)
-        for key in keys:
-            if key in self.nodes:
-                yield key
+    # nodes
 
-    def iterate_edges(self, verbs=None, directions=None, nodes=None):
-        yield from self.edges.iterate(
-            verbs=verbs, directions=directions, nodes=nodes
-        )
+    def iterate_keys(self, keys: Iterable[str] = None):
+        if keys is None:
+            keys = self.nodes.nodes_by_key.keys()
+        else:
+            keys = ensure_iterable(keys)
+            keys = filter(lambda k: k in self.nodes, keys)
+
+        yield from keys
 
     def save_node(self, node: Node):
         self.nodes.save(node)
 
     def get_node(self, key: str):
         return self.nodes.get(key)
-
-    def save_edge(self, edge: Edge):
-        self.edges.save(edge)
-        return edge
 
     def remove_node(self, key: str) -> Node:
         edges = [edge for _, edge in self.edges.iterate(nodes=[key])]
@@ -93,6 +101,20 @@ class InMemoryGraph(Graph):
         node = self.nodes.remove(key)
         return node
 
+    def get_labels(self):
+        return self.nodes.get_labels()
+
+    # edges
+
+    def iterate_edges(self, verbs=None, directions=None, nodes=None):
+        yield from self.edges.iterate(
+            verbs=verbs, directions=directions, nodes=nodes
+        )
+
+    def save_edge(self, edge: Edge):
+        self.edges.save(edge)
+        return edge
+
     def connect(self, *, start: Node, verb: str, end: Node, data: dict = None):
         registry = Registry.instance()
         self.save_node(start)
@@ -100,6 +122,11 @@ class InMemoryGraph(Graph):
         edge = registry.create(Edge, data, start=start, verb=verb, end=end)
         self.save_edge(edge)
         return edge
+
+    def get_verbs(self):
+        return self.edges.get_verbs()
+
+    # admin
 
     def info(self):
         return {

@@ -1,16 +1,14 @@
 import os
-import shutil
+import time
+from io import FileIO
 from pathlib import Path
 from typing import Optional
 
 import typer
 import uvicorn
-import time
-
-from tabulate import tabulate
-from io import FileIO
-
 from entitykb import KB, Config, logger, environ, rpc
+from tabulate import tabulate
+
 from . import services
 
 cli = typer.Typer()
