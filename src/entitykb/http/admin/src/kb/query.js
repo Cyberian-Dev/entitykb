@@ -1,9 +1,10 @@
 export class SearchRequest {
-    constructor(q, input, traversal, page, pageSize) {
+    constructor(q, labels, keys, traversal, page, pageSize) {
         pageSize = pageSize || 10;
 
         this.q = q || '';
-        this.input = input || SearchInput.prefix;
+        this.labels = labels || [];
+        this.keys = keys || [];
         this.traversal = (traversal && traversal.steps) || [];
         this.limit = pageSize;
         this.offset = page * pageSize;
@@ -28,12 +29,6 @@ export const Comparison = {
     range: "range",
     regex: "regex",
     iregex: "iregex",
-};
-
-export const SearchInput = {
-    prefix: "prefix",
-    term: "term",
-    key: "key",
 };
 
 export class FieldCriteria {

@@ -22,7 +22,6 @@ from .models import (
     Node,
     ParseRequest,
     Registry,
-    SearchInput,
     SearchRequest,
     SearchResponse,
     Step,
@@ -36,6 +35,7 @@ from .models import (
     chain,
     ensure_iterable,
     is_iterable,
+    label_filter,
     under_limit,
 )
 
@@ -97,7 +97,6 @@ __all__ = (
     "Pipeline",
     "PipelineConfig",
     "Registry",
-    "SearchInput",
     "SearchRequest",
     "SearchResponse",
     "Searcher",
@@ -124,6 +123,7 @@ __all__ = (
     "environ",
     "get_class_from_name",
     "is_iterable",
+    "label_filter",
     "logger",
     "logging",
     "models",

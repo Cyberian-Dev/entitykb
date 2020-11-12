@@ -1,4 +1,4 @@
-from entitykb import SearchRequest, T, SearchInput, Direction, F, Comparison
+from entitykb import SearchRequest, T, Direction, F, Comparison
 
 
 def test_roundtrip():
@@ -6,8 +6,9 @@ def test_roundtrip():
 
     data = request.dict()
     assert data == {
-        "input": SearchInput.prefix,
         "q": None,
+        "keys": [],
+        "labels": [],
         "limit": 100,
         "offset": 0,
         "traversal": [

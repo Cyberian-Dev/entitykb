@@ -2,14 +2,14 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
-from .enums import SearchInput
 from .node import Edge
 from .traverse import Traversal
 
 
 class SearchRequest(BaseModel):
     q: str = None
-    input: SearchInput = SearchInput.prefix
+    labels: List[str] = Field(default_factory=list)
+    keys: List[str] = Field(default_factory=list)
     traversal: Traversal = Field(default_factory=Traversal)
     limit: int = 100
     offset: int = 0

@@ -22,6 +22,9 @@ class Node(BaseModel):
     def __hash__(self):
         return hash((self.label, self.key))
 
+    def __lt__(self, other):
+        return self.key < other.key
+
     def __rshift__(self, verb):
         from .registry import Registry
 

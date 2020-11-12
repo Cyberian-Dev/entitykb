@@ -45,6 +45,11 @@ class NodeIndex(object):
     def get_labels(self) -> Set[str]:
         return sorted(self.nodes_by_label.keys())
 
+    def iterate_keys_by_label(self, label):
+        nodes = self.nodes_by_label.get(label, [])
+        for node in nodes:
+            yield node.key
+
 
 class EdgeIndex(object):
     def __init__(self):

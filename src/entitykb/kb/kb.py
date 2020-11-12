@@ -18,6 +18,7 @@ from entitykb import (
     Storage,
     TermsIndex,
     under_limit,
+    label_filter,
 )
 
 
@@ -156,18 +157,12 @@ class KB(BaseKB):
     # private methods
 
     def _get_starts(self, request: SearchRequest):
-        starts = []
-        if not request.q:
-            starts = self.graph.iterate_keys()
+        if request.q:
+            keys = self.terms.iterate_prefix_keys(prefix=request.q)
+            starts = filter(label_filter(request.labels), keys)
 
-        elif request.input is None or request.input.is_prefix:
-            starts = self.terms.iterate_prefix_keys(prefix=request.q)
-
-        elif request.input.is_term:
-            starts = self.terms.iterate_term_keys(term=request.q)
-
-        elif request.input.is_key:
-            starts = self.graph.iterate_keys(keys=request.q)
+        else:
+            starts = self.graph.iterate_keys(request.keys, request.labels)
 
         return starts
 

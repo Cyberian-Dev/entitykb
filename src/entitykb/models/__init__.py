@@ -1,12 +1,13 @@
 from .doc import Token, DocToken, Doc, DocEntity, ParseRequest
 from .entity import Entity
-from .enums import Direction, Comparison, SearchInput
+from .enums import Direction, Comparison
 from .funcs import (
     camel_to_snake,
     chain,
     ensure_iterable,
     is_iterable,
     under_limit,
+    label_filter,
 )
 from .node import Node, Edge
 from .traverse import (
@@ -42,7 +43,6 @@ __all__ = (
     "Node",
     "ParseRequest",
     "Registry",
-    "SearchInput",
     "SearchRequest",
     "SearchResponse",
     "Step",
@@ -57,5 +57,6 @@ __all__ = (
     "chain",
     "ensure_iterable",
     "is_iterable",
+    "label_filter",
     "under_limit",
 )

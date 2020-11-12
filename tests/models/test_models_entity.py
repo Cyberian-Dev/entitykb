@@ -25,3 +25,8 @@ def test_entity():
 
 def test_custom_entity_class(apple):
     assert apple.label == "COMPANY"
+
+
+def test_sort_entities(apple, google):
+    assert [apple, google] == sorted((google, apple))
+    assert [apple, google] == sorted((apple, google))

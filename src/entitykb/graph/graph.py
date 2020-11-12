@@ -1,6 +1,14 @@
-from typing import Tuple, Iterable
+from typing import Tuple, List
 
-from entitykb import Node, Edge, Registry, create_component, ensure_iterable
+from entitykb import (
+    Node,
+    Edge,
+    Registry,
+    chain,
+    create_component,
+    ensure_iterable,
+    label_filter,
+)
 from .index import NodeIndex, EdgeIndex
 
 
@@ -13,7 +21,7 @@ class Graph(object):
 
     # nodes
 
-    def iterate_keys(self, keys: Iterable[str]):
+    def iterate_keys(self, keys: List[str] = None, labels: List[str] = None):
         raise NotImplementedError
 
     def save_node(self, node: Node):
@@ -78,14 +86,26 @@ class InMemoryGraph(Graph):
 
     # nodes
 
-    def iterate_keys(self, keys: Iterable[str] = None):
-        if keys is None:
-            keys = self.nodes.nodes_by_key.keys()
-        else:
-            keys = ensure_iterable(keys)
-            keys = filter(lambda k: k in self.nodes, keys)
+    def iterate_keys(self, keys: List[str] = None, labels: List[str] = None):
+        starts = []
 
-        yield from keys
+        if not keys and labels:
+            for label in labels:
+                it = self.nodes.iterate_keys_by_label(label)
+                starts.append(it)
+
+        elif keys:
+            it = ensure_iterable(keys)
+            it = filter(label_filter(labels), it)
+            it = filter(lambda k: k in self.nodes, it)
+            starts.append(it)
+
+        else:
+            it = self.nodes.nodes_by_key.keys()
+            starts.append(it)
+
+        starts = chain(starts)
+        yield from starts
 
     def save_node(self, node: Node):
         self.nodes.save(node)

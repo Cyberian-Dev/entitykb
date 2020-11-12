@@ -1,6 +1,6 @@
 import _ from 'underscore';
 import {Entity, Neighbor} from "./nodes";
-import {Comparison, FieldCriteria, SearchInput, SearchRequest, Traversal} from "./query";
+import {Comparison, FieldCriteria, SearchRequest, Traversal} from "./query";
 
 const baseURL = window.location.origin;
 const searchURL = baseURL + "/search";
@@ -43,7 +43,7 @@ export class RequestManager {
     }
 
     async getSchema() {
-        return  await fetch(getSchemaURL, {
+        return await fetch(getSchemaURL, {
             ...defaultParams,
             method: "GET",
         })
@@ -79,19 +79,23 @@ export class RequestManager {
         let traversal = new Traversal();
         traversal.walk(thisRequest.verb, thisRequest.direction);
 
-        if (thisRequest.label) {
-            const criteria = new FieldCriteria("label", Comparison.exact, thisRequest.label);
-            traversal.include([criteria]);
-        }
-
         if (thisRequest.name) {
             const criteria = new FieldCriteria("name", Comparison.icontains, thisRequest.name);
             traversal.include([criteria]);
         }
 
-        const request = new SearchRequest(thisRequest.key, SearchInput.key, traversal, page);
+        if (thisRequest.label) {
+            const criteria = new FieldCriteria("label", Comparison.exact, thisRequest.label);
+            traversal.include([criteria]);
+        }
+
+
+        let keys = thisRequest.key ? [thisRequest.key] : [];
+        const request = new SearchRequest(null, null, keys, traversal, page);
+        console.log(request);
 
         const response = await this.doSearch(request);
+        console.log(response);
 
         let nodes = new Map(response.nodes.map(node => [node.key, node]));
         let neighbors = response.trails.map(trail => new Neighbor(trail, nodes.get(trail.end)));
@@ -105,15 +109,8 @@ export class RequestManager {
 
         let traversal = new Traversal();
 
-        if (Boolean(thisRequest.label)) {
-            const criteria = new FieldCriteria("label", Comparison.exact, thisRequest.label);
-            traversal.include([criteria]);
-        }
-
-        if (Boolean(thisRequest.key)) {
-            const criteria = new FieldCriteria("key", Comparison.icontains, thisRequest.key);
-            traversal.include([criteria]);
-        }
+        let labels = thisRequest.label ? [thisRequest.label] : [];
+        let keys = thisRequest.key ? [thisRequest.key] : [];
 
         if (Boolean(thisRequest.attribute)) {
             const criteria = new FieldCriteria(
@@ -122,9 +119,7 @@ export class RequestManager {
             traversal.include([criteria]);
         }
 
-        const request = new SearchRequest(thisRequest.name, SearchInput.prefix, traversal, page);
-        console.log(request);
-
+        const request = new SearchRequest(thisRequest.name, labels, keys, traversal, page);
         const response = await this.doSearch(request);
         const entities = response.nodes.map(data => new Entity(data));
 

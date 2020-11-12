@@ -43,3 +43,14 @@ def under_limit(items: List, limit: int):
         return True
 
     return len(items) < limit
+
+
+def label_filter(labels):
+    labels = set(ensure_iterable(labels))
+
+    def is_label(key):
+        _, label = key.rsplit("|", 1)
+        return label in labels
+
+    if labels:
+        return is_label

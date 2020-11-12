@@ -41,7 +41,6 @@
             <i class="blue filter icon"></i>
             {display}
         </a>
-        &nbsp;
     {/if}
 </div>
 
