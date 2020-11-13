@@ -20,7 +20,7 @@ class Node(BaseModel):
         super().__init__(**data)
 
     def __hash__(self):
-        return hash((self.label, self.key))
+        return hash(self.key)
 
     def __lt__(self, other):
         return self.key < other.key

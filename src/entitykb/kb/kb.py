@@ -117,7 +117,7 @@ class KB(BaseKB):
     def search(self, request: SearchRequest) -> SearchResponse:
         searcher = self._create_searcher(request)
         nodes, trails = self._get_page(request, searcher)
-        return SearchResponse(nodes=nodes, trails=trails)
+        return SearchResponse.construct(nodes=nodes, trails=trails)
 
     # admin
 

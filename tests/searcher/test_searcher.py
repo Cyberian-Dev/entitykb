@@ -78,12 +78,12 @@ def graph():
 
 
 def test_searcher(graph):
-    searcher = DefaultSearcher(graph=graph, traversal=T(), starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=T(), starts=[apple])
     trails = list(searcher)
     assert 1 == len(trails)
     assert {apple.key} == ends(trails)
 
-    searcher = DefaultSearcher(graph=graph, traversal=T(), starts=apple.key)
+    searcher = DefaultSearcher(graph=graph, traversal=T(), starts=[apple.key])
     trails = list(searcher)
     assert 1 == len(trails)
     assert {apple.key} == ends(trails)
@@ -101,7 +101,7 @@ def test_start_all_goal_all(graph):
 
 def test_in_nodes(graph):
     t = T().in_nodes(Verb.IS_A)
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
 
     assert {granny_smith.key, honeycrisp.key} == ends(trails)
@@ -110,7 +110,7 @@ def test_in_nodes(graph):
 
 def test_in_nodes_with_max_hops(graph):
     t = T().in_nodes(Verb.IS_A, max_hops=2)
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=food)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[food])
     trails = list(searcher)
 
     assert {
@@ -125,7 +125,7 @@ def test_in_nodes_with_max_hops(graph):
 
 def test_in_nodes_with_passthru(graph):
     t = T().in_nodes(Verb.IS_A, passthru=True)
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
 
     assert {apple.key, granny_smith.key, honeycrisp.key} == ends(trails)
@@ -134,7 +134,7 @@ def test_in_nodes_with_passthru(graph):
 
 def test_out_nodes(graph):
     t = T().out_nodes(Verb.IS_A)
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
 
     assert {fruit.key} == ends(trails)
@@ -143,7 +143,7 @@ def test_out_nodes(graph):
 
 def test_in_nodes_all_verbs(graph):
     t = T().in_nodes()
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
 
     assert {
@@ -157,7 +157,7 @@ def test_in_nodes_all_verbs(graph):
 
 def test_all_nodes_all_verbs_no_max(graph):
     t = T().all_nodes(max_hops=None)
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
 
     assert 8 == len(trails)
@@ -167,14 +167,14 @@ def test_all_nodes_all_verbs_no_max(graph):
 
 def test_all_nodes_optional_attribute(graph):
     t = T().all_nodes(max_hops=None).include(F.price > 3.00)
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
 
     assert 1 == len(trails)
     assert {honeycrisp.key} == ends(trails)
 
     t = T().all_nodes(max_hops=None).exclude(F.price > 3.00)
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
 
     assert 7 == len(trails)
@@ -183,7 +183,7 @@ def test_all_nodes_optional_attribute(graph):
 
 def test_in_has_a_apple_out_is_a(graph):
     t = T().in_nodes(Verb.HAS_A).out_nodes(Verb.IS_A)
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
 
     assert {dessert.key, pie.key} == ends(trails)
@@ -192,14 +192,14 @@ def test_in_has_a_apple_out_is_a(graph):
 
 def test_is_include_label(graph):
     t = T().in_nodes().include(F.label == "SAUCE")
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=dessert)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[dessert])
     trails = list(searcher)
 
     assert {apple_sauce.key} == {r.end for r in trails}
     assert {dessert.key} == {r.start for r in trails}
 
     t = T().in_nodes().include(F.label != "SAUCE")
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=dessert)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[dessert])
     trails = list(searcher)
 
     assert {pie.key} == {r.end for r in trails}
@@ -208,14 +208,14 @@ def test_is_include_label(graph):
 
 def test_query_exclude_by_label(graph):
     t = T().in_nodes().exclude(F.label == "SAUCE")
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=dessert)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[dessert])
     trails = list(searcher)
 
     assert {pie.key} == {r.end for r in trails}
     assert {dessert.key} == {r.start for r in trails}
 
     t = T().in_nodes().exclude(F.label != "SAUCE")
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=dessert)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[dessert])
     trails = list(searcher)
 
     assert {apple_sauce.key} == {r.end for r in trails}
@@ -224,37 +224,37 @@ def test_query_exclude_by_label(graph):
 
 def test_comparison_options(graph):
     t = T().in_nodes(Verb.IS_A).include(F.price < 3.00)
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert {granny_smith.key} == ends(trails)
 
     t = T().in_nodes(Verb.IS_A).include(F.price <= 1.99)
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert {granny_smith.key} == ends(trails)
 
     t = T().in_nodes(Verb.IS_A).include(F.price < 1.99)
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert set() == ends(trails)
 
     t = T().in_nodes(Verb.IS_A).include(F.price > 3.00)
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert {honeycrisp.key} == ends(trails)
 
     t = T().in_nodes(Verb.IS_A).include(F.price >= 3.99)
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert {honeycrisp.key} == ends(trails)
 
     t = T().in_nodes(Verb.IS_A).include(F.price.is_in(3.99, 1.99))
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert {granny_smith.key, honeycrisp.key} == ends(trails)
 
     t = T().in_nodes(Verb.IS_A).include(F.price > 3.99)
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert set() == ends(trails)
 
@@ -263,7 +263,7 @@ def test_comparison_options(graph):
         .in_nodes(Verb.IS_A)
         .include(F.price > 2.00, F.price < 3.00, all=True)
     )
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert set() == ends(trails)
 
@@ -272,74 +272,74 @@ def test_comparison_options(graph):
         .in_nodes(Verb.IS_A)
         .include(F.price > 2.00, F.price < 3.00, all=False)
     )
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert {honeycrisp.key, granny_smith.key} == ends(trails)
 
     t = T().in_nodes(Verb.IS_A).include(F.name.contains("Smith"))
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert {granny_smith.key} == ends(trails)
 
     t = T().in_nodes(Verb.IS_A).include(F.name.contains("smith"))
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert set() == ends(trails)
 
     t = T().in_nodes(Verb.IS_A).include(F.name.icontains("SMITH"))
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert {granny_smith.key} == ends(trails)
 
     t = T().in_nodes(Verb.IS_A).exclude(F.name.iexact("honeycrisp"))
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert {granny_smith.key} == ends(trails)
 
     t = T().in_nodes(Verb.IS_A).exclude(F.name.startswith("Hone"))
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert {granny_smith.key} == ends(trails)
 
     t = T().in_nodes(Verb.IS_A).exclude(F.name.istartswith("hone"))
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert {granny_smith.key} == ends(trails)
 
     t = T().in_nodes(Verb.IS_A).include(F.name.endswith("Smith"))
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert {granny_smith.key} == ends(trails)
 
     t = T().in_nodes(Verb.IS_A).include(F.name.iendswith("SMITH"))
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert {granny_smith.key} == ends(trails)
 
     t = T().in_nodes(Verb.IS_A).include(F.price.range((1.50, 5)))
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert {granny_smith.key, honeycrisp.key} == ends(trails)
 
     t = T().in_nodes(Verb.IS_A).include(F.name.iendswith("SMITH"))
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert {granny_smith.key} == ends(trails)
 
     t = T().in_nodes(Verb.IS_A).include(F.name.regex("^[A-Za-z]*$"))
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert {honeycrisp.key} == ends(trails)
 
     t = T().in_nodes(Verb.IS_A).include(F.name.iregex(r"^[\w\s]+$"))
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert {honeycrisp.key, granny_smith.key} == ends(trails)
 
 
 def test_has_apple_include_pies(graph):
     t = T().in_nodes(Verb.HAS_A).include(Verb.is_a >> pie)
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
 
     assert {apple_pie.key} == ends(trails)
@@ -348,21 +348,21 @@ def test_has_apple_include_pies(graph):
 
 def test_include_what_an_apple_is(graph):
     t = T().in_nodes(max_hops=3).include(Verb.is_a << apple)
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=food)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[food])
     trails = list(searcher)
     assert {fruit.key} == ends(trails)
 
 
 def test_include_adjacent_to_pie(graph):
     t = T().in_nodes(max_hops=3).include(Verb.is_a ** pie)
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=food)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[food])
     trails = list(searcher)
     assert {dessert.key, apple_pie.key} == ends(trails)
 
 
 def test_exclude_is_a(graph):
     t = T().in_nodes(Verb.HAS_A).exclude(Verb.is_a >> pie)
-    searcher = DefaultSearcher(graph=graph, traversal=t, starts=apple)
+    searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert {apple_sauce.key} == ends(trails)
 

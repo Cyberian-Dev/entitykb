@@ -10,7 +10,6 @@ from entitykb import (
     EdgeCriteria,
     Trail,
     WalkStep,
-    chain,
     create_component,
     under_limit,
 )
@@ -156,8 +155,7 @@ class Searcher(object):
 
 class DefaultSearcher(Searcher):
     def initialize(self) -> Layer:
-        starts = chain(self.starts)
-        layer = StartLayer(self.graph, starts=starts)
+        layer = StartLayer(self.graph, starts=self.starts)
 
         for step in self.traversal:
             if isinstance(step, WalkStep):

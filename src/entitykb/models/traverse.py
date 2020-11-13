@@ -291,15 +291,11 @@ F = FieldCriteriaBuilder
 
 class VerbType(type):
     def __getattr__(self, verb_name: str):
+        verb_name = verb_name.upper()
         return Verb(verb_name)
 
 
 class Verb(str, metaclass=VerbType):
-    def __new__(cls, string):
-        string = string.upper()
-        obj = super(Verb, cls).__new__(cls, string)
-        return obj
-
     def __rshift__(self, nodes):
         return EdgeCriteria(
             verbs=(self,), directions=(Direction.outgoing,), nodes=nodes

@@ -4,7 +4,6 @@ from entitykb import (
     Node,
     Edge,
     Registry,
-    chain,
     create_component,
     ensure_iterable,
     label_filter,
@@ -87,25 +86,20 @@ class InMemoryGraph(Graph):
     # nodes
 
     def iterate_keys(self, keys: List[str] = None, labels: List[str] = None):
-        starts = []
-
         if not keys and labels:
             for label in labels:
                 it = self.nodes.iterate_keys_by_label(label)
-                starts.append(it)
+                yield from it
 
         elif keys:
             it = ensure_iterable(keys)
             it = filter(label_filter(labels), it)
             it = filter(lambda k: k in self.nodes, it)
-            starts.append(it)
+            yield from it
 
         else:
             it = self.nodes.nodes_by_key.keys()
-            starts.append(it)
-
-        starts = chain(starts)
-        yield from starts
+            yield from it
 
     def save_node(self, node: Node):
         self.nodes.save(node)
