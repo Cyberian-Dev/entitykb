@@ -1,3 +1,4 @@
+from .__version__ import __version__, __title__, __description__
 from .env import environ
 from .config import Config, PipelineConfig
 from .reflection import create_component, get_class_from_name
@@ -114,6 +115,9 @@ __all__ = (
     "Verb",
     "WalkStep",
     "WhitespaceTokenizer",
+    "__description__",
+    "__title__",
+    "__version__",
     "cli",
     "contrib",
     "create_component",

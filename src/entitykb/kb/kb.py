@@ -2,6 +2,7 @@ from importlib import import_module
 from typing import Optional, Union
 
 from entitykb import (
+    __version__,
     BaseKB,
     Config,
     Edge,
@@ -142,6 +143,7 @@ class KB(BaseKB):
 
     def info(self) -> dict:
         return {
+            "entitykb": dict(version=__version__),
             "config": self.config.info(),
             "storage": self.storage.info(),
             "graph": self.graph.info(),
