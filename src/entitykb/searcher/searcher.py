@@ -157,7 +157,7 @@ class DefaultSearcher(Searcher):
     def initialize(self) -> Layer:
         layer = StartLayer(self.graph, starts=self.starts)
 
-        for step in self.traversal:
+        for step in self.traversal or []:
             if isinstance(step, WalkStep):
                 layer = WalkLayer(graph=self.graph, step=step, prev=layer)
             elif isinstance(step, FilterStep):

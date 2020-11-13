@@ -6,7 +6,6 @@ from entitykb import (
     T,
     F,
     Verb,
-    chain,
     Trail,
     InMemoryGraph,
     DefaultSearcher,
@@ -316,7 +315,7 @@ def test_comparison_options(graph):
     trails = list(searcher)
     assert {granny_smith.key} == ends(trails)
 
-    t = T().in_nodes(Verb.IS_A).include(F.price.range((1.50, 5)))
+    t = T().in_nodes(Verb.IS_A).include(F.price.range(1.50, 5))
     searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert {granny_smith.key, honeycrisp.key} == ends(trails)
@@ -374,7 +373,3 @@ def test_multi_result_hops(graph):
     )
     trails = list(searcher)
     assert ends(trails).issuperset({dessert.key})
-
-
-def test_chain():
-    assert list(chain(0, 1, 2)) == [0, 1, 2]

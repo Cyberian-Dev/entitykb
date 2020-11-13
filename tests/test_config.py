@@ -78,7 +78,7 @@ def test_config_roundtrip():
         "tokenizer",
     }
 
-    roundtrip = Config.construct(file_path="/tmp/config.json", data=data)
+    roundtrip = Config.make(file_path="/tmp/config.json", data=data)
     assert roundtrip.dict() == config.dict()
 
 

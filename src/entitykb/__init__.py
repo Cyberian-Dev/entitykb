@@ -1,6 +1,6 @@
 from .env import environ
 from .config import Config, PipelineConfig
-from .construct import create_component, get_class_from_name
+from .reflection import create_component, get_class_from_name
 
 from . import logging
 from .logging import logger
@@ -32,7 +32,6 @@ from .models import (
     V,
     Verb,
     WalkStep,
-    chain,
     ensure_iterable,
     is_iterable,
     label_filter,
@@ -115,7 +114,6 @@ __all__ = (
     "Verb",
     "WalkStep",
     "WhitespaceTokenizer",
-    "chain",
     "cli",
     "contrib",
     "create_component",

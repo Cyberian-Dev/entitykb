@@ -3,7 +3,6 @@ from .entity import Entity
 from .enums import Direction, Comparison
 from .funcs import (
     camel_to_snake,
-    chain,
     ensure_iterable,
     is_iterable,
     under_limit,
@@ -54,7 +53,6 @@ __all__ = (
     "Verb",
     "WalkStep",
     "camel_to_snake",
-    "chain",
     "ensure_iterable",
     "is_iterable",
     "label_filter",

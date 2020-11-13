@@ -2,8 +2,8 @@ from typing import Any, List, Optional
 
 from pydantic import validator, BaseModel, Field
 
-from .funcs import ensure_iterable, chain
 from .enums import Direction, Comparison
+from .funcs import ensure_iterable
 from .node import Node
 
 
@@ -83,7 +83,7 @@ class FieldCriteria(Criteria):
         return self.set(Comparison.icontains, value)
 
     def is_in(self, *args):
-        value = set(chain(args))
+        value = set(args)
         return self.set(Comparison.is_in, value)
 
     def gt(self, value):
@@ -110,10 +110,8 @@ class FieldCriteria(Criteria):
     def iendswith(self, value: str):
         return self.set(Comparison.iendswith, value)
 
-    def range(self, *args):
-        value = tuple(chain(args))
-        assert len(value), f"Range requires exactly 2 values. {value}"
-        return self.set(Comparison.range, value)
+    def range(self, min_val, max_val):
+        return self.set(Comparison.range, (min_val, max_val))
 
     def regex(self, value):
         return self.set(Comparison.regex, value)

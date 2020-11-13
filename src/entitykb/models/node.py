@@ -1,7 +1,8 @@
 from typing import Union, Any
 from uuid import uuid4
 
-from pydantic import BaseModel, validator, Field
+from pydantic import BaseModel, validator, Field, ValidationError
+from entitykb import logger
 
 from .funcs import camel_to_snake
 
@@ -59,7 +60,11 @@ class Node(BaseModel):
         from .registry import Registry
 
         registry = Registry.instance()
-        return registry.create(cls, *args, **kwargs)
+        try:
+            return registry.create(cls, *args, **kwargs)
+        except ValidationError:
+            logger.error(f"Failed to create Node: {args} {kwargs}")
+            raise
 
 
 class Edge(BaseModel):

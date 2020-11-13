@@ -49,7 +49,7 @@ class Config(BaseModel):
             with open(config_file_path, "r") as fp:
                 data = json.load(fp)
 
-        config = cls.construct(file_path=config_file_path, data=data)
+        config = cls.make(file_path=config_file_path, data=data)
 
         if not os.path.isfile(config_file_path):
             os.makedirs(os.path.dirname(config_file_path), exist_ok=True)
@@ -60,11 +60,11 @@ class Config(BaseModel):
         return config
 
     @classmethod
-    def construct(cls, *, file_path: str, data: dict) -> "Config":
+    def make(cls, file_path: str, data: dict) -> "Config":
         config = Config(file_path=file_path, **data)
         return config
 
-    def dict(self) -> dict:
+    def dict(self, **kwargs) -> dict:
         data = super(Config, self).dict()
         data.pop("file_path", None)
         return data
