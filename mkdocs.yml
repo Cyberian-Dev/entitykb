@@ -1,6 +1,6 @@
 site_name: EntityKB
 site_description: EntityKB, python knowledge base toolset
-site_url: https://entitykb.org/
+site_url: https://www.entitykb.org/
 
 theme:
     name: 'material'
