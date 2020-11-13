@@ -56,7 +56,7 @@
 <div class="ui grid">
     <div class="seven wide column">
         <h3>Node Details</h3>
-        <table class="ui compact definition table">
+        <table class="ui compact definition table top aligned">
             <tbody>
             <tr>
                 <td class="two wide column">key</td>
@@ -70,10 +70,18 @@
                 <td>label</td>
                 <td>{entity.label}</td>
             </tr>
-            {#each Object.entries(entity.attributes) as [name, value]}
+            {#each Object.entries(entity.attributes).sort() as [name, value]}
             <tr>
                 <td>{name}</td>
-                <td>{value}</td>
+                <td>
+                    {#if value instanceof Array}
+                    {#each value as item}
+                        {item}<br/>
+                    {/each}
+                    {:else}
+                        {value}
+                    {/if}
+                </td>
             </tr>
             {/each}
             </tbody>

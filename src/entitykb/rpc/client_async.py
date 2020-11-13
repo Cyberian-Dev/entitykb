@@ -13,13 +13,16 @@ from .connection import RPCConnection
 
 
 class AsyncKB(BaseKB):
-    def __init__(self, *, connection=None, host=None, port=None, timeout=None):
-        self.connection = connection or RPCConnection(
-            host=host, port=port, timeout=timeout
-        )
+    def __init__(self, *, host=None, port=None, timeout=None):
+        self.connection = RPCConnection(host=host, port=port, timeout=timeout)
 
     def __len__(self):
         raise NotImplementedError
+
+    def close(self):
+        if self.connection:
+            self.connection.close()
+            self.connection = None
 
     # nodes
 

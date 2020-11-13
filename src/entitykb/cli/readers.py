@@ -9,8 +9,8 @@ from .commands import cli
 def iterate_csv(file_obj: FileIO):
     reader = csv.DictReader(file_obj, dialect="excel")
     for data in reader:
-        synonyms = data.get("synonyms")
-        if isinstance(synonyms, str):
+        synonyms = data.pop("synonyms", "")
+        if synonyms:
             data["synonyms"] = synonyms.split(environ.mv_split)
         entity = Entity.construct(data)
         yield entity

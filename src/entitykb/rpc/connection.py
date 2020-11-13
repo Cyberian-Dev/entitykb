@@ -27,6 +27,9 @@ class RPCConnection(object):
         read, write = await asyncio.open_connection(self.host, self.port)
         self._client = Client(read, write, response_timeout=self.timeout)
 
+    def close(self):
+        self._client.close()
+
     async def __aenter__(self):
         if self._client is None:
             try:

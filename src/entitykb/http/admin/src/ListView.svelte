@@ -74,12 +74,23 @@
             <td>{entity.key}</td>
             <td>
                 <table class="ui compact celled table top aligned">
-                    {#each Object.entries(entity.attributes) as [name, value]}
-                        <tr class="top aligned">
-                            <td class="four wide field_name">{name}:</td>
-                            <td class="twelve wide">{value}</td>
-                        </tr>
-                    {/each}
+                {#each Object.entries(entity.attributes).sort() as [name, value]}
+                    <tr class="top aligned">
+                        <td class="four wide field_name">{name}:</td>
+                        <td class="twelve wide">
+                        {#if value instanceof Array}
+                            {#each value.slice(0, 5) as item}
+                                {item}<br/>
+                            {/each}
+                            {#if value.length > 5}
+                                <i>{value.length - 5} more...</i>
+                            {/if}
+                        {:else}
+                            {value}
+                        {/if}
+                        </td>
+                    </tr>
+                {/each}
                 </table>
             </td>
         </tr>

@@ -92,10 +92,7 @@ export class RequestManager {
 
         let keys = thisRequest.key ? [thisRequest.key] : [];
         const request = new SearchRequest(null, null, keys, traversal, page);
-        console.log(request);
-
         const response = await this.doSearch(request);
-        console.log(response);
 
         let nodes = new Map(response.nodes.map(node => [node.key, node]));
         let neighbors = response.trails.map(trail => new Neighbor(trail, nodes.get(trail.end)));
