@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://entitykb.org"><img src="./img/logo.png" alt="EntityKB"></a>
+  <a href="https://entitykb.org"><img src="https://www.entitykb.org/img/logo.png" alt="EntityKB"></a>
 </p>
 <p align="center">
     <em>EntityKB: Python Knowledge Base Toolset</em>
