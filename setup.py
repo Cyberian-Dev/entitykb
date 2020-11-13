@@ -3,37 +3,34 @@ import sys
 from setuptools import setup, find_packages
 
 install_requires = [
-    "click",
-    "lark-parser==0.8.9",
+    "aiofiles",
+    "aio-msgpack-rpc",
+    "fastapi",
     "pyahocorasick",
-    "python-dateutil",
-    "rapidfuzz",
-    "tabulate",
     "translitcodec",
-    "ujson",
+    "lark-parser==0.8.9",
+    "python-dateutil",
+    "tabulate",
+    "typer",
+    "uvicorn >=0.11.7",
 ]
 
 if sys.version_info[:2] == (3, 6):
     install_requires.append("dataclasses")
 
-extras_requires = {
-    "api": ["fastapi", "uvicorn"],
-}
-
 setup(
     name="entitykb",
-    version="0.2.0",
+    version="0.2.1",
     author="Ian Maurer",
     author_email="ian@genomoncology.com",
     packages=find_packages("src/"),
     package_dir={"": "src"},
     package_data={"": ["*.lark"]},
     include_package_data=True,
-    entry_points={"console_scripts": ["entitykb=entitykb.cli:main"]},
+    entry_points={"console_scripts": ["entitykb=entitykb:cli"]},
     install_requires=install_requires,
-    extras_require=extras_requires,
-    description="Rules-based Named Entity Recognition and Linking",
-    long_description="Rules-based Named Entity Recognition and Linking",
+    description="Python toolkit for building Knowledge Bases",
+    long_description="Python toolkit for building Knowledge Bases",
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Development Status :: 4 - Beta",

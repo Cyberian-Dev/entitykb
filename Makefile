@@ -19,11 +19,20 @@ update:
 tox: clean
 	tox
 
+docs-live:
+	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run mkdocs serve --dev-addr 127.0.0.1:8008
+
+docs-build:
+	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run mkdocs build
+	cp ./docs/index.md ./README.md
+
+
 # clean
 
 clean: clean-build clean-pyc clean-test
 
 clean-build:
+	rm -fr site/
 	rm -fr build/
 	rm -fr dist/
 	rm -fr .eggs/

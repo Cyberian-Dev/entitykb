@@ -1,84 +1,90 @@
+import json
 import os
-from dataclasses import dataclass, field, fields
-from typing import List
+from pathlib import Path
+from typing import List, Dict
 
-import ujson
+from pydantic import BaseModel, Field
 
-import entitykb
+from .env import environ
 
 
-@dataclass
-class Config:
-    file_path: str = None
+class PipelineConfig(BaseModel):
     extractor: str = "entitykb.DefaultExtractor"
-    filterers: List[str] = field(default_factory=list)
-    index: str = "entitykb.DefaultIndex"
-    normalizer: str = "entitykb.DefaultNormalizer"
-    resolvers: List[str] = None
-    tokenizer: str = "entitykb.DefaultTokenizer"
+    resolvers: List[str] = Field(default=["entitykb.TermResolver"])
+    filterers: List[str] = Field(default_factory=list)
 
-    def __post_init__(self):
-        self.resolvers = self.resolvers or ["entitykb.DefaultResolver"]
+    @classmethod
+    def default_factory(cls):
+        return dict(default=PipelineConfig())
+
+
+class Config(BaseModel):
+    file_path: str = None
+
+    graph: str = "entitykb.InMemoryGraph"
+    modules: List[str] = Field(default_factory=list)
+    normalizer: str = "entitykb.LatinLowercaseNormalizer"
+    searcher: str = "entitykb.DefaultSearcher"
+    storage: str = "entitykb.PickleStorage"
+    terms: str = "entitykb.TrieTermsIndex"
+    tokenizer: str = "entitykb.WhitespaceTokenizer"
+
+    pipelines: Dict[str, PipelineConfig] = Field(
+        default_factory=PipelineConfig.default_factory
+    )
 
     def __str__(self):
         return f"<Config: {self.file_path}>"
 
     @property
-    def root_dir(self):
+    def root(self):
         return os.path.dirname(self.file_path)
 
     @classmethod
-    def create(cls, root_dir: str) -> "Config":
-        config_file_path = entitykb.Config.get_file_path(root_dir=root_dir)
+    def create(cls, root: str) -> "Config":
+        config_file_path = cls.get_file_path(root=root)
 
         data = {}
         if os.path.isfile(config_file_path):
             with open(config_file_path, "r") as fp:
-                data = ujson.load(fp)
+                data = json.load(fp)
 
-        config = cls.construct(file_path=config_file_path, data=data)
+        config = cls.make(file_path=config_file_path, data=data)
 
         if not os.path.isfile(config_file_path):
+            os.makedirs(os.path.dirname(config_file_path), exist_ok=True)
             with open(config_file_path, "w") as fp:
-                ujson.dump(config.dict(), fp, indent=4)
+                json.dump(config.dict(), fp, indent=4)
+                fp.write("\n")
 
         return config
 
     @classmethod
-    def construct(cls, *, file_path: str, data: dict) -> "Config":
-        field_names = {class_field.name for class_field in fields(cls)}
-        data = {k: v for k, v in data.items() if k in field_names}
+    def make(cls, file_path: str, data: dict) -> "Config":
         config = Config(file_path=file_path, **data)
         return config
 
-    def dict(self) -> dict:
-        return {
-            "extractor": self.extractor,
-            "filterers": self.filterers,
-            "index": self.index,
-            "normalizer": self.normalizer,
-            "resolvers": self.resolvers,
-            "tokenizer": self.tokenizer,
-        }
+    def dict(self, **kwargs) -> dict:
+        data = super(Config, self).dict()
+        data.pop("file_path", None)
+        return data
 
     @classmethod
-    def get_file_path(cls, root_dir=None, file_name="config.json"):
-        root_dir = cls.get_root_dir(root_dir)
-        file_path = os.path.join(root_dir, file_name)
+    def get_file_path(cls, root=None, file_name="config.json"):
+        root = cls.get_root(root)
+        file_path = os.path.join(root, file_name)
         return file_path
 
     @classmethod
-    def get_root_dir(cls, root_dir=None):
-        root_dir = (
-            root_dir
-            or os.environ.get("ENTITYKB_ROOT")
-            or os.path.expanduser("~/.entitykb")
-        )
-        return root_dir
+    def get_root(cls, root=None) -> str:
+        if isinstance(root, Path):
+            root = str(root.resolve())
+
+        root = root or environ.root
+
+        return root
 
     def info(self) -> dict:
         info = self.dict()
-        info["path"] = self.file_path
-        info["resolvers"] = "\n".join(self.resolvers)
-        info["filterers"] = "\n".join(self.filterers)
+        info["root"] = self.root
         return info

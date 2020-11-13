@@ -1,34 +1,27 @@
-from typing import Union
+import tempfile
 
 import pytest
 
-from entitykb import BaseModel, Entity
+from entitykb import KB
+from entitykb.models import Node, Entity
 
 
-class Location(BaseModel):
-    def __init__(self, *, city: str):
-        self.city = city
+@pytest.fixture()
+def root():
+    return tempfile.mkdtemp()
 
-    def dict(self):
-        return dict(city=self.city)
 
-    @classmethod
-    def convert(cls, value: Union[dict, "Location"]):
-        if isinstance(value, dict):
-            return cls(**value)
-        else:
-            return value
+@pytest.fixture()
+def kb(root):
+    return KB(root=root)
+
+
+class Location(Node):
+    city: str
 
 
 class Company(Entity):
-    def __init__(self, *, headquarters: Location = None, **kwargs):
-        super().__init__(**kwargs)
-        self.headquarters = Location.convert(headquarters)
-
-    def dict(self):
-        data = super(Company, self).dict()
-        hq_dict = self.headquarters.dict() if self.headquarters else None
-        return {**data, "headquarters": hq_dict}
+    headquarters: Location = None
 
 
 the_the = Entity(name="The The", label="BAND")
@@ -38,10 +31,17 @@ the_the = Entity(name="The The", label="BAND")
 def apple():
     return Company(
         name="Apple, Inc.",
-        label="COMPANY",
         synonyms=("Apple", "AAPL"),
-        meta=dict(top_product="iPhone"),
-        headquarters=Location(city="Cupertino"),
+        headquarters=Location(key=1, city="Cupertino"),
+    )
+
+
+@pytest.fixture(scope="function")
+def apple_records():
+    return Company(
+        name="Apple Records",
+        synonyms=("Apple",),
+        headquarters=Location(key=2, city="Abbey Road"),
     )
 
 
@@ -54,9 +54,7 @@ def google():
 def amazon():
     return Company(
         name="Amazon, Inc.",
-        label="COMPANY",
         synonyms=("Amazon", "AMZN"),
-        meta=dict(top_product="Prime"),
         headquarters=Location(city="Seattle"),
     )
 
@@ -65,7 +63,6 @@ def amazon():
 def microsoft():
     return Company(
         name="Microsoft Corporation",
-        label="COMPANY",
         synonyms=[
             "Microsoft Corp",
             "MSFT",
