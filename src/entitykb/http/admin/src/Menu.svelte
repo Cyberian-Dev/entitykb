@@ -14,7 +14,7 @@
   <div class="item">
       <i class="large lightbulb outline icon"></i>
   </div>
-  <a id="admin" class="active item" on:click={setChoice}>Admin</a>
+  <a id="graph" class="active item" on:click={setChoice}>Graph</a>
   <a id="api" class="item" on:click={setChoice}>API</a>
   <a id="docs" class="item" on:click={setChoice}>Docs</a>
 </div>

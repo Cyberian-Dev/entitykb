@@ -97,7 +97,7 @@
             </div>
         </div>
 
-        <table class="ui compact striped celled table">
+        <table class="ui compact selectable celled striped table top aligned">
             <thead class="full-width">
             <tr>
                 <th class="two wide" nowrap="nowrap">

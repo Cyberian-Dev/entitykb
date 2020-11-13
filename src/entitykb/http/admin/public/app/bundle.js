@@ -2640,7 +2640,7 @@ var app = (function () {
     			i = element("i");
     			t0 = space();
     			a0 = element("a");
-    			a0.textContent = "Admin";
+    			a0.textContent = "Graph";
     			t2 = space();
     			a1 = element("a");
     			a1.textContent = "API";
@@ -2651,7 +2651,7 @@ var app = (function () {
     			add_location(i, file, 14, 6, 280);
     			attr_dev(div0, "class", "item");
     			add_location(div0, file, 13, 2, 255);
-    			attr_dev(a0, "id", "admin");
+    			attr_dev(a0, "id", "graph");
     			attr_dev(a0, "class", "active item");
     			add_location(a0, file, 16, 2, 336);
     			attr_dev(a1, "id", "api");
@@ -5131,11 +5131,11 @@ var app = (function () {
     			td3 = element("td");
     			t6 = text(t6_value);
     			t7 = space();
-    			add_location(td0, file$6, 127, 20, 3960);
-    			add_location(td1, file$6, 128, 20, 4010);
-    			add_location(td2, file$6, 129, 20, 4055);
-    			add_location(td3, file$6, 130, 20, 4100);
-    			add_location(tr, file$6, 126, 16, 3902);
+    			add_location(td0, file$6, 127, 20, 3983);
+    			add_location(td1, file$6, 128, 20, 4033);
+    			add_location(td2, file$6, 129, 20, 4078);
+    			add_location(td3, file$6, 130, 20, 4123);
+    			add_location(tr, file$6, 126, 16, 3925);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tr, anchor);
@@ -5407,20 +5407,20 @@ var app = (function () {
     			add_location(div3, file$6, 90, 8, 2461);
     			attr_dev(th0, "class", "two wide");
     			attr_dev(th0, "nowrap", "nowrap");
-    			add_location(th0, file$6, 102, 16, 2853);
+    			add_location(th0, file$6, 102, 16, 2876);
     			attr_dev(th1, "class", "two wide");
     			attr_dev(th1, "nowrap", "nowrap");
-    			add_location(th1, file$6, 108, 16, 3146);
+    			add_location(th1, file$6, 108, 16, 3169);
     			attr_dev(th2, "class", "three wide");
     			attr_dev(th2, "nowrap", "nowrap");
-    			add_location(th2, file$6, 113, 16, 3390);
+    			add_location(th2, file$6, 113, 16, 3413);
     			attr_dev(th3, "class", "two wide");
-    			add_location(th3, file$6, 117, 16, 3586);
-    			add_location(tr3, file$6, 101, 12, 2832);
+    			add_location(th3, file$6, 117, 16, 3609);
+    			add_location(tr3, file$6, 101, 12, 2855);
     			attr_dev(thead, "class", "full-width");
-    			add_location(thead, file$6, 100, 12, 2793);
-    			add_location(tbody1, file$6, 124, 12, 3836);
-    			attr_dev(table1, "class", "ui compact striped celled table");
+    			add_location(thead, file$6, 100, 12, 2816);
+    			add_location(tbody1, file$6, 124, 12, 3859);
+    			attr_dev(table1, "class", "ui compact selectable celled striped table top aligned");
     			add_location(table1, file$6, 99, 8, 2733);
     			attr_dev(div4, "class", "nine wide column");
     			add_location(div4, file$6, 89, 4, 2422);
@@ -5912,7 +5912,7 @@ var app = (function () {
     	return block;
     }
 
-    // (42:4) {#if (choice === "admin")}
+    // (42:4) {#if (choice === "graph")}
     function create_if_block$5(ctx) {
     	let div;
     	let listview;
@@ -5976,7 +5976,7 @@ var app = (function () {
     		block,
     		id: create_if_block$5.name,
     		type: "if",
-    		source: "(42:4) {#if (choice === \\\"admin\\\")}",
+    		source: "(42:4) {#if (choice === \\\"graph\\\")}",
     		ctx
     	});
 
@@ -6010,7 +6010,7 @@ var app = (function () {
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
-    		if (/*choice*/ ctx[0] === "admin") return 0;
+    		if (/*choice*/ ctx[0] === "graph") return 0;
     		if (/*choice*/ ctx[0] === "detail") return 1;
     		if (/*choice*/ ctx[0] === "api") return 2;
     		if (/*choice*/ ctx[0] === "docs") return 3;
@@ -6129,7 +6129,7 @@ var app = (function () {
     }
 
     function instance$7($$self, $$props, $$invalidate) {
-    	let choice = "admin";
+    	let choice = "graph";
     	let selectKey = null;
     	let schema = null;
     	const manager = new RequestManager();
@@ -6142,7 +6142,7 @@ var app = (function () {
     		if (selectKey !== null) {
     			$$invalidate(0, choice = "detail");
     		} else {
-    			$$invalidate(0, choice = "admin");
+    			$$invalidate(0, choice = "graph");
     		}
     	};
 

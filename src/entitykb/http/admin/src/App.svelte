@@ -8,7 +8,7 @@
     import ListView from "./ListView.svelte";
     import DetailView from "./DetailView.svelte";
 
-    let choice = "admin";
+    let choice = "graph";
     let selectKey = null;
     let schema = null;
     const manager = new RequestManager();
@@ -22,7 +22,7 @@
         if (selectKey !== null) {
             choice = "detail"
         } else {
-            choice = "admin";
+            choice = "graph";
         }
     };
 
@@ -39,7 +39,7 @@
 <main>
     <Menu bind:choice={choice} />
 
-    {#if (choice === "admin")}
+    {#if (choice === "graph")}
     <div id="content">
         <ListView bind:selectKey={selectKey} schema={schema} />
     </div>
