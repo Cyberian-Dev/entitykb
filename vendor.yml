@@ -1,0 +1,7 @@
+- .[Dd][Ss]_[Ss]tore$
+- (.*).min.css
+- (.*).min.js
+- bundle.js
+- bundle.css
+- rollup.config.js
+- ^fonts/
