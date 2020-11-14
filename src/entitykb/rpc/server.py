@@ -1,3 +1,4 @@
+import os
 import asyncio
 from typing import Optional
 
@@ -86,7 +87,11 @@ class RPCServer(object):
 
     def serve(self):
         self.loop = asyncio.get_event_loop()
-        logger.info(f"RPC Server LAUNCHED {self.conn} for {self.kb.config}")
+
+        logger.info(f"Process ID: {os.getpid()}")
+        logger.info(f"EntityKB Root: {self.kb.config.root}")
+        logger.info(f"RPC Server LAUNCHED {self.conn}")
+
         future = asyncio.start_server(
             self.rpc_server, self.conn.host, self.conn.port, loop=self.loop
         )

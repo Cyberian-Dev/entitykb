@@ -1,9 +1,19 @@
+import re
 import sys
+from pathlib import Path
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
+
+
+def get_version(package):
+    """
+    Return package version as listed in `__version__` in `init.py`.
+    """
+    version = Path(package, "__version__.py").read_text()
+    return re.search("__version__ = ['\"]([^'\"]+)['\"]", version).group(1)
+
 
 install_requires = [
-    "aiofiles",
     "aio-msgpack-rpc",
     "fastapi",
     "pyahocorasick",
@@ -20,7 +30,8 @@ if sys.version_info[:2] == (3, 6):
 
 setup(
     name="entitykb",
-    version="0.2.1",
+    python_requires=">=3.6",
+    version=get_version("entitykb"),
     author="Ian Maurer",
     author_email="ian@genomoncology.com",
     packages=find_packages("src/"),

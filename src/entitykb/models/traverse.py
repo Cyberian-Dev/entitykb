@@ -82,9 +82,9 @@ class FieldCriteria(Criteria):
     def icontains(self, value):
         return self.set(Comparison.icontains, value)
 
-    def is_in(self, *args):
-        value = set(args)
-        return self.set(Comparison.is_in, value)
+    def is_in(self, values):
+        values = set(values)
+        return self.set(Comparison.is_in, values)
 
     def gt(self, value):
         return self.set(Comparison.gt, value)
