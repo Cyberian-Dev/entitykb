@@ -108,6 +108,7 @@ class KB(BaseKB):
     def parse(self, request: Union[str, ParseRequest]):
         if isinstance(request, str):
             request = ParseRequest(text=request)
+
         pipeline = self.pipelines.get(request.pipeline)
         assert pipeline, f"Could not find pipeline: {request.pipeline}"
         doc = pipeline(text=request.text, labels=request.labels)
@@ -115,7 +116,10 @@ class KB(BaseKB):
 
     # graph
 
-    def search(self, request: SearchRequest) -> SearchResponse:
+    def search(self, request: Union[str, SearchRequest]) -> SearchResponse:
+        if isinstance(request, str):
+            request = SearchRequest(q=request)
+
         searcher = self._create_searcher(request)
         nodes, trails = self._get_page(request, searcher)
         return SearchResponse.construct(nodes=nodes, trails=trails)

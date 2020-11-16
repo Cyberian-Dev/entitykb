@@ -31,7 +31,7 @@ if sys.version_info[:2] == (3, 6):
 setup(
     name="entitykb",
     python_requires=">=3.6",
-    version=get_version("entitykb"),
+    version=get_version("src/entitykb"),
     author="Ian Maurer",
     author_email="ian@genomoncology.com",
     packages=find_packages("src/"),

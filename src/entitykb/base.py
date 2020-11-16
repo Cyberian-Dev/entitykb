@@ -36,7 +36,7 @@ class BaseKB(object):
 
     @abstractmethod
     def parse(self, request: ParseRequest) -> Doc:
-        """ Parse text into Doc with entities, filtered by query. """
+        """ Parse text into Doc into tokens and spans of entities. """
 
     # graph
 

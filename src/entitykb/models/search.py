@@ -64,3 +64,12 @@ class Trail(BaseModel):
 class SearchResponse(BaseModel):
     nodes: List[dict]
     trails: List[Trail]
+
+    def __len__(self):
+        return len(self.nodes)
+
+    def __getitem__(self, item):
+        return self.nodes[item]
+
+    def __iter__(self):
+        yield from self.nodes

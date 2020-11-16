@@ -80,7 +80,7 @@ class DocToken(BaseModel):
         return f"{self.token} [offset: {self.offset}]"
 
 
-class DocEntity(HasTokens):
+class Span(HasTokens):
     entity_key: str
     tokens: Tuple[DocToken, ...]
     entity: Entity = None
@@ -99,7 +99,7 @@ class DocEntity(HasTokens):
     def __str__(self):
         return f"{self.text} [{self.entity_key}]"
 
-    def __lt__(self, other: "DocEntity"):
+    def __lt__(self, other: "Span"):
         return self.sort_order < other.sort_order
 
     @property
@@ -131,8 +131,12 @@ class DocEntity(HasTokens):
 
 class Doc(HasTokens):
     text: str
-    entities: Tuple[DocEntity, ...] = None
+    spans: Tuple[Span, ...] = None
     tokens: Tuple[DocToken, ...] = None
+
+    @property
+    def entities(self):
+        return tuple(span.entity for span in self.spans)
 
 
 class ParseRequest(BaseModel):

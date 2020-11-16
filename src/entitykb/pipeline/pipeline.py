@@ -5,7 +5,7 @@ from entitykb import (
     BaseKB,
     Config,
     PipelineConfig,
-    DocEntity,
+    Span,
     get_class_from_name,
 )
 
@@ -57,11 +57,11 @@ class Pipeline(object):
 
     def __call__(self, text: str, labels: Iterable[str]):
         doc = self.extractor.extract_doc(text=text, labels=labels)
-        doc.entities = self.filter_entities(doc.entities)
-        doc.entities = tuple(doc.entities)
+        doc.spans = self.filter_spans(doc.spans)
+        doc.spans = tuple(doc.spans)
         return doc
 
-    def filter_entities(self, doc_entities: List[DocEntity]):
+    def filter_spans(self, spans: List[Span]):
         for filterer in self.filterers:
-            doc_entities = filterer.filter(doc_entities)
-        return doc_entities
+            spans = filterer.filter(spans)
+        return spans

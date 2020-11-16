@@ -54,17 +54,17 @@ def test_extract_default_classes(
 
     # noinspection PyCallingNonCallable
     doc = extractor(text)
-    assert len(doc.entities) == 4
+    assert len(doc.spans) == 4
 
-    assert doc.entities[0].entity_key == apple.key
-    assert doc.entities[1].entity_key == google.key
-    assert doc.entities[2].entity_key == amazon.key
-    assert doc.entities[3].entity_key == microsoft.key
+    assert doc.spans[0].entity_key == apple.key
+    assert doc.spans[1].entity_key == google.key
+    assert doc.spans[2].entity_key == amazon.key
+    assert doc.spans[3].entity_key == microsoft.key
 
-    assert doc.entities[0].text == "AAPL"
-    assert doc.entities[1].text == "google"
-    assert doc.entities[2].text == "Amazon"
-    assert doc.entities[3].text == "microsoft"
+    assert doc.spans[0].text == "AAPL"
+    assert doc.spans[1].text == "google"
+    assert doc.spans[2].text == "Amazon"
+    assert doc.spans[3].text == "microsoft"
 
 
 def test_extract_multi_token(
@@ -75,30 +75,30 @@ def test_extract_multi_token(
         "and The The Microsoft Corporation. Plus more AAPL and MSFT."
     )
     doc = extractor(text)
-    assert len(doc.entities) == 8, f"Incorrect: {doc.entities}"
+    assert len(doc.spans) == 8, f"Incorrect: {doc.spans}"
 
-    assert doc.entities[0].text == "Apple, Inc."
-    assert doc.entities[1].text == "Google, Inc."
-    assert doc.entities[2].text == "Amazon, Inc."
-    assert doc.entities[3].text == "The The"
-    assert doc.entities[4].text == "The Microsoft Corporation"
-    assert doc.entities[5].text == "Microsoft Corporation"
-    assert doc.entities[6].text == "AAPL"
-    assert doc.entities[7].text == "MSFT"
+    assert doc.spans[0].text == "Apple, Inc."
+    assert doc.spans[1].text == "Google, Inc."
+    assert doc.spans[2].text == "Amazon, Inc."
+    assert doc.spans[3].text == "The The"
+    assert doc.spans[4].text == "The Microsoft Corporation"
+    assert doc.spans[5].text == "Microsoft Corporation"
+    assert doc.spans[6].text == "AAPL"
+    assert doc.spans[7].text == "MSFT"
 
     doc = extractor(text, ("COMPANY", "BAND"))
-    assert len(doc.entities) == 8
+    assert len(doc.spans) == 8
 
     doc = extractor(text, ("BAND",))
-    assert len(doc.entities) == 1
+    assert len(doc.spans) == 1
 
     doc = extractor(text, ("COMPANY",))
-    assert len(doc.entities) == 7
+    assert len(doc.spans) == 7
 
 
 def test_extract_with_date(extractor: Extractor, apple):
     text = "Apple, Inc. was founded on April 1, 1976."
     doc = extractor(text)
-    assert len(doc.entities) == 2
-    assert doc.entities[0].entity_key == "Apple, Inc.|COMPANY"
-    assert doc.entities[1].entity == Date(year=1976, month=4, day=1)
+    assert len(doc.spans) == 2
+    assert doc.spans[0].entity_key == "Apple, Inc.|COMPANY"
+    assert doc.spans[1].entity == Date(year=1976, month=4, day=1)

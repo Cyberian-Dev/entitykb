@@ -26,47 +26,47 @@ def test_save_entity(kb: KB, apple, apple_records):
     kb.save_node(apple)
     kb.save_node(apple_records)
 
-    assert (kb.parse("AAPL")).entities[0].entity == apple
-    assert (kb.parse("Apple, Inc.")).entities[0].entity == apple
-    assert (kb.parse("Apple Computers")).entities[0].text == "Apple"
-    assert (kb.parse("Apple Records")).entities[0].entity == apple_records
-    assert 2 == len((kb.parse("Apple")).entities)
+    assert (kb.parse("AAPL")).spans[0].entity == apple
+    assert (kb.parse("Apple, Inc.")).spans[0].entity == apple
+    assert (kb.parse("Apple Computers")).spans[0].text == "Apple"
+    assert (kb.parse("Apple Records")).spans[0].entity == apple_records
+    assert 2 == len((kb.parse("Apple")).spans)
 
     apple2 = apple.copy(update=dict(synonyms=("Apple", "Apple Computers")))
 
     # should reset the terms
     kb.save_node(apple2)
 
-    assert not (kb.parse("AAPL")).entities
-    assert (kb.parse("Apple, Inc.")).entities[0].entity == apple2
-    assert (kb.parse("Apple Computers")).entities[0].entity == apple2
-    assert (kb.parse("Apple Computers")).entities[0].text == "Apple Computers"
-    assert 2 == len((kb.parse("Apple")).entities)
+    assert not (kb.parse("AAPL")).spans
+    assert (kb.parse("Apple, Inc.")).spans[0].entity == apple2
+    assert (kb.parse("Apple Computers")).spans[0].entity == apple2
+    assert (kb.parse("Apple Computers")).spans[0].text == "Apple Computers"
+    assert 2 == len((kb.parse("Apple")).spans)
 
     kb.remove_node(apple2)
 
-    assert 1 == len((kb.parse("Apple")).entities)
-    assert 1 == len((kb.parse("Apple Computers")).entities)
-    assert (kb.parse("Apple Computers")).entities[0].text == "Apple"
+    assert 1 == len((kb.parse("Apple")).spans)
+    assert 1 == len((kb.parse("Apple Computers")).spans)
+    assert (kb.parse("Apple Computers")).spans[0].text == "Apple"
 
 
 def test_save_load_sync(root, kb: KB, apple):
     kb.save_node(apple)
-    assert (kb.parse("AAPL")).entities[0].entity == apple
-    assert (kb.parse("Apple, Inc.")).entities[0].entity == apple
-    assert (kb.parse("Apple,Inc.")).entities[0].entity == apple
+    assert (kb.parse("AAPL")).spans[0].entity == apple
+    assert (kb.parse("Apple, Inc.")).spans[0].entity == apple
+    assert (kb.parse("Apple,Inc.")).spans[0].entity == apple
 
     kb.commit()
 
     kb = KB(root=root)
-    assert (kb.parse("AAPL")).entities[0].entity == apple
-    assert (kb.parse("Apple, Inc.")).entities[0].entity == apple
-    assert (kb.parse("Apple,Inc.")).entities[0].entity == apple
+    assert (kb.parse("AAPL")).spans[0].entity == apple
+    assert (kb.parse("Apple, Inc.")).spans[0].entity == apple
+    assert (kb.parse("Apple,Inc.")).spans[0].entity == apple
 
     kb = KB(root=root)
-    assert (kb.parse("AAPL")).entities[0].entity == apple
-    assert (kb.parse("Apple, Inc.")).entities[0].entity == apple
-    assert (kb.parse("Apple,Inc.")).entities[0].entity == apple
+    assert (kb.parse("AAPL")).spans[0].entity == apple
+    assert (kb.parse("Apple, Inc.")).spans[0].entity == apple
+    assert (kb.parse("Apple,Inc.")).spans[0].entity == apple
 
 
 def test_save_for_entity_and_edge(kb: KB, apple, google):
@@ -208,3 +208,14 @@ def test_search_no_results(kb: KB, apple):
     request = SearchRequest(limit=0)
     response = kb.search(request=request)
     assert [] == response.nodes
+
+
+def test_search_with_just_text(kb: KB, apple, google):
+    kb.save_node(apple)
+    kb.save_node(google)
+
+    response = kb.search("ap")
+    assert 1 == len(response)
+    assert [apple] == response.nodes
+    assert apple == response[0]
+    assert [apple] == list(response)

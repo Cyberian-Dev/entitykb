@@ -1,4 +1,4 @@
-from .doc import Token, DocToken, Doc, DocEntity, ParseRequest
+from .doc import Token, DocToken, Doc, Span, ParseRequest
 from .entity import Entity
 from .enums import Direction, Comparison
 from .funcs import (
@@ -30,7 +30,7 @@ __all__ = (
     "Criteria",
     "Direction",
     "Doc",
-    "DocEntity",
+    "Span",
     "DocToken",
     "Edge",
     "EdgeCriteria",

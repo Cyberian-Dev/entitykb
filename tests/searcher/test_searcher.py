@@ -247,7 +247,7 @@ def test_comparison_options(graph):
     trails = list(searcher)
     assert {honeycrisp.key} == ends(trails)
 
-    t = T().in_nodes(Verb.IS_A).include(F.price.is_in(3.99, 1.99))
+    t = T().in_nodes(Verb.IS_A).include(F.price.is_in((3.99, 1.99)))
     searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
     assert {granny_smith.key, honeycrisp.key} == ends(trails)

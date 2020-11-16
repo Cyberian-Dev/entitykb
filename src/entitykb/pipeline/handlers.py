@@ -1,6 +1,6 @@
 from typing import List, Dict
 
-from entitykb.models import Doc, DocToken, DocEntity, Token
+from entitykb.models import Doc, DocToken, Span, Token
 
 
 class TokenHandler(object):
@@ -9,16 +9,16 @@ class TokenHandler(object):
         self.resolver = resolver
 
         self.prefixes: Dict[Token, List[DocToken]] = {}
-        self.doc_entities: List[DocEntity] = []
+        self.spans: List[Span] = []
 
     def __repr__(self):
         return f"<TokenHandler: {self.resolver}>"
 
-    def finalize(self) -> List[DocEntity]:
+    def finalize(self) -> List[Span]:
         for (prefix, doc_tokens) in self.prefixes.items():
             self._resolve_entity(prefix, doc_tokens)
         self.prefixes = {}
-        return self.doc_entities
+        return self.spans
 
     def handle_token(self, doc_token: DocToken):
         new_prefixes: Dict[Token, List[DocToken]] = {}
@@ -46,13 +46,13 @@ class TokenHandler(object):
         while not any_found and prefix:
             entities = self.resolver.resolve(term=prefix)
             for entity in entities:
-                doc_entity = DocEntity(
+                span = Span(
                     text=prefix,
                     doc=self.doc,
                     entity=entity,
                     tokens=doc_tokens,
                 )
-                self.doc_entities.append(doc_entity)
+                self.spans.append(span)
                 any_found = True
 
             if not any_found:

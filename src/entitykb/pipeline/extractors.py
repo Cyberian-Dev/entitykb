@@ -1,6 +1,6 @@
 from typing import List, Tuple, Iterable
 
-from entitykb import Doc, DocToken, DocEntity, create_component
+from entitykb import Doc, DocToken, Span, create_component
 
 from .handlers import TokenHandler
 from .resolvers import Resolver
@@ -19,6 +19,9 @@ class Extractor(object):
     def __call__(self, text: str, labels: Labels = None) -> Doc:
         return self.extract_doc(text, labels)
 
+    def __repr__(self):
+        return self.__class__.__name__
+
     def extract_doc(self, text: str, labels: Labels = None) -> Doc:
         raise NotImplementedError
 
@@ -32,7 +35,7 @@ class DefaultExtractor(Extractor):
         doc = Doc(text=text)
         handlers = self.get_handlers(doc=doc, labels=labels)
         self.process_tokens(doc, handlers, text)
-        self.process_entities(doc, handlers, labels)
+        self.process_spans(doc, handlers, labels)
         return doc
 
     def get_handlers(self, doc: Doc, labels: Labels) -> List[TokenHandler]:
@@ -60,12 +63,10 @@ class DefaultExtractor(Extractor):
         return doc_tokens
 
     @classmethod
-    def process_entities(cls, doc, handlers, labels):
-        doc_entities: List[DocEntity] = []
+    def process_spans(cls, doc, handlers, labels):
+        spans: List[Span] = []
         for handler in handlers:
-            doc_entities += handler.finalize()
+            spans += handler.finalize()
         if labels:
-            doc_entities = (
-                doc_ent for doc_ent in doc_entities if doc_ent.label in labels
-            )
-        doc.entities = tuple(doc_entities)
+            spans = (span for span in spans if span.label in labels)
+        doc.spans = tuple(spans)

@@ -1,7 +1,7 @@
 from entitykb.models import (
     Entity,
     DocToken,
-    DocEntity,
+    Span,
     Doc,
     Token,
 )
@@ -33,13 +33,13 @@ def test_doc_create():
         ],
     )
 
-    doc.entities = (
-        DocEntity(
+    doc.spans = (
+        Span(
             text="Barack Obama",
             entity=Entity(name="Barack Obama", label="PRESIDENT"),
             tokens=doc.tokens[2:4],
         ),
-        DocEntity(
+        Span(
             text="Obama",
             entity=Entity(name="Barack Obama", label="PERSON"),
             tokens=doc.tokens[3:4],
@@ -50,14 +50,14 @@ def test_doc_create():
     assert len(doc) == 5
     assert str(doc) == "Hello, Barack Obama!"
     assert str(doc[2]) == "Barack"
-    assert set(doc.dict().keys()) == {"text", "entities", "tokens"}
+    assert set(doc.dict().keys()) == {"text", "spans", "tokens"}
 
-    doc_ent = doc.entities[0]
-    assert doc_ent.sort_order == (-2, 0, 0, 2, "PRESIDENT")
-    assert doc_ent.offsets == (2, 3)
-    assert doc_ent.offset == 2
-    assert doc_ent.last_offset == 3
-    assert doc_ent.dict() == {
+    span = doc.spans[0]
+    assert span.sort_order == (-2, 0, 0, 2, "PRESIDENT")
+    assert span.offsets == (2, 3)
+    assert span.offset == 2
+    assert span.last_offset == 3
+    assert span.dict() == {
         "entity": {
             "key": "Barack Obama|PRESIDENT",
             "label": "PRESIDENT",
@@ -73,11 +73,13 @@ def test_doc_create():
         ),
     }
 
-    doc_ent = doc.entities[1]
-    assert doc_ent.sort_order == (-1, 1, 1, 3, "PERSON")
+    span = doc.spans[1]
+    assert span.sort_order == (-1, 1, 1, 3, "PERSON")
 
-    assert doc.entities == tuple(sorted(doc.entities))
+    assert doc.spans == tuple(sorted(doc.spans))
 
     doc_data = doc.dict()
     new_doc = Doc(**doc_data)
     assert new_doc.dict() == doc_data
+
+    assert 2 == len(doc.entities)
