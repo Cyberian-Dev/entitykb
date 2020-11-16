@@ -99,7 +99,8 @@ Below are some choices that users should be aware of upfront:
 * **Not secure**: EntityKB has no authentication or authorization
   capabilities. RPC and HTTP services should not be exposed to
   untrusted clients. Instead, proxy EntityKB behind your application's
-  security layer.
+  security layer. Also, knowledge bases are stored using pickles
+  which are not secure, only unpickle data from trusted sources.
   
 * **Not memory optimized**: EntityKB is not a "big data" solution.
   The default graph store trades memory for runtime performance and
@@ -273,3 +274,19 @@ open source community. Below are the most salient examples:
 
 This project is copyrighted by [GenomOncology](https://www.genomoncology.com/)
 and licensed under the terms of the MIT license.
+
+---
+
+## Status
+
+EntityKB should be considered beta software. Some caveats:
+
+* Expect backwards incompatible changes that will break your Knowledge Base.
+
+* Monitor changes in the [release notes](release-notes.md).
+
+* To minimize frustration, please pin the version of the software in
+  your requirements.txt or equivalent file.
+
+* Submit bugs and enhancement suggestions via
+  [GitHub issues](https://github.com/genomoncology/entitykb/issues).
