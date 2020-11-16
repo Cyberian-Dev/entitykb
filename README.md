@@ -108,14 +108,14 @@ Below are some choices that users should be aware of before starting:
   via configuration.
 
 * **Not transactional**: EntityKB is not designed for ACID-compliant
-  data storage and should never be used as the "System of Record". 
+  data storage and should never be used as the "system of record". 
   EntityKB can be updated during runtime, but care should be taken to
   prevent data loss or corruption.
   
 * **No Machine Learning**: EntityKB is a software development platform
   without any out-of-the-box machine learning capabilities. However, it
   certainly can be used in larger ML-based projects and custom resolvers
-  can be added that have "ML models" at their heart of the code.
+  can be added that use ML models for their entity detection logic.
   
 # Getting Started
 
