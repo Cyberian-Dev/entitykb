@@ -6,8 +6,9 @@ from typing import Optional
 
 import typer
 import uvicorn
-from entitykb import KB, Config, logger, environ, rpc
+from entitykb import KB, Config, logger, environ, rpc, Direction
 from tabulate import tabulate
+from json import dumps
 
 from . import services
 
@@ -52,6 +53,33 @@ def info(root: Optional[Path] = typer.Option(None)):
     flat = sorted(services.flatten_dict(kb.info()).items())
     output = tabulate(flat, tablefmt="pretty", colalign=("left", "right"))
     typer.echo(output)
+
+
+@cli.command()
+def dump(
+    output: str = typer.Argument("-"),
+    root: Optional[Path] = typer.Option(None),
+):
+    """ Dump data from KB in JSONL format. """
+    with typer.open_file(output, "w") as f:
+        kb = KB(root=root)
+        for node in kb.graph:
+            payload = node.dict()
+            envelope = dict(kind="node", payload=payload)
+            data = dumps(envelope)
+            f.write(data)
+            f.write("\n")
+
+            it = kb.graph.iterate_edges(
+                directions=Direction.outgoing, nodes=node
+            )
+
+            for _, edge in it:
+                payload = edge.dict()
+                envelope = dict(kind="edge", payload=payload)
+                data = dumps(envelope)
+                f.write(data)
+                f.write("\n")
 
 
 @cli.command()
