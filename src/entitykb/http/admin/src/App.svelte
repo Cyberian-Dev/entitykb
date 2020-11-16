@@ -7,6 +7,7 @@
     import Bottom from "./Bottom.svelte";
     import ListView from "./ListView.svelte";
     import DetailView from "./DetailView.svelte";
+    import ParseView from "./ParseView.svelte";
 
     let choice = "graph";
     let selectKey = null;
@@ -47,6 +48,10 @@
     <div id="content">
         <DetailView bind:selectKey={selectKey} schema={schema} />
     </div>
+    {:else if (choice === "parse")}
+        <div id="content">
+            <ParseView bind:selectKey={selectKey} />
+        </div>
     {:else if (choice === "api")}
         <iframe title="Swagger API" src="/docs"></iframe>
     {:else if (choice === "docs")}

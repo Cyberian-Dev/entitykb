@@ -15,6 +15,7 @@
       <i class="large lightbulb outline icon"></i>
   </div>
   <a id="graph" class="active item" on:click={setChoice}>Graph</a>
+  <a id="parse" class="item" on:click={setChoice}>Parse</a>
   <a id="api" class="item" on:click={setChoice}>API</a>
   <a id="docs" class="item" on:click={setChoice}>Docs</a>
 </div>

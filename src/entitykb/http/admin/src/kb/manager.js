@@ -3,6 +3,7 @@ import {Entity, Neighbor} from "./nodes";
 import {Comparison, FieldCriteria, SearchRequest, Traversal} from "./query";
 
 const baseURL = window.location.origin;
+const parseURL = baseURL + "/parse";
 const searchURL = baseURL + "/search";
 const getNodeURL = baseURL + "/nodes/";
 const getSchemaURL = baseURL + "/meta/schema";
@@ -70,7 +71,30 @@ export class RequestManager {
             });
 
         return new Entity(data);
+    }
 
+    async parseDoc(text) {
+        const body = JSON.stringify({text: text});
+
+        return await fetch(parseURL, {
+            ...defaultParams,
+            method: "POST",
+            body: body,
+        })
+            .then(response => {
+                return response.json()
+            })
+            .catch(async response => {
+                console.log(response);
+                return {}
+            });
+    }
+
+    async getDoc(page, thisRequest) {
+        this.start(page, thisRequest);
+        let doc = await this.parseDoc(thisRequest.text);
+        this.finish();
+        return doc;
     }
 
     async getNeighbors(page, thisRequest) {
