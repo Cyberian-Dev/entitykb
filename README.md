@@ -4,7 +4,7 @@
   </a>
   <br/>
   <em>
-    EntityKB is a python toolkit for the rapid development of custom
+    EntityKB is a Python toolkit for the rapid development of custom
     knowledge bases.
   </em>
 </p>
@@ -23,23 +23,14 @@
 
 ---
 
-# Background
+## Overview
 
 EntityKB is a toolkit for quickly creating knowledge bases (a.k.a.
-knowledge graphs) using the python programming language.  Knowledge
+knowledge graphs) using the Python programming language.  Knowledge
 bases enable [entity linking](https://en.wikipedia.org/wiki/Entity_linking)
 for information extraction and structured searching projects.
 For example, web scraping scripts or chat bot applications can provide
 greater value when concepts are linked to a traversable semantic graph.
-
-EntityKB was developed by [GenomOncology](https://www.genomoncology.com/)
-and is the foundation of the clinical, molecular and genomic knowledge
-base that power GenomOncology's [igniteIQ data extraction
-platform](https://genomoncology.com/igniteiq) and [clinical decision
-support API suite](https://genomoncology.com/api-suite). EntityKB
-was released as an open source library (MIT License) in November
-2020 for the benefit of GenomOncology's clients and the greater
-open source community.
 
 Out of the box, EntityKB is a programmatic framework for algorithmic text
 mining techniques, not a machine-learning based NLP solution. However, 
@@ -60,7 +51,7 @@ EntityKB provides a focused set of core capabilities that can be built upon:
 * **Processing pipeline** that normalizes, tokenizes and extracts entities
   from text.
 
-* **Searching** with python based query and traversal language.
+* **Searching** with Python based query and traversal language.
 
 * **Importing and exporting** of data with CLI tooling and/or Python code.
   
@@ -70,25 +61,27 @@ EntityKB provides a focused set of core capabilities that can be built upon:
   
 ### Priorities
 
-The goal of EntityKB is to make it "easy" to create custom Knowledge Bases.
-Where "easy" is defined as "**Fast to Start**" and "Simple to Change".
-The below priorities are in service to this overarching goal:
+The goal of EntityKB is to make it "easy" to create custom Knowledge
+Bases.  where "easy" is defined as "**fast to start**" and "**simple
+to change**".  The below [quality
+attributes](https://en.wikipedia.org/wiki/List_of_system_quality_attributes)
+are in service to this overarching goal:
 
-* **Up and Running**: Immediately start adding entities and processing
-  text with the default KB configuration.
+* **Efficiency**: Immediately start adding entities and processing text
+  with default setup.
 
-* **Configurable**: Add custom or replace default code by editing a simple
-  JSON file.
+* **Configurability**: Add custom code and replace default code by editing a
+  simple JSON file.
   
-* **Multiple Interfaces**: Embed as Python library, manage via CLI,
-  or invoke remotely via RPC or HTTP.
+* **Interoperability**: Embed as Python library, manage via CLI, or invoke
+  remotely via RPC or HTTP.
 
-* **Domain Specific**: Create new entity types using type annotated
+* **Relevancy**: Create new entity types using type annotated
   [Pydantic](https://pydantic-docs.helpmanual.io/) models and custom
   resolvers using grammars or other Domain Specific Language (DSL)
   programming techniques.
 
-* **Portable**: Code and data created for EntityKB should be easy to
+* **Portability**: Code and data created for EntityKB should be easy to
   transfer to a new framework or approach.
   
 
@@ -102,10 +95,11 @@ Below are some choices that users should be aware of before starting:
   untrusted clients. Instead, proxy EntityKB behind your application's
   security layer.
   
-* **Heavy RAM usage**: EntityKB is not a "big data" solution.
-  The default graph store trades RAM for runtime performance and ease-of-use.
-  However, the storage could be replaced with a new implementation
-  via configuration.
+* **Heavy memory usage**: EntityKB is not a "big data" solution.
+  The default graph store trades memory for runtime performance and
+  ease-of-use. However, the default storage component could be replaced
+  with a new one that offloads data to disk or a new graph component
+  that delegates to a scalable backend like Neo4j.
 
 * **Not transactional**: EntityKB is not designed for ACID-compliant
   data storage and should never be used as the "system of record". 
@@ -117,7 +111,9 @@ Below are some choices that users should be aware of before starting:
   certainly can be used in larger ML-based projects and custom resolvers
   can be added that use ML models for their entity detection logic.
   
-# Getting Started
+---
+  
+## Getting Started
 
 ### Install
 
@@ -128,7 +124,7 @@ $ pip install entitykb
 ### Initialize
 
 EntityKB creates a KB in the path specified by the ENTITYKB_ROOT environment
-variable. If no variable is provided, then the user's ~/.entitykb path is
+variable. If no variable is provided, then the user's `~/.entitykb` path is
 used.
 
 ```text
@@ -167,7 +163,7 @@ $ entitykb info
 
 Start a new Knowledge Base and add two entities:
 
-```
+```python
 >>> from entitykb import KB, Entity
 >>> kb = KB()
 >>> kb.save_node(Entity(name="New York", label="STATE"))
@@ -177,7 +173,7 @@ Entity(key='New York City|CITY', label='CITY', data=None, name='New York City', 
 ```
 
 Perform term search using common prefix text:
-```
+```python
 >>> response = kb.search("New Y")
 >>> len(response)
 2
@@ -188,7 +184,7 @@ Entity(key='New York City|CITY', label='CITY', data=None, name='New York City', 
 ```
 
 Parse text into a document with tokens and spans containing entities:
-```
+```python
 >>> doc = kb.parse("NYC is another name for New York City")
 >>> len(doc.tokens)
 8
@@ -200,14 +196,42 @@ Entity(key='New York City|CITY', label='CITY', data=None, name='New York City', 
 ```
 
 Commit the KB to disk, otherwise the saved nodes will be lost on exit.
-```
+```python
 >>> kb.commit()
 True
 ```
 
+---
 
-## License
+## Background
 
-This project is copyrighted by
-[GenomOncology](https://www.genomoncology.com/) and licensed under
-the terms of the MIT license.
+### History
+
+EntityKB was developed by [GenomOncology](https://www.genomoncology.com/)
+and is the foundation of the clinical, molecular and genomic knowledge
+base that power GenomOncology's [igniteIQ data extraction
+platform](https://genomoncology.com/igniteiq) and [clinical decision
+support API suite](https://genomoncology.com/api-suite). EntityKB
+was released as an open source library in November 2020 for the
+benefit of GenomOncology's clients and the greater open source
+community.
+
+
+### Maintainer
+
+The initial version of EntityKB was designed and implemented by Ian Maurer
+who is the Chief Technology Officer (CTO) for GenomOncology. Ian has over
+20 years of industry experience and is the architect of GenomOncology's 
+[igniteIQ data extract platform](https://genomoncology.com/igniteiq) and the
+[API Suite](https://genomoncology.com/api-suite) that powers GenomOncology's
+[Precision Oncology Platform](https://www.genomoncology.com/our-platform).
+
+Ian can be contacted via [Twitter](https://twitter.com/imaurer),
+[LinkedIn](https://www.linkedin.com/in/ianmaurer/), or email
+(ian -at- genomoncology.com).
+
+
+### License
+
+This project is copyrighted by [GenomOncology](https://www.genomoncology.com/)
+and licensed under the terms of the MIT license.
