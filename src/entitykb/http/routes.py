@@ -21,7 +21,7 @@ async def get_node(key: str) -> dict:
 
 @router.post("/nodes", tags=["nodes"])
 async def save_node(node: dict = Body(...)) -> dict:
-    """ Parse text and return document object. """
+    """ Saves nodes to graph and terms to index. """
     async with connection as client:
         return await client.call("save_node", node)
 
@@ -31,6 +31,16 @@ async def remove_node(key: str):
     """ Remove node and relationships from KB. """
     async with connection as client:
         return await client.call("remove_node", key)
+
+
+# edges
+
+
+@router.post("/edges", tags=["edges"])
+async def save_edge(edge: dict = Body(...)) -> dict:
+    """ Save edge to graph store. """
+    async with connection as client:
+        return await client.call("save_edge", edge)
 
 
 # pipeline

@@ -43,7 +43,8 @@ class AsyncKB(BaseKB):
     # edges
 
     async def save_edge(self, edge):
-        raise NotImplementedError
+        async with self.connection as client:
+            return await client.call("save_edge", edge.dict())
 
     # search
 

@@ -34,7 +34,8 @@ class HandlerKB(BaseKB):
     # edges
 
     def save_edge(self, edge):
-        raise NotImplementedError
+        edge = self._kb.save_edge(edge)
+        return edge.dict()
 
     # pipeline
 

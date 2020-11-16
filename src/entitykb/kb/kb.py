@@ -100,7 +100,8 @@ class KB(BaseKB):
 
     # edges
 
-    def save_edge(self, edge):
+    def save_edge(self, edge: Union[Edge, dict]):
+        edge = Registry.instance().create(Edge, edge)
         return self.graph.save_edge(edge)
 
     # pipeline

@@ -27,8 +27,8 @@ class SyncKB(AsyncKB):
 
     def save_node(self, node: Node) -> Node:
         future = super(SyncKB, self).save_node(node)
-        uncommitted = run_future(future)
-        return uncommitted
+        node = run_future(future)
+        return node
 
     def remove_node(self, key) -> bool:
         future = super(SyncKB, self).remove_node(key)
@@ -38,7 +38,9 @@ class SyncKB(AsyncKB):
     # edges
 
     def save_edge(self, edge):
-        raise NotImplementedError
+        future = super(SyncKB, self).save_edge(edge)
+        edge = run_future(future)
+        return edge
 
     # pipeline
 

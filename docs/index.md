@@ -21,6 +21,11 @@
     https://github.com/genomoncology/entitykb
 </a>
 
+**EntityKB Python Package**:
+<a href="https://pypi.org/project/entitykb/" target="_blank">
+    https://pypi.org/project/entitykb/
+</a>
+
 ---
 
 ## Overview
@@ -40,7 +45,8 @@ tools for real-world solutions.
 
 ### Capabilities
 
-EntityKB provides a focused set of core capabilities that can be built upon:
+EntityKB provides a focused set of core capabilities that can be
+extended and enhanced:
 
 * **Graph-based data model** for storing of entities (nodes) and their
   relationships (edges).
@@ -62,10 +68,10 @@ EntityKB provides a focused set of core capabilities that can be built upon:
 ### Priorities
 
 The goal of EntityKB is to make it "easy" to create custom Knowledge
-Bases.  where "easy" is defined as "**fast to start**" and "**simple
+Bases where "easy" is defined as "**fast to start**" and "**simple
 to change**".  The below [quality
 attributes](https://en.wikipedia.org/wiki/List_of_system_quality_attributes)
-are in service to this overarching goal:
+have been prioritized in service to this overarching goal:
 
 * **Efficiency**: Immediately start adding entities and processing text
   with default setup.
@@ -81,21 +87,21 @@ are in service to this overarching goal:
   resolvers using grammars or other Domain Specific Language (DSL)
   programming techniques.
 
-* **Portability**: Code and data created for EntityKB should be easy to
-  transfer to a new framework or approach.
+* **Portability**: Code and data created for EntityKB should be
+  transferable to a new technology stack with minimal effort.
   
 
 ### Limitations
 
 EntityKB is deliberately limited in scope to minimize complexity.
-Below are some choices that users should be aware of before starting:
+Below are some choices that users should be aware of upfront:
 
 * **Not secure**: EntityKB has no authentication or authorization
   capabilities. RPC and HTTP services should not be exposed to
   untrusted clients. Instead, proxy EntityKB behind your application's
   security layer.
   
-* **Heavy memory usage**: EntityKB is not a "big data" solution.
+* **Not memory optimized**: EntityKB is not a "big data" solution.
   The default graph store trades memory for runtime performance and
   ease-of-use. However, the default storage component could be replaced
   with a new one that offloads data to disk or a new graph component
@@ -222,13 +228,45 @@ community.
 The initial version of EntityKB was designed and implemented by Ian Maurer
 who is the Chief Technology Officer (CTO) for GenomOncology. Ian has over
 20 years of industry experience and is the architect of GenomOncology's 
-[igniteIQ data extract platform](https://genomoncology.com/igniteiq) and the
+[igniteIQ data extract platform](https://genomoncology.com/igniteiq) and
 [API Suite](https://genomoncology.com/api-suite) that powers GenomOncology's
 [Precision Oncology Platform](https://www.genomoncology.com/our-platform).
 
 Ian can be contacted via [Twitter](https://twitter.com/imaurer),
 [LinkedIn](https://www.linkedin.com/in/ianmaurer/), or email
 (ian -at- genomoncology.com).
+
+
+### Related Projects
+
+EntityKB was inspired by and is powered by several other projects in the
+open source community. Below are the most salient examples:
+
+* [pyahocorasick](https://github.com/WojciechMula/pyahocorasick)
+  is used for storing strings and retrieving terms from text.
+  
+* [Typer](https://github.com/tiangolo/typer) powers EntityKB's
+  Command Line Interface (CLI) tool.
+
+* [FastAPI](https://github.com/tiangolo/fastapi) powers EntityKB's
+  HTTP Application Programming Interface (API).
+
+* [uvicorn](https://github.com/encode/uvicorn) and
+  [Starlette](https://github.com/encode/starlette) for power running FastAPI.
+  
+* [Pydantic](https://github.com/samuelcolvin/pydantic/) for model
+  annotations, schema definition and FastAPI documentation.
+  
+* [MkDocs](https://github.com/mkdocs/mkdocs/), 
+  [Termynal.js](https://github.com/ines/termynal/), and
+  [Material for MkDocs](https://github.com/squidfunk/mkdocs-material)
+  for making the documentation look great.
+  
+* [Lark](https://github.com/lark-parser/lark) for powering the date
+  resolver's grammar.
+  
+* [FlashText](https://github.com/vi3k6i5/flashtext) for inspiring
+  parts of EntityKB's design and approach.
 
 
 ### License
