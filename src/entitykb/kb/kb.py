@@ -1,4 +1,3 @@
-from importlib import import_module
 from typing import Optional, Union
 
 from entitykb import (
@@ -51,8 +50,6 @@ class KB(BaseKB):
             )
             self.pipelines[name] = pipeline
 
-        self.modules = [import_module(m) for m in self.config.modules]
-
         self.reload()
 
     # common
@@ -77,7 +74,7 @@ class KB(BaseKB):
         return self.graph.get_node(key)
 
     def save_node(self, node: Union[Node, dict]) -> Node:
-        node = Registry.instance().create(Node, node)
+        node = Node.create(node)
 
         key = Node.to_key(node)
         previous = self.get_node(key)
@@ -101,7 +98,7 @@ class KB(BaseKB):
     # edges
 
     def save_edge(self, edge: Union[Edge, dict]):
-        edge = Registry.instance().create(Edge, edge)
+        edge = Edge.create(edge)
         return self.graph.save_edge(edge)
 
     # pipeline

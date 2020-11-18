@@ -116,5 +116,9 @@ class Registry(object):
             cls._instance = Registry()
         return cls._instance
 
+    @classmethod
+    def reset(cls):
+        cls._instance = None
+
     def create_schema(self, labels: List[str], verbs: List[str]):
         return Schema(self.lookup, labels, verbs)

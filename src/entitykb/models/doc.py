@@ -5,7 +5,6 @@ from typing import Tuple, Optional, Any, List
 from pydantic import BaseModel
 
 from .entity import Entity
-from .registry import Registry
 
 
 class Token(str):
@@ -86,7 +85,7 @@ class Span(HasTokens):
     entity: Entity = None
 
     def __init__(self, **data: Any):
-        entity = Registry.instance().create(Entity, data.pop("entity"))
+        entity = Entity.create(data.pop("entity"))
 
         # populate entity_key if not provided
         data.setdefault("entity_key", entity and entity.key)

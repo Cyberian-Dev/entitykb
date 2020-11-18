@@ -1,8 +1,8 @@
-from typing import List
+from typing import List, Any
 
 from pydantic import BaseModel, Field
 
-from .node import Edge
+from .node import Edge, Node
 from .traverse import Traversal
 
 
@@ -62,8 +62,13 @@ class Trail(BaseModel):
 
 
 class SearchResponse(BaseModel):
-    nodes: List[dict]
+    nodes: List[Node]
     trails: List[Trail]
+
+    def __init__(self, **data: Any):
+        nodes = [Node.create(n) for n in data.pop("nodes", [])]
+        super().__init__(nodes=[], **data)
+        self.nodes = nodes
 
     def __len__(self):
         return len(self.nodes)

@@ -1,3 +1,4 @@
+from importlib import import_module
 import json
 import os
 from pathlib import Path
@@ -5,7 +6,9 @@ from typing import List, Dict
 
 from pydantic import BaseModel, Field
 
+from .logging import logger
 from .env import environ
+from .models.registry import Registry
 
 
 class PipelineConfig(BaseModel):
@@ -33,6 +36,13 @@ class Config(BaseModel):
         default_factory=PipelineConfig.default_factory
     )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        modules = [import_module(m).__name__ for m in self.modules]
+        logger.info(f"Loading modules: {modules}")
+        Registry.reset()
+
     def __str__(self):
         return f"<Config: {self.file_path}>"
 
@@ -41,7 +51,7 @@ class Config(BaseModel):
         return os.path.dirname(self.file_path)
 
     @classmethod
-    def create(cls, root: str) -> "Config":
+    def create(cls, root: str = None) -> "Config":
         config_file_path = cls.get_file_path(root=root)
 
         data = {}

@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Body, HTTPException, status
 
-from entitykb import rpc, Doc, models
+from entitykb import rpc, Doc, models, Config
 
 router = APIRouter()
 connection = rpc.RPCConnection()
+config = Config.create()
 
 
 # nodes
@@ -61,7 +62,8 @@ async def parse(request: models.ParseRequest = Body(...)) -> Doc:
 async def search(request: models.SearchRequest = Body(...)):
     """ Parse text and return document object. """
     async with connection as client:
-        return await client.call("search", request.dict())
+        data = await client.call("search", request.dict())
+        return data
 
 
 # admin
