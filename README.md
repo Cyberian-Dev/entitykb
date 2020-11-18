@@ -54,8 +54,8 @@ extended and enhanced:
 * **Terms index** for efficient storing and retrieval of entity names and
   synonyms.
   
-* **Processing pipeline** that normalizes, tokenizes and extracts entities
-  from text.
+* **Processing pipeline** that normalizes and tokenizes text and then
+  resolves entities from spans of tokens.
 
 * **Searching** with Python based query and traversal language.
 
@@ -79,13 +79,11 @@ have been prioritized in service to this overarching goal:
 * **Configurability**: Add custom code and replace default code by editing a
   simple JSON file.
   
-* **Interoperability**: Embed as Python library, manage via CLI, or invoke
-  remotely via RPC or HTTP.
+* **Interoperability**: Interact via command-line, RPC, HTTP, or in-memory
+  Python library.
 
-* **Relevancy**: Create new entity types using type annotated
-  [Pydantic](https://pydantic-docs.helpmanual.io/) models and custom
-  resolvers using grammars or other Domain Specific Language (DSL)
-  programming techniques.
+* **Relevancy**: Create new entity classes, contextual labels/verbs,
+  and custom resolvers with domain specific grammars.
 
 * **Portability**: Code and data created for EntityKB should be
   transferable to a new technology stack with minimal effort.
@@ -113,10 +111,15 @@ Below are some choices that users should be aware of upfront:
   EntityKB can be updated during runtime, but care should be taken to
   prevent data loss or corruption.
   
-* **No Machine Learning**: EntityKB is a software development platform
+* **Not ML based**: EntityKB is a software development platform
   without any out-of-the-box machine learning capabilities. However, it
   certainly can be used in larger ML-based projects and custom resolvers
   can be added that use ML models for their entity detection logic.
+  
+* **Not Resilient**: EntityKB graph searching capability has no
+  guards against long-running queries that can impact system
+  responsiveness. Limit end user's from creating open-ended queries to
+  prevent service disruption.
   
 ---
   
