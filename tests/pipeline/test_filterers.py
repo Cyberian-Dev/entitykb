@@ -16,10 +16,17 @@ from entitykb.pipeline import (
 
 
 @pytest.fixture()
-def spans():
-    doc = Doc(text="a")
-    tokens = [DocToken(doc=doc, token=Token("a"), offset=0)]
+def doc():
+    return Doc(text="a")
 
+
+@pytest.fixture()
+def tokens(doc):
+    return [DocToken(doc=doc, token=Token("a"), offset=0)]
+
+
+@pytest.fixture()
+def spans(doc, tokens):
     spans = [
         Span(
             text="0",
@@ -50,17 +57,19 @@ def spans():
     return spans
 
 
-def test_longest_filters(spans):
-    spans = KeepLongestByKey().filter(spans=spans)
+def test_longest_filters(spans, tokens):
+    spans = KeepLongestByKey().filter(spans=spans, tokens=tokens)
     assert 3 == len(spans)
 
-    spans = KeepLongestByLabel().filter(spans=spans)
+    spans = KeepLongestByLabel().filter(spans=spans, tokens=tokens)
     assert 2 == len(spans)
 
-    spans = KeepLongestByOffset().filter(spans=spans)
+    spans = KeepLongestByOffset().filter(spans=spans, tokens=tokens)
     assert 1 == len(spans)
 
 
-def test_pipeline_filter_spans(spans):
+def test_pipeline_filter_spans(doc, spans, tokens):
+    doc.spans = spans
+    doc.tokens = tokens
     pipeline = Pipeline(filterers=[ExactOnlyFilterer()])
-    assert 3 == len(pipeline.filter_spans(spans))
+    assert 3 == len(pipeline.filter_spans(doc))

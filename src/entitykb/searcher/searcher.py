@@ -94,7 +94,7 @@ class FilterLayer(Layer):
             nodes=trail.end,
         )
 
-        node_set = set(criteria.nodes)
+        node_set = set(criteria.keys)
 
         found = False
         for (key, edge) in it:

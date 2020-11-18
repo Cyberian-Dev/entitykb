@@ -1,14 +1,12 @@
 from dataclasses import dataclass
-from typing import Tuple, List, Iterable
+from typing import Tuple, Iterable
 
 from entitykb import (
     BaseKB,
     Config,
     PipelineConfig,
-    Span,
     get_class_from_name,
 )
-
 from .extractors import Extractor
 from .filterers import Filterer
 from .normalizers import Normalizer
@@ -20,7 +18,6 @@ from .tokenizers import Tokenizer
 class Pipeline(object):
     extractor: Extractor = None
     filterers: Tuple[Filterer, ...] = tuple
-    resolvers: Tuple[Resolver, ...] = tuple
 
     @classmethod
     def create(
@@ -47,9 +44,7 @@ class Pipeline(object):
             pipeline.extractor, tokenizer=tokenizer, resolvers=resolvers,
         )
 
-        pipeline = cls(
-            extractor=extractor, filterers=filterers, resolvers=resolvers,
-        )
+        pipeline = cls(extractor=extractor, filterers=filterers)
 
         return pipeline
 
@@ -57,11 +52,12 @@ class Pipeline(object):
 
     def __call__(self, text: str, labels: Iterable[str]):
         doc = self.extractor.extract_doc(text=text, labels=labels)
-        doc.spans = self.filter_spans(doc.spans)
+        doc.spans = self.filter_spans(doc)
         doc.spans = tuple(doc.spans)
         return doc
 
-    def filter_spans(self, spans: List[Span]):
+    def filter_spans(self, doc):
+        spans = doc.spans
         for filterer in self.filterers:
-            spans = filterer.filter(spans)
+            spans = filterer.filter(doc.spans, doc.tokens)
         return spans

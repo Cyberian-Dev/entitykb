@@ -5,8 +5,8 @@ site_url: https://www.entitykb.org/
 theme:
     name: 'material'
     palette:
-        primary: 'grey'
-        accent: 'yellow'
+        primary: 'white'
+        accent: 'blue'
     icon:
         repo: fontawesome/brands/github-alt
     logo: 'img/favicon.png'
@@ -17,8 +17,9 @@ repo_url: https://github.com/genomoncology/entitykb
 edit_uri: ''
 
 nav:
-    - EntityKB: 'index.md'
-    - Contributing: 'contributing.md'
+    - Introduction: 'index.md'
+    - Reference: 'reference.md'
+    - Development: 'development.md'
     - Release Notes: 'release-notes.md'
 
 markdown_extensions:
@@ -58,5 +59,7 @@ extra_css:
 
 extra_javascript:
     - 'https://unpkg.com/mermaid@8.4.6/dist/mermaid.min.js'
+    - 'https://cdnjs.cloudflare.com/ajax/libs/tablesort/5.2.1/tablesort.min.js'
     - 'js/termynal.js'
     - 'js/custom.js'
+    - 'js/tables.js'

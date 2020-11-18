@@ -76,7 +76,7 @@ class HandlerKB(BaseKB):
 
 class RPCServer(object):
     def __init__(self, root: str = None, host: str = None, port: int = None):
-        self.conn = RPCConnection(host=host, port=port)
+        self.connection = RPCConnection(host=host, port=port)
         self.kb = KB(root=root)
         self.handler = HandlerKB(self.kb)
         self.rpc_server = aio_msgpack_rpc.Server(handler=self.handler)
@@ -91,16 +91,21 @@ class RPCServer(object):
 
         logger.info(f"Process ID: {os.getpid()}")
         logger.info(f"EntityKB Root: {self.kb.config.root}")
-        logger.info(f"RPC Server LAUNCHED {self.conn}")
+        logger.info(f"RPC Server LAUNCHED {self.connection}")
 
         future = asyncio.start_server(
-            self.rpc_server, self.conn.host, self.conn.port, loop=self.loop
+            self.rpc_server,
+            self.connection.host,
+            self.connection.port,
+            loop=self.loop,
         )
         self.stream = self.loop.run_until_complete(future)
         self.loop.run_forever()
 
     def close(self):
-        logger.info(f"RPC Server EXITING {self.conn} for {self.kb.config}")
+        logger.info(
+            f"RPC Server EXITING {self.connection} for {self.kb.config}"
+        )
         if self.stream:
             self.stream.close()
             self.loop.run_until_complete(self.stream.wait_closed())

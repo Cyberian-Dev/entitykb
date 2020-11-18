@@ -51,7 +51,7 @@ def test_rel_criteria():
     assert r.dict() == {
         "verbs": ["IS_A"],
         "directions": [Direction.outgoing],
-        "nodes": ["Fruit|FOOD"],
+        "keys": ["Fruit|FOOD"],
         "type": "edge",
     }
 
@@ -131,7 +131,7 @@ def test_filter_by_edge():
             EdgeCriteria(
                 verbs=["IS_A"],
                 directions=[Direction.outgoing],
-                nodes=["Apple|COMPANY"],
+                keys=["Apple|COMPANY"],
             )
         )
     )

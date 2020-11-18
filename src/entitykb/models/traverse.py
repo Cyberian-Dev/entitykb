@@ -128,14 +128,14 @@ class FieldCriteria(Criteria):
 class EdgeCriteria(Criteria):
     verbs: List[str]
     directions: List[Direction]
-    nodes: List[str]
+    keys: List[str]
     type: str = "edge"
 
     @validator("verbs", "directions", pre=True, always=True)
     def to_list(cls, v):
         return ensure_iterable(v, f=list)
 
-    @validator("nodes", pre=True, always=True)
+    @validator("keys", pre=True, always=True)
     def to_key_tuple(cls, v):
         return list(Node.to_key(n) for n in ensure_iterable(v))
 
@@ -296,19 +296,19 @@ class VerbType(type):
 class Verb(str, metaclass=VerbType):
     def __rshift__(self, nodes):
         return EdgeCriteria(
-            verbs=(self,), directions=(Direction.outgoing,), nodes=nodes
+            verbs=(self,), directions=(Direction.outgoing,), keys=nodes
         )
 
     def __lshift__(self, nodes):
         return EdgeCriteria(
-            verbs=(self,), directions=(Direction.incoming,), nodes=nodes
+            verbs=(self,), directions=(Direction.incoming,), keys=nodes
         )
 
     def __pow__(self, nodes):
         return EdgeCriteria(
             verbs=(self,),
             directions=(Direction.incoming, Direction.outgoing),
-            nodes=nodes,
+            keys=nodes,
         )
 
 
