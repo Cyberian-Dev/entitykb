@@ -86,7 +86,7 @@ def dump(
 def load(
     in_file: Path = typer.Argument(None),
     root: Optional[Path] = typer.Option(None),
-    format: str = typer.Option("csv"),
+    format: str = typer.Option("jsonl"),
     dry_run: bool = typer.Option(False, "--dry-run"),
     mv_split: str = typer.Option("|"),
 ):

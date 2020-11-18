@@ -130,13 +130,46 @@ $ pip install entitykb
 
 ### Initialize
 
-EntityKB creates a KB in the path specified by the ENTITYKB_ROOT environment
-variable. If no variable is provided, then the user's `~/.entitykb` path is
-used.
+EntityKB `init` creates a KB in the specified "root" directory. The root
+directory is determined using the following priorities:
+
+1. Command-line argument
+2. Environment variable (ENTITYKB_ROOT)
+3. Default path (~/.entitykb)
+
+Below are the `init` and `info` commands using the default path. Notice
+the default configuration specifies implementation classes that can be
+overridden using the `config.json` file. The `index.db` contains the graph
+and terms index data in python pickle format and can be deployed with the
+config.json to any server using the same version of EntityKB.
 
 ```text
 $ entitykb init
 INFO:     Initialization completed successfully.
+
+$ ls ~/.entitykb/
+config.json
+index.db
+
+$ cat ~/.entitykb/config.json
+{
+    "graph": "entitykb.InMemoryGraph",
+    "modules": [],
+    "normalizer": "entitykb.LatinLowercaseNormalizer",
+    "searcher": "entitykb.DefaultSearcher",
+    "storage": "entitykb.PickleStorage",
+    "terms": "entitykb.TrieTermsIndex",
+    "tokenizer": "entitykb.WhitespaceTokenizer",
+    "pipelines": {
+        "default": {
+            "extractor": "entitykb.DefaultExtractor",
+            "resolvers": [
+                "entitykb.TermResolver"
+            ],
+            "filterers": []
+        }
+    }
+}
 
 $ entitykb info
 +------------------------------------+-------------------------------------+
@@ -207,6 +240,19 @@ Commit the KB to disk, otherwise the saved nodes will be lost on exit.
 >>> kb.commit()
 True
 ```
+
+Dump and load the data for safe transfer to a different version of EntityKB:
+```bash
+$ entitykb dump /tmp/out.jsonl
+$ wc -l /tmp/out.jsonl
+2
+$ entitykb clear
+Are you sure you want to clear: /Users/ianmaurer/.entitykb/index.db? [y/N]: y
+INFO:     Clear completed successfully.
+$ entitykb load /tmp/out.jsonl
+Loaded 2 in 0.01s [/tmp/out.jsonl, jsonl]
+```
+
 
 ---
 
@@ -287,6 +333,19 @@ EntityKB should be considered beta software. Some caveats:
 
 * To minimize frustration, please pin the version of the software in
   your requirements.txt or equivalent file.
+ 
+---
+  
+## Contributing
 
 * Submit bugs and enhancement suggestions via
   [GitHub issues](https://github.com/genomoncology/entitykb/issues).
+  
+* Contributions welcome, please see [Development](development.md) for
+  setting up a working dev environment.
+  
+* Our goal is to keep EntityKB's code footprint as small as possible
+  but `contrib` modules will be more readily accepted.
+  
+* Separate packages don't require a pull request, but please follow the
+  naming pattern `entitykb-<name>` to aid in discoverability on pypi.
