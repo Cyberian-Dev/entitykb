@@ -1,7 +1,8 @@
 The recommended approach for iteratively developing and deploying EntityKB
 is as follows:
 
-1. Load data using the `entitykb load` tool.
+1. Initialize your KB with `entitykb init` and load data using the
+   `entitykb load` command.
 
 2. Do initial development and unit testing using the in-memory `KB` class
    directly.
@@ -12,7 +13,10 @@ is as follows:
 4. Do your application development in a separate project using the `SyncKB`
    or `AsyncKB` clients talking to the RPC server that is also running. 
    
-5. In production, run the RPC server using `entitykb rpc` command.
+5. Ensure you custom node and edge classes are available on both sides
+   of the client-server setup using the `modules` Config str list.
+   
+6. In production, run the RPC server using `entitykb rpc` command.
 
 ### Additional Considerations
 

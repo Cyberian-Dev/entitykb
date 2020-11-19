@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from entitykb import KB, Doc, Edge, SearchRequest, T
+from entitykb import KB, Doc, Edge, SearchRequest, T, SearchResponse
 
 
 def test_parse(kb: KB):
@@ -99,6 +99,10 @@ def test_save_for_entity_and_edge(kb: KB, apple, google):
         "nodes": 1,
         "edges": 0,
     }
+
+    data = response.dict()
+    compare = SearchResponse(**data)
+    assert compare.nodes == response.nodes
 
 
 def test_kb_save_bool_clear(kb: KB, apple):

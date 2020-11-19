@@ -14,15 +14,15 @@ def get_version(package):
 
 
 install_requires = [
-    "aio-msgpack-rpc",
-    "fastapi",
-    "pyahocorasick",
-    "translitcodec",
+    "aio-msgpack-rpc==0.2.0",
+    "fastapi==0.61.2",
     "lark-parser==0.8.9",
-    "python-dateutil",
-    "tabulate",
-    "typer",
-    "uvicorn >=0.11.7",
+    "pyahocorasick==1.4.0",
+    "python-dateutil==2.8.1",
+    "tabulate==0.8.7",
+    "translitcodec==0.5.2",
+    "typer==0.3.2",
+    "uvicorn==0.12.2",
 ]
 
 if sys.version_info[:2] == (3, 6):

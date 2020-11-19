@@ -53,7 +53,7 @@ query creation.
 ### Example
 
 Below is an example search request that will find all of the cities
-located in Asian countries with a population between 500 and 1000 people.
+located in countries that are on the continent of Asia.
 
 ```python
 from entitykb import T, V, F, SearchRequest, AsyncKB
@@ -62,15 +62,20 @@ kb = AsyncKB()
 
 traversal = (
     T()
-    .include(F.population.range(500, 1000))
     .include(V.ON_CONTINENT >> "AS|CONTINENT")
     .in_nodes("LOCATED_IN")
+    .include(F.population.range(100, 200))
 )
 
 request = SearchRequest(labels=["COUNTRY"], traversal=traversal)
 response = kb.search(request)
 print(response.nodes)
 ```
+
+This query starts by iterating all of the countries (labels = "COUNTRY"),
+filtering in the ones on Asia ((V.ON_CONTINENT >> "AS|CONTINENT"), walking
+to the incoming nodes with the verb LOCATED_IN and then filtering
+on the cities population.
 
 This would find the city West Island in the country of the Cocoa Islands
 by walking the graph.
