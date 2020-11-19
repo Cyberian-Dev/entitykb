@@ -1,3 +1,3 @@
 __title__ = "entitykb"
 __description__ = "Knowledge Base toolkit for Python"
-__version__ = "0.9.1"
+__version__ = "20.11.1"

@@ -1,3 +1,4 @@
+from os import path
 import re
 import sys
 from pathlib import Path
@@ -11,6 +12,13 @@ def get_version(package):
     """
     version = Path(package, "__version__.py").read_text()
     return re.search("__version__ = ['\"]([^'\"]+)['\"]", version).group(1)
+
+
+def get_long_description():
+    this_directory = path.abspath(path.dirname(__file__))
+    with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
+        long_description = f.read()
+    return long_description
 
 
 install_requires = [
@@ -41,7 +49,9 @@ setup(
     entry_points={"console_scripts": ["entitykb=entitykb:cli"]},
     install_requires=install_requires,
     description="Python toolkit for building Knowledge Bases",
-    long_description="Python toolkit for building Knowledge Bases",
+    long_description=get_long_description(),
+    long_description_content_type="text/markdown",
+    url="https://github.com/genomoncology/entitykb",
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Development Status :: 4 - Beta",
