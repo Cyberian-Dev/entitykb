@@ -22,6 +22,7 @@ def get_long_description():
 
 
 install_requires = [
+    "aiofiles==0.6.0",
     "aio-msgpack-rpc==0.2.0",
     "fastapi==0.61.2",
     "lark-parser==0.8.9",

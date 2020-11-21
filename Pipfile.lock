@@ -23,6 +23,13 @@
             "markers": "python_version >= '3.6'",
             "version": "==0.2.0"
         },
+        "aiofiles": {
+            "hashes": [
+                "sha256:bd3019af67f83b739f8e4053c6c0512a7f545b9a8d91aaeab55e6e0f9d123c27",
+                "sha256:e0281b157d3d5d59d803e3f4557dcc9a3dff28a4dd4829a9ff478adae50ca092"
+            ],
+            "version": "==0.6.0"
+        },
         "click": {
             "hashes": [
                 "sha256:d2b5255c7c6349bc1bd1e59e08cd12acbbd63ce649f2588755783aa94dfb6b1a",
@@ -33,7 +40,7 @@
         },
         "entitykb": {
             "editable": true,
-            "path": "./"
+            "path": "."
         },
         "fastapi": {
             "hashes": [
@@ -174,11 +181,6 @@
                 "sha256:e5dbed4a8a44c7b04376021021d63798d6a7bcfae9c654a0b153577b93854fba"
             ],
             "version": "==0.12.2"
-        },
-        "zipp": {
-            "editable": true,
-            "markers": "python_version >= '3.6'",
-            "path": "."
         }
     },
     "develop": {
@@ -758,9 +760,12 @@
             "version": "==0.2.5"
         },
         "zipp": {
-            "editable": true,
+            "hashes": [
+                "sha256:102c24ef8f171fd729d46599845e95c7ab894a4cf45f5de11a44cc7444fb1108",
+                "sha256:ed5eee1974372595f9e416cc7bbeeb12335201d8081ca8a0743c954d4446e5cb"
+            ],
             "markers": "python_version >= '3.6'",
-            "path": "."
+            "version": "==3.4.0"
         }
     }
 }

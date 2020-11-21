@@ -40,7 +40,7 @@ class Config(BaseModel):
         super().__init__(*args, **kwargs)
 
         modules = [import_module(m).__name__ for m in self.modules]
-        logger.info(f"Loading modules: {modules}")
+        logger.debug(f"Loading modules: {modules}")
         Registry.reset()
 
     def __str__(self):

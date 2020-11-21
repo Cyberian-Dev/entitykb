@@ -3,12 +3,14 @@ include LICENSE *.md
 # Include Lark Grammars
 recursive-include src *.lark
 
-# Don't package GitHub-specific files.
-exclude .travis.yml
-
 # Tests
 include tox.ini .coveragerc conftest.py dev-requirements.txt
 recursive-include tests *.py
+
+# Admin UI
+recursive-include src/entitykb/http/admin *.*
+prune src/entitykb/http/admin/node_modules
+prune src/entitykb/http/admin/src
 
 # Documentation
 # include docs/Makefile
