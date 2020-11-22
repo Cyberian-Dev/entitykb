@@ -86,7 +86,11 @@ export class RequestManager {
             })
             .catch(async response => {
                 console.log(response);
-                return {}
+                return {
+                    text: text,
+                    spans: [],
+                    tokens: []
+                }
             });
     }
 

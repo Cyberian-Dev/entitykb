@@ -38,6 +38,9 @@ def is_date(text: str) -> bool:
 
 def parse_date(text: str) -> Optional[date]:
     if is_date(text):
-        result = parser.parse(text)
-        result = result and result.date()
-        return result
+        try:
+            result = parser.parse(text)
+            result = result and result.date()
+            return result
+        except parser.ParserError:
+            pass

@@ -59,5 +59,5 @@ class Pipeline(object):
     def filter_spans(self, doc):
         spans = doc.spans
         for filterer in self.filterers:
-            spans = filterer.filter(doc.spans, doc.tokens)
+            spans = filterer.filter(spans, doc.tokens)
         return spans

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 from entitykb import (
     BaseKB,
@@ -48,12 +48,20 @@ class AsyncKB(BaseKB):
 
     # search
 
-    async def parse(self, request: ParseRequest) -> Doc:
+    async def parse(self, request: Union[str, ParseRequest]) -> Doc:
+        if isinstance(request, str):
+            request = ParseRequest(text=request)
+
         async with self.connection as client:
             data: dict = await client.call("parse", request.dict())
             return Doc(**data)
 
-    async def search(self, request: SearchRequest) -> SearchResponse:
+    async def search(
+        self, request: Union[str, SearchRequest]
+    ) -> SearchResponse:
+        if isinstance(request, str):
+            request = SearchRequest(q=request)
+
         async with self.connection as client:
             data: dict = await client.call("search", request.dict())
             return SearchResponse(**data)

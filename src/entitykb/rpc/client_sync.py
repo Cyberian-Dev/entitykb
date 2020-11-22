@@ -1,5 +1,5 @@
 import asyncio
-from typing import Optional
+from typing import Optional, Union
 
 from entitykb import Node, ParseRequest, Doc, SearchRequest, SearchResponse
 
@@ -44,7 +44,7 @@ class SyncKB(AsyncKB):
 
     # pipeline
 
-    def parse(self, request: ParseRequest) -> Doc:
+    def parse(self, request: Union[str, ParseRequest]) -> Doc:
         future = super(SyncKB, self).parse(request)
         doc = run_future(future)
         return doc

@@ -23,7 +23,6 @@
 
         if (manager.isAvailable(page, nextRequest)) {
             let doc = await manager.getDoc(page, nextRequest);
-            console.log(doc);
             spans = Boolean(doc) ? doc.spans : [];
         }
     };

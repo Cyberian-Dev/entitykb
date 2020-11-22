@@ -17,6 +17,8 @@ def test_parse_examples():
     assert parse_date("15 SEPTEMBER 2019") == date(2019, 9, 15)
 
     assert parse_date("20190102") is None
+    assert parse_date("2019-01-") is None
+    assert parse_date("2019-01-0") is None
 
 
 def test_is_prefix():
