@@ -1,11 +1,10 @@
 import pytest
 
-from entitykb.contrib.date import DateResolver, Date
 from entitykb import Entity
+from entitykb.contrib.date import DateResolver, Date
 from entitykb.pipeline import (
     TermResolver,
     WhitespaceTokenizer,
-    LatinLowercaseNormalizer,
     Extractor,
     DefaultExtractor,
 )
@@ -30,20 +29,13 @@ def test_construct():
 @pytest.fixture(scope="function")
 def extractor(kb, apple, google, amazon, microsoft):
     tokenizer = WhitespaceTokenizer()
-    normalizer = LatinLowercaseNormalizer()
-
-    resolver = TermResolver(
-        name="default", tokenizer=tokenizer, normalizer=normalizer, kb=kb,
-    )
+    resolver = TermResolver(kb=kb)
 
     for entity in (apple, google, amazon, microsoft, the_the):
         kb.save_node(entity)
 
-    resolvers = (
-        resolver,
-        DateResolver(tokenizer=tokenizer, normalizer=normalizer, kb=kb),
-    )
-    extractor = Extractor.create(tokenizer=tokenizer, resolvers=resolvers,)
+    resolvers = (resolver, DateResolver(kb=kb))
+    extractor = Extractor.create(tokenizer=tokenizer, resolvers=resolvers)
     return extractor
 
 
@@ -101,4 +93,6 @@ def test_extract_with_date(extractor: Extractor, apple):
     doc = extractor(text)
     assert len(doc.spans) == 2
     assert doc.spans[0].entity_key == "Apple, Inc.|COMPANY"
-    assert doc.spans[1].entity == Date(year=1976, month=4, day=1)
+    assert doc.spans[1].entity == Date(
+        year=1976, month=4, day=1, synonyms=("April 1, 1976",)
+    )

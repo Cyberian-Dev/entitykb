@@ -48,16 +48,17 @@ provides an inventory of important classes, modules, and functions.
 | pipeline.extractor    | Extractor                 | Base-class for extracting document from text.             |
 | pipeline.extractor    | DefaultExtractor          | Creates handlers, processes tokens, and collects spans.   |
 | pipeline.filterer     | Filterer                  | Base class for filtering spans.                           |
-| pipeline.filterer     | ExactOnlyFilterer         | Only keep spans that are an exact match.                  |
+| pipeline.filterer     | ExactNameOnly             | Only keep spans that exactly match to the entity name.    |
 | pipeline.filterer     | KeepLongestByKey          | Keeps longest overlapping span with same node key.        |
 | pipeline.filterer     | KeepLongestByLabel        | Keeps longest overlapping span with same node label.      |
 | pipeline.filterer     | KeepLongestByOffset       | Keeps longest overlapping span using token offsets.       |
+| pipeline.filterer     | LowerNameOrExactSynonym   | Keeps when lower name or exact synonym match.             |
 | pipeline.handler      | TokenHandler              | Manages resolver prefix tokens state during extraction.   |
 | pipeline.normalizers  | Normalizer                | Base class for normalizing text.                          |
 | pipeline.normalizers  | LatinLowercaseNormalizer  | Default normalizer that converts text to lowercase ASCII. |
 | pipeline.pipeline     | Pipeline                  | Container of resolvers and filterers, does extract/filter.|
 | pipeline.resolvers    | Resolver                  | Base class with is_prefix and resolve methods.            |
-| pipeline.resolvers    | TermResolver              | Resolves entities from terms using TermsIndex.            |
+| pipeline.resolvers    | TermResolver              | Resolves entities from terms using TrieTermsIndex.        |
 | pipeline.tokenizers   | Tokenizer                 | Base class with tokenize and detokenize methods.          |
 | pipeline.tokenizers   | WhitespaceTokenizer       | Default tokenizer that splits on whitespace characters.   |
 | rpc.client_async      | AsyncKB                   | Remote KB client that supports async/await calls.         |

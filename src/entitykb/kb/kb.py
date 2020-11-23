@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Union, Dict
 
 from entitykb import (
     __version__,
@@ -17,12 +17,21 @@ from entitykb import (
     SearchResponse,
     Storage,
     TermsIndex,
+    Tokenizer,
     under_limit,
     label_filter,
 )
 
 
 class KB(BaseKB):
+    config: Config
+    storage: Storage
+    normalizer: Normalizer
+    tokenizer: Tokenizer
+    terms: TermsIndex
+    graph: Graph
+    pipelines: Dict[str, Pipeline]
+
     def __init__(self, root: str = None):
         self.uncommitted = 0
 
@@ -33,6 +42,7 @@ class KB(BaseKB):
         )
 
         self.normalizer = Normalizer.create(self.config.normalizer)
+        self.tokenizer = Tokenizer.create(self.config.tokenizer)
 
         self.terms = TermsIndex.create(
             self.config.terms, normalizer=self.normalizer
@@ -43,10 +53,7 @@ class KB(BaseKB):
         self.pipelines = {}
         for name, pipeline in self.config.pipelines.items():
             pipeline = Pipeline.create(
-                kb=self,
-                config=self.config,
-                pipeline=pipeline,
-                normalizer=self.normalizer,
+                kb=self, config=self.config, pipeline=pipeline,
             )
             self.pipelines[name] = pipeline
 

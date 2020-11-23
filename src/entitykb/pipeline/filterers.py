@@ -4,18 +4,40 @@ from typing import Optional, Union, Type, List
 from entitykb.models import Span
 
 
+def sort_key(span: Span):
+    return (
+        -span.num_tokens,
+        0 if span.is_exact_name_match else 1,
+        0 if span.is_lower_name_match else 1,
+        0 if span.is_lower_name_or_exact_synonym_match else 1,
+        span.offset,
+        span.label,
+    )
+
+
 class Filterer(object):
     @classmethod
     def filter(cls, spans, tokens) -> List[Span]:
         raise NotImplementedError
 
 
-class ExactOnlyFilterer(Filterer):
+class ExactNameOnly(Filterer):
     """ Only keep spans that are an exact match. """
 
     @classmethod
     def filter(cls, spans, tokens) -> List[Span]:
-        it = filter(lambda span: span.is_match_exact, spans)
+        it = filter(lambda span: span.is_exact_name_match, spans)
+        return list(it)
+
+
+class LowerNameOrExactSynonym(Filterer):
+    """ Only keep spans that are an exact match. """
+
+    @classmethod
+    def filter(cls, spans, tokens) -> List[Span]:
+        it = filter(
+            lambda span: span.is_lower_name_or_exact_synonym_match, spans
+        )
         return list(it)
 
 
@@ -27,10 +49,6 @@ class KeepLongestByKey(Filterer):
         return span.entity_key, offset
 
     @classmethod
-    def sort_key(cls, span: Span):
-        return span.sort_order
-
-    @classmethod
     def is_unique(cls, seen: set, span: Span) -> bool:
         keys = {cls.filter_key(span, offset) for offset in span.offsets}
         is_unique = seen.isdisjoint(keys)
@@ -40,7 +58,7 @@ class KeepLongestByKey(Filterer):
     @classmethod
     def filter(cls, spans, tokens) -> List[Span]:
         is_unique = partial(cls.is_unique, set())
-        sorted_spans = sorted(spans, key=cls.sort_key)
+        sorted_spans = sorted(spans, key=sort_key)
         unique_spans = filter(is_unique, sorted_spans)
         return sorted(unique_spans, key=lambda d: d.offset)
 

@@ -1,7 +1,8 @@
 from .extractors import Extractor, DefaultExtractor
 from .filterers import (
     Filterer,
-    ExactOnlyFilterer,
+    ExactNameOnly,
+    LowerNameOrExactSynonym,
     KeepLongestByKey,
     KeepLongestByLabel,
     KeepLongestByOffset,
@@ -14,18 +15,19 @@ from .tokenizers import Tokenizer, WhitespaceTokenizer
 
 __all__ = (
     "DefaultExtractor",
-    "LatinLowercaseNormalizer",
-    "TermResolver",
-    "WhitespaceTokenizer",
-    "ExactOnlyFilterer",
+    "ExactNameOnly",
     "Extractor",
     "Filterer",
     "KeepLongestByKey",
     "KeepLongestByLabel",
     "KeepLongestByOffset",
+    "LatinLowercaseNormalizer",
+    "LowerNameOrExactSynonym",
     "Normalizer",
     "Pipeline",
     "Resolver",
+    "TermResolver",
     "TokenHandler",
     "Tokenizer",
+    "WhitespaceTokenizer",
 )

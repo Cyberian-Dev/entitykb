@@ -9,7 +9,6 @@ from entitykb import (
 )
 from .extractors import Extractor
 from .filterers import Filterer
-from .normalizers import Normalizer
 from .resolvers import Resolver
 from .tokenizers import Tokenizer
 
@@ -21,28 +20,19 @@ class Pipeline(object):
 
     @classmethod
     def create(
-        cls,
-        kb: BaseKB,
-        config: Config,
-        pipeline: PipelineConfig,
-        normalizer: Normalizer,
+        cls, kb: BaseKB, config: Config, pipeline: PipelineConfig,
     ):
         tokenizer = Tokenizer.create(config.tokenizer)
 
         resolvers = tuple(
-            Resolver.create(
-                resolver, tokenizer=tokenizer, normalizer=normalizer, kb=kb,
-            )
-            for resolver in pipeline.resolvers or [None]
+            Resolver.create(resolver, kb=kb) for resolver in pipeline.resolvers
         )
-        assert resolvers, f"No resolvers found. ({config})"
-
-        filterers = pipeline.filterers or []
-        filterers = tuple(get_class_from_name(f) for f in filterers)
-
         extractor = Extractor.create(
             pipeline.extractor, tokenizer=tokenizer, resolvers=resolvers,
         )
+
+        filterers = pipeline.filterers or []
+        filterers = tuple(get_class_from_name(f) for f in filterers)
 
         pipeline = cls(extractor=extractor, filterers=filterers)
 

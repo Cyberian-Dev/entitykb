@@ -18,7 +18,13 @@ class DateResolver(Resolver):
         entities = []
         if dt:
             name = dt.strftime("%Y-%m-%d")
-            date = Date(name=name, year=dt.year, month=dt.month, day=dt.day)
+            date = Date(
+                name=name,
+                year=dt.year,
+                month=dt.month,
+                day=dt.day,
+                synonyms=(term,),
+            )
             entities.append(date)
 
         return entities

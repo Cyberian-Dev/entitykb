@@ -98,9 +98,6 @@ class Span(HasTokens):
     def __str__(self):
         return f"{self.text} [{self.entity_key}]"
 
-    def __lt__(self, other: "Span"):
-        return self.sort_order < other.sort_order
-
     @property
     def name(self):
         return self.entity and self.entity.name
@@ -110,22 +107,20 @@ class Span(HasTokens):
         return self.entity and (self.entity.label or "ENTITY")
 
     @property
-    def is_match_exact(self):
+    def synonyms(self):
+        return (self.entity and self.entity.synonyms) or []
+
+    @property
+    def is_exact_name_match(self):
         return self.name == self.text
 
     @property
-    def is_lower_match(self):
+    def is_lower_name_match(self):
         return self.name and (self.name.lower() == self.text.lower())
 
     @property
-    def sort_order(self):
-        return (
-            -self.num_tokens,
-            0 if self.is_match_exact else 1,
-            0 if self.is_lower_match else 1,
-            self.offset,
-            self.label,
-        )
+    def is_lower_name_or_exact_synonym_match(self):
+        return self.is_lower_name_match or (self.text in self.synonyms)
 
 
 class Doc(HasTokens):

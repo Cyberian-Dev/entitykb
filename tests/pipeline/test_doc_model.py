@@ -53,7 +53,6 @@ def test_doc_create():
     assert set(doc.dict().keys()) == {"text", "spans", "tokens"}
 
     span = doc.spans[0]
-    assert span.sort_order == (-2, 0, 0, 2, "PRESIDENT")
     assert span.offsets == (2, 3)
     assert span.offset == 2
     assert span.last_offset == 3
@@ -72,11 +71,6 @@ def test_doc_create():
             {"offset": 3, "token": "Obama"},
         ),
     }
-
-    span = doc.spans[1]
-    assert span.sort_order == (-1, 1, 1, 3, "PERSON")
-
-    assert doc.spans == tuple(sorted(doc.spans))
 
     doc_data = doc.dict()
     new_doc = Doc(**doc_data)

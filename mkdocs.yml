@@ -22,7 +22,6 @@ nav:
     - Searching: 'searching.md'
     - Custom Models: 'custom-models.md'
     - Pipeline: 'pipeline.md'
-    - Reference: 'reference.md'
     - Development: 'development.md'
     - Deployment: 'deployment.md'
     - Release Notes: 'release-notes.md'

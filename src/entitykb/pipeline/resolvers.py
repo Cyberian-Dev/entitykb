@@ -3,16 +3,10 @@ from typing import Iterable, List
 from entitykb import create_component, Entity
 
 from .handlers import TokenHandler
-from .normalizers import Normalizer
-from .tokenizers import Tokenizer
 
 
 class Resolver(object):
-    def __init__(
-        self, *, tokenizer: Tokenizer, normalizer: Normalizer, kb, **_,
-    ):
-        self.tokenizer = tokenizer
-        self.normalizer = normalizer
+    def __init__(self, kb=None):
         self.kb = kb
 
     def __repr__(self):

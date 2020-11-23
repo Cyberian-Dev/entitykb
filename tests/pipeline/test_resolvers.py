@@ -1,67 +1,19 @@
-from entitykb.contrib.date import DateResolver, Date
-from entitykb.pipeline import (
-    TermResolver,
-    Resolver,
-    LatinLowercaseNormalizer,
-    WhitespaceTokenizer,
-)
+from entitykb.contrib.date import DateResolver
+from entitykb.pipeline import TermResolver, Resolver
 
 
 def test_resolver_construct(kb):
-    tokenizer = WhitespaceTokenizer()
-    normalizer = LatinLowercaseNormalizer()
-
+    assert isinstance(Resolver.create(None, kb=kb), TermResolver)
+    assert isinstance(Resolver.create(TermResolver, kb=kb), TermResolver)
+    assert isinstance(Resolver.create(DateResolver, kb=kb), DateResolver)
     assert isinstance(
-        Resolver.create(
-            None,
-            name="default",
-            tokenizer=tokenizer,
-            normalizer=normalizer,
-            kb=kb,
-        ),
-        TermResolver,
-    )
-
-    assert isinstance(
-        Resolver.create(
-            TermResolver,
-            name="default",
-            tokenizer=tokenizer,
-            normalizer=normalizer,
-            kb=kb,
-        ),
-        TermResolver,
-    )
-
-    assert isinstance(
-        Resolver.create(
-            DateResolver,
-            name="default",
-            tokenizer=tokenizer,
-            normalizer=normalizer,
-            kb=kb,
-        ),
-        DateResolver,
-    )
-
-    assert isinstance(
-        Resolver.create(
-            "entitykb.contrib.date.DateResolver",
-            name="default",
-            tokenizer=tokenizer,
-            normalizer=normalizer,
-            kb=kb,
-        ),
+        Resolver.create("entitykb.contrib.date.DateResolver", kb=kb),
         DateResolver,
     )
 
 
-def test_date_resolver_is_prefix(kb):
-    resolver = DateResolver(
-        tokenizer=WhitespaceTokenizer(),
-        normalizer=LatinLowercaseNormalizer(),
-        kb=kb,
-    )
+def test_date_resolver_is_prefix():
+    resolver = DateResolver()
 
     assert resolver.is_prefix("2019")
     assert resolver.is_prefix("2019-")
@@ -75,27 +27,16 @@ def test_date_resolver_is_prefix(kb):
     assert not resolver.is_prefix("2017 07 19 J")
 
 
-def test_date_resolver_find_valid(kb):
-    resolver = DateResolver(
-        tokenizer=WhitespaceTokenizer(),
-        normalizer=LatinLowercaseNormalizer(),
-        kb=kb,
-    )
-
-    expected = [Date(year=2019, month=1, day=1)]
-    assert expected == resolver.resolve("2019-01-01")
-    assert expected == resolver.resolve("Jan 1st, 2019")
-    assert expected == resolver.resolve("01/01/19")
-    assert expected == resolver.resolve("2019-JAN-01")
+def test_date_resolver_find_valid():
+    resolver = DateResolver()
+    assert "2019-01-01" == resolver.resolve("2019-01-01")[0].name
+    assert "2019-01-01" == resolver.resolve("Jan 1st, 2019")[0].name
+    assert "2019-01-01" == resolver.resolve("01/01/19")[0].name
+    assert "2019-01-01" == resolver.resolve("2019-JAN-01")[0].name
 
 
-def test_date_resolver_fail_invalid(kb):
-    resolver = DateResolver(
-        tokenizer=WhitespaceTokenizer(),
-        normalizer=LatinLowercaseNormalizer(),
-        kb=kb,
-    )
-
+def test_date_resolver_fail_invalid():
+    resolver = DateResolver()
     result = resolver.resolve("Nonsense!")
     assert not result
 
@@ -110,11 +51,7 @@ def test_date_resolver_fail_invalid(kb):
 
 
 def test_default_resolver(kb, apple):
-    tokenizer = WhitespaceTokenizer()
-    normalizer = LatinLowercaseNormalizer()
-    resolver = TermResolver(
-        name="default", tokenizer=tokenizer, normalizer=normalizer, kb=kb,
-    )
+    resolver = TermResolver(kb=kb)
     kb.save_node(apple)
 
     assert resolver.is_prefix("a")

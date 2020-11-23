@@ -11,7 +11,8 @@ from entitykb.pipeline import (
     KeepLongestByOffset,
     KeepLongestByKey,
     KeepLongestByLabel,
-    ExactOnlyFilterer,
+    ExactNameOnly,
+    LowerNameOrExactSynonym,
 )
 
 
@@ -29,27 +30,27 @@ def tokens(doc):
 def spans(doc, tokens):
     spans = [
         Span(
-            text="0",
+            text="a",
             doc=doc,
-            entity=Entity(name="0", label="A"),
+            entity=Entity(name="A", label="LABEL_0"),
             tokens=tokens,
         ),
         Span(
-            text="0",
+            text="a",
             doc=doc,
-            entity=Entity(name="0", label="A"),
+            entity=Entity(name="B", label="LABEL_0"),
             tokens=tokens,
         ),
         Span(
-            text="0",
+            text="a",
             doc=doc,
-            entity=Entity(name="1", label="A"),
+            entity=Entity(name="A", label="LABEL_1"),
             tokens=tokens,
         ),
         Span(
-            text="0",
+            text="a",
             doc=doc,
-            entity=Entity(name="0", label="B"),
+            entity=Entity(name="C", label="LABEL_0", synonyms=["a"]),
             tokens=tokens,
         ),
     ]
@@ -57,19 +58,32 @@ def spans(doc, tokens):
     return spans
 
 
-def test_longest_filters(spans, tokens):
-    spans = KeepLongestByKey().filter(spans=spans, tokens=tokens)
-    assert 3 == len(spans)
-
-    spans = KeepLongestByLabel().filter(spans=spans, tokens=tokens)
-    assert 2 == len(spans)
-
-    spans = KeepLongestByOffset().filter(spans=spans, tokens=tokens)
-    assert 1 == len(spans)
+def test_longest_by_key(spans, tokens):
+    assert 4 == len(KeepLongestByKey().filter(spans=spans, tokens=tokens))
 
 
-def test_pipeline_filter_spans(doc, spans, tokens):
+def test_longest_by_label(spans, tokens):
+    assert 2 == len(KeepLongestByLabel().filter(spans=spans, tokens=tokens))
+
+
+def test_longest_by_offset(spans, tokens):
+    assert 1 == len(KeepLongestByOffset().filter(spans=spans, tokens=tokens))
+
+
+def test_exact_name_only(spans, tokens):
+    assert 0 == len(ExactNameOnly().filter(spans=spans, tokens=tokens))
+
+
+def test_lower_name_or_exact_synonym_only(spans, tokens):
+    assert 3 == len(
+        LowerNameOrExactSynonym().filter(spans=spans, tokens=tokens)
+    )
+
+
+def test_pipeline(doc, spans, tokens):
     doc.spans = spans
     doc.tokens = tokens
-    pipeline = Pipeline(filterers=[ExactOnlyFilterer()])
-    assert 3 == len(pipeline.filter_spans(doc))
+    pipeline = Pipeline(
+        filterers=[LowerNameOrExactSynonym(), KeepLongestByLabel()]
+    )
+    assert 2 == len(pipeline.filter_spans(doc))

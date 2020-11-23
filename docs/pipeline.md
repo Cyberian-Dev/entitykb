@@ -1,6 +1,59 @@
-The processing pipeline normalizes and tokenizes text and then resolves
-entities from spans of tokens. At the end of this process, the pipeline 
-returns a `Doc` object with those tokens, spans and entities.
+Knowledge Bases expose a method called `parse` which turns text into a
+`Doc` object by calling a specific `Pipeline` that performs the following
+steps:
+
+1. `Extractor` calls `Tokenizer` to tokenize the text.
+2. `Extractor` iterates tokens and manages state using it's `TokenHandler`.
+3. `Resolvers` resolve tokens (term) into `Spans` that reference `Entities`.
+4. `Filterers` process resolved `Spans` and remove, add, or combine them.
+5. `Extractor` returns a `Doc` object with the tokens and entity spans.
+
+### Configuration
+
+Pipelines are configured using the KB's `config.json` file. Below is an
+example config with the `DateResolver` and 2 out-of-the-box filterers added:
+
+```json
+{
+    "graph": "entitykb.InMemoryGraph",
+    "modules": [],
+    "normalizer": "entitykb.LatinLowercaseNormalizer",
+    "searcher": "entitykb.DefaultSearcher",
+    "storage": "entitykb.PickleStorage",
+    "terms": "entitykb.TrieTermsIndex",
+    "tokenizer": "entitykb.WhitespaceTokenizer",
+    "pipelines": {
+        "default": {
+            "extractor": "entitykb.DefaultExtractor",
+            "resolvers": [
+                "entitykb.TermResolver",
+                "entitykb.contrib.date.DateResolver"
+            ],
+            "filterers": [
+                "entitykb.LowerNameOrExactSynonym",
+                "entitykb.KeepLongestByOffset"
+            ]
+        }
+    }
+}
+```
+
+### Out of the Box Components
+
+Below are the components that are provided by the base EntityKB project:
+
+| Section                 | Item                               | Description                                               | 
+| ----------------------- | ---------------------------------- | --------------------------------------------------------- | 
+| normalizer              | entitykb.LatinLowercaseNormalizer  | Default normalizer that converts text to lowercase ASCII. |
+| tokenizer               | entitykb.WhitespaceTokenizer       | Default tokenizer that splits on whitespace characters.   |
+| pipelines.extractor     | entitykb.DefaultExtractor          | Creates handlers, processes tokens, and collects spans.   |
+| pipelines.filterers     | entitykb.ExactNameOnly             | Only keep spans that exactly match to the entity name.    |
+| pipelines.filterers     | entitykb.KeepLongestByKey          | Keeps longest overlapping span with same node key.        |
+| pipelines.filterers     | entitykb.KeepLongestByLabel        | Keeps longest overlapping span with same node label.      |
+| pipelines.filterers     | entitykb.KeepLongestByOffset       | Keeps longest overlapping span using token offsets.       |
+| pipelines.filterers     | entitykb.LowerNameOrExactSynonym   | Keeps when lower name or exact synonym match.             |
+| pipelines.resolvers     | entitykb.TermResolver              | Resolves entities from terms using TrieTermsIndex.        |
+| pipelines.resolvers     | entitykb.contrib.date.DateResolver | Contribution resolver that finds date entities.           |
 
 ## Customization
 
@@ -46,10 +99,9 @@ entities, but it also would detect any synonyms such as "NYC".
 Once the pipeline has tokenized the text and collected all of the entities
 as spans, there is a process of calling `Filterer` classes that have been
 configured as part fo the pipeline. The `Filterer` classes are invoked in
-order and their job is to remove or combine any spans/entities that they
-wish.
+order and their job is to remove, add or combine any spans/entities.
 
-A custom `Filter` needs to implement just 1 function, it should either
+A custom `Filterer` needs to implement just 1 function, it should either
 return the original list untouched or create a new list with just the
 filtered spans.
 
@@ -61,7 +113,9 @@ class MyCustomFilterer(object):
 
     @classmethod
     def filter(cls, spans, tokens) -> List[Span]:
-        ...
+        # todo: implement logic here and return new list
+        new_spans = spans[:]
+        return new_spans
 ```
 
 
@@ -69,6 +123,12 @@ class MyCustomFilterer(object):
 
 ```mermaid
  classDiagram
+
+    class KB {
+        parse(request)
+    }
+
+    KB "1" --> "*" Pipeline: pipelines
 
     class Pipeline {
         __call__(text, labels)
@@ -80,15 +140,20 @@ class MyCustomFilterer(object):
         __call__(text, labels)
     }
 
+    Extractor "1" ..> "1" Tokenizer: uses
+
+    class Tokenizer {
+        tokenize(text)
+        detokenize(tokens)
+    }
+
     Extractor "1" --> "*" TokenHandler: handlers
 
     class TokenHandler {
         __call__(text, labels)
     }
 
-
     Token Handler "1" --> "1" Resolver: resolvers
-    Extractor "1" --> "*" Resolver: resolvers
 
     class Resolver {
         is_prefix(term)
@@ -100,28 +165,10 @@ class MyCustomFilterer(object):
     class TermResolver {
     }
 
-    Resolver "1" --> "1" Normalizer: normalizer
+    TermResolver "1" ..> "1" Normalizer: uses
 
     class Normalizer {
         normalize(text)
-    }
-
-    Normalizer <|-- LatinLowercaseNormalizer: is a
-
-    class LatinLowercaseNormalizer {
-    }
-
-    Extractor "1" --> "1" Tokenizer: tokenizer
-    Resolver "1" --> "1" Tokenizer: tokenizer
-
-    class Tokenizer {
-        tokenize(text)
-        detokenize(tokens)
-    }
-
-    Tokenizer <| -- WhitespaceTokenizer: is a
-
-    class WhitespaceTokenizer {
     }
 
     Pipeline "1" --> "*" Filterer: filterers
@@ -165,7 +212,6 @@ class MyCustomFilterer(object):
         name: str
         synonyms: Tuple[str]
         create()$
-        terms(): Tuple[str]
     }
 ```
 

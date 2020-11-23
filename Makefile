@@ -20,7 +20,7 @@ tox: clean
 	tox
 
 docs-live:
-	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run mkdocs serve --dev-addr 127.0.0.1:8008
+	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run mkdocs serve --dev-addr 127.0.0.1:8009
 
 docs-build:
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run mkdocs build
