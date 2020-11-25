@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from io import StringIO
 from unittest.mock import MagicMock
 
@@ -27,7 +28,7 @@ def test_flatten_dict():
 
 
 def test_init_kb(root):
-    assert isinstance(root, str)
+    assert isinstance(root, Path)
     assert os.path.exists(root)
     assert os.path.isdir(root)
     assert [] == os.listdir(root)

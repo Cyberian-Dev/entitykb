@@ -31,16 +31,28 @@
 ## Overview
 
 EntityKB is a toolkit for quickly creating knowledge bases (a.k.a.
-knowledge graphs) using the Python programming language.  Knowledge
-bases enable [entity linking](https://en.wikipedia.org/wiki/Entity_linking)
-for information extraction and structured searching projects.
-For example, web scraping scripts or chat bot applications can provide
-greater value when concepts are linked to a traversable semantic graph.
+knowledge graphs) using the Python programming language.
 
-Out of the box, EntityKB is a programmatic framework for algorithmic text
-mining techniques, not a machine-learning based NLP solution. However, 
-EntityKB could be used in conjunction with NLP and other deep learning
-tools for real-world solutions.
+EntityKB is a programmatic framework for algorithmic text mining techniques,
+not a machine-learning based NLP solution. However, it can be used for
+scenarios where ML approaches are not (currently) appropriate/tenable.
+
+### Use Cases
+
+EntityKB could provide useful capabilities for a wide variety of use cases
+but below are some potential examples:
+
+* **Entity Extraction**: Identify entities in text using keyword and
+  grammar-based pattern matching.
+  
+* **Entity Linking**: Use graph relationships to provide context for
+  typeahead/autocomplete, semantic search, recommendations, or chatbots.
+
+* **Object Storing**: Store and retrieve data for rapid application development
+  without SQL calls or object-relational mapping.
+
+* **Data Set Labeling**: Use entity extraction to generate labeled data
+  using keywords and grammars to bootstrap training sets.
 
 
 ### Capabilities
@@ -57,12 +69,17 @@ extended and enhanced:
 * **Processing pipeline** that normalizes and tokenizes text and then
   resolves entities from spans of tokens.
 
-* **Searching** with Python based query and traversal language.
+* **Searching** with fluent, pythonic traversal query builder for walking
+ and filtering graph nodes and relationships.
 
 * **Importing and exporting** of data with CLI tooling and/or Python code.
   
 * **Multiple interfaces** including embedded Python client, RPC/HTTP servers
   and CLI.
+  
+* **Key-value store** for adding and retrieving Python objects in local
+  memory or over RPC/HTTP calls.
+
 
   
 ### Priorities
@@ -187,7 +204,7 @@ $ entitykb info
 | config.storage                     |              entitykb.PickleStorage |
 | config.terms                       |             entitykb.TrieTermsIndex |
 | config.tokenizer                   |        entitykb.WhitespaceTokenizer |
-| entitykb.version                   |                               0.9.0 |
+| entitykb.version                   |                             20.12.0 |
 | graph.edges                        |                                   0 |
 | graph.nodes                        |                                   0 |
 | storage.disk_space                 |                             84.00 B |

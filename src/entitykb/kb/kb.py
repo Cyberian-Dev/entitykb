@@ -32,7 +32,7 @@ class KB(BaseKB):
     graph: Graph
     pipelines: Dict[str, Pipeline]
 
-    def __init__(self, root: str = None):
+    def __init__(self, root=None):
         self.uncommitted = 0
 
         self.config = Config.create(root=root)

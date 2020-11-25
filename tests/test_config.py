@@ -83,5 +83,5 @@ def test_config_roundtrip():
 
 
 def test_get_root_dir():
-    assert str(Path("/tmp").resolve()) == Config.get_root(Path("/tmp"))
-    assert isinstance(Config.get_root(None), str)
+    assert Path("/tmp") == Config.get_root(Path("/tmp"))
+    assert isinstance(Config.get_root(None), Path)

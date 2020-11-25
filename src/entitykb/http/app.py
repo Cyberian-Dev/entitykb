@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 from fastapi import FastAPI, staticfiles
 from starlette.middleware.cors import CORSMiddleware
@@ -24,7 +24,7 @@ app.add_middleware(
 app.include_router(routes.router)
 
 # mount Admin UI
-admin = os.path.join(os.path.dirname(__file__), "admin/public")
+admin = Path(__file__).parent / "admin/public"
 app.mount(
     "/", staticfiles.StaticFiles(directory=admin, html=True), name="admin",
 )

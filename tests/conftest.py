@@ -1,4 +1,5 @@
 import tempfile
+from pathlib import Path
 
 import pytest
 
@@ -8,7 +9,7 @@ from entitykb.models import Node, Entity
 
 @pytest.fixture()
 def root():
-    return tempfile.mkdtemp()
+    return Path(tempfile.mkdtemp())
 
 
 @pytest.fixture()

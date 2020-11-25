@@ -4,20 +4,20 @@ from entitykb import PickleStorage
 
 
 def test_backup_dirs(root):
-    expected = os.path.join(root, "backups")
-    assert os.path.exists(expected) is False
+    expected = root / "backups"
+    assert not expected.exists()
 
     storage = PickleStorage(root=root)
     assert expected == storage.backup_dir
-    assert os.path.exists(expected)
+    assert expected.exists()
 
 
 def test_info(root):
     storage = PickleStorage(root=root)
     info = storage.info()
     assert {"path", "disk_space", "last_commit"} == info.keys()
-    assert os.path.join(root, "index.db") == storage.index_path
-    assert os.path.join(root, "index.db") == info["path"]
+    assert root / "index.db" == storage.index_path
+    assert root / "index.db" == info["path"]
 
 
 def test_save_load(root):

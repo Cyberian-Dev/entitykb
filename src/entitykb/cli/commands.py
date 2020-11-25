@@ -12,7 +12,7 @@ from json import dumps
 
 from . import services
 
-cli = typer.Typer()
+cli = typer.Typer(add_completion=False)
 
 
 def finish(operation: str, success: bool, error_code: int = None):
@@ -31,12 +31,17 @@ def init(root: Optional[Path] = typer.Option(None)):
 
 
 @cli.command()
-def clear(root: Optional[Path] = typer.Option(None)):
+def clear(
+    root: Optional[Path] = typer.Option(None),
+    force: bool = typer.Option(False, "--force", "-f"),
+):
     """ Clear local KB """
 
     root = Config.get_root(root)
-    path = os.path.join(root, "index.db")
-    typer.confirm(f"Are you sure you want to clear: {path}?", abort=True)
+    path = root / "index.db"
+
+    if not force:
+        typer.confirm(f"Are you sure you want to clear: {path}?", abort=True)
 
     os.remove(path)
 

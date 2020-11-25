@@ -1,5 +1,3 @@
-import os
-
 import pytest
 
 from entitykb import KB, Doc, Edge, SearchRequest, T, SearchResponse
@@ -12,14 +10,14 @@ def test_parse(kb: KB):
 
 
 def test_creates_files(root, kb: KB, apple):
-    assert os.path.isfile(os.path.join(root, "config.json"))
-    assert not os.path.isfile(os.path.join(root, "index.db"))
+    assert (root / "config.json").is_file()
+    assert not (root / "index.db").is_file()
 
     kb.save_node(apple)
-    assert not os.path.isfile(os.path.join(root, "index.db"))
+    assert not (root / "index.db").is_file()
 
     kb.commit()
-    assert os.path.isfile(os.path.join(root, "index.db"))
+    assert (root / "index.db").is_file()
 
 
 def test_save_entity(kb: KB, apple, apple_records):

@@ -3,7 +3,7 @@ from datetime import date
 from lark.lark import Lark, Tree
 from lark.exceptions import LarkError
 from dateutil import parser
-import os
+from pathlib import Path
 
 
 class Parser(object):
@@ -12,7 +12,7 @@ class Parser(object):
     @classmethod
     def instance(cls):
         if cls._instance is None:
-            fp = os.path.join(os.path.dirname(__file__), "date.lark")
+            fp = Path(__file__).parent / "date.lark"
             grammar = open(fp, "r").read()
             cls._instance = Lark(grammar, parser="lalr")
 

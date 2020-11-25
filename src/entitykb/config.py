@@ -22,7 +22,7 @@ class PipelineConfig(BaseModel):
 
 
 class Config(BaseModel):
-    file_path: str = None
+    file_path: Path = None
 
     graph: str = "entitykb.InMemoryGraph"
     modules: List[str] = Field(default_factory=list)
@@ -48,20 +48,20 @@ class Config(BaseModel):
 
     @property
     def root(self):
-        return os.path.dirname(self.file_path)
+        return Path(self.file_path).parent
 
     @classmethod
-    def create(cls, root: str = None) -> "Config":
+    def create(cls, root=None) -> "Config":
         config_file_path = cls.get_file_path(root=root)
 
         data = {}
-        if os.path.isfile(config_file_path):
+        if config_file_path.is_file():
             with open(config_file_path, "r") as fp:
                 data = json.load(fp)
 
         config = cls.make(file_path=config_file_path, data=data)
 
-        if not os.path.isfile(config_file_path):
+        if not config_file_path.is_file():
             os.makedirs(os.path.dirname(config_file_path), exist_ok=True)
             with open(config_file_path, "w") as fp:
                 json.dump(config.dict(), fp, indent=4)
@@ -80,19 +80,13 @@ class Config(BaseModel):
         return data
 
     @classmethod
-    def get_file_path(cls, root=None, file_name="config.json"):
+    def get_file_path(cls, root=None, file_name="config.json") -> Path:
         root = cls.get_root(root)
-        file_path = os.path.join(root, file_name)
-        return file_path
+        return root / file_name
 
     @classmethod
-    def get_root(cls, root=None) -> str:
-        if isinstance(root, Path):
-            root = str(root.resolve())
-
-        root = root or environ.root
-
-        return root
+    def get_root(cls, root=None) -> Path:
+        return Path(root or environ.root)
 
     def info(self) -> dict:
         info = self.dict()

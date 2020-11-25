@@ -3,6 +3,7 @@ import os
 import pickle
 import sys
 import tempfile
+from pathlib import Path
 from dataclasses import dataclass
 from typing import Optional, Any
 
@@ -11,7 +12,7 @@ from entitykb import logger, create_component
 
 @dataclass
 class Storage(object):
-    root: str = None
+    root: Path
     max_backups: int = 5
 
     def info(self) -> dict:
@@ -32,8 +33,8 @@ class Storage(object):
 
     @property
     def backup_dir(self):
-        backup_dir = os.path.join(self.root, "backups")
-        if not os.path.exists(backup_dir):
+        backup_dir = self.root / "backups"
+        if not backup_dir.exists():
             os.makedirs(backup_dir, exist_ok=True)
         return backup_dir
 
@@ -55,11 +56,11 @@ class PickleStorage(Storage):
     @property
     def index_path(self):
         if self.root:
-            return os.path.join(self.root, "index.db")
+            return self.root / "index.db"
 
     @property
     def exists(self):
-        return self.index_path and os.path.exists(self.index_path)
+        return self.index_path and self.index_path.exists()
 
     def load(self) -> Any:
         py_data = None
@@ -71,7 +72,7 @@ class PickleStorage(Storage):
                     py_data = pickle.loads(pickle_data)
 
                 except (AttributeError, pickle.UnpicklingError, TypeError):
-                    logger.error("Failed to load index: " + self.index_path)
+                    logger.error(f"Failed to load index: {self.index_path}")
 
         return py_data
 
@@ -85,7 +86,7 @@ class PickleStorage(Storage):
             update_time = self.file_updated(path)
             file_name = os.path.basename(path)
             file_name += update_time.strftime(".%d-%m-%Y_%I-%M-%S.%f_%p")
-            backup_path = os.path.join(self.backup_dir, file_name)
+            backup_path = self.backup_dir / file_name
             os.rename(path, backup_path)
 
             self.clean_backups()
@@ -100,8 +101,8 @@ class PickleStorage(Storage):
             return oldest
 
     @classmethod
-    def file_updated(cls, path) -> datetime:
-        if path and os.path.exists(path):
+    def file_updated(cls, path: Path) -> datetime:
+        if path and path.exists():
             file_t = os.path.getmtime(path)
             return datetime.datetime.fromtimestamp(file_t)
 
@@ -119,18 +120,17 @@ class PickleStorage(Storage):
 
     @classmethod
     def sizeof(cls, path_or_obj):
-        if isinstance(path_or_obj, str) and os.path.exists(path_or_obj):
+        if isinstance(path_or_obj, Path) and path_or_obj.exists():
             num = os.path.getsize(path_or_obj)
         else:
             num = sys.getsizeof(path_or_obj)
         return cls.sizeof_fmt(num)
 
     @classmethod
-    def safe_write(cls, path: str, data: bytes):
+    def safe_write(cls, path: Path, data: bytes):
         """ Write data to temp file. Then use os.link to move into place. """
         # https://stackoverflow.com/a/36784658/1946790
         # https://stackoverflow.com/a/57015098/1946790
-        dir_path = os.path.dirname(path)
-        with tempfile.NamedTemporaryFile(dir=dir_path, mode="w+b") as tf:
+        with tempfile.NamedTemporaryFile(dir=path.parent, mode="w+b") as tf:
             tf.write(data)
             os.link(tf.name, path)
