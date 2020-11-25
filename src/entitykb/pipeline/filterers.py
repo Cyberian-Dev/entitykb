@@ -49,18 +49,23 @@ class KeepLongestByKey(Filterer):
         return span.entity_key, offset
 
     @classmethod
-    def is_unique(cls, seen: set, span: Span) -> bool:
+    def is_unique(cls, max_length: int, seen: set, span: Span) -> bool:
         keys = {cls.filter_key(span, offset) for offset in span.offsets}
         is_unique = seen.isdisjoint(keys)
         seen.update(keys)
-        return is_unique
+        return len(span) == max_length or is_unique
 
     @classmethod
     def filter(cls, spans, tokens) -> List[Span]:
-        is_unique = partial(cls.is_unique, set())
-        sorted_spans = sorted(spans, key=sort_key)
-        unique_spans = filter(is_unique, sorted_spans)
-        return sorted(unique_spans, key=lambda d: d.offset)
+        if len(spans) > 1:
+            sorted_spans = sorted(spans, key=sort_key)
+            max_length = len(sorted_spans[0].tokens)
+            is_unique = partial(cls.is_unique, max_length, set())
+            unique_spans = filter(is_unique, sorted_spans)
+            return sorted(unique_spans, key=lambda d: d.offset)
+
+        else:
+            return spans
 
 
 class KeepLongestByLabel(KeepLongestByKey):

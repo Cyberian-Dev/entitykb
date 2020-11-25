@@ -30,17 +30,14 @@
 
 ## Overview
 
-EntityKB is a toolkit for quickly creating knowledge bases (a.k.a.
-knowledge graphs) using the Python programming language.
+EntityKB is a toolkit for creating knowledge bases (i.e. knowledge graphs)
+using the Python programming language.
 
-EntityKB is a programmatic framework for algorithmic text mining techniques,
-not a machine-learning based NLP solution. However, it can be used for
-scenarios where ML approaches are not (currently) appropriate/tenable.
 
 ### Use Cases
 
-EntityKB could provide useful capabilities for a wide variety of use cases
-but below are some potential examples:
+EntityKB could provide useful capabilities for a wide variety of use cases.
+Below are some examples:
 
 * **Entity Extraction**: Identify entities in text using keyword and
   grammar-based pattern matching.
@@ -84,8 +81,8 @@ extended and enhanced:
   
 ### Priorities
 
-The goal of EntityKB is to make it "easy" to create custom Knowledge
-Bases where "easy" is defined as "**fast to start**" and "**simple
+The goal of EntityKB is to make it "easy" to create custom knowledge
+bases where "easy" is defined as "**fast to start**" and "**simple
 to change**".  The below [quality
 attributes](https://en.wikipedia.org/wiki/List_of_system_quality_attributes)
 have been prioritized in service to this overarching goal:
