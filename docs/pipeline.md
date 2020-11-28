@@ -42,18 +42,19 @@ example config with the `DateResolver` and 2 out-of-the-box filterers added:
 
 Below are the components that are provided by the base EntityKB project:
 
-| Section                 | Item                               | Description                                               | 
-| ----------------------- | ---------------------------------- | --------------------------------------------------------- | 
-| normalizer              | entitykb.LatinLowercaseNormalizer  | Default normalizer that converts text to lowercase ASCII. |
-| tokenizer               | entitykb.WhitespaceTokenizer       | Default tokenizer that splits on whitespace characters.   |
-| pipelines.extractor     | entitykb.DefaultExtractor          | Creates handlers, processes tokens, and collects spans.   |
-| pipelines.filterers     | entitykb.ExactNameOnly             | Only keep spans that exactly match to the entity name.    |
-| pipelines.filterers     | entitykb.KeepLongestByKey          | Keeps longest overlapping span with same node key.        |
-| pipelines.filterers     | entitykb.KeepLongestByLabel        | Keeps longest overlapping span with same node label.      |
-| pipelines.filterers     | entitykb.KeepLongestByOffset       | Keeps longest overlapping span using token offsets.       |
-| pipelines.filterers     | entitykb.LowerNameOrExactSynonym   | Keeps when lower name or exact synonym match.             |
-| pipelines.resolvers     | entitykb.TermResolver              | Resolves entities from terms using TrieTermsIndex.        |
-| pipelines.resolvers     | entitykb.contrib.date.DateResolver | Contribution resolver that finds date entities.           |
+| Section                 | Item                                 | Description                                               | 
+| ----------------------- | ------------------------------------ | --------------------------------------------------------- | 
+| normalizer              | entitykb.LatinLowercaseNormalizer    | Default normalizer that converts text to lowercase ASCII. |
+| tokenizer               | entitykb.WhitespaceTokenizer         | Default tokenizer that splits on whitespace characters.   |
+| pipelines.extractor     | entitykb.DefaultExtractor            | Creates handlers, processes tokens, and collects spans.   |
+| pipelines.filterers     | entitykb.ExactNameOnly               | Only keep spans that exactly match to the entity name.    |
+| pipelines.filterers     | entitykb.KeepLongestByKey            | Keeps longest overlapping span with same node key.        |
+| pipelines.filterers     | entitykb.KeepLongestByLabel          | Keeps longest overlapping span with same node label.      |
+| pipelines.filterers     | entitykb.KeepLongestByOffset         | Keeps longest overlapping span using token offsets.       |
+| pipelines.filterers     | entitykb.LowerNameOrExactSynonym     | Keeps when lower name or exact synonym match.             |
+| pipelines.resolvers     | entitykb.TermResolver                | Resolves entities from terms using TrieTermsIndex.        |
+| pipelines.resolvers     | entitykb.contrib.date.DateResolver   | Contribution resolver that finds date entities.           |
+| pipelines.resolvers     | entitykb.contrib.email.EmailResolver | Contribution resolver that finds email entities.          |
 
 ## Customization
 

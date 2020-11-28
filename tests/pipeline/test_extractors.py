@@ -2,6 +2,7 @@ import pytest
 
 from entitykb import Entity
 from entitykb.contrib.date import DateResolver, Date
+
 from entitykb.pipeline import (
     TermResolver,
     WhitespaceTokenizer,

@@ -30,8 +30,16 @@
 
 ## Overview
 
-EntityKB is a toolkit for creating knowledge bases (i.e. knowledge graphs)
+EntityKB is a toolkit for rapidly developing knowledge bases (i.e.
+[knowledge graphs](https://en.wikipedia.org/wiki/Knowledge_Graph))
 using the Python programming language.
+
+It's purpose is to enable a person or small team with a mix of
+domain expertise and software development skills to rapidly and
+iteratively build a system that meets their functional requirements.
+EntityKB could also serve as a prototyping environment to inform
+the design of a "real" production system on an "approved" technology
+stack.
 
 
 ### Use Cases
@@ -43,14 +51,16 @@ Below are some examples:
   grammar-based pattern matching.
   
 * **Entity Linking**: Use graph relationships to provide context for
-  typeahead/autocomplete, semantic search, recommendations, or chatbots.
+  typeahead/autocomplete, searching, recommendations, or question/answering.
 
 * **Object Storing**: Store and retrieve data for rapid application development
   without SQL calls or object-relational mapping.
 
-* **Data Set Labeling**: Use entity extraction to generate labeled data
-  using keywords and grammars to bootstrap training sets.
+* **Data Set Labeling**: Use entity extraction to generate annotations
+  to overcome training data set "cold start" problem.
 
+* **Agile Data Integration**: Curate and assemble knowledge graph from
+  new sources iteratively without costly database remodeling cycles.
 
 ### Capabilities
 
@@ -77,32 +87,29 @@ extended and enhanced:
 * **Key-value store** for adding and retrieving Python objects in local
   memory or over RPC/HTTP calls.
 
-
-  
 ### Priorities
 
-The goal of EntityKB is to make it "easy" to create custom knowledge
-bases where "easy" is defined as "**fast to start**" and "**simple
-to change**".  The below [quality
-attributes](https://en.wikipedia.org/wiki/List_of_system_quality_attributes)
-have been prioritized in service to this overarching goal:
+Only through rapid, iterative experimentation can a knowledge graph be fully
+realized. Due to this, EntityKB has prioritized the following
+[quality attributes](https://en.wikipedia.org/wiki/List_of_system_quality_attributes)
+in an effort to reduce cycle time and increase the iteration velocity.
 
-* **Efficiency**: Immediately start adding entities and processing text
-  with default setup.
+* **Evolvability**: Add, update and remove entity types and
+  data sources without time-consuming data migrations.
 
-* **Configurability**: Add custom code and replace default code by editing a
-  simple JSON file.
+* **Configurability**: Activate and deactivate out-of-the-box components and
+  custom code by editing a simple JSON file.
   
 * **Interoperability**: Interact via command-line, RPC, HTTP, or in-memory
-  Python library.
+  Python library based on evolving project needs.
 
-* **Relevancy**: Create new entity classes, contextual labels/verbs,
-  and custom resolvers with domain specific grammars.
+* **Understandability**: Create new entity classes, contextual labels/verbs,
+  and custom resolvers with domain specific language and concepts.
 
 * **Portability**: Code and data created for EntityKB should be
   transferable to a new technology stack with minimal effort.
   
-
+  
 ### Limitations
 
 EntityKB is deliberately limited in scope to minimize complexity.

@@ -8,8 +8,10 @@ provides an inventory of important classes, modules, and functions.
 | cli                   | commands.py               | Functions that are available via command line.            |
 | cli                   | readers.py                | Default file readers for CSV and JSONL file types.        |
 | contrib.date          | date.lark                 | [Lark](https://github.com/lark-parser/lark) grammar.      | 
-| contrib.date          | DateResolver              | Example resolver for finding Date entities.               |
 | contrib.date          | Date                      | Example entity with fields for year, month, day.          |
+| contrib.date          | DateResolver              | Example resolver for finding Date entities.               |
+| contrib.email         | Email                     | Example entity with fields for username and domain.       |
+| contrib.email         | EmailResolver             | Example resolver that finds email entities.               |
 | deps                  | Environ                   | Env vars that prevents setting previously read values.    |
 | graph                 | Graph                     | Abstract class for graph reading and writing.             |
 | graph                 | InMemoryGraph             | Default graph that keeps data in memory using indices.    |

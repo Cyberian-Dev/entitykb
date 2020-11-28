@@ -1,15 +1,16 @@
 import os
 import time
+from inspect import getfullargspec
 from io import FileIO
+from json import dumps
 from pathlib import Path
 from typing import Optional
 
 import typer
 import uvicorn
-from entitykb import KB, Config, logger, environ, rpc, Direction
 from tabulate import tabulate
-from json import dumps
 
+from entitykb import KB, Config, logger, environ, rpc, Direction
 from . import services
 
 cli = typer.Typer(add_completion=False)
@@ -41,7 +42,7 @@ def clear(
     path = root / "index.db"
 
     if not force:
-        typer.confirm(f"Are you sure you want to clear: {path}?", abort=True)
+        typer.confirm(f"Are you sure ou want to clear: {path}?", abort=True)
 
     os.remove(path)
 
@@ -102,7 +103,7 @@ def load(
     kb = KB(root=root) if not dry_run else None
 
     file_obj = in_file.open("r")
-    it = iterate_file(file_format=format, file_obj=file_obj)
+    it = iterate_file(file_format=format, file_obj=file_obj, kb=kb)
 
     count = 0
     with typer.progressbar(it) as progress:
@@ -188,9 +189,15 @@ def register_format(file_format: str):
     return decorator_register
 
 
-def iterate_file(file_format: str, file_obj: FileIO):
+def iterate_file(file_format: str, file_obj: FileIO, kb: KB):
     func = ff_registry[file_format]
-    yield from func(file_obj)
+    spec = getfullargspec(func)
+    if len(spec.args) == 1:
+        yield from func(file_obj)
+    elif len(spec.args) == 2:
+        yield from func(file_obj, kb)
+    else:
+        raise RuntimeError(f"Invalid reader function: {func} {spec.args}")
 
 
 cli.register_format = register_format

@@ -49,7 +49,7 @@ setup(
     include_package_data=True,
     entry_points={"console_scripts": ["entitykb=entitykb:cli"]},
     install_requires=install_requires,
-    description="Python toolkit for building Knowledge Bases",
+    description="Python toolkit for rapidly developing knowledge bases",
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     url="https://github.com/genomoncology/entitykb",
