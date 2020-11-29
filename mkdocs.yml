@@ -24,6 +24,7 @@ nav:
     - Pipeline: 'pipeline.md'
     - Development: 'development.md'
     - Deployment: 'deployment.md'
+    - Reference: 'reference.md'
     - Release Notes: 'release-notes.md'
 
 markdown_extensions:

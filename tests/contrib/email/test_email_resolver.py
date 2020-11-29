@@ -38,3 +38,20 @@ def test_resolve():
     assert "EMAIL" == entity.label
     assert "username" == entity.username
     assert "gmail.com" == entity.domain
+
+    entities = resolver.resolve("my.user-name@subsub.sub.domain.tld")
+    assert 1 == len(entities)
+
+    entity = entities[0]
+    assert isinstance(entity, Email)
+    assert "EMAIL" == entity.label
+    assert "my.user-name" == entity.username
+    assert "subsub.sub.domain.tld" == entity.domain
+
+
+def test_no_resolve():
+    assert not resolver.resolve("username@")
+    assert not resolver.resolve("username")
+    assert not resolver.resolve("username@gmail")
+    assert not resolver.resolve("username@gmail.")
+    assert not resolver.resolve("username@gmail.com.")

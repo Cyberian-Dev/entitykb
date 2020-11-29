@@ -1,14 +1,11 @@
-from typing import Iterable, List
+from typing import List
+
 from entitykb.pipeline import Resolver
 from . import grammar, Date
 
 
 class DateResolver(Resolver):
-    @classmethod
-    def is_relevant(cls, labels: Iterable[str]):
-        is_relevant = not bool(labels)
-        is_relevant = is_relevant or (Date.get_default_label() in labels)
-        return is_relevant
+    allowed_labels = {Date.get_default_label()}
 
     def resolve(self, term: str) -> List[Date]:
         dt = grammar.parse_date(term)

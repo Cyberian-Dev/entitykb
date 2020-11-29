@@ -53,8 +53,8 @@ Below are the components that are provided by the base EntityKB project:
 | pipelines.filterers     | entitykb.KeepLongestByOffset         | Keeps longest overlapping span using token offsets.       |
 | pipelines.filterers     | entitykb.LowerNameOrExactSynonym     | Keeps when lower name or exact synonym match.             |
 | pipelines.resolvers     | entitykb.TermResolver                | Resolves entities from terms using TrieTermsIndex.        |
-| pipelines.resolvers     | entitykb.contrib.date.DateResolver   | Contribution resolver that finds date entities.           |
-| pipelines.resolvers     | entitykb.contrib.email.EmailResolver | Contribution resolver that finds email entities.          |
+| pipelines.resolvers     | entitykb.contrib.date.DateResolver   | Custom Resolver that finds date entities.                 |
+| pipelines.resolvers     | entitykb.contrib.email.EmailResolver | Custom RegexResolver that finds email entities.           |
 
 ## Customization
 
@@ -159,6 +159,23 @@ class MyCustomFilterer(object):
     class Resolver {
         is_prefix(term)
         resolve(term)
+    }
+
+    Resolver <|-- RegexResolver: is a
+
+    class RegexResolver {
+         re_tokens: List[str]
+         create_entities(term, re_match)
+    }
+
+    RegexResolver <|-- EmailResolver: is a
+
+    class EmailResolver {
+    }
+
+    Resolver <|-- DateResolver: is a
+
+    class DateResolver {
     }
 
     Resolver <|-- TermResolver: is a

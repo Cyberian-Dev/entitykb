@@ -9,9 +9,9 @@ provides an inventory of important classes, modules, and functions.
 | cli                   | readers.py                | Default file readers for CSV and JSONL file types.        |
 | contrib.date          | date.lark                 | [Lark](https://github.com/lark-parser/lark) grammar.      | 
 | contrib.date          | Date                      | Example entity with fields for year, month, day.          |
-| contrib.date          | DateResolver              | Example resolver for finding Date entities.               |
+| contrib.date          | DateResolver              | Example custom Resolver for finding Date entities.        |
 | contrib.email         | Email                     | Example entity with fields for username and domain.       |
-| contrib.email         | EmailResolver             | Example resolver that finds email entities.               |
+| contrib.email         | EmailResolver             | Example RegexResolver that finds email entities.          |
 | deps                  | Environ                   | Env vars that prevents setting previously read values.    |
 | graph                 | Graph                     | Abstract class for graph reading and writing.             |
 | graph                 | InMemoryGraph             | Default graph that keeps data in memory using indices.    |
@@ -61,6 +61,7 @@ provides an inventory of important classes, modules, and functions.
 | pipeline.pipeline     | Pipeline                  | Container of resolvers and filterers, does extract/filter.|
 | pipeline.resolvers    | Resolver                  | Base class with is_prefix and resolve methods.            |
 | pipeline.resolvers    | TermResolver              | Resolves entities from terms using TrieTermsIndex.        |
+| pipeline.resolvers    | RegexResolver             | Resolves entities from terms using Regex token patterns.  |
 | pipeline.tokenizers   | Tokenizer                 | Base class with tokenize and detokenize methods.          |
 | pipeline.tokenizers   | WhitespaceTokenizer       | Default tokenizer that splits on whitespace characters.   |
 | rpc.client_async      | AsyncKB                   | Remote KB client that supports async/await calls.         |
@@ -167,6 +168,13 @@ sections for better viewing of specific subsections or try zooming.
     class Resolver {
         is_prefix(term)
         resolve(term)
+    }
+
+    Resolver <|-- RegexResolver: is a
+
+    class RegexResolver {
+         re_tokens: List[str]
+         create_entities(term, re_match)
     }
 
     Resolver <|-- TermResolver: is a

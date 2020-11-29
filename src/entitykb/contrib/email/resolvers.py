@@ -1,32 +1,23 @@
-import re
-from typing import List, Iterable
+from typing import List
 
-from entitykb import Resolver
+from entitykb import RegexResolver, Entity
 from .model import Email
 
 
-class EmailResolver(Resolver):
-    @classmethod
-    def is_relevant(cls, labels: Iterable[str]):
-        is_relevant = not bool(labels)
-        is_relevant = is_relevant or (Email.get_default_label() in labels)
-        return is_relevant
+class EmailResolver(RegexResolver):
+    allowed_labels = {Email.get_default_label()}
+    re_tokens = [
+        r"[a-zA-Z0-9_.+-]+",
+        r"@",
+        r"[a-zA-Z0-9-]+",
+        r"\.",
+        r"[a-zA-Z0-9-]+",
+        r"(?:\.[a-zA-Z0-9-]+)*",
+    ]
 
-    prefix_pattern = re.compile(
-        r"[a-zA-Z0-9_.+-]+(@([a-zA-Z0-9-]+(\.([a-zA-Z0-9-.]+)?)?)?)?"
-    )
-
-    def is_prefix(self, term: str) -> bool:
-        return self.prefix_pattern.fullmatch(term)
-
-    resolve_pattern = re.compile(
-        r"([a-zA-Z0-9_.+-]+)@([a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)"
-    )
-
-    def resolve(self, term: str) -> List[Email]:
-        entities = []
-        match = self.resolve_pattern.fullmatch(term)
-        if match:
-            entity = Email(name=term, username=match[1], domain=match[2])
-            entities.append(entity)
-        return entities
+    def create_entities(self, term: str, re_match) -> List[Entity]:
+        groups = re_match.groups()
+        domain = "".join(groups[2:])
+        username = groups[0]
+        entity = Email(name=term, username=username, domain=domain)
+        return [entity]
