@@ -23,6 +23,8 @@ def test_is_prefix():
     assert resolver.is_prefix("January 1,") is True
     assert resolver.is_prefix("January") is True
 
+    assert resolver.is_prefix("January 1st,") is True
+
     assert resolver.is_prefix("2019-01-02") is True
     assert resolver.is_prefix("2019-01-") is True
     assert resolver.is_prefix("2019-01") is True
@@ -32,6 +34,11 @@ def test_is_prefix():
     assert resolver.is_prefix("JAN ") is True
     assert resolver.is_prefix("JAN") is True
 
+    assert resolver.is_prefix("01/02/22") is True
+    assert resolver.is_prefix("01/02/") is True
+    assert resolver.is_prefix("01/02") is True
+    assert resolver.is_prefix("01/") is True
+
 
 def test_is_not_prefix():
     assert resolver.is_prefix("JAN 2019") is False
@@ -39,6 +46,8 @@ def test_is_not_prefix():
 
 def test_parse_m_d_y():
     assert parse_date("SEP 15 2019") == date(2019, 9, 15)
+    assert parse_date("SEP 15th 2019") == date(2019, 9, 15)
+    assert parse_date("SEP 15th, 2019") == date(2019, 9, 15)
     assert parse_date("SEPT 15 2019") == date(2019, 9, 15)
     assert parse_date("SEPTEMBER 15 2019") == date(2019, 9, 15)
     assert parse_date("09/15/2019") == date(2019, 9, 15)
@@ -58,6 +67,10 @@ def test_parse_d_m_y():
     assert parse_date("15 SEPT 2019") == date(2019, 9, 15)
     assert parse_date("15 SEPTEMBER 2019") == date(2019, 9, 15)
     assert parse_date("15 SEPTEMBER 19") == date(2019, 9, 15)
+
+    assert parse_date("1st SEP 2019") == date(2019, 9, 1)
+    assert parse_date("3rd SEP 2019") == date(2019, 9, 3)
+    assert parse_date("15th SEP 2019") == date(2019, 9, 15)
 
     # DMY wins when D > 12
     assert parse_date("15/09/2019") == date(2019, 9, 15)

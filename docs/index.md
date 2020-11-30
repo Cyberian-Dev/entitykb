@@ -57,9 +57,9 @@ Below are some examples:
 * **Data Set Labeling**: Overcome the "cold start" training set problem
   by using entity extraction capabilities to generate annotations.
 
-* **Rapid Development**: Iteratively add new data types as "plain old" Python
-  objects to your knowledge graph without expensive data modeling/migration
-  cycles using SQL or ORMs.
+* **Knowledge Curation**: Iteratively add new data types as "plain old"
+  Python objects to your knowledge graph without expensive data modeling
+  or migration cycles using SQL or ORMs.
 
 ### Capabilities
 
