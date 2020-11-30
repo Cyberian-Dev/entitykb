@@ -53,7 +53,9 @@ Below are the components that are provided by the base EntityKB project:
 | pipelines.filterers     | entitykb.KeepLongestByOffset         | Keeps longest overlapping span using token offsets.       |
 | pipelines.filterers     | entitykb.LowerNameOrExactSynonym     | Keeps when lower name or exact synonym match.             |
 | pipelines.resolvers     | entitykb.TermResolver                | Resolves entities from terms using TrieTermsIndex.        |
-| pipelines.resolvers     | entitykb.contrib.date.DateResolver   | Custom Resolver that finds date entities.                 |
+| pipelines.resolvers     | entitykb.RegexResolver               | Abstract class for finding entities with regex patterns.  |
+| pipelines.resolvers     | entitykb.GrammarResolver             | Abstract class for finding entities with Lark grammars.   |
+| pipelines.resolvers     | entitykb.contrib.date.DateResolver   | Custom GrammarResolver that finds date entities.          |
 | pipelines.resolvers     | entitykb.contrib.email.EmailResolver | Custom RegexResolver that finds email entities.           |
 
 ## Customization
@@ -90,10 +92,53 @@ For instance, a "City Resolver" that knows about "New York City"
 should have the `is_prefix` method return True for the terms "New",
 "New York" and "New York City".  The `resolve` method should return
 a list containing the Entity object but only for the full "New York
-City".
+City". While this example is valid, it would be best implemented using
+the `TermResolver` class described below.
 
-The `TermsResolver` provides this functionality for loaded
-entities, but it also would detect any synonyms such as "NYC".
+#### Term Resolver
+
+`TermResolver` resolves entities based on their names and synonyms. It
+uses the `TermsIndex` of the knowledge graph to check token prefix validity
+and resolve terms into entities.
+
+This class is the default resolver for newly initialized KBs.
+
+#### Regex Resolver
+
+`RegexResolver` is an abstract base class that allows for the use
+of regular expressions to resolve entities. The base class resolver
+provides `is_prefix` and `resolve` methods that use a list of tokens
+regular expressions provided by the derived class.
+
+A derived class must provide a `re_tokens` class attribute that
+is a list of regular expression strings that will be compiled using Python's
+`re` module. The derived class must also implement a new method called
+`create_entities` that receives the `term` and the `re.Match` object
+that results from a `full_match` call.
+
+See the `EmailResolver` class in the contrib package for an example 
+implementation.
+
+#### Grammar Resolver
+
+`GrammarResolver` is an abstract base class that allows for the use
+of [Lark](https://github.com/lark-parser/lark) grammars to resolve
+entities. The base class resolver provides `is_prefix` and `resolve`
+methods that use a Lark grammar provided by the derived class.
+
+A derived class must provide a `grammar` class attribute that is
+either a file Path object or a full text string of the grammar.
+The derived class must also implement a new method called
+`create_entities` that receives the `term` and the `lark.Tree`
+object that results from a `parse` call using the Lark grammar.
+
+See the `DateResolver` class in the contrib package for an example 
+implementation.
+
+<em>Note: Be warned that grammars are significantly more powerful than
+"ordinary" regex, but it is also a very challenging programming
+paradigm that requires lots of trial and error to learn.</em>
+
 
 ### Custom Filterers
 
@@ -157,30 +202,44 @@ class MyCustomFilterer(object):
     Token Handler "1" --> "1" Resolver: resolvers
 
     class Resolver {
-        is_prefix(term)
-        resolve(term)
+        is_prefix(term)*
+        resolve(term)*
     }
 
     Resolver <|-- RegexResolver: is a
 
     class RegexResolver {
-         re_tokens: List[str]
-         create_entities(term, re_match)
+        re_tokens: List[str] = None
+        is_prefix(term)
+        resolve(term)
+        create_entities(term, re_match)*
     }
 
     RegexResolver <|-- EmailResolver: is a
 
     class EmailResolver {
+         re_tokens: List[str]
     }
 
-    Resolver <|-- DateResolver: is a
+    Resolver <|-- GrammarResolver: is a
+
+    class GrammarResolver {
+        grammar: Union[str, Path] = None
+        is_prefix(term)
+        resolve(term)
+        create_entities(term, tree)*
+    }
+
+    GrammarResolver <|-- DateResolver: is a
 
     class DateResolver {
+         grammar: Union[str, Path]
     }
 
     Resolver <|-- TermResolver: is a
 
     class TermResolver {
+        terms: TermsIndex
     }
 
     TermResolver "1" ..> "1" Normalizer: uses

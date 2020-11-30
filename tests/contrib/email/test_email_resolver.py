@@ -35,6 +35,7 @@ def test_resolve():
 
     entity = entities[0]
     assert isinstance(entity, Email)
+    assert "username@gmail.com" == entity.name
     assert "EMAIL" == entity.label
     assert "username" == entity.username
     assert "gmail.com" == entity.domain
@@ -43,6 +44,7 @@ def test_resolve():
     assert 1 == len(entities)
 
     entity = entities[0]
+    assert "my.user-name@subsub.sub.domain.tld" == entity.name
     assert isinstance(entity, Email)
     assert "EMAIL" == entity.label
     assert "my.user-name" == entity.username

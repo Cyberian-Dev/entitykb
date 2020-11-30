@@ -47,20 +47,19 @@ stack.
 EntityKB could provide useful capabilities for a wide variety of use cases.
 Below are some examples:
 
-* **Entity Extraction**: Identify entities in text using keyword and
-  grammar-based pattern matching.
+* **Entity Extraction**: Pull concepts from unstructured text using using
+  keyword and pattern matching.
   
-* **Entity Linking**: Use graph relationships to provide context for
-  typeahead/autocomplete, searching, recommendations, or question/answering.
+* **Entity Linking**: Map concepts to a knowledge graph for "semantic 
+  searching" capabilities for recommendation systems, Q&A, data
+  harmonization, and validated data entry (i.e. drop downs, typeahead).
 
-* **Object Storing**: Store and retrieve data for rapid application development
-  without SQL calls or object-relational mapping.
+* **Data Set Labeling**: Overcome the "cold start" training set problem
+  by using entity extraction capabilities to generate annotations.
 
-* **Data Set Labeling**: Use entity extraction to generate annotations
-  to overcome training data set "cold start" problem.
-
-* **Agile Data Integration**: Curate and assemble knowledge graph from
-  new sources iteratively without costly database remodeling cycles.
+* **Rapid Development**: Iteratively add new data types as "plain old" Python
+  objects to your knowledge graph without expensive data modeling/migration
+  cycles using SQL or ORMs.
 
 ### Capabilities
 

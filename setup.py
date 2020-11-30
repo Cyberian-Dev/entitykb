@@ -27,7 +27,6 @@ install_requires = [
     "fastapi==0.61.2",
     "lark-parser==0.8.9",
     "pyahocorasick==1.4.0",
-    "python-dateutil==2.8.1",
     "tabulate==0.8.7",
     "translitcodec==0.5.2",
     "typer==0.3.2",

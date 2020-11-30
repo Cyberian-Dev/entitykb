@@ -10,7 +10,7 @@ from .filterers import (
 from .handlers import TokenHandler
 from .normalizers import Normalizer, LatinLowercaseNormalizer
 from .pipeline import Pipeline
-from .resolvers import Resolver, TermResolver, RegexResolver
+from .resolvers import Resolver, TermResolver, RegexResolver, GrammarResolver
 from .tokenizers import Tokenizer, WhitespaceTokenizer
 
 __all__ = (
@@ -18,6 +18,7 @@ __all__ = (
     "ExactNameOnly",
     "Extractor",
     "Filterer",
+    "GrammarResolver",
     "KeepLongestByKey",
     "KeepLongestByLabel",
     "KeepLongestByOffset",

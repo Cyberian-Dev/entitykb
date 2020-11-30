@@ -1,5 +1,8 @@
 import re
-from typing import Iterable, Set, List
+from pathlib import Path
+from typing import Iterable, Set, List, Union
+
+from lark import Lark, UnexpectedToken, LarkError, Tree
 
 from entitykb import create_component, Entity
 from .handlers import TokenHandler
@@ -79,7 +82,7 @@ class RegexResolver(Resolver):
         self.resolve_pattern = re.compile(resolve_str)
 
     def is_prefix(self, term: str) -> bool:
-        return self.prefix_pattern.fullmatch(term)
+        return bool(self.prefix_pattern.fullmatch(term))
 
     def resolve(self, term: str) -> List[Entity]:
         entities = []
@@ -89,4 +92,44 @@ class RegexResolver(Resolver):
         return entities
 
     def create_entities(self, term: str, re_match) -> List[Entity]:
+        raise NotImplementedError
+
+
+class GrammarResolver(Resolver):
+
+    grammar: Union[str, Path] = None
+    parser: str = "lalr"
+    start: str = "start"
+
+    def __init__(self, kb=None):
+        super().__init__(kb=kb)
+
+        if isinstance(self.grammar, Path):
+            data = open(self.grammar, "r").read()
+        else:
+            data = self.grammar  # pragma: no cover
+
+        self.lark = Lark(data, parser=self.parser)
+
+    def resolve(self, term: str) -> List[Entity]:
+        try:
+            tree = self.lark.parse(term, start=self.start)
+            entities = self.create_entities(term, tree)
+        except LarkError:
+            entities = []
+
+        return entities
+
+    def is_prefix(self, term: str) -> bool:
+        try:
+            self.lark.parse(term, start=self.start)
+            is_prefix = True
+        except UnexpectedToken as e:
+            is_prefix = e.token.type == "$END"
+        except Exception:
+            is_prefix = False
+
+        return is_prefix
+
+    def create_entities(self, term: str, tree: Tree) -> List[Entity]:
         raise NotImplementedError
