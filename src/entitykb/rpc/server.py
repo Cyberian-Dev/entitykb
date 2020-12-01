@@ -1,6 +1,7 @@
-import os
 import asyncio
+import os
 from typing import Optional
+from msgpack import Packer, Unpacker
 
 import aio_msgpack_rpc
 
@@ -79,7 +80,11 @@ class RPCServer(object):
         self.connection = RPCConnection(host=host, port=port)
         self.kb = KB(root=root)
         self.handler = HandlerKB(self.kb)
-        self.rpc_server = aio_msgpack_rpc.Server(handler=self.handler)
+        self.rpc_server = aio_msgpack_rpc.Server(
+            handler=self.handler,
+            packer=Packer(use_bin_type=True, datetime=True),
+            unpacker_factory=lambda: Unpacker(raw=False, timestamp=3),
+        )
         self.loop: asyncio.AbstractEventLoop = None
         self.stream: asyncio.StreamWriter = None
 

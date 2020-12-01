@@ -1,5 +1,6 @@
 import asyncio
 from dataclasses import dataclass
+from msgpack import Packer, Unpacker
 
 from aio_msgpack_rpc import Client
 
@@ -25,7 +26,13 @@ class RPCConnection(object):
 
     async def open(self):
         read, write = await asyncio.open_connection(self.host, self.port)
-        self._client = Client(read, write, response_timeout=self.timeout)
+        self._client = Client(
+            read,
+            write,
+            packer=Packer(use_bin_type=True, datetime=True),
+            unpacker=Unpacker(raw=False, timestamp=3),
+            response_timeout=self.timeout,
+        )
 
     def close(self):
         self._client.close()
