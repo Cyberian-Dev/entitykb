@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 import typer
+import smart_open
 import uvicorn
 from tabulate import tabulate
 
@@ -90,7 +91,7 @@ def dump(
 
 @cli.command()
 def load(
-    in_file: Path = typer.Argument(None),
+    in_file: str = typer.Argument(None),
     root: Optional[Path] = typer.Option(None),
     format: str = typer.Option("jsonl"),
     dry_run: bool = typer.Option(False, "--dry-run"),
@@ -102,7 +103,7 @@ def load(
 
     kb = KB(root=root) if not dry_run else None
 
-    file_obj = in_file.open("r")
+    file_obj = smart_open.open(in_file)
     it = iterate_file(file_format=format, file_obj=file_obj, kb=kb)
 
     count = 0
