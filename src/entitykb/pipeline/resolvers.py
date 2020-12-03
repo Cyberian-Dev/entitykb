@@ -48,17 +48,21 @@ class Resolver(object):
 
 class TermResolver(Resolver):
     def resolve(self, term: str) -> List[Entity]:
-        term_iter = self.kb.terms.iterate_term_keys(term=term)
-
-        entities = []
-        for key in term_iter:
-            entity = self.kb.graph.get_node(key)
-            entities.append(entity)
-
-        return entities
+        return self.find_entities(self.kb.graph, self.kb.terms, term)
 
     def is_prefix(self, term: str) -> bool:
         return self.kb.terms.is_prefix(term)
+
+    @classmethod
+    def find_entities(cls, graph, terms_index, term: str):
+        term_iter = terms_index.iterate_term_keys(term=term)
+
+        entities = []
+        for key in term_iter:
+            entity = graph.get_node(key)
+            entities.append(entity)
+
+        return entities
 
 
 class RegexResolver(Resolver):

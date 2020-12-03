@@ -18,7 +18,8 @@ class Normalizer(object):
 
     @classmethod
     def create(cls, value=None):
-        return create_component(value, Normalizer, LatinLowercaseNormalizer)
+        default_class = LatinLowercaseNormalizer if cls == Normalizer else cls
+        return create_component(value, Normalizer, default_class)
 
 
 class LatinLowercaseNormalizer(Normalizer):

@@ -1,5 +1,6 @@
-from typing import Tuple, Any
+from typing import Any
 
+from .fields import StrTupleField
 from .node import Node
 
 ENTITY = "ENTITY"
@@ -7,7 +8,7 @@ ENTITY = "ENTITY"
 
 class Entity(Node):
     name: str = None
-    synonyms: Tuple[str, ...] = ()
+    synonyms: StrTupleField = ()
 
     def __init__(self, **data: Any):
         if not data.get("label"):

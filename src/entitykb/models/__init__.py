@@ -1,6 +1,7 @@
 from .doc import Token, DocToken, Doc, Span, ParseRequest
 from .entity import Entity
 from .enums import Direction, Comparison
+from .fields import StrTupleField
 from .funcs import (
     camel_to_snake,
     ensure_iterable,
@@ -45,6 +46,7 @@ __all__ = (
     "SearchRequest",
     "SearchResponse",
     "Step",
+    "StrTupleField",
     "T",
     "Token",
     "Trail",

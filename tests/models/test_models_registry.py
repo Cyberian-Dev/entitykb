@@ -108,7 +108,7 @@ def test_schema():
             "name": {"title": "Name", "type": "string"},
             "synonyms": {
                 "default": (),
-                "items": {"type": "string"},
+                "items": {},
                 "title": "Synonyms",
                 "type": "array",
             },

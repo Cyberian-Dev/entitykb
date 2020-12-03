@@ -79,8 +79,9 @@ class TrieTermsIndex(TermsIndex):
             entry = set()
             self.trie.add_word(normalized, entry)
 
-        props = tuple(kwargs.items())
-        entry.add((key, props))
+        if key:
+            props = tuple(kwargs.items())
+            entry.add((key, props))
 
         return normalized
 
