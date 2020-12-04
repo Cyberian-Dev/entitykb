@@ -184,11 +184,11 @@
         },
         "appnope": {
             "hashes": [
-                "sha256:caeb46680dc3859d6dfa0ca18e70778dbac4d9cf33502a4ff228714ba1e513a0",
-                "sha256:d8096c5a6113c971509547ccf1dff1747a940b23e9ce34aff48f8305dbc0e6a0"
+                "sha256:93aa393e9d6c54c5cd570ccadd8edad61ea0c4b9ea7a01409020c9aa019eb442",
+                "sha256:dd83cd4b5b460958838f6eb3000c660b1f9caf2a5b1de4264e941512f603258a"
             ],
             "markers": "sys_platform == 'darwin'",
-            "version": "==0.1.1"
+            "version": "==0.1.2"
         },
         "attrs": {
             "hashes": [
@@ -291,11 +291,11 @@
         },
         "importlib-metadata": {
             "hashes": [
-                "sha256:030f3b1bdb823ecbe4a9659e14cc861ce5af403fe99863bae173ec5fe00ab132",
-                "sha256:caeee3603f5dcf567864d1be9b839b0bcfdf1383e3e7be33ce2dead8144ff19c"
+                "sha256:b8de9eff2b35fb037368f28a7df1df4e6436f578fa74423505b6c6a778d5b5dd",
+                "sha256:c2d6341ff566f609e89a2acb2db190e5e1d23d5409d6cc8d2fe34d72443876d4"
             ],
             "markers": "python_version < '3.8'",
-            "version": "==2.1.0"
+            "version": "==2.1.1"
         },
         "iniconfig": {
             "hashes": [

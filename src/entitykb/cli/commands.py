@@ -1,8 +1,9 @@
 import os
 import time
+import json
+
 from inspect import getfullargspec
 from io import FileIO
-from json import dumps
 from pathlib import Path
 from typing import Optional
 
@@ -10,6 +11,7 @@ import typer
 import smart_open
 import uvicorn
 from tabulate import tabulate
+from pydantic.json import pydantic_encoder
 
 from entitykb import KB, Config, logger, environ, rpc, Direction
 from . import services
@@ -73,7 +75,7 @@ def dump(
         for node in kb.graph:
             payload = node.dict()
             envelope = dict(kind="node", payload=payload)
-            data = dumps(envelope)
+            data = json.dumps(envelope, default=pydantic_encoder)
             f.write(data)
             f.write("\n")
 
@@ -84,7 +86,7 @@ def dump(
             for _, edge in it:
                 payload = edge.dict()
                 envelope = dict(kind="edge", payload=payload)
-                data = dumps(envelope)
+                data = json.dumps(envelope, default=pydantic_encoder)
                 f.write(data)
                 f.write("\n")
 

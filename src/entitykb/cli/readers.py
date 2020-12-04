@@ -1,6 +1,7 @@
 import csv
+import json
+
 from io import FileIO
-from json import loads
 
 from entitykb import Entity, environ, Node, Edge
 from .commands import cli
@@ -20,7 +21,7 @@ def iterate_csv(file_obj: FileIO):
 @cli.register_format("jsonl")
 def iterate_jsonl(file_obj: FileIO):
     for line in file_obj:
-        envelope = loads(line)
+        envelope = json.loads(line)
         kind, payload = envelope["kind"], envelope["payload"]
         if kind == "node":
             yield Node.create(**payload)
