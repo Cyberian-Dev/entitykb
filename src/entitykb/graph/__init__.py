@@ -1,10 +1,9 @@
 from .graph import Graph, InMemoryGraph
-from .index import NodeIndex, EdgeIndex, NestedDict
+from .index import NodeIndex, EdgeIndex
 
 __all__ = (
     "EdgeIndex",
     "Graph",
     "InMemoryGraph",
-    "NestedDict",
     "NodeIndex",
 )

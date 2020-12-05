@@ -108,6 +108,7 @@ class InMemoryGraph(Graph):
         return self.nodes.get(key)
 
     def remove_node(self, key: str) -> Node:
+        key = Node.to_key(key)
         edges = [edge for _, edge in self.edges.iterate(nodes=[key])]
         for edge in edges:
             self.edges.remove(edge)
@@ -138,7 +139,7 @@ class InMemoryGraph(Graph):
         return edge
 
     def get_verbs(self):
-        return self.edges.get_verbs()
+        return set(self.edges.get_verbs())
 
     # admin
 

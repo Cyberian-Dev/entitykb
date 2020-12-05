@@ -101,6 +101,9 @@ class Edge(BaseModel):
         self.start = Node.to_key(start)
         return self
 
+    def get_other(self, direction):
+        return self.end if direction.is_outgoing else self.start
+
     @classmethod
     def create(cls, *args, **kwargs):
         from .registry import Registry

@@ -1,5 +1,5 @@
+from entitykb.graph.index import NodeIndex, EdgeIndex
 from entitykb.models import Node, Edge, Direction
-from entitykb.graph.index import EdgeIndex, NodeIndex
 
 
 def test_node_index():
@@ -25,6 +25,7 @@ def test_edge_index_save_remove():
 
     # iterate edges
     assert 4 == len(list(index.iterate(verbs="IS_A")))
+    print(list(index.iterate(nodes=node_b)))
     assert 1 == len(list(index.iterate(nodes=node_b)))
     assert 2 == len(list(index.iterate(nodes=node_a)))
     assert 2 == len(
