@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import List, Any, Tuple
 
 from pydantic import BaseModel, Field
 
@@ -18,18 +18,28 @@ class SearchRequest(BaseModel):
 class Hop(BaseModel):
     start: str
     end: str
-    edges: List[Edge] = []
+    edges: Tuple[Edge, ...] = ()
+
+    def __hash__(self):
+        return hash((self.start, self.end, self.edges))
+
+    def __eq__(self, other):
+        return (
+            self.start == other.start
+            and self.end == self.end
+            and self.edges == other.edges
+        )
 
 
 class Trail(BaseModel):
     start: str
-    hops: List[Hop] = []
+    hops: Tuple[Hop, ...] = ()
 
     def __hash__(self):
-        return hash((self.start, self.end))
+        return hash((self.start, self.hops and self.hops[-1]))
 
     def __eq__(self, other):
-        return self.start == other.start and self.end == other.end
+        return self.start == other.start and self.hops[-1] == other.hops[-1]
 
     def __repr__(self):
         return f"<Trail: {self.start} - {len(self)} -> {self.end}>"
@@ -44,14 +54,10 @@ class Trail(BaseModel):
         else:
             return self.start
 
-    def copy(self, **kwargs):
-        return Trail.construct(start=self.start, hops=self.hops[:])
-
     def push(self, end, edge: Edge) -> "Trail":
-        copy = self.copy()
-        next_hop = Hop.construct(start=self.end, end=end, edges=[edge])
-        copy.hops.append(next_hop)
-        return copy
+        next_hop = Hop.construct(start=self.end, end=end, edges=(edge,))
+        hops = self.hops + (next_hop,)
+        return Trail.construct(start=self.start, hops=hops)
 
     def dict(self, *args, **kwargs):
         return {

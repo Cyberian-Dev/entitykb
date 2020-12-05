@@ -9,6 +9,10 @@ class Direction(str, enum.Enum):
     outgoing = "outgoing"
     incoming = "incoming"
 
+    @property
+    def is_outgoing(self):
+        return Direction.outgoing == self
+
     @classmethod
     def as_tuple(cls, directions, all_if_none=False):
         values = tuple()

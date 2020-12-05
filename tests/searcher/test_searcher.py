@@ -159,9 +159,8 @@ def test_all_nodes_all_verbs_no_max(graph):
     searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
 
-    assert 8 == len(trails)
-    assert apple.key not in ends(trails)
     assert {apple.key} == starts(trails)
+    assert 22 == len(trails)
 
 
 def test_all_nodes_optional_attribute(graph):
@@ -176,7 +175,7 @@ def test_all_nodes_optional_attribute(graph):
     searcher = DefaultSearcher(graph=graph, traversal=t, starts=[apple])
     trails = list(searcher)
 
-    assert 7 == len(trails)
+    assert 21 == len(trails)
     assert honeycrisp.key not in ends(trails)
 
 

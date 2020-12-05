@@ -12,10 +12,9 @@ class CustomField(object):
         raise NotImplementedError
 
 
-if TYPE_CHECKING:
-    StrTupleField = Tuple[str, ...]
+StrTupleField = Tuple[str, ...]
 
-else:
+if not TYPE_CHECKING:
 
     class StrTupleField(tuple, CustomField):
         @classmethod

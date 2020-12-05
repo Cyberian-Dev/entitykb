@@ -90,7 +90,7 @@ def test_save_for_entity_and_edge(kb: KB, apple, google):
 
     t = T().all_nodes(passthru=True)
     response = kb.search(request=SearchRequest(q="a", traversal=t))
-    assert [apple, google] == response.nodes
+    assert 3 == len(response.nodes)
 
     kb.remove_node(apple.key)
     assert kb.info()["graph"] == {

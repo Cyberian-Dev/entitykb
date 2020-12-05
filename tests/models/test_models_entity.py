@@ -12,7 +12,7 @@ def test_entity():
     )
     assert empty.terms == ("empty",)
 
-    entity = Entity(name="GenomOncology", label="COMPANY", synonyms=("GO",))
+    entity = Entity(name="GenomOncology", label="COMPANY", synonyms="GO")
     assert entity.dict() == dict(
         name="GenomOncology",
         synonyms=("GO",),

@@ -71,6 +71,16 @@ class Edge(BaseModel):
 
     __all_verbs__ = ()
 
+    def __hash__(self):
+        return hash((self.start, self.verb, self.end))
+
+    def __eq__(self, other):
+        return (
+            self.start == other.start
+            and self.verb == other.verb
+            and self.end == other.end
+        )
+
     @validator("start", "end", pre=True, always=True)
     def node_to_key(cls, v):
         return Node.to_key(v)
