@@ -33,6 +33,7 @@ def test_save_entity(kb: KB, apple, apple_records):
     apple2 = apple.copy(update=dict(synonyms=("Apple", "Apple Computers")))
 
     # should reset the terms
+    kb.remove_node(apple)
     kb.save_node(apple2)
 
     assert not (kb.parse("AAPL")).spans
