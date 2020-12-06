@@ -1,6 +1,5 @@
 from collections import defaultdict as dd
 from threading import Lock
-from typing import Set
 
 from entitykb.models import Node, Edge, Direction, ensure_iterable, SmartList
 
@@ -22,7 +21,7 @@ class EdgeIndex(object):
 
         return count
 
-    def get_verbs(self) -> Set[str]:
+    def get_verbs(self):
         return self.by_verb.keys()
 
     def save(self, edge: Edge):

@@ -1,7 +1,7 @@
 from typing import Iterable
 
 from ahocorasick import Automaton as Trie
-from entitykb import Entity, Normalizer, create_component
+from entitykb import Entity, Normalizer, create_component, SmartList
 
 
 class TermsIndex(object):
@@ -23,7 +23,7 @@ class TermsIndex(object):
     def add_entity(self, entity: Entity, **kwargs):
         raise NotImplementedError
 
-    def add_term(self, key: str, term: str, **kwargs):
+    def add_term(self, key: str, term: str):
         raise NotImplementedError
 
     def remove_entity(self, entity: Entity):
@@ -71,17 +71,16 @@ class TrieTermsIndex(TermsIndex):
         for term in entity.terms:
             self.add_term(key=key, term=term, **kwargs)
 
-    def add_term(self, key: str, term: str, **kwargs):
+    def add_term(self, key: str, term: str):
         normalized = self.normalizer(term)
         entry = self.trie.get(normalized, None)
 
         if entry is None:
-            entry = set()
+            entry = SmartList()
             self.trie.add_word(normalized, entry)
 
         if key:
-            props = tuple(kwargs.items())
-            entry.add((key, props))
+            entry.append(key)
 
         return normalized
 
@@ -93,8 +92,7 @@ class TrieTermsIndex(TermsIndex):
     def remove_term(self, key: str, term: str):
         normalized = self.normalizer(term)
         entry = self.trie.get(normalized, None)
-
-        entry = {(k, p) for k, p in (entry or ()) if k != key}
+        entry.remove(key)
 
         if not entry:
             self.trie.remove_word(normalized)
@@ -108,11 +106,11 @@ class TrieTermsIndex(TermsIndex):
     def iterate_prefix_keys(self, prefix: str) -> Iterable[str]:
         normalized = self.normalizer(prefix)
         for entry in self.trie.values(normalized):
-            for key, meta in entry:
+            for key in entry:
                 yield key
 
     def iterate_term_keys(self, term: str) -> Iterable[str]:
         normalized = self.normalizer(term)
         entry = self.trie.get(normalized, ())
-        for key, meta in entry:
+        for key in entry:
             yield key

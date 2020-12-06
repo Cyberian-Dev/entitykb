@@ -5,6 +5,8 @@ from pydantic import BaseModel, validator, Field
 
 from .funcs import camel_to_snake
 
+label_cache = {}
+
 
 class Node(BaseModel):
     key: str = Field(default_factory=lambda: str(uuid4()))
@@ -42,7 +44,10 @@ class Node(BaseModel):
     def get_default_label(cls):
         default_label = cls.__dict__.get("__default_label__")
         if default_label is None:
-            default_label = camel_to_snake(cls.__name__, upper=True)
+            default_label = label_cache.get(cls.__name__)
+            if default_label is None:
+                default_label = camel_to_snake(cls.__name__, upper=True)
+                label_cache[cls.__name__] = default_label
         return default_label
 
     @classmethod
