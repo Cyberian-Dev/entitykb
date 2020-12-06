@@ -288,12 +288,30 @@ F = FieldCriteriaBuilder
 
 
 class VerbType(type):
+    cache = {}
+
     def __getattr__(self, verb_name: str):
-        verb_name = verb_name.upper()
-        return Verb(verb_name)
+        if verb_name is None:
+            return
+
+        verb = Verb.cache.get(verb_name)
+        if verb:
+            return verb
+
+        upper_case = verb_name.upper()
+        verb = Verb.cache.get(upper_case)
+        if not verb:
+            verb = Verb(upper_case)
+
+        Verb.cache[verb_name] = verb
+        Verb.cache[upper_case] = verb
+        return verb
 
 
 class Verb(str, metaclass=VerbType):
+    def __call__(self, item):
+        return Verb.__getattr__(item)
+
     def __rshift__(self, nodes):
         return EdgeCriteria(
             verbs=(self,), directions=(Direction.outgoing,), keys=nodes

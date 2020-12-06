@@ -62,7 +62,7 @@ def test_remove_start(a, b, c, index):
 
     # not new, but accepts existing edge
     index.save(e2)
-    assert checks() == dict(t_v=6, t_a=2, t_b=2, t_c=2, o_c=1, i_c=1)
+    assert checks() == dict(t_v=8, t_a=2, t_b=3, t_c=3, o_c=1, i_c=2)
 
     # removes edge twice
     index.remove(e2)

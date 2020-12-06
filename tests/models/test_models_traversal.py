@@ -12,6 +12,12 @@ from entitykb.models import (
 )
 
 
+def test_verb():
+    assert V.IS_A == V.IS_A
+    assert id(V.IS_A) == id(V.IS_A)
+    assert V["IS_A"] == V["is_a"]
+
+
 def test_create_walk_step_defaults():
     walk_step = WalkStep()
     assert walk_step.dict() == {

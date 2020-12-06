@@ -19,9 +19,6 @@ class Node(BaseModel):
             data["label"] = self.get_default_label()
         super().__init__(**data)
 
-    def __hash__(self):
-        return hash(self.key)
-
     def __lt__(self, other):
         return self.key < other.key
 
@@ -71,12 +68,19 @@ class Edge(BaseModel):
 
     __all_verbs__ = ()
 
+    def __init__(self, *args, **kw):
+        from .traverse import Verb
+
+        super().__init__(*args, **kw)
+        self.verb = Verb[self.verb]
+
     def __hash__(self):
         return hash((self.start, self.verb, self.end))
 
     def __eq__(self, other):
         return (
-            self.start == other.start
+            other is not None
+            and self.start == other.start
             and self.verb == other.verb
             and self.end == other.end
         )
