@@ -8,7 +8,8 @@ from entitykb import (
     ensure_iterable,
     label_filter,
 )
-from .index import NodeIndex, EdgeIndex
+from .node_index import NodeIndex
+from .edge_index import EdgeIndex
 
 
 class Graph(object):
@@ -109,11 +110,15 @@ class InMemoryGraph(Graph):
 
     def remove_node(self, key: str) -> Node:
         key = Node.to_key(key)
+
+        # capture all edges to prevent iterator issues
         edges = [edge for _, edge in self.edges.iterate(nodes=[key])]
+
         for edge in edges:
             self.edges.remove(edge)
 
         node = self.nodes.remove(key)
+
         return node
 
     def get_labels(self):

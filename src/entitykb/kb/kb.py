@@ -160,8 +160,8 @@ class KB(BaseKB):
         }
 
     def get_schema(self) -> dict:
-        verbs = self.graph.get_verbs()
-        labels = self.graph.get_labels()
+        verbs = sorted(self.graph.get_verbs())
+        labels = sorted(self.graph.get_labels())
         schema = Registry.instance().create_schema(labels, verbs)
         return schema.dict()
 
