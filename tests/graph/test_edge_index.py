@@ -1,7 +1,7 @@
 from pytest import fixture
 
 from entitykb.graph.edge_index import EdgeIndex
-from entitykb.models import Node, Edge
+from entitykb.models import Node, Edge, Direction
 
 v = "VERB"
 
@@ -36,53 +36,40 @@ def count(index, **kw):
 
 
 def test_remove_start(a, b, c, index):
-    e0 = Edge(start=b, verb=v, end=a)
-    assert index.save(e0)
+    def checks():
+        return dict(
+            t_v=count(index, verbs=v),
+            t_a=count(index, nodes=a),
+            t_b=count(index, nodes=b),
+            t_c=count(index, nodes=c),
+            o_c=count(index, nodes=c, directions=Direction.outgoing),
+            i_c=count(index, nodes=c, directions=Direction.incoming),
+        )
 
-    assert 1 == count(index, nodes=a)
-    assert 1 == count(index, nodes=b)
-    assert 0 == count(index, nodes=c)
-    assert 2 == count(index, verbs=v)
-    assert 1 == count(index, verbs=v, nodes=a)
+    assert checks() == dict(t_v=0, t_a=0, t_b=0, t_c=0, o_c=0, i_c=0)
+
+    e0 = Edge(start=b, verb=v, end=a)
+    index.save(e0)
+    assert checks() == dict(t_v=2, t_a=1, t_b=1, t_c=0, o_c=0, i_c=0)
 
     e1 = Edge(start=c, verb=v, end=a)
-    assert index.save(e1)
+    index.save(e1)
+    assert checks() == dict(t_v=4, t_a=2, t_b=1, t_c=1, o_c=1, i_c=0)
 
-    assert 2 == count(index, nodes=a)
-    assert 1 == count(index, nodes=b)
-    assert 1 == count(index, nodes=c)
-    assert 4 == count(index, verbs=v)
-    assert 2 == count(index, verbs=v, nodes=a)
+    e2 = Edge(start=b, verb=v, end=c)
+    index.save(e2)
+    assert checks() == dict(t_v=6, t_a=2, t_b=2, t_c=2, o_c=1, i_c=1)
 
-    # not new
-    assert not index.save(e0)
+    # not new, but accepts existing edge
+    index.save(e2)
+    assert checks() == dict(t_v=6, t_a=2, t_b=2, t_c=2, o_c=1, i_c=1)
 
-    assert 2 == count(index, nodes=a)
-    assert 1 == count(index, nodes=b)
-    assert 1 == count(index, nodes=c)
-    assert 4 == count(index, verbs=v)
-    assert 2 == count(index, verbs=v, nodes=a)
+    # removes edge twice
+    index.remove(e2)
+    assert checks() == dict(t_v=4, t_a=2, t_b=1, t_c=1, o_c=1, i_c=0)
 
     index.remove(e1)
-
-    assert 1 == count(index, nodes=a)
-    assert 1 == count(index, nodes=b)
-    assert 0 == count(index, nodes=c)
-    assert 2 == count(index, verbs=v)
-    assert 1 == count(index, verbs=v, nodes=a)
-
-    index.remove(e1)
-
-    assert 1 == count(index, nodes=a)
-    assert 1 == count(index, nodes=b)
-    assert 0 == count(index, nodes=c)
-    assert 2 == count(index, verbs=v)
-    assert 1 == count(index, verbs=v, nodes=a)
+    assert checks() == dict(t_v=2, t_a=1, t_b=1, t_c=0, o_c=0, i_c=0)
 
     index.remove(e0)
-
-    assert 0 == count(index, nodes=a)
-    assert 0 == count(index, nodes=b)
-    assert 0 == count(index, nodes=c)
-    assert 0 == count(index, verbs=v)
-    assert 0 == count(index, verbs=v, nodes=a)
+    assert checks() == dict(t_v=0, t_a=0, t_b=0, t_c=0, o_c=0, i_c=0)
