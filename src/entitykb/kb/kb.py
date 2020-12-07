@@ -133,6 +133,7 @@ class KB(BaseKB):
 
     def commit(self):
         self.storage.archive()
+        self.graph.commit()
         self.terms.commit()
         py_data = self.terms.get_data(), self.graph.get_data()
         self.storage.save(py_data)

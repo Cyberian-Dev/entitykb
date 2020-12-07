@@ -52,6 +52,9 @@ class Graph(object):
 
     # admin
 
+    def commit(self):
+        raise NotImplementedError
+
     def info(self):
         raise NotImplementedError
 
@@ -99,7 +102,7 @@ class InMemoryGraph(Graph):
             yield from it
 
         else:
-            it = self.nodes.nodes_by_key.keys()
+            it = iter(self.nodes)
             yield from it
 
     def save_node(self, node: Node):
@@ -147,6 +150,11 @@ class InMemoryGraph(Graph):
         return set(self.edges.get_verbs())
 
     # admin
+
+    def commit(self):
+        self.nodes.commit()
+        # todo:
+        # self.edges.commit()
 
     def info(self):
         return {

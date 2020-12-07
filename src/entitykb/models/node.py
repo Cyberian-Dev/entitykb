@@ -3,13 +3,22 @@ from uuid import uuid4
 from msgpack import packb, unpackb
 
 from pydantic import BaseModel, validator, Field
+from ujson import loads, dumps
 
 from .funcs import camel_to_snake
 
 label_cache = {}
 
 
-class NewBase(BaseModel):
+class Serializable(BaseModel):
+    def serialize(self) -> str:
+        return dumps(self.dict(), escape_forward_slashes=False)
+
+    @classmethod
+    def deserialize(cls, json: str):
+        data = loads(json)
+        return cls.create(**data)
+
     def compress(self) -> bytes:
         data = self.dict()
         return packb(data)
@@ -27,7 +36,7 @@ class NewBase(BaseModel):
         return registry.create(cls, *args, **kwargs)
 
 
-class Node(NewBase):
+class Node(Serializable):
     key: str = Field(default_factory=lambda: str(uuid4()))
     label: str
     data: dict = None
@@ -76,7 +85,7 @@ class Node(NewBase):
         return labels
 
 
-class Edge(NewBase):
+class Edge(Serializable):
     start: str = None
     verb: str = None
     end: str = None

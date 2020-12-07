@@ -73,6 +73,7 @@ def test_save_load_sync(root, kb: KB, apple):
 def test_save_for_entity_and_edge(kb: KB, apple, google):
     assert apple == kb.save(apple)
     assert google == kb.save(google)
+    kb.commit()
 
     assert 2 == len(kb)
     assert apple == kb.get_node(apple.key)
@@ -87,6 +88,7 @@ def test_save_for_entity_and_edge(kb: KB, apple, google):
 
     kb.save(Edge(start=apple, verb="POINTS_NO_WHERE", end="INVALID|THING"))
     kb.save(Edge(start=apple, verb="POINTS_NO_WHERE", end=google))
+    kb.commit()
 
     assert kb.info()["graph"] == {
         "nodes": 2,
@@ -98,6 +100,8 @@ def test_save_for_entity_and_edge(kb: KB, apple, google):
     assert 3 == len(response.nodes)
 
     kb.remove_node(apple.key)
+    kb.commit()
+
     assert kb.info()["graph"] == {
         "nodes": 1,
         "edges": 0,
@@ -112,6 +116,8 @@ def test_kb_save_bool_clear(kb: KB, apple):
     assert bool(kb)
 
     assert apple == kb.save(apple)
+    kb.commit()
+
     assert 1 == len(kb)
     kb.clear()
 

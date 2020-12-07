@@ -21,7 +21,7 @@ class TermsIndex(object):
         raise NotImplementedError
 
     def commit(self):
-        pass
+        raise NotImplementedError
 
     def add_entity(self, entity: Entity, **kwargs):
         key = Entity.to_key(entity)
@@ -83,16 +83,15 @@ class DawgTermsIndex(TermsIndex):
         for encoded_key in self.dawg.iterkeys():
             pieces = encoded_key.split(self.sep)
             term, keys = pieces[0], set(pieces[1:])
-
-            if term in self.adds or term in self.removes:
-                keys -= self.removes.get(term, set())
-                keys |= self.adds.get(term, set())
-                self.adds[term] = keys
+            keys -= self.removes.get(term, set())
+            keys |= self.adds.get(term, set())
+            self.adds[term] = keys
 
         combined = []
         for term, keys in self.adds.items():
-            encoded_key = self.sep.join([term] + sorted(keys))
-            combined.append(encoded_key)
+            if keys:
+                encoded_key = self.sep.join([term] + sorted(keys))
+                combined.append(encoded_key)
 
         self.dawg = CompletionDAWG(combined)
         self.adds.clear()

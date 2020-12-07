@@ -31,6 +31,7 @@ install_requires = [
     "tabulate==0.8.7",
     "translitcodec==0.5.2",
     "typer==0.3.2",
+    "ujson==4.0.1",
     "uvicorn==0.12.2",
 ]
 

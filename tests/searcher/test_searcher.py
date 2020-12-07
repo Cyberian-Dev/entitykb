@@ -72,7 +72,9 @@ def graph():
     for edge in edges:
         graph.save_edge(edge)
 
+    graph.commit()
     assert "<Graph: 9 nodes, 11 edges>" == repr(graph)
+
     return graph
 
 

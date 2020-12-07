@@ -44,10 +44,12 @@ def clear(
     root = Config.get_root(root)
     path = root / "index.db"
 
-    if not force:
-        typer.confirm(f"Are you sure ou want to clear: {path}?", abort=True)
-
-    os.remove(path)
+    if os.path.exists(path):
+        if not force:
+            typer.confirm(f"Clearing {path}. Are you sure?", abort=True)
+        os.remove(path)
+    else:
+        logger.info(f"{path} does not exist. Creating new database.")
 
     kb = KB(root=root)
     success = kb.commit()
@@ -111,11 +113,12 @@ def load(
     count = 0
     with typer.progressbar(it) as progress:
         for obj in progress:
+            count += 1
+
             if kb:
                 kb.save(obj)
-            elif count < 10:
+            elif count <= 10:
                 typer.echo(obj)
-            count += 1
 
     if kb:
         kb.commit()

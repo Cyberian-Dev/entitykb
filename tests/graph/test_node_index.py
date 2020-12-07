@@ -6,11 +6,13 @@ def test_node_index():
     node = Node()
     index = NodeIndex()
     index.save(node)
+    index.commit()
+
     assert node == index.get(node.key)
     assert {"NODE"} == index.get_labels()
 
     index.remove(node.key)
-    assert index.get(node.key) is None
+    index.commit()
 
-    # currently returns label, even though no more exist
-    assert {"NODE"} == index.get_labels()
+    assert index.get(node.key) is None
+    assert set() == index.get_labels()
