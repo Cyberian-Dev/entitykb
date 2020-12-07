@@ -29,7 +29,7 @@ class Config(BaseModel):
     normalizer: str = "entitykb.LatinLowercaseNormalizer"
     searcher: str = "entitykb.DefaultSearcher"
     storage: str = "entitykb.PickleStorage"
-    terms: str = "entitykb.TrieTermsIndex"
+    terms: str = "entitykb.DawgTermsIndex"
     tokenizer: str = "entitykb.WhitespaceTokenizer"
 
     pipelines: Dict[str, PipelineConfig] = Field(

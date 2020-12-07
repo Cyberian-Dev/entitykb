@@ -1,3 +1,3 @@
-from .terms import TermsIndex, TrieTermsIndex
+from .terms import TermsIndex, DawgTermsIndex
 
-__all__ = ("TermsIndex", "TrieTermsIndex")
+__all__ = ("TermsIndex", "DawgTermsIndex")

@@ -1,52 +1,39 @@
 import pytest
 
-from entitykb.terms import TermsIndex
+from entitykb.terms.terms import DawgTermsIndex
 from entitykb.pipeline import Normalizer
 
 
 @pytest.fixture()
 def terms():
     normalizer = Normalizer.create()
-    terms = TermsIndex.create(normalizer=normalizer)
+    terms = DawgTermsIndex.create(normalizer=normalizer)
     return terms
 
 
 def test_length_clear_info(terms):
     assert 0 == len(terms)
     assert terms.info() == {
-        "links_count": 0,
-        "longest_word": 0,
-        "nodes_count": 0,
-        "sizeof_node": 32,
-        "total_size": 0,
-        "words_count": 0,
+        "count": 0,
     }
 
     terms.add_term("key", "Hello")
+    terms.commit()
     assert 1 == len(terms)
     assert terms.info() == {
-        "links_count": 5,
-        "longest_word": 5,
-        "nodes_count": 6,
-        "sizeof_node": 32,
-        "total_size": 232,
-        "words_count": 1,
+        "count": 1,
     }
 
     terms.clear_data()
     assert 0 == len(terms)
     assert terms.info() == {
-        "links_count": 0,
-        "longest_word": 0,
-        "nodes_count": 0,
-        "sizeof_node": 32,
-        "total_size": 0,
-        "words_count": 0,
+        "count": 0,
     }
 
 
 def test_is_prefix(terms):
     terms.add_term("key", "Hello")
+    terms.commit()
 
     # positive cases
     assert terms.is_prefix("Hello")
@@ -65,6 +52,7 @@ def test_iterate_prefix(terms):
     b_key = "b"
     terms.add_term(a_key, "aa")
     terms.add_term(b_key, "ab")
+    terms.commit()
 
     # positive cases
     assert {a_key, b_key} == set(terms.iterate_prefix_keys("a"))
@@ -80,10 +68,16 @@ def test_iterate_term(terms):
     b_key = "b"
     terms.add_term(a_key, "aa")
     terms.add_term(b_key, "ab")
+    terms.add_term(b_key, "abc")
+    terms.commit()
 
     # positive cases
     assert {a_key} == set(terms.iterate_term_keys("aa"))
     assert {b_key} == set(terms.iterate_term_keys("ab"))
+    assert {b_key} == set(terms.iterate_term_keys("abc"))
+
+    terms.remove_term(b_key, "abc")
+    terms.commit()
 
     # negative cases
     assert set() == set(terms.iterate_term_keys("a"))

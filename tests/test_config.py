@@ -59,7 +59,7 @@ def test_config_defaults():
         },
         "searcher": "entitykb.DefaultSearcher",
         "storage": "entitykb.PickleStorage",
-        "terms": "entitykb.TrieTermsIndex",
+        "terms": "entitykb.DawgTermsIndex",
         "tokenizer": "entitykb.WhitespaceTokenizer",
     }
 

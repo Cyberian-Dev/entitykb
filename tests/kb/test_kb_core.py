@@ -23,6 +23,7 @@ def test_creates_files(root, kb: KB, apple):
 def test_save_entity(kb: KB, apple, apple_records):
     kb.save_node(apple)
     kb.save_node(apple_records)
+    kb.commit()
 
     assert (kb.parse("AAPL")).spans[0].entity == apple
     assert (kb.parse("Apple, Inc.")).spans[0].entity == apple
@@ -34,6 +35,7 @@ def test_save_entity(kb: KB, apple, apple_records):
 
     # should reset the terms
     kb.save_node(apple2)
+    kb.commit()
 
     assert not (kb.parse("AAPL")).spans
     assert (kb.parse("Apple, Inc.")).spans[0].entity == apple2
@@ -42,6 +44,7 @@ def test_save_entity(kb: KB, apple, apple_records):
     assert 2 == len((kb.parse("Apple")).spans)
 
     kb.remove_node(apple2)
+    kb.commit()
 
     assert 1 == len((kb.parse("Apple")).spans)
     assert 1 == len((kb.parse("Apple Computers")).spans)
@@ -50,11 +53,11 @@ def test_save_entity(kb: KB, apple, apple_records):
 
 def test_save_load_sync(root, kb: KB, apple):
     kb.save_node(apple)
+    kb.commit()
+
     assert (kb.parse("AAPL")).spans[0].entity == apple
     assert (kb.parse("Apple, Inc.")).spans[0].entity == apple
     assert (kb.parse("Apple,Inc.")).spans[0].entity == apple
-
-    kb.commit()
 
     kb = KB(root=root)
     assert (kb.parse("AAPL")).spans[0].entity == apple
@@ -70,10 +73,12 @@ def test_save_load_sync(root, kb: KB, apple):
 def test_save_for_entity_and_edge(kb: KB, apple, google):
     assert apple == kb.save(apple)
     assert google == kb.save(google)
+
     assert 2 == len(kb)
     assert apple == kb.get_node(apple.key)
 
     kb.save(Edge(start=apple, verb="IS_A", end=apple))
+    kb.commit()
 
     assert kb.info()["graph"] == {
         "nodes": 2,
@@ -129,6 +134,7 @@ def test_get_schema(kb: KB):
 def test_search_with_results(kb: KB, apple, google):
     kb.save_node(apple)
     kb.save_node(google)
+    kb.commit()
 
     # default (all nodes, no filter, etc.)
     response = kb.search(request=SearchRequest())
@@ -215,6 +221,7 @@ def test_search_no_results(kb: KB, apple):
 def test_search_with_just_text(kb: KB, apple, google):
     kb.save_node(apple)
     kb.save_node(google)
+    kb.commit()
 
     response = kb.search("ap")
     assert 1 == len(response)

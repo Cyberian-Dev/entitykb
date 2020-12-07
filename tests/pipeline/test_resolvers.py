@@ -53,6 +53,7 @@ def test_date_resolver_fail_invalid():
 def test_default_resolver(kb, apple):
     resolver = TermResolver(kb=kb)
     kb.save_node(apple)
+    kb.commit()
 
     assert resolver.is_prefix("a")
     assert resolver.is_prefix("apple")

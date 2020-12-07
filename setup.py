@@ -24,9 +24,9 @@ def get_long_description():
 install_requires = [
     "aiofiles==0.6.0",
     "aio-msgpack-rpc==0.2.0",
+    "DAWG==0.8.0",
     "fastapi==0.61.2",
     "lark-parser==0.8.9",
-    "pyahocorasick==1.4.0",
     "smart-open==4.0.1",
     "tabulate==0.8.7",
     "translitcodec==0.5.2",

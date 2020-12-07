@@ -62,7 +62,7 @@ from .pipeline import (
     Tokenizer,
     WhitespaceTokenizer,
 )
-from .terms import TermsIndex, TrieTermsIndex
+from .terms import TermsIndex, DawgTermsIndex
 from .storage import Storage, PickleStorage
 from .kb import KB
 from .cli import cli
@@ -75,6 +75,7 @@ __all__ = (
     "Comparison",
     "Config",
     "Criteria",
+    "DawgTermsIndex",
     "DefaultExtractor",
     "DefaultSearcher",
     "Direction",
@@ -122,7 +123,6 @@ __all__ = (
     "Tokenizer",
     "Trail",
     "Traversal",
-    "TrieTermsIndex",
     "V",
     "Verb",
     "WalkStep",

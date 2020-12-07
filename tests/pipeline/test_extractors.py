@@ -34,6 +34,7 @@ def extractor(kb, apple, google, amazon, microsoft):
 
     for entity in (apple, google, amazon, microsoft, the_the):
         kb.save_node(entity)
+    kb.commit()
 
     resolvers = (resolver, DateResolver(kb=kb))
     extractor = Extractor.create(tokenizer=tokenizer, resolvers=resolvers)
