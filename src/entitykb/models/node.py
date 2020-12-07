@@ -1,5 +1,6 @@
 from typing import Union, Any
 from uuid import uuid4
+from msgpack import packb, unpackb
 
 from pydantic import BaseModel, validator, Field
 
@@ -8,7 +9,25 @@ from .funcs import camel_to_snake
 label_cache = {}
 
 
-class Node(BaseModel):
+class NewBase(BaseModel):
+    def compress(self) -> bytes:
+        data = self.dict()
+        return packb(data)
+
+    @classmethod
+    def decompress(cls, bin: bytes):
+        data = unpackb(bin)
+        return cls.create(**data)
+
+    @classmethod
+    def create(cls, *args, **kwargs):
+        from .registry import Registry
+
+        registry = Registry.instance()
+        return registry.create(cls, *args, **kwargs)
+
+
+class Node(NewBase):
     key: str = Field(default_factory=lambda: str(uuid4()))
     label: str
     data: dict = None
@@ -56,15 +75,8 @@ class Node(BaseModel):
         labels.add(cls.get_default_label())
         return labels
 
-    @classmethod
-    def create(cls, *args, **kwargs):
-        from .registry import Registry
 
-        registry = Registry.instance()
-        return registry.create(cls, *args, **kwargs)
-
-
-class Edge(BaseModel):
+class Edge(NewBase):
     start: str = None
     verb: str = None
     end: str = None
@@ -112,10 +124,3 @@ class Edge(BaseModel):
 
     def get_other(self, direction):
         return self.end if direction.is_outgoing else self.start
-
-    @classmethod
-    def create(cls, *args, **kwargs):
-        from .registry import Registry
-
-        registry = Registry.instance()
-        return registry.create(cls, *args, **kwargs)

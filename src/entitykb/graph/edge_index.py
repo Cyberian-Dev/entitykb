@@ -9,8 +9,8 @@ lock = Lock()
 class EdgeIndex(object):
     def __init__(self):
         self.by_start = {}  # start -> {verb -> out_edges}
-        self.by_end = {}  # end -> {verb -> in_edges}
         self.by_verb = {}  # verb -> {start -> out_edges}
+        self.by_end = {}  # end -> {verb -> in_edges}
 
     def __len__(self):
         count = 0
@@ -25,9 +25,10 @@ class EdgeIndex(object):
         return self.by_verb.keys()
 
     def save(self, edge: Edge):
+        bin = edge.compress()
         with lock:
             start_dict = self.by_start.setdefault(edge.start, dd(SmartList))
-            start_dict[edge.verb].append(edge)
+            start_dict[edge.verb].append(bin)
 
             # by_verb is same as by_start, with different key ordering
             verb_dict = self.by_verb.setdefault(edge.verb, {})
@@ -35,24 +36,25 @@ class EdgeIndex(object):
 
             # by_end flips the direction of edge
             end_dict = self.by_end.setdefault(edge.end, dd(SmartList))
-            end_dict[edge.verb].append(edge)
+            end_dict[edge.verb].append(bin)
 
     def remove(self, edge: Edge):
         with lock:
-            self._del_start_edge(edge)
-            self._del_end_edge(edge)
+            bin = edge.compress()
+            self._del_start_edge(edge, bin)
+            self._del_end_edge(edge, bin)
 
-    def _del_start_edge(self, edge):
+    def _del_start_edge(self, edge, bin):
         start_verb = self.by_start.get(edge.start)
         if start_verb is not None:
             out_edges = start_verb.get(edge.verb)
-            out_edges.remove(edge)
+            out_edges.remove(bin)
 
-    def _del_end_edge(self, edge):
+    def _del_end_edge(self, edge, bin):
         end_verb = self.by_end.get(edge.end)
         if end_verb is not None:
             in_edges = end_verb.get(edge.verb)
-            in_edges.remove(edge)
+            in_edges.remove(bin)
 
     def iterate(self, verbs=None, directions=None, nodes=None):
         verbs = (None,) if not verbs else verbs
@@ -71,11 +73,13 @@ class EdgeIndex(object):
         if edges is None:
             pass
         elif isinstance(edges, dict):
-            for edge in edges.values():
-                for e in edge:
-                    yield e.get_other(direction), e
+            for edge_list in edges.values():
+                for bin in edge_list:
+                    edge = Edge.decompress(bin)
+                    yield edge.get_other(direction), edge
         else:
-            for edge in edges:
+            for bin in edges:
+                edge = Edge.decompress(bin)
                 yield edge.get_other(direction), edge
 
     def _get_edges(self, direction, node_key, verb):
