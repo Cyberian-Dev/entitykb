@@ -153,8 +153,7 @@ class InMemoryGraph(Graph):
 
     def commit(self):
         self.nodes.commit()
-        # todo:
-        # self.edges.commit()
+        self.edges.commit()
 
     def info(self):
         return {

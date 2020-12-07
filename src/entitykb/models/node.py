@@ -1,6 +1,5 @@
 from typing import Union, Any
 from uuid import uuid4
-from msgpack import packb, unpackb
 
 from pydantic import BaseModel, validator, Field
 from ujson import loads, dumps
@@ -17,15 +16,6 @@ class Serializable(BaseModel):
     @classmethod
     def deserialize(cls, json: str):
         data = loads(json)
-        return cls.create(**data)
-
-    def compress(self) -> bytes:
-        data = self.dict()
-        return packb(data)
-
-    @classmethod
-    def decompress(cls, bin: bytes):
-        data = unpackb(bin)
         return cls.create(**data)
 
     @classmethod

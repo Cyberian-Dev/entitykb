@@ -48,7 +48,10 @@ class NodeIndex(BaseNodeIndex):
         self.removes = set()
 
     def __len__(self):
-        return len(self.dawg.keys(self.key_sep))
+        count = 0
+        for _ in self.dawg.iterkeys(self.key_sep):
+            count += 1
+        return count
 
     def __iter__(self):
         for item in self.dawg.iterkeys(self.key_sep):
