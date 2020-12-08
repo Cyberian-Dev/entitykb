@@ -41,8 +41,6 @@ from .models import (
 )
 
 from .base import BaseKB
-from .graph import Graph, InMemoryGraph
-from .searcher import Searcher, DefaultSearcher
 from .pipeline import (
     DefaultExtractor,
     ExactNameOnly,
@@ -61,7 +59,8 @@ from .pipeline import (
     Tokenizer,
     WhitespaceTokenizer,
 )
-from .terms import TermsIndex, DawgTermsIndex
+from .graph import Graph, InMemoryGraph, TermsIndex, DawgTermsIndex
+from .searcher import Searcher, DefaultSearcher
 from .storage import Storage, PickleStorage
 from .kb import KB
 from .cli import cli

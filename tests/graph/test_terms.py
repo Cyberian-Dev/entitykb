@@ -1,6 +1,6 @@
 import pytest
 
-from entitykb.terms.terms import DawgTermsIndex
+from entitykb.graph.terms import DawgTermsIndex
 from entitykb.pipeline import Normalizer
 
 

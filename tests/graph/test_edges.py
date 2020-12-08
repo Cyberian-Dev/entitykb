@@ -1,6 +1,6 @@
 from pytest import fixture
 
-from entitykb.graph.edge_index import EdgeIndex
+from entitykb.graph.edges import EdgeIndex
 from entitykb.models import Node, Edge, Direction
 
 v = "VERB"

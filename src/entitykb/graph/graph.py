@@ -7,8 +7,8 @@ from entitykb import (
     ensure_iterable,
     label_filter,
 )
-from .edge_index import EdgeIndex
-from .node_index import NodeIndex
+from .edges import EdgeIndex
+from .nodes import NodeIndex
 
 
 class Graph(object):

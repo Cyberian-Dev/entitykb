@@ -1,4 +1,4 @@
-from entitykb.graph.node_index import NodeIndex
+from entitykb.graph.nodes import NodeIndex
 from entitykb.models import Node
 
 
