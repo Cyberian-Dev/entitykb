@@ -40,7 +40,7 @@ class EdgeIndex(BaseEdgeIndex):
 
     def __init__(self):
         self.dawg = CompletionDAWG([])
-        self.verb = set()
+        self.verbs = set()
         self.adds = set()
         self.removes = set()
 
@@ -51,7 +51,7 @@ class EdgeIndex(BaseEdgeIndex):
         return count
 
     def get_verbs(self) -> Set[str]:
-        return self.verb
+        return self.verbs
 
     def save(self, edge: Edge):
         self.adds.add(edge)
@@ -77,26 +77,21 @@ class EdgeIndex(BaseEdgeIndex):
         if sep:
             prefix = sep.join(tokens)
             for line in self.dawg.iterkeys(prefix):
-                pieces = line.split(sep)
-                json = self._get_json(pieces, sep)
-                if json is not None:
-                    edge = Edge.deserialize(json)
-                    yield edge.get_other(direction), edge
+                edge = self._to_edge(line, sep)
+                yield edge.get_other(direction), edge
 
-    def _get_json(self, pieces, sep):
+    def _to_edge(self, line, sep):
+        pieces = line.split(sep)
         if sep == self.sve:
-            return pieces[4]
+            _, s, v, e = pieces
 
-        if sep == self.vse:
+        elif sep == self.vse:
             _, v, s, e = pieces
 
         else:  # e, v, s
             _, e, v, s = pieces
 
-        prefix = self.sve.join(["", s, v, e, ""])
-        for item in self.dawg.iterkeys(prefix):
-            _, json = item.rsplit(self.sve, maxsplit=1)
-            return json
+        return Edge(start=s, verb=v, end=e)
 
     def _get_sep_tokens(self, direction, node_key, verb):
         sep = None
@@ -113,28 +108,25 @@ class EdgeIndex(BaseEdgeIndex):
         return sep, tokens
 
     def commit(self):
-        data = {}
-        verbs = set()
-        for edge in self.adds:
-            if edge not in self.removes:
-                verbs.add(edge.verb)
-                data[(edge.start, edge.verb, edge.end)] = edge.serialize()
+        data = self.adds - self.removes
 
         for item in self.dawg.iterkeys(self.sve):
-            _, start, verb, end, json = item.split(self.sve)
-            key = (start, verb, end)
+            _, start, verb, end = item.split(self.sve)
+            edge = Edge(start=start, verb=verb, end=end)
 
-            if key not in self.removes and key not in data:
-                data[key] = json
-                verbs.add(verb)
+            if edge not in self.removes:
+                data.add(edge)
 
         combined = []
 
-        for (start, verb, end), json in data.items():
-            combined.append(self.sve.join(["", start, verb, end, json]))
-            combined.append(self.vse.join(["", verb, start, end]))
-            combined.append(self.evs.join(["", end, verb, start]))
+        verbs = set()
+        for edge in data:
+            combined.append(self.sve.join([""] + edge.sve_list))
+            combined.append(self.vse.join([""] + edge.vse_list))
+            combined.append(self.evs.join([""] + edge.evs_list))
+            verbs.add(edge.verb)
 
         self.dawg = CompletionDAWG(combined)
+        self.verbs = verbs
         self.adds.clear()
         self.removes.clear()

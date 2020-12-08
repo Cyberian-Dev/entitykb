@@ -105,7 +105,6 @@ class KB(BaseKB):
     # edges
 
     def save_edge(self, edge: Union[Edge, dict]):
-        edge = Edge.create(edge)
         return self.graph.save_edge(edge)
 
     # pipeline

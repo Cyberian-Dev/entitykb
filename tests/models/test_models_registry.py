@@ -1,33 +1,9 @@
-from entitykb.models import Registry, Node, Entity, Edge
 from entitykb.contrib.date import Date
+from entitykb.models import Registry, Node, Entity
 
 
 class CustomNode(Node):
     pass
-
-
-class HasNine(Edge):
-    value: int = 9
-    __all_verbs__ = ("HAS_NINE",)
-
-
-def test_edge_verbs():
-    assert Edge.get_all_verbs() == set()
-    assert HasNine.get_all_verbs() == {"HAS_NINE"}
-
-
-def test_edge_create():
-    registry = Registry()
-    assert isinstance(registry.create(Edge, Edge()), Edge)
-    assert isinstance(registry.create(Edge, {}), Edge)
-    assert isinstance(registry.create(Edge, verb="HAS_A"), Edge)
-    assert isinstance(registry.create(Edge, verb="HAS_NINE"), HasNine)
-
-    assert isinstance(registry.create(Edge, {"verb": "HAS_NINE"}), HasNine)
-    assert isinstance(HasNine.create(), HasNine)
-
-    assert registry.create(Edge, {"verb": "HAS_NINE"}).value == 9
-    assert registry.create(Edge, {"verb": "HAS_NINE", "value": 11}).value == 11
 
 
 def test_node_create():
@@ -73,19 +49,7 @@ def test_schema():
     registry = Registry.instance()
     schema = registry.create_schema(verbs=[], labels=[])
     schema = schema.dict()
-    assert schema.keys() == {"nodes", "edges", "labels", "verbs"}
-
-    assert schema.get("edges").get("EDGE") == {
-        "properties": {
-            "data": {"title": "Data", "type": "object"},
-            "end": {"title": "End", "type": "string"},
-            "start": {"title": "Start", "type": "string"},
-            "verb": {"title": "Verb", "type": "string"},
-            "weight": {"default": 1, "title": "Weight", "type": "integer"},
-        },
-        "title": "Edge",
-        "type": "object",
-    }
+    assert schema.keys() == {"nodes", "labels", "verbs"}
 
     assert schema.get("nodes").get("NODE") == {
         "properties": {

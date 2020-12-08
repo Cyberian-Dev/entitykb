@@ -3,17 +3,15 @@ from typing import Dict, Type, List
 from pydantic import BaseModel, Field
 
 from .entity import Entity
-from .node import Node, Edge
+from .node import Node
 
 
 class Lookup(BaseModel):
     nodes: Dict[str, Type[Node]]
-    edges: Dict[str, Type[Edge]]
 
     def __init__(self, **_: Dict):
         nodes = self.load_nodes()
-        edges = self.load_edges()
-        super().__init__(nodes=nodes, edges=edges)
+        super().__init__(nodes=nodes)
 
     # utilities
 
@@ -41,31 +39,15 @@ class Lookup(BaseModel):
                 nodes[label] = node_cls
         return nodes
 
-    # edges
-
-    def get_edge_class(self, cls: Type[Edge], data: dict):
-        verb = data.get("verb")
-        found = self.edges.get(verb)
-        return found or cls
-
-    def load_edges(self):
-        edges = dict(EDGE=Edge)
-        for edge_cls in self.get_subclasses(Edge):
-            for verb in edge_cls.get_all_verbs():
-                edges[verb] = edge_cls
-        return edges
-
 
 class Schema(BaseModel):
     nodes: Dict[str, Dict]
-    edges: Dict[str, Dict]
     labels: List[str] = Field(default_factory=list)
     verbs: List[str] = Field(default_factory=list)
 
     def __init__(self, lookup: Lookup, labels, verbs):
         nodes = self.load_nodes(lookup)
-        edges = self.load_edges(lookup)
-        super().__init__(nodes=nodes, edges=edges, labels=labels, verbs=verbs)
+        super().__init__(nodes=nodes, labels=labels, verbs=verbs)
 
     @classmethod
     def load_nodes(cls, lookup: Lookup):
@@ -73,13 +55,6 @@ class Schema(BaseModel):
         for (label, node) in lookup.nodes.items():
             nodes[label] = node.schema()
         return nodes
-
-    @classmethod
-    def load_edges(cls, lookup: Lookup):
-        edges = {}
-        for (verb, edge) in lookup.edges.items():
-            edges[verb] = edge.schema()
-        return edges
 
 
 class Registry(object):
@@ -90,7 +65,7 @@ class Registry(object):
         self.lookup = Lookup()
 
     def create(self, cls, item=None, **data):
-        if isinstance(item, (Node, Edge)):
+        if isinstance(item, Node):
             return item
 
         if isinstance(item, dict):
@@ -103,8 +78,6 @@ class Registry(object):
         klass = None
         if issubclass(cls, Node):
             klass = self.lookup.get_node_class(cls, data=data)
-        elif issubclass(cls, Edge):
-            klass = self.lookup.get_edge_class(cls, data=data)
 
         assert klass, f"Could not identify class: {cls} {data}"
 

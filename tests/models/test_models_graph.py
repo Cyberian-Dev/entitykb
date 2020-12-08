@@ -14,9 +14,7 @@ def test_edge():
     start = Node()
     end = Node()
     edge = Edge(start=start, end=end, verb="IS_A")
-    assert edge.dict() == dict(
-        start=start.key, verb="IS_A", end=end.key, weight=1, data=None,
-    )
+    assert edge.dict() == dict(__root__=(start.key, "IS_A", end.key))
 
     two = start >> "IS_A" >> end
     assert two == edge

@@ -291,21 +291,19 @@ class VerbType(type):
     cache = {}
 
     def __getattr__(self, verb_name: str):
-        if verb_name is None:
-            return
+        if verb_name is not None:
+            verb = Verb.cache.get(verb_name)
+            if verb:
+                return verb
 
-        verb = Verb.cache.get(verb_name)
-        if verb:
+            upper_case = verb_name.upper()
+            verb = Verb.cache.get(upper_case)
+            if not verb:
+                verb = Verb(upper_case)
+
+            Verb.cache[verb_name] = verb
+            Verb.cache[upper_case] = verb
             return verb
-
-        upper_case = verb_name.upper()
-        verb = Verb.cache.get(upper_case)
-        if not verb:
-            verb = Verb(upper_case)
-
-        Verb.cache[verb_name] = verb
-        Verb.cache[upper_case] = verb
-        return verb
 
 
 class Verb(str, metaclass=VerbType):

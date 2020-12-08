@@ -132,9 +132,8 @@ def test_kb_save_invalid(kb: KB):
 
 def test_get_schema(kb: KB):
     schema = kb.get_schema()
-    assert schema.keys() == {"nodes", "edges", "verbs", "labels"}
+    assert schema.keys() == {"nodes", "verbs", "labels"}
     assert {"NODE", "ENTITY"}.issubset(schema["nodes"].keys())
-    assert {"EDGE"}.issubset(schema["edges"].keys())
 
 
 def test_search_with_results(kb: KB, apple, google):

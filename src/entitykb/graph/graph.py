@@ -3,13 +3,12 @@ from typing import Tuple, List
 from entitykb import (
     Node,
     Edge,
-    Registry,
     create_component,
     ensure_iterable,
     label_filter,
 )
-from .node_index import NodeIndex
 from .edge_index import EdgeIndex
+from .node_index import NodeIndex
 
 
 class Graph(object):
@@ -139,10 +138,9 @@ class InMemoryGraph(Graph):
         return edge
 
     def connect(self, *, start: Node, verb: str, end: Node, data: dict = None):
-        registry = Registry.instance()
         self.save_node(start)
         self.save_node(end)
-        edge = registry.create(Edge, data, start=start, verb=verb, end=end)
+        edge = Edge(start=start, verb=verb, end=end)
         self.save_edge(edge)
         return edge
 

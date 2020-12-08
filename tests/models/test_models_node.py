@@ -1,4 +1,4 @@
-from entitykb import Node, Entity, Edge
+from entitykb import Node, Entity
 
 
 class CustomNode(Node):
@@ -20,7 +20,3 @@ def test_create_node():
     assert isinstance(Node.create(), Node)
     assert isinstance(CustomNode.create(), CustomNode)
     assert Node.create(name="abc").key == "abc|ENTITY"
-
-
-def test_create_edge():
-    assert isinstance(Edge.create(), Edge)

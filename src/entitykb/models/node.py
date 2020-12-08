@@ -1,7 +1,7 @@
-from typing import Union, Any
+from typing import Union, Any, Tuple, Optional
 from uuid import uuid4
 
-from pydantic import BaseModel, validator, Field
+from pydantic import BaseModel, Field
 from ujson import loads, dumps
 
 from .funcs import camel_to_snake
@@ -10,6 +10,9 @@ label_cache = {}
 
 
 class Serializable(BaseModel):
+    class Config:
+        allow_mutation = False
+
     def serialize(self) -> str:
         return dumps(self.dict(), escape_forward_slashes=False)
 
@@ -43,16 +46,10 @@ class Node(Serializable):
         return self.key < other.key
 
     def __rshift__(self, verb):
-        from .registry import Registry
-
-        registry = Registry.instance()
-        return registry.create(Edge, start=self.key, verb=verb, end=None)
+        return Edge(start=self.key, verb=verb, end=None)
 
     def __lshift__(self, verb):
-        from .registry import Registry
-
-        registry = Registry.instance()
-        return registry.create(Edge, start=None, verb=verb, end=self.key)
+        return Edge(start=None, verb=verb, end=self.key)
 
     @staticmethod
     def to_key(node_key: Union["Node", str]) -> str:
@@ -75,51 +72,77 @@ class Node(Serializable):
         return labels
 
 
-class Edge(Serializable):
-    start: str = None
-    verb: str = None
-    end: str = None
-    weight: int = 1
-    data: dict = None
+class Edge(BaseModel):
+    __root__: Tuple[Optional[str], ...]
 
-    __all_verbs__ = ()
+    def __init__(self, *, start=None, verb=None, end=None, __root__=None):
+        __root__ = __root__ or (None, None, None)
+        super().__init__(__root__=__root__)
 
-    def __init__(self, *args, **kw):
-        from .traverse import Verb
-
-        super().__init__(*args, **kw)
-        self.verb = Verb[self.verb]
+        if start:
+            self.set_start(start)
+        if verb:
+            self.set_verb(verb)
+        if end:
+            self.set_end(end)
 
     def __hash__(self):
-        return hash((self.start, self.verb, self.end))
+        return hash(self.__root__)
 
     def __eq__(self, other):
-        return (
-            other is not None
-            and self.start == other.start
-            and self.verb == other.verb
-            and self.end == other.end
-        )
+        return bool(other and self.__root__ == other)
 
-    @validator("start", "end", pre=True, always=True)
-    def node_to_key(cls, v):
-        return Node.to_key(v)
-
-    @classmethod
-    def get_all_verbs(cls):
-        verbs = set(cls.__dict__.get("__all_verbs__", ()))
-        return verbs
+    def __getitem__(self, item):
+        return self.__root__[item]
 
     def __repr__(self):
         return f"<Edge: start={self.start}, verb={self.verb}, end={self.end}>"
 
     def __rshift__(self, end: Union[Node, str]):
-        self.end = Node.to_key(end)
+        self.set_end(end)
         return self
 
     def __lshift__(self, start: Union[Node, str]):
-        self.start = Node.to_key(start)
+        self.set_start(start)
         return self
+
+    @property
+    def start(self):
+        return self[0]
+
+    def set_start(self, start):
+        start = Node.to_key(start)
+        self.__root__ = (start, self.__root__[1], self.__root__[2])
+
+    @property
+    def verb(self):
+        return self[1]
+
+    def set_verb(self, verb):
+        from .traverse import Verb
+
+        verb = Verb[verb]
+        self.__root__ = (self.__root__[0], verb, self.__root__[2])
+
+    @property
+    def end(self):
+        return self[2]
+
+    def set_end(self, end):
+        end = Node.to_key(end)
+        self.__root__ = (self.__root__[0], self.__root__[1], end)
 
     def get_other(self, direction):
         return self.end if direction.is_outgoing else self.start
+
+    @property
+    def sve_list(self):
+        return [self.start, self.verb, self.end]
+
+    @property
+    def vse_list(self):
+        return [self.verb, self.start, self.end]
+
+    @property
+    def evs_list(self):
+        return [self.end, self.verb, self.start]

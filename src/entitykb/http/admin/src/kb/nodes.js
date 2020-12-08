@@ -26,8 +26,8 @@ export class Neighbor {
 
     constructor(trail, node) {
         const edge = trail.hops[0].edges[0];
-        this.direction = edge.end === trail.end ? "outgoing" : "incoming";
-        this.verb = edge.verb;
+        this.direction = edge[2] === trail.end ? "outgoing" : "incoming";
+        this.verb = edge[1];
         this.key = node.key;
         this.label = node.label;
         this.name = node.name;
