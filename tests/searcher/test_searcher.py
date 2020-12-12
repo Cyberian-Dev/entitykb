@@ -7,8 +7,9 @@ from entitykb import (
     F,
     Verb,
     Trail,
-    InMemoryGraph,
+    Graph,
     DefaultSearcher,
+    LatinLowercaseNormalizer,
 )
 
 
@@ -62,8 +63,9 @@ def starts(trails: List[Trail]):
 
 
 @pytest.fixture
-def graph():
-    graph = InMemoryGraph()
+def graph(root):
+    normalizer = LatinLowercaseNormalizer()
+    graph = Graph(root=root, normalizer=normalizer)
     assert "<Graph: 0 nodes, 0 edges>" == repr(graph)
 
     for entity in entities:
@@ -72,7 +74,7 @@ def graph():
     for edge in edges:
         graph.save_edge(edge)
 
-    graph.commit()
+    graph.reindex()
     assert "<Graph: 9 nodes, 11 edges>" == repr(graph)
 
     return graph

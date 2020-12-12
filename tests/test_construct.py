@@ -11,10 +11,14 @@ class B(A):
 
 
 def test_create_component():
-    obj = create_component(None, A, B, c=1)
+    obj = create_component(value=None, default_cls=B, c=1)
     assert isinstance(obj, B)
     assert obj.c == 1
 
-    obj = create_component(B(), A, B, c=2)
+    obj = create_component(B(), default_cls=A, c=2)
     assert isinstance(obj, B)
     assert obj.c == 2
+
+    obj = create_component(B, default_cls=A, c=3)
+    assert isinstance(obj, B)
+    assert obj.c == 3

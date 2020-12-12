@@ -1,30 +1,15 @@
 import pytest
 
-from entitykb import Entity
+from entitykb import Entity, interfaces
 from entitykb.contrib.date import DateResolver, Date
 
 from entitykb.pipeline import (
     TermResolver,
     WhitespaceTokenizer,
-    Extractor,
     DefaultExtractor,
 )
 
 the_the = Entity(name="The The", label="BAND")
-
-
-def test_construct():
-    extractor = Extractor.create(tokenizer=None, resolvers=None)
-    assert isinstance(extractor, DefaultExtractor)
-
-    extractor = Extractor.create(
-        DefaultExtractor, tokenizer=None, resolvers=None
-    )
-    assert isinstance(extractor, DefaultExtractor)
-
-    class_name = "entitykb.pipeline.DefaultExtractor"
-    extractor = Extractor.create(class_name, tokenizer=None, resolvers=None)
-    assert isinstance(extractor, DefaultExtractor)
 
 
 @pytest.fixture(scope="function")
@@ -34,15 +19,15 @@ def extractor(kb, apple, google, amazon, microsoft):
 
     for entity in (apple, google, amazon, microsoft, the_the):
         kb.save_node(entity)
-    kb.commit()
+    kb.reindex()
 
     resolvers = (resolver, DateResolver(kb=kb))
-    extractor = Extractor.create(tokenizer=tokenizer, resolvers=resolvers)
+    extractor = DefaultExtractor(tokenizer=tokenizer, resolvers=resolvers)
     return extractor
 
 
 def test_extract_default_classes(
-    extractor: Extractor, apple, google, amazon, microsoft
+    extractor: interfaces.IExtractor, apple, google, amazon, microsoft
 ):
     text = "She invested in AAPL, google, Amazon, and microsoft"
 
@@ -62,7 +47,7 @@ def test_extract_default_classes(
 
 
 def test_extract_multi_token(
-    extractor: Extractor, apple, google, amazon, microsoft
+    extractor: interfaces.IExtractor, apple, google, amazon, microsoft
 ):
     text = (
         "She invested in Apple, Inc., Google, Inc., Amazon, Inc., "
@@ -90,7 +75,7 @@ def test_extract_multi_token(
     assert len(doc.spans) == 7
 
 
-def test_extract_with_date(extractor: Extractor, apple):
+def test_extract_with_date(extractor: interfaces.IExtractor, apple):
     text = "Apple, Inc. was founded on April 1, 1976."
     doc = extractor(text)
     assert len(doc.spans) == 2

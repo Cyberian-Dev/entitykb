@@ -14,7 +14,7 @@ white:
 
 update:
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv update --dev
-	PIPENV_IGNORE_VIRTUALENVS=1 pipenv lock -r --dev > dev-requirements.txt
+	PIPENV_IGNORE_VIRTUALENVS=1 pipenv lock -r --dev-only > dev-requirements.txt
 
 tox: clean
 	tox

@@ -2,62 +2,33 @@ from typing import Optional, Union, Dict
 
 from entitykb import (
     __version__,
-    BaseKB,
     Config,
     Edge,
-    Entity,
-    Graph,
     Node,
-    Normalizer,
     ParseRequest,
     Pipeline,
     Registry,
     SearchRequest,
-    Searcher,
     SearchResponse,
-    Storage,
-    TermsIndex,
-    Tokenizer,
     under_limit,
-    label_filter,
+    interfaces,
 )
 
 
-class KB(BaseKB):
+class KB(interfaces.IKnowledgeBase):
     config: Config
-    storage: Storage
-    normalizer: Normalizer
-    tokenizer: Tokenizer
-    terms: TermsIndex
-    graph: Graph
     pipelines: Dict[str, Pipeline]
 
     def __init__(self, root=None):
-        self.uncommitted = 0
-
         self.config = Config.create(root=root)
-
-        self.storage = Storage.create(
-            self.config.storage, root=self.config.root
-        )
-
-        self.normalizer = Normalizer.create(self.config.normalizer)
-        self.tokenizer = Tokenizer.create(self.config.tokenizer)
-
-        self.terms = TermsIndex.create(
-            self.config.terms, normalizer=self.normalizer
-        )
-
-        self.graph = Graph.create(self.config.graph)
+        self.normalizer = self.config.create_normalizer()
+        self.tokenizer = self.config.create_tokenizer()
+        self.graph = self.config.create_graph(normalizer=self.normalizer)
 
         self.pipelines = {}
-        for name, pipeline in self.config.pipelines.items():
-            pipeline = Pipeline.create(
-                kb=self, config=self.config, pipeline=pipeline,
-            )
+        for name, pipeline_config in self.config.pipelines.items():
+            pipeline = pipeline_config.create_pipeline(self)
             self.pipelines[name] = pipeline
-
-        self.reload()
 
     # common
 
@@ -82,24 +53,11 @@ class KB(BaseKB):
 
     def save_node(self, node: Union[Node, dict]) -> Node:
         node = Node.create(node)
-
-        key = Node.to_key(node)
-        previous = self.get_node(key)
-
         self.graph.save_node(node)
-
-        if isinstance(node, Entity):
-            if previous:
-                self.terms.remove_entity(previous)
-            self.terms.add_entity(node)
-
         return node
 
-    def remove_node(self, key) -> bool:
-        key = Node.to_key(key)
-        node = self.graph.remove_node(key)
-        if isinstance(node, Entity):
-            self.terms.remove_entity(node)
+    def remove_node(self, node_key: Union[Node, str]) -> Node:
+        node = self.graph.remove_node(node_key)
         return node
 
     # edges
@@ -130,34 +88,23 @@ class KB(BaseKB):
 
     # admin
 
-    def commit(self):
-        self.storage.archive()
-        self.graph.commit()
-        self.terms.commit()
-        py_data = self.terms.get_data(), self.graph.get_data()
-        self.storage.save(py_data)
-        return True
+    def reload(self):
+        self.graph.reload()
+
+    def reindex(self):
+        self.graph.reindex()
 
     def clear(self):
-        self.terms.clear_data()
-        self.graph.clear_data()
-        return True
+        self.graph.clear()
 
-    def reload(self):
-        py_data = self.storage.load()
-        if py_data:
-            terms_core, graph_core = py_data
-            self.terms.put_data(terms_core)
-            self.graph.put_data(graph_core)
-        return True
+    def clean_edges(self):
+        self.graph.clean_edges()
 
     def info(self) -> dict:
         return {
             "entitykb": dict(version=__version__),
             "config": self.config.info(),
-            "storage": self.storage.info(),
             "graph": self.graph.info(),
-            "terms": self.terms.info(),
         }
 
     def get_schema(self) -> dict:
@@ -169,24 +116,16 @@ class KB(BaseKB):
     # private methods
 
     def _get_starts(self, request: SearchRequest):
-        if request.q:
-            keys = self.terms.iterate_prefix_keys(prefix=request.q)
-            starts = filter(label_filter(request.labels), keys)
-
-        else:
-            starts = self.graph.iterate_keys(request.keys, request.labels)
-
-        return starts
+        return self.graph.iterate_keys(
+            prefixes=request.q, labels=request.labels, keys=request.keys
+        )
 
     def _create_searcher(self, request: SearchRequest):
-        starts = self._get_starts(request)
-        searcher = Searcher.create(
-            self.config.searcher,
+        return self.config.create_searcher(
             graph=self.graph,
             traversal=request.traversal,
-            starts=starts,
+            starts=self._get_starts(request),
         )
-        return searcher
 
     def _get_page(self, request, searcher):
         # paginate request

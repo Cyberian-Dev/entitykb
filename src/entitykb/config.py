@@ -1,14 +1,14 @@
-from importlib import import_module
 import json
-import os
+from importlib import import_module
 from pathlib import Path
 from typing import List, Dict
 
 from pydantic import BaseModel, Field
 
-from .logging import logger
 from .env import environ
+from .logging import logger
 from .models.registry import Registry
+from .reflection import create_component
 
 
 class PipelineConfig(BaseModel):
@@ -20,24 +20,52 @@ class PipelineConfig(BaseModel):
     def default_factory(cls):
         return dict(default=PipelineConfig())
 
+    def create_pipeline(self, kb):
+        from entitykb.pipeline.pipeline import Pipeline
+
+        resolvers = tuple(
+            create_component(value=resolver, kb=kb)
+            for resolver in self.resolvers
+        )
+
+        extractor = self.create_extractor(
+            tokenizer=kb.tokenizer, resolvers=resolvers
+        )
+
+        filterers = self.create_filterers()
+        return Pipeline(extractor=extractor, filterers=filterers)
+
+    def create_filterers(self):
+        return tuple(create_component(f) for f in self.filterers)
+
+    def create_extractor(self, tokenizer, resolvers):
+        from entitykb.pipeline.extractors import DefaultExtractor
+
+        return create_component(
+            value=self.extractor,
+            default_cls=DefaultExtractor,
+            tokenizer=tokenizer,
+            resolvers=resolvers,
+        )
+
 
 class Config(BaseModel):
     file_path: Path = None
 
-    graph: str = "entitykb.InMemoryGraph"
+    graph: str = "entitykb.Graph"
     modules: List[str] = Field(default_factory=list)
     normalizer: str = "entitykb.LatinLowercaseNormalizer"
     searcher: str = "entitykb.DefaultSearcher"
     storage: str = "entitykb.PickleStorage"
-    terms: str = "entitykb.DawgTermsIndex"
+    terms: str = "entitykb.TermsIndex"
     tokenizer: str = "entitykb.WhitespaceTokenizer"
 
     pipelines: Dict[str, PipelineConfig] = Field(
         default_factory=PipelineConfig.default_factory
     )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
         modules = [import_module(m).__name__ for m in self.modules]
         logger.debug(f"Loading modules: {modules}")
@@ -56,22 +84,17 @@ class Config(BaseModel):
 
         data = {}
         if config_file_path.is_file():
-            with open(config_file_path, "r") as fp:
+            with config_file_path.open("r") as fp:
                 data = json.load(fp)
 
-        config = cls.make(file_path=config_file_path, data=data)
+        config = cls(file_path=config_file_path, **data)
 
         if not config_file_path.is_file():
-            os.makedirs(os.path.dirname(config_file_path), exist_ok=True)
-            with open(config_file_path, "w") as fp:
+            config_file_path.parent.mkdir(parents=True, exist_ok=True)
+            with config_file_path.open(mode="w") as fp:
                 json.dump(config.dict(), fp, indent=4)
                 fp.write("\n")
 
-        return config
-
-    @classmethod
-    def make(cls, file_path: str, data: dict) -> "Config":
-        config = Config(file_path=file_path, **data)
         return config
 
     def dict(self, **kwargs) -> dict:
@@ -92,3 +115,38 @@ class Config(BaseModel):
         info = self.dict()
         info["root"] = self.root
         return info
+
+    def create_normalizer(self):
+        from entitykb.pipeline.normalizers import LatinLowercaseNormalizer
+
+        return create_component(
+            value=self.normalizer, default_cls=LatinLowercaseNormalizer
+        )
+
+    def create_tokenizer(self):
+        from entitykb.pipeline.tokenizers import WhitespaceTokenizer
+
+        return create_component(
+            value=self.tokenizer, default_cls=WhitespaceTokenizer
+        )
+
+    def create_graph(self, normalizer):
+        from entitykb.graph import Graph
+
+        return create_component(
+            value=self.graph,
+            default_cls=Graph,
+            root=self.root,
+            normalizer=normalizer,
+        )
+
+    def create_searcher(self, graph, starts, traversal):
+        from entitykb.searcher import DefaultSearcher
+
+        return create_component(
+            value=self.searcher,
+            default_cls=DefaultSearcher,
+            graph=graph,
+            traversal=traversal,
+            starts=starts,
+        )

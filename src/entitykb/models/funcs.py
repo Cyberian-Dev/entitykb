@@ -1,5 +1,4 @@
 import re
-from typing import List
 
 camel_pattern = re.compile(r"(?<!^)(?=[A-Z])")
 
@@ -14,7 +13,9 @@ def is_iterable(items):
     return isinstance(items, (list, set, dict, frozenset, tuple))
 
 
-def ensure_iterable(items, f=tuple, explode_first=False):
+def ensure_iterable(items, f=None, explode_first=False):
+    f = f or tuple
+
     if not is_iterable(items):
         items = f((items,))
 
@@ -26,7 +27,7 @@ def ensure_iterable(items, f=tuple, explode_first=False):
     return items
 
 
-def under_limit(items: List, limit: int):
+def under_limit(items, limit: int):
     if limit is None:
         return True
 

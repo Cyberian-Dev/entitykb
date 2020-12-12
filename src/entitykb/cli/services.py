@@ -28,11 +28,11 @@ def init_kb(root, exist_ok=False) -> bool:
     try:
         root = Config.get_root(root)
 
-        os.makedirs(root, exist_ok=exist_ok)
+        os.makedirs(str(root), exist_ok=exist_ok)
         Config.create(root=root)
 
         kb = KB(root=root)
-        kb.commit()
+        kb.reindex()
         success = True
 
     except FileExistsError as e:

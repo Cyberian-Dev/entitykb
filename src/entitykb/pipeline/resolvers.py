@@ -1,71 +1,30 @@
 import re
 from pathlib import Path
-from typing import Iterable, Set, List, Union
+from typing import List, Union
 
 from lark import Lark, UnexpectedToken, LarkError, Tree
 
-from entitykb import create_component, Entity
-from .handlers import TokenHandler
-
-ALL_LABELS = object()
+from entitykb import Entity, interfaces
 
 
-class Resolver(object):
-
-    allowed_labels: Set[str] = ALL_LABELS
-
-    def __init__(self, kb=None):
-        self.kb = kb
-
-    def __repr__(self):
-        return self.__class__.__name__
-
-    @classmethod
-    def get_handler_class(cls):
-        return TokenHandler
-
-    @classmethod
-    def is_relevant(cls, labels: Iterable[str]):
-        if not bool(labels):
+class TermResolver(interfaces.IResolver):
+    def is_prefix(self, term: str) -> bool:
+        for _ in self.kb.graph.iterate_keys(prefixes=term):
             return True
-
-        if cls.allowed_labels == ALL_LABELS:
-            return True
-
-        items = set(labels).intersection(cls.allowed_labels)
-        return bool(items)
+        return False
 
     def resolve(self, term: str) -> List[Entity]:
-        raise NotImplementedError
-
-    def is_prefix(self, term: str) -> bool:
-        raise NotImplementedError
-
-    @classmethod
-    def create(cls, value=None, **kwargs) -> "Resolver":
-        return create_component(value, Resolver, TermResolver, **kwargs)
-
-
-class TermResolver(Resolver):
-    def resolve(self, term: str) -> List[Entity]:
-        return self.find_entities(self.kb.graph, self.kb.terms, term)
-
-    def is_prefix(self, term: str) -> bool:
-        return self.kb.terms.is_prefix(term)
-
-    @classmethod
-    def find_entities(cls, graph, terms_index, term: str):
-        term_iter = terms_index.iterate_term_keys(term=term)
-
         entities = []
-        for key in term_iter:
-            entity = graph.get_node(key)
-            entities.append(entity)
+
+        for key in self.kb.graph.iterate_keys(terms=term):
+            entity = self.kb.graph.get_node(key)
+            if entity:
+                entities.append(entity)
 
         return entities
 
 
-class RegexResolver(Resolver):
+class RegexResolver(interfaces.IResolver):
 
     re_tokens: List[str] = None
 
@@ -99,7 +58,7 @@ class RegexResolver(Resolver):
         raise NotImplementedError
 
 
-class GrammarResolver(Resolver):
+class GrammarResolver(interfaces.IResolver):
 
     grammar: Union[str, Path] = None
     parser: str = "lalr"

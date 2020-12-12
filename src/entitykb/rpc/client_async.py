@@ -1,18 +1,18 @@
 from typing import Optional, Union
 
 from entitykb import (
-    BaseKB,
     Node,
     ParseRequest,
     Doc,
     SearchRequest,
     SearchResponse,
+    interfaces,
 )
 
 from .connection import RPCConnection
 
 
-class AsyncKB(BaseKB):
+class AsyncKB(interfaces.IKnowledgeBase):
     def __init__(self, *, host=None, port=None, timeout=None):
         self.connection = RPCConnection(host=host, port=port, timeout=timeout)
 
@@ -75,10 +75,6 @@ class AsyncKB(BaseKB):
     async def clear(self) -> bool:
         async with self.connection as client:
             return await client.call("clear")
-
-    async def reload(self) -> bool:
-        async with self.connection as client:
-            return await client.call("reload")
 
     async def info(self) -> dict:
         async with self.connection as client:

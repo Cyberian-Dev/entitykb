@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from entitykb import KB
+from entitykb import KB, LatinLowercaseNormalizer
 from entitykb.models import Node, Entity
 
 
@@ -15,6 +15,11 @@ def root():
 @pytest.fixture()
 def kb(root):
     return KB(root=root)
+
+
+@pytest.fixture()
+def normalizer():
+    return LatinLowercaseNormalizer()
 
 
 class Location(Node):

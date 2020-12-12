@@ -52,7 +52,7 @@ def clear(
         logger.info(f"{path} does not exist. Creating new database.")
 
     kb = KB(root=root)
-    success = kb.commit()
+    success = kb.reindex()
 
     finish("Clear", success)
 
@@ -121,7 +121,7 @@ def load(
                 typer.echo(obj)
 
     if kb:
-        kb.commit()
+        kb.reindex()
         timer = time.time() - start
         typer.echo(f"Loaded {count} in {timer:.2f}s [{in_file}, {format}]")
 

@@ -24,8 +24,8 @@ def doc():
 @pytest.fixture()
 def tokens(doc):
     return [
-        DocToken(doc=doc, token=Token("a"), offset=0),
-        DocToken(doc=doc, token=Token("b"), offset=1),
+        DocToken(token=Token("a"), offset=0),
+        DocToken(token=Token("b"), offset=1),
     ]
 
 

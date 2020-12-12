@@ -2,27 +2,11 @@ import codecs
 from string import ascii_lowercase, digits, punctuation
 
 import translitcodec
-from entitykb import create_component
+
+from entitykb import interfaces
 
 
-class Normalizer(object):
-    def __call__(self, text: str):
-        return self.normalize(text)
-
-    @property
-    def trie_characters(self) -> str:
-        raise NotImplementedError
-
-    def normalize(self, text: str):
-        raise NotImplementedError
-
-    @classmethod
-    def create(cls, value=None):
-        default_class = LatinLowercaseNormalizer if cls == Normalizer else cls
-        return create_component(value, Normalizer, default_class)
-
-
-class LatinLowercaseNormalizer(Normalizer):
+class LatinLowercaseNormalizer(interfaces.INormalizer):
     """ Normalizes to lowercase ascii characters only. """
 
     def __init__(self):

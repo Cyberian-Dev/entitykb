@@ -1,7 +1,7 @@
 from functools import partial
-from typing import Optional, Union, Type, List
+from typing import List
 
-from entitykb.models import Span
+from entitykb import Span, interfaces
 
 
 def sort_key(span: Span):
@@ -15,13 +15,7 @@ def sort_key(span: Span):
     )
 
 
-class Filterer(object):
-    @classmethod
-    def filter(cls, spans, tokens) -> List[Span]:
-        raise NotImplementedError
-
-
-class ExactNameOnly(Filterer):
+class ExactNameOnly(interfaces.IFilterer):
     """ Only keep spans that are an exact match. """
 
     @classmethod
@@ -30,7 +24,7 @@ class ExactNameOnly(Filterer):
         return list(it)
 
 
-class LowerNameOrExactSynonym(Filterer):
+class LowerNameOrExactSynonym(interfaces.IFilterer):
     """ Only keep spans that are an exact match. """
 
     @classmethod
@@ -41,7 +35,7 @@ class LowerNameOrExactSynonym(Filterer):
         return list(it)
 
 
-class KeepLongestByKey(Filterer):
+class KeepLongestByKey(interfaces.IFilterer):
     """ Keeps longest overlapping span sharing same key. """
 
     @classmethod
@@ -80,8 +74,5 @@ class KeepLongestByOffset(KeepLongestByKey):
     """ Keeps longest overlapping span. """
 
     @classmethod
-    def filter_key(self, span: Span, offset: int):
+    def filter_key(cls, span: Span, offset: int):
         return offset
-
-
-FiltererType = Optional[Union[Type[Filterer], Filterer, str]]

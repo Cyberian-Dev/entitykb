@@ -5,11 +5,11 @@ from msgpack import Packer, Unpacker
 
 import aio_msgpack_rpc
 
-from entitykb import logger, KB, BaseKB, ParseRequest, SearchRequest
+from entitykb import logger, KB, ParseRequest, SearchRequest, interfaces
 from .connection import RPCConnection
 
 
-class HandlerKB(BaseKB):
+class HandlerKB(interfaces.IKnowledgeBase):
     """ EntityKB RPC Handler Server """
 
     def __init__(self, _kb):
@@ -55,15 +55,11 @@ class HandlerKB(BaseKB):
     # admin
 
     def commit(self) -> bool:
-        count = self._kb.commit()
+        count = self._kb.reindex()
         return count
 
     def clear(self) -> bool:
         success = self._kb.clear()
-        return success
-
-    def reload(self) -> bool:
-        success = self._kb.reload()
         return success
 
     def info(self) -> dict:

@@ -182,6 +182,7 @@ class FilterStep(Step):
         return [Criteria.create(c) for c in ensure_iterable(v or ())]
 
 
+# noinspection PyShadowingBuiltins
 class Traversal(BaseModel):
     __root__: List[Step] = Field(default_factory=list)
 
@@ -251,8 +252,8 @@ class Traversal(BaseModel):
     def _add_filter(
         self, *criteria: Criteria, all: bool = False, exclude: bool = False
     ):
-        filter = FilterStep(criteria=criteria, all=all, exclude=exclude)
-        self.append(filter)
+        step = FilterStep(criteria=list(criteria), all=all, exclude=exclude)
+        self.append(step)
         return self
 
     def _walk_nodes(
@@ -263,7 +264,7 @@ class Traversal(BaseModel):
         directions=None,
     ):
         walk = WalkStep(
-            verbs=verbs,
+            verbs=list(verbs),
             directions=Direction.as_tuple(directions, all_if_none=True),
             max_hops=max_hops,
             passthru=passthru,
@@ -312,18 +313,18 @@ class Verb(str, metaclass=VerbType):
 
     def __rshift__(self, nodes):
         return EdgeCriteria(
-            verbs=(self,), directions=(Direction.outgoing,), keys=nodes
+            verbs=[self], directions=[Direction.outgoing], keys=nodes
         )
 
     def __lshift__(self, nodes):
         return EdgeCriteria(
-            verbs=(self,), directions=(Direction.incoming,), keys=nodes
+            verbs=[self], directions=[Direction.incoming], keys=nodes
         )
 
     def __pow__(self, nodes):
         return EdgeCriteria(
-            verbs=(self,),
-            directions=(Direction.incoming, Direction.outgoing),
+            verbs=[self],
+            directions=[Direction.incoming, Direction.outgoing],
             keys=nodes,
         )
 

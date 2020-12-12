@@ -11,19 +11,20 @@ def test_parse(kb: KB):
 
 def test_creates_files(root, kb: KB, apple):
     assert (root / "config.json").is_file()
-    assert not (root / "index.db").is_file()
+    assert (root / "nodes").is_dir()
+    assert (root / "edges").is_dir()
+    assert not (root / "nodes.dawg").is_file()
+    assert not (root / "edges.dawg").is_file()
 
-    kb.save_node(apple)
-    assert not (root / "index.db").is_file()
-
-    kb.commit()
-    assert (root / "index.db").is_file()
+    kb.reindex()
+    assert (root / "nodes.dawg").is_file()
+    assert (root / "edges.dawg").is_file()
 
 
 def test_save_entity(kb: KB, apple, apple_records):
     kb.save_node(apple)
     kb.save_node(apple_records)
-    kb.commit()
+    kb.reindex()
 
     assert (kb.parse("AAPL")).spans[0].entity == apple
     assert (kb.parse("Apple, Inc.")).spans[0].entity == apple
@@ -35,7 +36,7 @@ def test_save_entity(kb: KB, apple, apple_records):
 
     # should reset the terms
     kb.save_node(apple2)
-    kb.commit()
+    kb.reindex()
 
     assert not (kb.parse("AAPL")).spans
     assert (kb.parse("Apple, Inc.")).spans[0].entity == apple2
@@ -44,7 +45,7 @@ def test_save_entity(kb: KB, apple, apple_records):
     assert 2 == len((kb.parse("Apple")).spans)
 
     kb.remove_node(apple2)
-    kb.commit()
+    kb.reindex()
 
     assert 1 == len((kb.parse("Apple")).spans)
     assert 1 == len((kb.parse("Apple Computers")).spans)
@@ -52,34 +53,31 @@ def test_save_entity(kb: KB, apple, apple_records):
 
 
 def test_save_load_sync(root, kb: KB, apple):
+    def check():
+        assert (kb.parse("AAPL")).spans[0].entity == apple
+        assert (kb.parse("Apple, Inc.")).spans[0].entity == apple
+        assert (kb.parse("Apple,Inc.")).spans[0].entity == apple
+
     kb.save_node(apple)
-    kb.commit()
-
-    assert (kb.parse("AAPL")).spans[0].entity == apple
-    assert (kb.parse("Apple, Inc.")).spans[0].entity == apple
-    assert (kb.parse("Apple,Inc.")).spans[0].entity == apple
+    kb.reindex()
+    check()
 
     kb = KB(root=root)
-    assert (kb.parse("AAPL")).spans[0].entity == apple
-    assert (kb.parse("Apple, Inc.")).spans[0].entity == apple
-    assert (kb.parse("Apple,Inc.")).spans[0].entity == apple
-
-    kb = KB(root=root)
-    assert (kb.parse("AAPL")).spans[0].entity == apple
-    assert (kb.parse("Apple, Inc.")).spans[0].entity == apple
-    assert (kb.parse("Apple,Inc.")).spans[0].entity == apple
+    check()
+    kb.reload()
+    check()
 
 
 def test_save_for_entity_and_edge(kb: KB, apple, google):
     assert apple == kb.save(apple)
     assert google == kb.save(google)
-    kb.commit()
+    kb.reindex()
 
     assert 2 == len(kb)
     assert apple == kb.get_node(apple.key)
 
     kb.save(Edge(start=apple, verb="IS_A", end=apple))
-    kb.commit()
+    kb.reindex()
 
     assert kb.info()["graph"] == {
         "nodes": 2,
@@ -88,7 +86,7 @@ def test_save_for_entity_and_edge(kb: KB, apple, google):
 
     kb.save(Edge(start=apple, verb="POINTS_NO_WHERE", end="INVALID|THING"))
     kb.save(Edge(start=apple, verb="POINTS_NO_WHERE", end=google))
-    kb.commit()
+    kb.reindex()
 
     assert kb.info()["graph"] == {
         "nodes": 2,
@@ -100,7 +98,14 @@ def test_save_for_entity_and_edge(kb: KB, apple, google):
     assert 3 == len(response.nodes)
 
     kb.remove_node(apple.key)
-    kb.commit()
+    kb.reindex()
+
+    assert kb.info()["graph"] == {
+        "nodes": 1,
+        "edges": 3,
+    }
+
+    kb.clean_edges()
 
     assert kb.info()["graph"] == {
         "nodes": 1,
@@ -116,7 +121,7 @@ def test_kb_save_bool_clear(kb: KB, apple):
     assert bool(kb)
 
     assert apple == kb.save(apple)
-    kb.commit()
+    kb.reindex()
 
     assert 1 == len(kb)
     kb.clear()
@@ -139,7 +144,7 @@ def test_get_schema(kb: KB):
 def test_search_with_results(kb: KB, apple, google):
     kb.save_node(apple)
     kb.save_node(google)
-    kb.commit()
+    kb.reindex()
 
     # default (all nodes, no filter, etc.)
     response = kb.search(request=SearchRequest())
@@ -226,7 +231,7 @@ def test_search_no_results(kb: KB, apple):
 def test_search_with_just_text(kb: KB, apple, google):
     kb.save_node(apple)
     kb.save_node(google)
-    kb.commit()
+    kb.reindex()
 
     response = kb.search("ap")
     assert 1 == len(response)

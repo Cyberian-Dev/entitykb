@@ -1,149 +1,167 @@
-from threading import Lock
-from typing import Set
+from pathlib import Path
+from typing import Iterator, Set, Tuple
 
+import diskcache
 from dawg import CompletionDAWG
 
-from entitykb import Node
-
-lock = Lock()
+from entitykb import Node, interfaces, ensure_iterable, istr
 
 
-class BaseNodeIndex(object):
-    def __len__(self):
-        raise NotImplementedError
+class NodeIndex(object):
+    def __init__(self, root: Path, normalizer: interfaces.INormalizer):
+        self.normalizer = normalizer
+        self.dawg_path = root / "nodes.dawg"
+        self.cache = diskcache.Index(str(root / "nodes"))
+        self.dawg: CompletionDAWG = self._create_dawg()
 
-    def __iter__(self):
-        raise NotImplementedError
+    def __len__(self) -> int:
+        return len(self.cache)
 
-    def __contains__(self, key):
-        raise NotImplementedError
+    def __iter__(self) -> Iterator[Node]:
+        return iter(self.cache)
 
-    def commit(self):
-        raise NotImplementedError
+    def __contains__(self, node) -> bool:
+        key = Node.to_key(node)
+        return self.cache.__contains__(key)
 
-    def get(self, key: str):
-        raise NotImplementedError
-
-    def save(self, node: Node):
-        raise NotImplementedError
-
-    def remove(self, key: str) -> Node:
-        raise NotImplementedError
-
-    def get_labels(self) -> Set[str]:
-        raise NotImplementedError
-
-    def iterate_keys_by_label(self, label):
-        raise NotImplementedError
-
-
-class NodeIndex(BaseNodeIndex):
-    key_sep = "\1"
-    label_sep = "\2"
-
-    def __init__(self):
-        self.dawg = CompletionDAWG([])
-        self.labels = set()
-        self.adds = {}
-        self.removes = set()
-
-    def __len__(self):
-        count = 0
-        for _ in self.dawg.iterkeys(self.key_sep):
-            count += 1
-        return count
-
-    def __iter__(self):
-        for item in self.dawg.iterkeys(self.key_sep):
-            yield self._to_node(item)
-
-    def __contains__(self, key):
-        prefix = self._node_prefix(key)
-        return self.dawg.has_keys_with_prefix(prefix)
-
-    def commit(self):
-        by_label, data = self._process_add_removes()
-        self.dawg = self._make_dawg(by_label, data)
-        self.labels = set(by_label.keys())
-        self.adds.clear()
-        self.removes.clear()
-
-    def get(self, key: str):
-        prefix = self._node_prefix(key)
-        items = self.dawg.iterkeys(prefix)
-        first = None
-        second = None
-
+    def get(self, key: str) -> Node:
         try:
-            first = next(items)
-            second = next(items)
-        except StopIteration:
+            return self.cache[key]
+        except KeyError:
             pass
 
-        if first is not None and second is None:
-            return self._to_node(first)
-
     def save(self, node: Node):
-        self.adds[node.key] = node
-        self.removes.discard(node.key)
+        self.cache[node.key] = node
 
     def remove(self, key: str) -> Node:
-        current = self.get(key)
-        self.removes.add(key)
-        self.adds.pop(key, None)
-        return current
+        removed = self.cache.pop(key, None)
+        return removed
 
     def get_labels(self) -> Set[str]:
-        return self.labels
+        labels = set()
+        for line in self.dawg.iterkeys(self._lbl):
+            labels.add(line[1:])
+        return labels
 
-    def iterate_keys_by_label(self, label):
-        prefix = self._label_prefix(label)
-        for item in self.dawg.iterkeys(prefix):
-            _, key = item.rsplit(self.label_sep, maxsplit=1)
-            yield key
+    def reload(self):
+        self.dawg = CompletionDAWG([])
+        if self.dawg_path.is_file():
+            self.dawg.load(str(self.dawg_path))
 
-    @classmethod
-    def _node_prefix(cls, key: str):
-        return f"{cls.key_sep}{key}{cls.key_sep}"
+    def reindex(self):
+        self.dawg = self._create_dawg()
+        self.dawg.save(self.dawg_path)
 
-    @classmethod
-    def _label_prefix(cls, label: str):
-        return f"{cls.label_sep}{label}{cls.label_sep}"
+    def clear(self):
+        self.cache.clear()
+        self.reindex()
 
-    @classmethod
-    def _to_node(cls, item: str):
-        _, json = item.rsplit(cls.key_sep, maxsplit=1)
-        return Node.deserialize(json=json)
+    # terms
 
-    def _process_add_removes(self):
-        data = {}
-        by_label = {}
-        for key, node in self.adds.items():
-            if key not in self.removes:
-                data[key] = node.serialize()
-                by_label.setdefault(node.label, set()).add(key)
-        for item in self.dawg.iterkeys(self.key_sep):
-            _, key, json = item.rsplit(self.key_sep, maxsplit=2)
-            if key not in self.removes and key not in data:
-                data[key] = json
-                split = key.rsplit("|", maxsplit=1)
-                if len(split) == 2:
-                    key, label = split
-                else:
-                    label = Node.deserialize(json).label
-                by_label.setdefault(label, set()).add(key)
-        return by_label, data
+    def iterate(
+        self,
+        keys: istr = None,
+        terms: istr = None,
+        prefixes: istr = None,
+        labels: istr = None,
+    ):
 
-    def _make_dawg(self, by_label, data):
-        combined = []
+        allow_prefix = True
+        strings = [None]
+        if terms:
+            strings = ensure_iterable(terms)
+            allow_prefix = False
+        elif prefixes:
+            strings = ensure_iterable(prefixes)
 
-        for key, json in data.items():
-            line = f"{self.key_sep}{key}{self.key_sep}{json}"
-            combined.append(line)
-
-        for label, keys in by_label.items():
+        labels = ensure_iterable(labels) or [None]
+        keys = ensure_iterable(keys) or [None]
+        for label in labels:
             for key in keys:
-                line = f"{self.label_sep}{label}{self.label_sep}{key}"
-                combined.append(line)
+                for string in strings:
+                    for _, k, is_match in self._do_iter(string, label, key):
+                        if allow_prefix or is_match:
+                            yield k
 
-        return CompletionDAWG(combined)
+    # dawg separators
+
+    _tky = "\1"  # term -> key
+    _ltk = "\2"  # label -> term -> key
+    _lky = "\3"  # label -> key
+    _lbl = "\4"  # label
+
+    # private methods
+
+    def _create_dawg(self) -> CompletionDAWG:
+        def generate_dawg_keys():
+            labels = set()
+            for node in self.cache.values():
+                for term in node.terms:
+                    norm = self.normalizer.normalize(term)
+                    yield self._tky.join(["", norm, node.key])
+                    yield self._ltk.join(["", node.label, norm, node.key])
+
+                yield self._lky.join(["", node.label, node.key])
+
+                if node.label not in labels:
+                    labels.add(node.label)
+                    yield f"{self._lbl}{node.label}"
+
+        it_keys = generate_dawg_keys()
+        dawg = CompletionDAWG(it_keys)
+        return dawg
+
+    def _do_iter(self, term=None, label=None, key=None):
+        norm = self.normalizer(term) if term else None
+        yield from self._do_iter_pair(norm, label, key)
+
+    def _do_iter_pair(self, norm, label, key) -> Tuple[str, str, bool]:
+        sep, tokens = self._get_sep_tokens(norm, label, key)
+
+        if sep:
+            prefix = sep.join(tokens)
+            for line in self.dawg.iterkeys(prefix):
+                term, key = self._to_term_key(line, sep)
+                yield term, key, term == norm
+
+        else:
+            if key:
+                keys = [key] if key in self.cache else []
+            else:
+                keys = self.cache.keys()
+
+            for k in keys:
+                yield None, k, False
+
+    def _to_term_key(self, line, sep) -> Tuple[str, str]:
+        pieces = line.split(sep)
+
+        if sep == self._tky:
+            _, t, k = pieces
+
+        elif sep == self._ltk:
+            _, _, t, k = pieces
+
+        else:
+            _, l, k = pieces
+            t = None
+
+        return t, k
+
+    def _get_sep_tokens(self, norm, label, key):
+        sep = False
+        tokens = []
+
+        if label and norm:
+            sep = self._ltk
+            tokens = ["", label, norm] + ([key] if key else [])
+
+        elif norm:
+            sep = self._tky
+            tokens = ["", norm] + ([key] if key else [])
+
+        elif label:
+            sep = self._lky
+            tokens = ["", label, key or ""]
+
+        return sep, tokens

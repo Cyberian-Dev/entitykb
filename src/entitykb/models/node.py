@@ -2,40 +2,22 @@ from typing import Union, Any, Tuple, Optional
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
-from ujson import loads, dumps
 
 from .funcs import camel_to_snake
 
 label_cache = {}
 
 
-class Serializable(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    def serialize(self) -> str:
-        return dumps(self.dict(), escape_forward_slashes=False)
-
-    @classmethod
-    def deserialize(cls, json: str):
-        data = loads(json)
-        return cls.create(**data)
-
-    @classmethod
-    def create(cls, *args, **kwargs):
-        from .registry import Registry
-
-        registry = Registry.instance()
-        return registry.create(cls, *args, **kwargs)
-
-
-class Node(Serializable):
+class Node(BaseModel):
     key: str = Field(default_factory=lambda: str(uuid4()))
     label: str
     data: dict = None
 
     __all_labels__ = {"NODE"}
     __default_label__ = "NODE"
+
+    class Config:
+        allow_mutation = False
 
     def __init__(self, **data: Any):
         if not data.get("label"):
@@ -50,6 +32,10 @@ class Node(Serializable):
 
     def __lshift__(self, verb):
         return Edge(start=None, verb=verb, end=self.key)
+
+    @property
+    def terms(self):
+        return ()
 
     @staticmethod
     def to_key(node_key: Union["Node", str]) -> str:
@@ -70,6 +56,13 @@ class Node(Serializable):
         labels = set(cls.__dict__.get("__all_labels__", ()))
         labels.add(cls.get_default_label())
         return labels
+
+    @classmethod
+    def create(cls, *args, **kwargs):
+        from .registry import Registry
+
+        registry = Registry.instance()
+        return registry.create(cls, *args, **kwargs)
 
 
 class Edge(BaseModel):
@@ -105,6 +98,10 @@ class Edge(BaseModel):
     def __lshift__(self, start: Union[Node, str]):
         self.set_start(start)
         return self
+
+    @property
+    def key(self):
+        return self.start, self.verb, self.end
 
     @property
     def start(self):

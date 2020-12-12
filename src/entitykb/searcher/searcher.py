@@ -10,7 +10,6 @@ from entitykb import (
     EdgeCriteria,
     Trail,
     WalkStep,
-    create_component,
     under_limit,
 )
 
@@ -147,10 +146,6 @@ class Searcher(object):
 
     def initialize(self) -> Layer:
         raise NotImplementedError
-
-    @classmethod
-    def create(cls, value=None, **kwargs) -> "Searcher":
-        return create_component(value, Searcher, DefaultSearcher, **kwargs)
 
 
 class DefaultSearcher(Searcher):

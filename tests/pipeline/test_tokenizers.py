@@ -1,25 +1,9 @@
-from entitykb.pipeline import Tokenizer, WhitespaceTokenizer
+from entitykb.pipeline import WhitespaceTokenizer
 from entitykb.models import Token
 
 
-def test_construct():
-    tokenizer = Tokenizer.create()
-    assert isinstance(tokenizer, WhitespaceTokenizer)
-
-    tokenizer = Tokenizer.create(WhitespaceTokenizer)
-    assert isinstance(tokenizer, WhitespaceTokenizer)
-
-    class_name = "entitykb.pipeline.WhitespaceTokenizer"
-    tokenizer = Tokenizer.create(class_name)
-    assert isinstance(tokenizer, WhitespaceTokenizer)
-
-    argument = WhitespaceTokenizer()
-    tokenizer = Tokenizer.create(argument)
-    assert argument is tokenizer
-
-
-def test_default_tokenizer():
-    tokenizer = Tokenizer.create()
+def test_whitespace_tokenizer():
+    tokenizer = WhitespaceTokenizer()
 
     assert list(tokenizer("one")) == ["one"]
 
@@ -60,7 +44,7 @@ def test_default_tokenizer():
 
 
 def test_roundtrip_de_tokenize():
-    tokenizer = Tokenizer.create()
+    tokenizer = WhitespaceTokenizer()
 
     examples = [
         "Strange,",
@@ -79,7 +63,7 @@ def test_roundtrip_de_tokenize():
 
 
 def test_detokenize_through_add():
-    tokenizer = Tokenizer.create()
+    tokenizer = WhitespaceTokenizer()
     original = "one, 3.14 (a [b] c-d&f)"
     tokens = tokenizer(original)
     count = 0

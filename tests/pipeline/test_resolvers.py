@@ -1,15 +1,5 @@
 from entitykb.contrib.date import DateResolver
-from entitykb.pipeline import TermResolver, Resolver
-
-
-def test_resolver_construct(kb):
-    assert isinstance(Resolver.create(None, kb=kb), TermResolver)
-    assert isinstance(Resolver.create(TermResolver, kb=kb), TermResolver)
-    assert isinstance(Resolver.create(DateResolver, kb=kb), DateResolver)
-    assert isinstance(
-        Resolver.create("entitykb.contrib.date.DateResolver", kb=kb),
-        DateResolver,
-    )
+from entitykb.pipeline import TermResolver
 
 
 def test_date_resolver_is_prefix():
@@ -53,7 +43,7 @@ def test_date_resolver_fail_invalid():
 def test_default_resolver(kb, apple):
     resolver = TermResolver(kb=kb)
     kb.save_node(apple)
-    kb.commit()
+    kb.reindex()
 
     assert resolver.is_prefix("a")
     assert resolver.is_prefix("apple")

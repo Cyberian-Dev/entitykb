@@ -1,6 +1,5 @@
-import os
-from pathlib import Path
 from io import StringIO
+from pathlib import Path
 from unittest.mock import MagicMock
 
 from entitykb.cli import services, readers
@@ -29,12 +28,18 @@ def test_flatten_dict():
 
 def test_init_kb(root):
     assert isinstance(root, Path)
-    assert os.path.exists(root)
-    assert os.path.isdir(root)
-    assert [] == os.listdir(root)
+    assert root.exists()
+    assert root.is_dir()
+    assert set() == set(root.iterdir())
 
     assert services.init_kb(root, exist_ok=True)
-    assert {"config.json", "index.db"} == set(os.listdir(root))
+    assert {
+        "nodes",
+        "nodes.dawg",
+        "config.json",
+        "edges",
+        "edges.dawg",
+    } == set(f.name for f in root.iterdir())
 
     assert services.init_kb(root, exist_ok=False) is False
 

@@ -1,26 +1,7 @@
 import string
 from typing import Optional, Union, Iterator, Set, Iterable
 
-from entitykb import Token, DocToken, create_component
-
-
-class Tokenizer(object):
-    def __call__(self, text: str) -> Iterator[Token]:
-        return self.tokenize(text)
-
-    def tokenize(self, text) -> Iterator[Token]:
-        raise NotImplementedError
-
-    def detokenize(self, tokens: Iterable[Token]) -> str:
-        raise NotImplementedError
-
-    def as_tuples(self, text):
-        tuples = tuple((str(t), t.ws_after) for t in self(text))
-        return tuples
-
-    @classmethod
-    def create(cls, value=None):
-        return create_component(value, Tokenizer, WhitespaceTokenizer)
+from entitykb import Token, DocToken, interfaces
 
 
 class State(object):
@@ -86,7 +67,7 @@ class State(object):
         return iter(tokens)
 
 
-class WhitespaceTokenizer(Tokenizer):
+class WhitespaceTokenizer(interfaces.ITokenizer):
     def __init__(
         self,
         word_chars: Optional[Set[str]] = None,

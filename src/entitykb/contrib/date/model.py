@@ -1,6 +1,7 @@
+from typing import Any
 from datetime import date
 
-from entitykb.models import Entity
+from entitykb import Entity
 
 
 class Date(Entity):
@@ -8,7 +9,7 @@ class Date(Entity):
     month: int = None
     day: int = None
 
-    def __init__(self, **data: dict):
+    def __init__(self, **data: Any):
         dt = date(data["year"], data["month"], data["day"])
         data.setdefault("name", dt.strftime("%Y-%m-%d"))
         super().__init__(**data)

@@ -1,6 +1,6 @@
 from typing import List, Dict
 
-from entitykb.models import Doc, DocToken, Span, Token
+from entitykb import Doc, DocToken, Span, Token
 
 
 class TokenHandler(object):

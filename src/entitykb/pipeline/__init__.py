@@ -1,6 +1,5 @@
-from .extractors import Extractor, DefaultExtractor
+from .extractors import DefaultExtractor
 from .filterers import (
-    Filterer,
     ExactNameOnly,
     LowerNameOrExactSynonym,
     KeepLongestByKey,
@@ -8,28 +7,23 @@ from .filterers import (
     KeepLongestByOffset,
 )
 from .handlers import TokenHandler
-from .normalizers import Normalizer, LatinLowercaseNormalizer
+from .normalizers import LatinLowercaseNormalizer
 from .pipeline import Pipeline
-from .resolvers import Resolver, TermResolver, RegexResolver, GrammarResolver
-from .tokenizers import Tokenizer, WhitespaceTokenizer
+from .resolvers import TermResolver, RegexResolver, GrammarResolver
+from .tokenizers import WhitespaceTokenizer
 
 __all__ = (
     "DefaultExtractor",
     "ExactNameOnly",
-    "Extractor",
-    "Filterer",
     "GrammarResolver",
     "KeepLongestByKey",
     "KeepLongestByLabel",
     "KeepLongestByOffset",
     "LatinLowercaseNormalizer",
     "LowerNameOrExactSynonym",
-    "Normalizer",
     "Pipeline",
     "RegexResolver",
-    "Resolver",
     "TermResolver",
     "TokenHandler",
-    "Tokenizer",
     "WhitespaceTokenizer",
 )

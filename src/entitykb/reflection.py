@@ -1,18 +1,21 @@
 import functools
+import inspect
 from importlib import import_module
-from typing import Callable
+from typing import Union, Iterator, Iterable, Callable
+
+istr = Union[Iterable[str], Iterator[str]]
 
 
-def create_component(value, base_class, default_class, **kwargs):
-    if value is None:
-        value = default_class(**kwargs)
-
-    elif isinstance(value, base_class):
-        for (k, v) in kwargs.items():
-            setattr(value, k, v)
+def create_component(value, default_cls=None, **kwargs):
+    if value is None and default_cls is not None:
+        value = default_cls(**kwargs)
 
     elif isinstance(value, str):
         value = instantiate_class_from_name(value, **kwargs)
+
+    elif isinstance(value, inspect.getmro(default_cls)[:-1]):
+        for (k, v) in kwargs.items():
+            setattr(value, k, v)
 
     elif isinstance(value, Callable):
         value = value(**kwargs)

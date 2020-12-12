@@ -47,7 +47,7 @@ def test_environ_set_get():
 def test_config_defaults():
     config = Config()
     assert config.dict() == {
-        "graph": "entitykb.InMemoryGraph",
+        "graph": "entitykb.Graph",
         "modules": [],
         "normalizer": "entitykb.LatinLowercaseNormalizer",
         "pipelines": {
@@ -59,7 +59,7 @@ def test_config_defaults():
         },
         "searcher": "entitykb.DefaultSearcher",
         "storage": "entitykb.PickleStorage",
-        "terms": "entitykb.DawgTermsIndex",
+        "terms": "entitykb.TermsIndex",
         "tokenizer": "entitykb.WhitespaceTokenizer",
     }
 
@@ -78,7 +78,7 @@ def test_config_roundtrip():
         "tokenizer",
     }
 
-    roundtrip = Config.make(file_path="/tmp/config.json", data=data)
+    roundtrip = Config(file_path="/tmp/config.json", **data)
     assert roundtrip.dict() == config.dict()
 
 
