@@ -186,20 +186,19 @@ $ cat ~/.entitykb/config.json
 $ entitykb info
 +------------------------------------+-----------------------------------+
 | config.graph                       |                    entitykb.Graph |
-| config.modules                     |                                [] |
+| config.modules                     |                                   |
 | config.normalizer                  | entitykb.LatinLowercaseNormalizer |
 | config.pipelines.default.extractor |         entitykb.DefaultExtractor |
-| config.pipelines.default.filterers |                                [] |
-| config.pipelines.default.resolvers |         ['entitykb.TermResolver'] |
+| config.pipelines.default.filterers |                                   |
+| config.pipelines.default.resolvers |             entitykb.TermResolver |
 | config.root                        |        /Users/ianmaurer/.entitykb |
 | config.searcher                    |          entitykb.DefaultSearcher |
 | config.terms                       |               entitykb.TermsIndex |
 | config.tokenizer                   |      entitykb.WhitespaceTokenizer |
-| entitykb.version                   |                           20.12.0 |
+| entitykb.version                   |                          20.12.14 |
 | graph.edges                        |                                 0 |
 | graph.nodes                        |                                 0 |
 +------------------------------------+-----------------------------------+
-
 ```
 
 ### Interact
