@@ -75,15 +75,14 @@ class EdgeIndex(object):
     # private methods
 
     def _load_dawg(self):
-        dawg = CompletionDAWG([])
         if self.dawg_path.is_file():
-            dawg.load(str(self.dawg_path))
-        return dawg
+            return CompletionDAWG().load(str(self.dawg_path))
+        return CompletionDAWG([])
 
     def _create_dawg(self) -> CompletionDAWG:
         def generate_dawg_keys():
             verbs = set()
-            for edge in self.cache.values():
+            for edge in self:
                 yield self._sve.join([""] + edge.sve_list)
                 yield self._vse.join([""] + edge.vse_list)
                 yield self._evs.join([""] + edge.evs_list)

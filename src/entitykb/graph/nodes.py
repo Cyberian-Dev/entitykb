@@ -17,7 +17,7 @@ class NodeIndex(object):
     def __len__(self) -> int:
         return len(self.cache)
 
-    def __iter__(self) -> Iterator[Node]:
+    def __iter__(self) -> Iterator[str]:
         return iter(self.cache)
 
     def __contains__(self, node) -> bool:
@@ -91,10 +91,9 @@ class NodeIndex(object):
     # private methods
 
     def _load_dawg(self):
-        dawg = CompletionDAWG([])
-        if dawg_path.is_file():
-           dawg.load(str(self.dawg_path))
-        return dawg
+        if self.dawg_path.is_file():
+            return CompletionDAWG().load(str(self.dawg_path))
+        return CompletionDAWG([])
 
     def _create_dawg(self) -> CompletionDAWG:
         def generate_dawg_keys():
