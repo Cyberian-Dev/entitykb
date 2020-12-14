@@ -78,7 +78,7 @@ def test_save_for_entity_and_edge(kb: KB, apple, google):
     assert 2 == len(kb)
     assert apple == kb.get_node(apple.key)
 
-    kb.save(Edge(start=apple, verb="IS_A", end=apple))
+    kb.connect(start=apple, verb="IS_A", end=apple)
     kb.reindex()
 
     assert kb.info()["graph"] == {
