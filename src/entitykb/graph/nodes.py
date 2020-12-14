@@ -12,7 +12,7 @@ class NodeIndex(object):
         self.normalizer = normalizer
         self.dawg_path = root / "nodes.dawg"
         self.cache = diskcache.Index(str(root / "nodes"))
-        self.dawg: CompletionDAWG = self._create_dawg()
+        self.dawg: CompletionDAWG = self._load_dawg()
 
     def __len__(self) -> int:
         return len(self.cache)
@@ -44,9 +44,7 @@ class NodeIndex(object):
         return labels
 
     def reload(self):
-        self.dawg = CompletionDAWG([])
-        if self.dawg_path.is_file():
-            self.dawg.load(str(self.dawg_path))
+        self.dawg = self._load_dawg()
 
     def reindex(self):
         self.dawg = self._create_dawg()
@@ -91,6 +89,12 @@ class NodeIndex(object):
     _lbl = "\4"  # label
 
     # private methods
+
+    def _load_dawg(self):
+        dawg = CompletionDAWG([])
+        if dawg_path.is_file():
+           dawg.load(str(self.dawg_path))
+        return dawg
 
     def _create_dawg(self) -> CompletionDAWG:
         def generate_dawg_keys():

@@ -11,7 +11,7 @@ class EdgeIndex(object):
     def __init__(self, root: Path):
         self.dawg_path = root / "edges.dawg"
         self.cache = DiskIndex(str(root / "edges"))
-        self.dawg: CompletionDAWG = self._create_dawg()
+        self.dawg: CompletionDAWG = self._load_dawg()
 
     def __len__(self) -> int:
         return len(self.cache)
@@ -48,9 +48,7 @@ class EdgeIndex(object):
                     yield from self._do_iter(verb, node_key, direction)
 
     def reload(self):
-        self.dawg = CompletionDAWG([])
-        if self.dawg_path.is_file():
-            self.dawg.load(str(self.dawg_path))
+        self.dawg = self._load_dawg()
 
     def reindex(self):
         self.dawg = self._create_dawg()
@@ -75,6 +73,12 @@ class EdgeIndex(object):
     _vbs = "\4"  # verb
 
     # private methods
+
+    def _load_dawg(self):
+        dawg = CompletionDAWG([])
+        if self.dawg_path.is_file():
+            dawg.load(str(self.dawg_path))
+        return dawg
 
     def _create_dawg(self) -> CompletionDAWG:
         def generate_dawg_keys():

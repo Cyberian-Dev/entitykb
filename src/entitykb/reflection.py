@@ -7,30 +7,35 @@ istr = Union[Iterable[str], Iterator[str]]
 
 
 def create_component(value, default_cls=None, **kwargs):
+    component = None
+
     if value is None and default_cls is not None:
-        value = default_cls(**kwargs)
+        component = default_cls(**kwargs)
 
     elif isinstance(value, str):
-        value = instantiate_class_from_name(value, **kwargs)
+        component = instantiate_class_from_name(value, **kwargs)
 
     elif isinstance(value, inspect.getmro(default_cls)[:-1]):
+        component = value
         for (k, v) in kwargs.items():
-            setattr(value, k, v)
+            setattr(component, k, v)
 
     elif isinstance(value, Callable):
-        value = value(**kwargs)
+        component = value(**kwargs)
 
-    return value
+    assert component is not None, f"create fail: {value}, {default_cls}"
+    return component
 
 
 @functools.lru_cache(maxsize=100)
 def get_class_from_name(full_name: str):
     module_name, class_name = full_name.rsplit(".", 1)
     module = import_module(module_name)
-    klass = getattr(module, class_name)
+    klass = getattr(module, class_name, None)
     return klass
 
 
 def instantiate_class_from_name(full_name: str, *args, **kwargs):
     klass = get_class_from_name(full_name)
-    return klass(*args, **kwargs)
+    if klass:
+        return klass(*args, **kwargs)

@@ -42,19 +42,14 @@ def clear(
     """ Clear local KB """
 
     root = Config.get_root(root)
-    path = root / "index.db"
 
-    if os.path.exists(path):
+    if root.exists():
         if not force:
-            typer.confirm(f"Clearing {path}. Are you sure?", abort=True)
-        os.remove(path)
-    else:
-        logger.info(f"{path} does not exist. Creating new database.")
+            typer.confirm(f"Clearing {root}. Are you sure?", abort=True)
 
     kb = KB(root=root)
-    success = kb.reindex()
-
-    finish("Clear", success)
+    kb.clear()
+    finish("Clear", True)
 
 
 @cli.command()
@@ -99,10 +94,11 @@ def load(
     root: Optional[Path] = typer.Option(None),
     format: str = typer.Option("jsonl"),
     dry_run: bool = typer.Option(False, "--dry-run"),
+    skip_reindex: bool = typer.Option(False, "--skip-reindex"),
     mv_split: str = typer.Option("|"),
 ):
     """ Load data into local KB """
-    start = time.time()
+    t0 = time.time()
     environ.mv_split = mv_split
 
     kb = KB(root=root) if not dry_run else None
@@ -120,10 +116,20 @@ def load(
             elif count <= 10:
                 typer.echo(obj)
 
-    if kb:
-        kb.reindex()
-        timer = time.time() - start
-        typer.echo(f"Loaded {count} in {timer:.2f}s [{in_file}, {format}]")
+    t1 = time.time()
+    typer.echo(f"Loaded {count} in {t1 - t0:.2f}s [{in_file}, {format}]")
+    if kb and not skip_reindex:
+        reindex(root=root)
+
+
+@cli.command()
+def reindex(root: Optional[Path] = typer.Option(None)):
+    """ Load data into local KB """
+    t0 = time.time()
+    kb = KB(root=root)
+    kb.reindex()
+    t1 = time.time()
+    typer.echo(f"Reindexed in {t1 - t0:.2f}s")
 
 
 @cli.command(name="rpc")

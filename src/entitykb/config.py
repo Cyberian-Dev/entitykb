@@ -56,7 +56,6 @@ class Config(BaseModel):
     modules: List[str] = Field(default_factory=list)
     normalizer: str = "entitykb.LatinLowercaseNormalizer"
     searcher: str = "entitykb.DefaultSearcher"
-    storage: str = "entitykb.PickleStorage"
     terms: str = "entitykb.TermsIndex"
     tokenizer: str = "entitykb.WhitespaceTokenizer"
 
