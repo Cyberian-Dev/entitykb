@@ -25,6 +25,7 @@ install_requires = [
     "aiofiles==0.6.0",
     "aio-msgpack-rpc==0.2.0",
     "DAWG==0.8.0",
+    "diskcache==5.1.0",
     "fastapi==0.61.2",
     "lark-parser==0.8.9",
     "smart-open==4.0.1",

@@ -24,6 +24,8 @@ def test_creates_files(root, kb: KB, apple):
 def test_save_entity(kb: KB, apple, apple_records):
     kb.save_node(apple)
     kb.save_node(apple_records)
+    assert {apple, apple_records} == set(kb)
+
     kb.reindex()
 
     assert (kb.parse("AAPL")).spans[0].entity == apple

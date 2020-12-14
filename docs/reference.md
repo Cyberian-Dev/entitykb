@@ -13,8 +13,7 @@ provides an inventory of important classes, modules, and functions.
 | contrib.email         | Email                     | Example entity with fields for username and domain.       |
 | contrib.email         | EmailResolver             | Example RegexResolver that finds email entities.          |
 | deps                  | Environ                   | Env vars that prevents setting previously read values.    |
-| graph                 | Graph                     | Abstract class for graph reading and writing.             |
-| graph                 | InMemoryGraph             | Default graph that keeps data in memory using indices.    |
+| graph                 | Graph                     | Default graph that keeps data in memory using indices.    |
 | graph                 | NodeIndex                 | Stores nodes by their key and label for fast retrieval.   |
 | graph                 | EdgeIndex                 | Stores edges for retrieval by verb, direction or node.    |
 | http                  | admin                     | [Svelte](https://svelte.dev/)-based admin web UI.         |
@@ -47,22 +46,17 @@ provides an inventory of important classes, modules, and functions.
 | models.traverse       | FilterStep                | Filter searching based on criteria with all/exclude flags.|
 | models.traverse       | EdgeCriteria              | Filtering criteria based on edges and neighboring nodes.  |
 | models.traverse       | FieldCriteria             | Filtering criteria based on node field value.             |
-| pipeline.extractor    | Extractor                 | Base-class for extracting document from text.             |
 | pipeline.extractor    | DefaultExtractor          | Creates handlers, processes tokens, and collects spans.   |
-| pipeline.filterer     | Filterer                  | Base class for filtering spans.                           |
 | pipeline.filterer     | ExactNameOnly             | Only keep spans that exactly match to the entity name.    |
 | pipeline.filterer     | KeepLongestByKey          | Keeps longest overlapping span with same node key.        |
 | pipeline.filterer     | KeepLongestByLabel        | Keeps longest overlapping span with same node label.      |
 | pipeline.filterer     | KeepLongestByOffset       | Keeps longest overlapping span using token offsets.       |
 | pipeline.filterer     | LowerNameOrExactSynonym   | Keeps when lower name or exact synonym match.             |
 | pipeline.handler      | TokenHandler              | Manages resolver prefix tokens state during extraction.   |
-| pipeline.normalizers  | Normalizer                | Base class for normalizing text.                          |
 | pipeline.normalizers  | LatinLowercaseNormalizer  | Default normalizer that converts text to lowercase ASCII. |
 | pipeline.pipeline     | Pipeline                  | Container of resolvers and filterers, does extract/filter.|
-| pipeline.resolvers    | Resolver                  | Base class with is_prefix and resolve methods.            |
 | pipeline.resolvers    | TermResolver              | Resolves entities from terms using TrieTermsIndex.        |
 | pipeline.resolvers    | RegexResolver             | Resolves entities from terms using Regex token patterns.  |
-| pipeline.tokenizers   | Tokenizer                 | Base class with tokenize and detokenize methods.          |
 | pipeline.tokenizers   | WhitespaceTokenizer       | Default tokenizer that splits on whitespace characters.   |
 | rpc.client_async      | AsyncKB                   | Remote KB client that supports async/await calls.         |
 | rpc.client_sync       | SyncKB                    | Remote KB client that supports synchronous calls.         |
@@ -76,8 +70,6 @@ provides an inventory of important classes, modules, and functions.
 | searcher              | FilterLayer               | Layer that filters trails based on edge or field criteria.|
 | storage               | Storage                   | Base class for saving and loading KB data.                |
 | storage               | PickleStorage             | Default storage class that uses pickle (de)serialization. |
-| terms                 | TermsIndex                | Base class for storing/retrieving entity terms.           |
-| terms                 | TrieTermsIndex            | Default terms index built using [pyahocorasick](https://pyahocorasick.readthedocs.io/en/latest/).|
 | config                | Config                    | Handles reading and writing of KB configuration files.    |
 | config                | PipelineConfig            | Describes configuration of each named pipeline in KB.     |
 | env                   | Environ                   | Default environment values with getter/setter properties. |

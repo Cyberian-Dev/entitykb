@@ -18,7 +18,7 @@ class Graph(interfaces.IGraph):
         return len(self.nodes)
 
     def __iter__(self) -> Iterable[Node]:
-        yield from self.nodes
+        yield from self.iterate_nodes()
 
     def save_node(self, node: Node):
         self.nodes.save(node)
@@ -27,8 +27,7 @@ class Graph(interfaces.IGraph):
         return self.nodes.get(key=key)
 
     def remove_node(self, node_key: Union[Node, str]) -> Node:
-        key = Node.to_key(node_key)
-        return self.nodes.remove(key=key)
+        return self.nodes.remove(node_key)
 
     def get_labels(self) -> Set[str]:
         return self.nodes.get_labels()
@@ -74,6 +73,19 @@ class Graph(interfaces.IGraph):
         yield from self.nodes.iterate(
             keys=keys, terms=terms, prefixes=prefixes, labels=labels
         )
+
+    def iterate_nodes(
+        self,
+        keys: istr = None,
+        terms: istr = None,
+        prefixes: istr = None,
+        labels: istr = None,
+    ) -> Iterable[Node]:
+
+        for key in self.nodes.iterate(
+            keys=keys, terms=terms, prefixes=prefixes, labels=labels
+        ):
+            yield self.nodes.get(key=key)
 
     def reindex(self):
         self.nodes.reindex()

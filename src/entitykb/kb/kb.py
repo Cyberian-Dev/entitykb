@@ -41,6 +41,9 @@ class KB(interfaces.IKnowledgeBase):
     def __len__(self):
         return len(self.graph)
 
+    def __iter__(self):
+        yield from self.graph
+
     def save(self, item):
         if isinstance(item, Node):
             return self.save_node(item)
@@ -67,6 +70,9 @@ class KB(interfaces.IKnowledgeBase):
 
     def save_edge(self, edge: Union[Edge, dict]):
         return self.graph.save_edge(edge)
+
+    def connect(self, *, start: Node, verb: str, end: Node):
+        return self.graph.connect(start=start, verb=verb, end=end)
 
     # pipeline
 

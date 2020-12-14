@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Iterator, Set, Tuple
+from typing import Set, Tuple
 
 import diskcache
 from dawg import CompletionDAWG
@@ -17,9 +17,6 @@ class NodeIndex(object):
     def __len__(self) -> int:
         return len(self.cache)
 
-    def __iter__(self) -> Iterator[str]:
-        return iter(self.cache)
-
     def __contains__(self, node) -> bool:
         key = Node.to_key(node)
         return self.cache.__contains__(key)
@@ -33,7 +30,8 @@ class NodeIndex(object):
     def save(self, node: Node):
         self.cache[node.key] = node
 
-    def remove(self, key: str) -> Node:
+    def remove(self, node: Node) -> Node:
+        key = Node.to_key(node)
         removed = self.cache.pop(key, None)
         return removed
 

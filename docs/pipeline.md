@@ -15,12 +15,10 @@ example config with the `DateResolver` and 2 out-of-the-box filterers added:
 
 ```json
 {
-    "graph": "entitykb.InMemoryGraph",
-    "modules": [],
+    "graph": "entitykb.Graph",
+    "modules": ["geokb"],
     "normalizer": "entitykb.LatinLowercaseNormalizer",
     "searcher": "entitykb.DefaultSearcher",
-    "storage": "entitykb.PickleStorage",
-    "terms": "entitykb.TrieTermsIndex",
     "tokenizer": "entitykb.WhitespaceTokenizer",
     "pipelines": {
         "default": {
@@ -52,7 +50,7 @@ Below are the components that are provided by the base EntityKB project:
 | pipelines.filterers     | entitykb.KeepLongestByLabel          | Keeps longest overlapping span with same node label.      |
 | pipelines.filterers     | entitykb.KeepLongestByOffset         | Keeps longest overlapping span using token offsets.       |
 | pipelines.filterers     | entitykb.LowerNameOrExactSynonym     | Keeps when lower name or exact synonym match.             |
-| pipelines.resolvers     | entitykb.TermResolver                | Resolves entities from terms using TrieTermsIndex.        |
+| pipelines.resolvers     | entitykb.TermResolver                | Resolves entities from terms using graph's term index.
 | pipelines.resolvers     | entitykb.RegexResolver               | Abstract class for finding entities with regex patterns.  |
 | pipelines.resolvers     | entitykb.GrammarResolver             | Abstract class for finding entities with Lark grammars.   |
 | pipelines.resolvers     | entitykb.contrib.date.DateResolver   | Custom GrammarResolver that finds date entities.          |

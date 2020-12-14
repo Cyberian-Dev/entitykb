@@ -32,20 +32,12 @@
 
 EntityKB is a toolkit for rapidly developing knowledge bases (i.e.
 [knowledge graphs](https://en.wikipedia.org/wiki/Knowledge_Graph))
-using the Python programming language.
-
-It's purpose is to enable a person or small team with a mix of
-domain expertise and software development skills to rapidly and
-iteratively build a system that meets their functional requirements.
-EntityKB could also serve as a prototyping environment to inform
-the design of a "real" production system on an "approved" technology
-stack.
+using the Python programming language. It combines an text processing
+pipeline with a graph data store to support rules/string-based
+entity extraction and linking.
 
 
-### Use Cases
-
-EntityKB could provide useful capabilities for a wide variety of use cases.
-Below are some examples:
+### Potential Use Cases
 
 * **Entity Extraction**: Pull concepts from unstructured text using using
   keyword and pattern matching.
@@ -57,41 +49,37 @@ Below are some examples:
 * **Data Set Labeling**: Overcome the "cold start" training set problem
   by using entity extraction capabilities to generate annotations.
 
-* **Knowledge Curation**: Iteratively add new data types as "plain old"
-  Python objects to your knowledge graph without expensive data modeling
-  or migration cycles using SQL or ORMs.
+* **Knowledge Curation/Integration**: Iteratively add new data types 
+  and sources with simple Python model classes and data loaders.
 
 ### Capabilities
 
 EntityKB provides a focused set of core capabilities that can be
 extended and enhanced:
 
-* **Graph-based data model** for storing of entities (nodes) and their
-  relationships (edges).
+* **Graph data store** for storing of entities (nodes) and their
+  relationships (edges) as plain-old python objects.
   
-* **Terms index** for efficient storing and retrieval of entity names and
-  synonyms.
+* **Terms and Edge index** for efficient retrieval and traversal of
+  entities using their name, synonyms, and relationships.
   
 * **Processing pipeline** that normalizes and tokenizes text and then
-  resolves entities from spans of tokens.
+  resolves entities using string, regex, grammar or python based matching.
 
 * **Searching** with fluent, pythonic traversal query builder for walking
- and filtering graph nodes and relationships.
+ and filtering graph nodes and their relationships.
 
 * **Importing and exporting** of data with CLI tooling and/or Python code.
   
 * **Multiple interfaces** including embedded Python client, RPC/HTTP servers
   and CLI.
   
-* **Key-value store** for adding and retrieving Python objects in local
-  memory or over RPC/HTTP calls.
-
 ### Priorities
 
-Only through rapid, iterative experimentation can a knowledge graph be fully
-realized. Due to this, EntityKB has prioritized the following
+EntityKB's core goal is to enable the rapid, iterative development of custom
+knowledge graphs using Python. The following
 [quality attributes](https://en.wikipedia.org/wiki/List_of_system_quality_attributes)
-in an effort to reduce cycle time and increase the iteration velocity.
+have been prioritized in furtherance of this goal:
 
 * **Evolvability**: Add, update and remove entity types and
   data sources without time-consuming data migrations.
@@ -120,11 +108,10 @@ Below are some choices that users should be aware of upfront:
   security layer. Also, knowledge bases are stored using pickles
   which are not secure, only unpickle data from trusted sources.
   
-* **Not memory optimized**: EntityKB is not a "big data" solution.
-  The default graph store trades memory for runtime performance and
-  ease-of-use. However, the default storage component could be replaced
-  with a new one that offloads data to disk or a new graph component
-  that delegates to a scalable backend like Neo4j.
+* **Python-based**: The most critical data structures are powered by
+  libraries written in the C programming language for high-performance
+  and tight memory management. However, this library is still mostly
+  Python-based and will certainly not meet everyone's runtime needs.
 
 * **Not transactional**: EntityKB is not designed for ACID-compliant
   data storage and should never be used as the "system of record". 
@@ -172,16 +159,18 @@ INFO:     Initialization completed successfully.
 
 $ ls ~/.entitykb/
 config.json
-index.db
+edges
+edges.dawg
+nodes
+nodes.dawg
 
 $ cat ~/.entitykb/config.json
 {
-    "graph": "entitykb.InMemoryGraph",
+    "graph": "entitykb.Graph",
     "modules": [],
     "normalizer": "entitykb.LatinLowercaseNormalizer",
     "searcher": "entitykb.DefaultSearcher",
-    "storage": "entitykb.PickleStorage",
-    "terms": "entitykb.TrieTermsIndex",
+    "terms": "entitykb.TermsIndex",
     "tokenizer": "entitykb.WhitespaceTokenizer",
     "pipelines": {
         "default": {
@@ -195,31 +184,22 @@ $ cat ~/.entitykb/config.json
 }
 
 $ entitykb info
-+------------------------------------+-------------------------------------+
-| config.graph                       |              entitykb.InMemoryGraph |
-| config.modules                     |                                  [] |
-| config.normalizer                  |   entitykb.LatinLowercaseNormalizer |
-| config.pipelines.default.extractor |           entitykb.DefaultExtractor |
-| config.pipelines.default.filterers |                                  [] |
-| config.pipelines.default.resolvers |           ['entitykb.TermResolver'] |
-| config.root                        |          /Users/ianmaurer/.entitykb |
-| config.searcher                    |            entitykb.DefaultSearcher |
-| config.storage                     |              entitykb.PickleStorage |
-| config.terms                       |             entitykb.TrieTermsIndex |
-| config.tokenizer                   |        entitykb.WhitespaceTokenizer |
-| entitykb.version                   |                             20.12.0 |
-| graph.edges                        |                                   0 |
-| graph.nodes                        |                                   0 |
-| storage.disk_space                 |                             84.00 B |
-| storage.last_commit                |                                     |
-| storage.path                       | /Users/ianmaurer/.entitykb/index.db |
-| terms.links_count                  |                                   0 |
-| terms.longest_word                 |                                   0 |
-| terms.nodes_count                  |                                   0 |
-| terms.sizeof_node                  |                                  32 |
-| terms.total_size                   |                                   0 |
-| terms.words_count                  |                                   0 |
-+------------------------------------+-------------------------------------+
++------------------------------------+-----------------------------------+
+| config.graph                       |                    entitykb.Graph |
+| config.modules                     |                                [] |
+| config.normalizer                  | entitykb.LatinLowercaseNormalizer |
+| config.pipelines.default.extractor |         entitykb.DefaultExtractor |
+| config.pipelines.default.filterers |                                [] |
+| config.pipelines.default.resolvers |         ['entitykb.TermResolver'] |
+| config.root                        |        /Users/ianmaurer/.entitykb |
+| config.searcher                    |          entitykb.DefaultSearcher |
+| config.terms                       |               entitykb.TermsIndex |
+| config.tokenizer                   |      entitykb.WhitespaceTokenizer |
+| entitykb.version                   |                           20.12.0 |
+| graph.edges                        |                                 0 |
+| graph.nodes                        |                                 0 |
++------------------------------------+-----------------------------------+
+
 ```
 
 ### Interact
@@ -229,10 +209,51 @@ Start a new Knowledge Base and add two entities:
 ```python
 >>> from entitykb import KB, Entity
 >>> kb = KB()
->>> kb.save_node(Entity(name="New York", label="STATE"))
-Entity(key='New York|STATE', label='STATE', data=None, name='New York', synonyms=())
->>> kb.save_node(Entity(name="New York City", label="CITY", synonyms=["NYC"]))
+
+>>> nys = Entity(name="New York", label="STATE")
+>>> kb.save_node(nys)
+
+>>> nyc = Entity(name="New York City", label="CITY", synonyms=["NYC"])
+>>> kb.save_node(nyc)
 Entity(key='New York City|CITY', label='CITY', data=None, name='New York City', synonyms=('NYC',))
+```
+
+Edge objects can be created using the Edge class or the right/left-shift
+methods on nodes. The `Verb` (or short-hand `V`) can be used or so can
+a simple string. The library converts all verbs to uppercase:
+
+```python
+>>> from entitykb import Edge, Verb, V 
+
+>>> Edge(start="New York City|CITY", verb=V.IS_IN, end=nys)
+Edge(start='New York City|CITY', verb='IS_IN', end='New York|STATE')
+
+>>> nyc >> Verb.IS_IN >> nys
+Edge(start='New York City|CITY', verb='IS_IN', end='New York|STATE')
+
+>>> nys << V.is_in << nyc
+Edge(start='New York City|CITY', verb='IS_IN', end='New York|STATE')
+
+>>> nys << "is_in" << "New York City|CITY"
+Edge(start='New York City|CITY', verb='IS_IN', end='New York|STATE')
+```
+
+Edges still need to be saved to the graph which can be accomplished using
+the `save_edge` or `connect` methods:
+
+```python
+>>> edge = nyc >> Verb.IS_IN >> nys
+>>> kb.save_edge(edge)
+
+>>> kb.connect(start=nyc, verb="IS_IN", end=nyc)
+Edge(start='New York|STATE', verb='IS_IN', end='New York City|CITY')
+```
+
+To index the terms and edges of the Graph store, you must first run the 
+`reindex` method on the KB:
+
+```python
+>>> kb.reindex()
 ```
 
 Perform term search using common prefix text:
@@ -258,11 +279,14 @@ Parse text into a document with tokens and spans containing entities:
 Entity(key='New York City|CITY', label='CITY', data=None, name='New York City', synonyms=('NYC',)))
 ```
 
-Commit the KB to disk, otherwise the saved nodes will be lost on exit.
-```python
->>> kb.commit()
-True
+The dump command generates JSONL:
+```bash
+$ entitykb dump
+{"kind": "node", "payload": {"key": "New York|STATE", "label": "STATE", "data": null, "name": "New York", "synonyms": []}}
+{"kind": "node", "payload": {"key": "New York City|CITY", "label": "CITY", "data": null, "name": "New York City", "synonyms": ["NYC"]}}
+{"kind": "edge", "payload": {"__root__": ["New York City|CITY", "IS_IN", "New York|STATE"]}}
 ```
+
 
 Dump and load the data for safe transfer to a different version of EntityKB:
 ```bash
@@ -272,10 +296,13 @@ $ wc -l /tmp/out.jsonl
 $ entitykb clear
 Are you sure you want to clear: /Users/ianmaurer/.entitykb/index.db? [y/N]: y
 INFO:     Clear completed successfully.
-$ entitykb load /tmp/out.jsonl
-Loaded 2 in 0.01s [/tmp/out.jsonl, jsonl]
-```
 
+$ # do version switch here.
+
+$ $ entitykb load /tmp/out.jsonl
+Loaded 2 in 0.02s [/tmp/out.jsonl, jsonl]
+Reindexed in 0.01s
+```
 
 ---
 
@@ -312,8 +339,15 @@ Ian can be contacted via [Twitter](https://twitter.com/imaurer),
 EntityKB was inspired by and is powered by several other projects in the
 open source community. Below are the most salient examples:
 
-* [pyahocorasick](https://github.com/WojciechMula/pyahocorasick)
-  is used for storing strings and retrieving terms from text.
+* [DAWG](https://dawg.readthedocs.io/en/latest/)
+  is used for indexing edge relationships (triples), terms, and labels. It
+  supports "completion" of terms based on a prefix.
+  
+* [DiskCache](http://www.grantjenks.com/docs/diskcache/)
+  is used for storing nodes and edges to disk as python objects.
+  
+* [Pydantic](https://github.com/samuelcolvin/pydantic/) for model
+  annotations, schema definition and FastAPI documentation.
   
 * [Typer](https://github.com/tiangolo/typer) powers EntityKB's
   Command Line Interface (CLI) tool.
@@ -323,9 +357,6 @@ open source community. Below are the most salient examples:
 
 * [uvicorn](https://github.com/encode/uvicorn) and
   [Starlette](https://github.com/encode/starlette) for power running FastAPI.
-  
-* [Pydantic](https://github.com/samuelcolvin/pydantic/) for model
-  annotations, schema definition and FastAPI documentation.
   
 * [MkDocs](https://github.com/mkdocs/mkdocs/), 
   [Termynal.js](https://github.com/ines/termynal/), and
@@ -351,6 +382,11 @@ and licensed under the terms of the MIT license.
 EntityKB should be considered beta software. Some caveats:
 
 * Expect backwards incompatible changes that will break your Knowledge Base.
+  When that happens, run the following steps:
+       1. Using the old version of EntityKB, run the `dump` CLI command to
+          generate a JSONL file of your edges and nodes.
+       2. Switch to the new version of EntityKB, and run the `load` CLI command
+          to import the edges and nodes from JSONL.
 
 * Monitor changes in the [release notes](release-notes.md).
 

@@ -27,6 +27,9 @@ class Node(BaseModel):
     def __lt__(self, other):
         return self.key < other.key
 
+    def __hash__(self):
+        return hash((self.label, self.key))
+
     def __rshift__(self, verb):
         return Edge(start=self.key, verb=verb, end=None)
 
@@ -89,7 +92,9 @@ class Edge(BaseModel):
         return self.__root__[item]
 
     def __repr__(self):
-        return f"<Edge: start={self.start}, verb={self.verb}, end={self.end}>"
+        return (
+            f"Edge(start='{self.start}', verb='{self.verb}', end='{self.end}')"
+        )
 
     def __rshift__(self, end: Union[Node, str]):
         self.set_end(end)

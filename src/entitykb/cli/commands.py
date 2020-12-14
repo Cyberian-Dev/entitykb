@@ -69,8 +69,8 @@ def dump(
     """ Dump data from KB in JSONL format. """
     with typer.open_file(output, "w") as f:
         kb = KB(root=root)
-        for node in kb.graph:
-            payload = node.dict()
+        for node in kb:
+            payload = node
             envelope = dict(kind="node", payload=payload)
             data = json.dumps(envelope, default=pydantic_encoder)
             f.write(data)
