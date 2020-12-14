@@ -48,7 +48,7 @@ def flatten_dict(d, parent_key="", sep="."):
         if isinstance(v, collections.MutableMapping):
             items.extend(flatten_dict(v, new_key, sep=sep).items())
         elif isinstance(v, (list, tuple)):
-            items.append((new_key, "\n".join(v)))
+            items.append((new_key, "\n".join(map(str, v))))
         else:
             items.append((new_key, v))
     return dict(items)
