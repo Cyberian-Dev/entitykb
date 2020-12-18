@@ -247,7 +247,9 @@ class IResolver(object):
 
 class IExtractor(object):
     def __init__(
-        self, tokenizer: ITokenizer, resolvers: Tuple[IResolver, ...],
+        self,
+        tokenizer: ITokenizer,
+        resolvers: Tuple[IResolver, ...],
     ):
         self.tokenizer = tokenizer
         self.resolvers = resolvers

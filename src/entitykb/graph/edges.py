@@ -2,15 +2,19 @@ from pathlib import Path
 from typing import Set, Iterator, Optional
 
 from dawg import CompletionDAWG
-from diskcache import Index as DiskIndex
+from pydantic.json import pydantic_encoder
 
 from entitykb import Node, Edge, Direction, ensure_iterable
+
+from .cache import create_index
 
 
 class EdgeIndex(object):
     def __init__(self, root: Path):
         self.dawg_path = root / "edges.dawg"
-        self.cache = DiskIndex(str(root / "edges"))
+        self.cache = create_index(
+            str(root / "edges"), encoder=pydantic_encoder, decoder=Edge.create
+        )
         self.dawg: CompletionDAWG = self._load_dawg()
 
     def __len__(self) -> int:

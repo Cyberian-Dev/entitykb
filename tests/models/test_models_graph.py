@@ -1,4 +1,6 @@
+from pydantic.json import pydantic_encoder
 from entitykb.models import Node, Edge
+from msgpack import packb, unpackb
 
 
 def test_node():
@@ -8,6 +10,9 @@ def test_node():
 
     node = Node(key="ENTITY|LABEL", label="LABEL")
     assert node.dict() == dict(key="ENTITY|LABEL", label="LABEL", data=None)
+
+    data = packb(node, default=pydantic_encoder)
+    assert unpackb(data, object_hook=Node.create) == node
 
 
 def test_edge():
@@ -23,3 +28,6 @@ def test_edge():
     three = end << "IS_A" << start
     assert three == edge
     assert three.dict() == edge.dict()
+
+    data = packb(edge, default=pydantic_encoder)
+    assert unpackb(data, object_hook=Edge.create) == edge

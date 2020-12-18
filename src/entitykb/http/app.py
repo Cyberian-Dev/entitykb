@@ -26,12 +26,15 @@ app.include_router(routes.router)
 # mount Admin UI
 admin = Path(__file__).parent / "admin/public"
 app.mount(
-    "/", staticfiles.StaticFiles(directory=admin, html=True), name="admin",
+    "/",
+    staticfiles.StaticFiles(directory=admin, html=True),
+    name="admin",
 )
 
 
 @app.exception_handler(ConnectionRefusedError)
 async def rpc_connection_handler(*_):
     return JSONResponse(
-        status_code=503, content="Connection Refused. Check RPC server.",
+        status_code=503,
+        content="Connection Refused. Check RPC server.",
     )

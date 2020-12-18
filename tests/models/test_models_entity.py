@@ -1,4 +1,6 @@
 from entitykb.models import Entity
+from pydantic.json import pydantic_encoder
+from msgpack import packb, unpackb
 
 
 def test_entity():
@@ -30,3 +32,10 @@ def test_custom_entity_class(apple):
 def test_sort_entities(apple, google):
     assert [apple, google] == sorted((google, apple))
     assert [apple, google] == sorted((apple, google))
+
+
+def test_pack_unpack(apple):
+    data = packb(apple, default=pydantic_encoder)
+    assert isinstance(data, bytes)
+    entity = unpackb(data, object_hook=Entity.create)
+    assert entity == apple

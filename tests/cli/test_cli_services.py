@@ -23,7 +23,7 @@ def test_preview_mode():
 def test_flatten_dict():
     nested = dict(a=dict(b=1, c=2), d=(3, 4), e=dict(f=dict(g=5)))
     flat = services.flatten_dict(nested)
-    assert {"a.b": 1, "a.c": 2, "d": '3\n4', "e.f.g": 5} == flat
+    assert {"a.b": 1, "a.c": 2, "d": "3\n4", "e.f.g": 5} == flat
 
 
 def test_init_kb(root):

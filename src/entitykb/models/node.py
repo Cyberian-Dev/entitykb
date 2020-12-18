@@ -42,7 +42,10 @@ class Node(BaseModel):
 
     @staticmethod
     def to_key(node_key: Union["Node", str]) -> str:
-        return node_key.key if isinstance(node_key, Node) else node_key
+        try:
+            return node_key.key
+        except AttributeError:
+            return node_key
 
     @classmethod
     def get_default_label(cls):
@@ -72,15 +75,12 @@ class Edge(BaseModel):
     __root__: Tuple[Optional[str], ...]
 
     def __init__(self, *, start=None, verb=None, end=None, __root__=None):
-        __root__ = __root__ or (None, None, None)
-        super().__init__(__root__=__root__)
+        if not __root__:
+            from .traverse import Verb
 
-        if start:
-            self.set_start(start)
-        if verb:
-            self.set_verb(verb)
-        if end:
-            self.set_end(end)
+            __root__ = (Node.to_key(start), Verb[verb], Node.to_key(end))
+
+        super().__init__(__root__=__root__)
 
     def __hash__(self):
         return hash(self.__root__)
@@ -123,8 +123,7 @@ class Edge(BaseModel):
     def set_verb(self, verb):
         from .traverse import Verb
 
-        verb = Verb[verb]
-        self.__root__ = (self.__root__[0], verb, self.__root__[2])
+        self.__root__ = (self.__root__[0], Verb[verb], self.__root__[2])
 
     @property
     def end(self):
@@ -148,3 +147,9 @@ class Edge(BaseModel):
     @property
     def evs_list(self):
         return [self.end, self.verb, self.start]
+
+    @classmethod
+    def create(cls, item=None, **kwargs):
+        if isinstance(item, dict):
+            kwargs = {**kwargs, **item}
+        return Edge(**kwargs)
