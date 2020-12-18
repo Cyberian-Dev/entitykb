@@ -112,6 +112,10 @@ class IGraph(object):
     # admin
 
     @abstractmethod
+    def transact(self):
+        """ Open up transaction for locking. """
+
+    @abstractmethod
     def reindex(self):
         """ Run index process on graph to rebuild edges, terms, etc. """
 
@@ -185,6 +189,10 @@ class IKnowledgeBase(object):
         """ Suggest term auto-completes, filtered by query. """
 
     # admin
+
+    @abstractmethod
+    def transact(self):
+        """ Start transaction for locking for loading. """
 
     @abstractmethod
     def reindex(self):

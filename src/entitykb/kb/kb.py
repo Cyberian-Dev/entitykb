@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from typing import Optional, Union, Dict
 
 from entitykb import (
@@ -96,6 +97,11 @@ class KB(interfaces.IKnowledgeBase):
         return SearchResponse.construct(nodes=nodes, trails=trails)
 
     # admin
+
+    @contextmanager
+    def transact(self):
+        with self.graph.transact():
+            yield
 
     def reload(self):
         self.graph.reload()

@@ -108,13 +108,14 @@ def load(
 
     count = 0
     with typer.progressbar(it) as progress:
-        for obj in progress:
-            count += 1
+        with kb.transact():
+            for obj in progress:
+                count += 1
 
-            if kb:
-                kb.save(obj)
-            elif count <= 10:
-                typer.echo(obj)
+                if kb:
+                    kb.save(obj)
+                elif count <= 10:
+                    typer.echo(obj)
 
     t1 = time.time()
     typer.echo(f"Loaded {count} in {t1 - t0:.2f}s [{in_file}, {format}]")

@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Union, Iterable, Set, Optional
 
@@ -86,6 +87,12 @@ class Graph(interfaces.IGraph):
             keys=keys, terms=terms, prefixes=prefixes, labels=labels
         ):
             yield self.nodes.get(key=key)
+
+    @contextmanager
+    def transact(self):
+        with self.nodes.cache.transact():
+            with self.edges.cache.transact():
+                yield
 
     def reindex(self):
         self.nodes.reindex()
