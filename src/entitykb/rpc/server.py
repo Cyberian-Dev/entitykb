@@ -29,8 +29,9 @@ class HandlerKB(interfaces.IKnowledgeBase):
         node = self._kb.save_node(node)
         return node.dict()
 
-    def remove_node(self, key) -> bool:
-        return self._kb.remove_node(key)
+    def remove_node(self, key) -> dict:
+        node = self._kb.remove_node(key)
+        return node.dict()
 
     # edges
 
@@ -54,9 +55,11 @@ class HandlerKB(interfaces.IKnowledgeBase):
 
     # admin
 
-    def commit(self) -> bool:
-        count = self._kb.reindex()
-        return count
+    def transact(self):
+        pass
+
+    def reindex(self):
+        self._kb.reindex()
 
     def clear(self) -> bool:
         success = self._kb.clear()

@@ -30,10 +30,10 @@ class SyncKB(AsyncKB):
         node = run_future(future)
         return node
 
-    def remove_node(self, key) -> bool:
+    def remove_node(self, key) -> Node:
         future = super(SyncKB, self).remove_node(key)
-        success = run_future(future)
-        return success
+        node = run_future(future)
+        return node
 
     # edges
 
@@ -58,8 +58,8 @@ class SyncKB(AsyncKB):
 
     # admin
 
-    def commit(self) -> bool:
-        future = super(SyncKB, self).commit()
+    def reindex(self):
+        future = super(SyncKB, self).reindex()
         success = run_future(future)
         return success
 

@@ -167,7 +167,7 @@ class IKnowledgeBase(object):
         """ Save node to KB. """
 
     @abstractmethod
-    def remove_node(self, key) -> bool:
+    def remove_node(self, key) -> Node:
         """ Remove node and relationships from KB. """
 
     # edges
@@ -193,6 +193,10 @@ class IKnowledgeBase(object):
     @abstractmethod
     def transact(self):
         """ Start transaction for locking for loading. """
+
+    @abstractmethod
+    def reload(self):
+        """ Reindex node and edge indexes.  """
 
     @abstractmethod
     def reindex(self):

@@ -36,7 +36,7 @@ class AsyncKB(interfaces.IKnowledgeBase):
         async with self.connection as client:
             return await client.call("save_node", node.dict())
 
-    async def remove_node(self, key) -> bool:
+    async def remove_node(self, key) -> Node:
         async with self.connection as client:
             return await client.call("remove_node", key)
 
@@ -68,9 +68,17 @@ class AsyncKB(interfaces.IKnowledgeBase):
 
     # admin
 
-    async def commit(self) -> bool:
+    async def transact(self):
         async with self.connection as client:
-            return await client.call("commit")
+            return await client.call("transact")
+
+    async def reload(self):
+        async with self.connection as client:
+            return await client.call("reload")
+
+    async def reindex(self):
+        async with self.connection as client:
+            return await client.call("reindex")
 
     async def clear(self) -> bool:
         async with self.connection as client:
