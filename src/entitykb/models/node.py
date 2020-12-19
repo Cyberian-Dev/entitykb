@@ -1,9 +1,10 @@
 from typing import Union, Any, Tuple, Optional
 from uuid import uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 from .funcs import camel_to_snake
+from .enums import TripleSep as TS
 
 label_cache = {}
 
@@ -20,7 +21,7 @@ class Node(BaseModel):
         allow_mutation = False
 
     def __init__(self, **data: Any):
-        if not data.get("label"):
+        if "label" not in data:
             data["label"] = self.get_default_label()
         super().__init__(**data)
 
@@ -106,7 +107,7 @@ class Edge(BaseModel):
 
     @property
     def key(self):
-        return self.start, self.verb, self.end
+        return self.sve
 
     @property
     def start(self):
@@ -137,19 +138,28 @@ class Edge(BaseModel):
         return self.end if direction.is_outgoing else self.start
 
     @property
-    def sve_list(self):
-        return [self.start, self.verb, self.end]
+    def sve(self):
+        return f"{TS.sve}{self.start}{TS.sve}{self.verb}{TS.sve}{self.end}"
 
     @property
-    def vse_list(self):
-        return [self.verb, self.start, self.end]
+    def vse(self):
+        return f"{TS.vse}{self.verb}{TS.vse}{self.start}{TS.vse}{self.end}"
 
     @property
-    def evs_list(self):
-        return [self.end, self.verb, self.start]
+    def evs(self):
+        return f"{TS.evs}{self.end}{TS.evs}{self.verb}{TS.evs}{self.start}"
+
+    @property
+    def vbs(self):
+        return f"{TS.vbs}{self.verb}"
 
     @classmethod
-    def create(cls, item=None, **kwargs):
-        if isinstance(item, dict):
-            kwargs = {**kwargs, **item}
-        return Edge(**kwargs)
+    def create(cls, line: str, ts: TS = TS.sve):
+        if ts.is_sve:
+            _, start, verb, end = line.split(ts)
+        elif ts.is_vse:
+            _, verb, start, end = line.split(ts)
+        else:
+            _, end, verb, start = line.split(ts)
+
+        return Edge(__root__=(start, verb, end))

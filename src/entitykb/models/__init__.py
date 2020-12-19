@@ -1,6 +1,5 @@
 from .doc import Token, DocToken, Doc, Span, ParseRequest
-from .entity import Entity
-from .enums import Direction, Comparison
+from .enums import Direction, Comparison, TripleSep
 from .fields import StrTupleField
 from .funcs import (
     camel_to_snake,
@@ -10,6 +9,7 @@ from .funcs import (
     label_filter,
 )
 from .node import Node, Edge
+from .entity import Entity
 from .traverse import (
     F,
     FieldCriteria,
@@ -51,6 +51,7 @@ __all__ = (
     "Token",
     "Trail",
     "Traversal",
+    "TripleSep",
     "V",
     "Verb",
     "WalkStep",

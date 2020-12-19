@@ -28,6 +28,3 @@ def test_edge():
     three = end << "IS_A" << start
     assert three == edge
     assert three.dict() == edge.dict()
-
-    data = packb(edge, default=pydantic_encoder)
-    assert unpackb(data, object_hook=Edge.create) == edge

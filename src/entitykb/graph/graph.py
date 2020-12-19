@@ -95,8 +95,8 @@ class Graph(interfaces.IGraph):
                 yield
 
     def reindex(self):
-        self.nodes.reindex()
         self.edges.reindex()
+        self.nodes.reindex()
 
     def reload(self):
         self.nodes.reload()

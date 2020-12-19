@@ -125,3 +125,19 @@ class Comparison(str, enum.Enum):
     def do_iregex(cls, compare_value: str, field_value: str):
         pattern = re.compile(compare_value, re.IGNORECASE)
         return pattern.match(str(field_value)) is not None
+
+
+@enum.unique
+class TripleSep(str, enum.Enum):
+    sve = "\1"  # start -> verb -> end -> json
+    vse = "\2"  # verb -> start -> end
+    evs = "\3"  # end -> verb -> start
+    vbs = "\4"  # verb
+
+    @property
+    def is_sve(self):
+        return self == TripleSep.sve
+
+    @property
+    def is_vse(self):
+        return self == TripleSep.vse
