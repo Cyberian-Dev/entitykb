@@ -58,6 +58,9 @@ class HandlerKB(interfaces.IKnowledgeBase):
     def transact(self):
         pass
 
+    def reload(self):
+        self._kb.reload()
+
     def reindex(self):
         self._kb.reindex()
 

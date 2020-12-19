@@ -1,8 +1,9 @@
 import asyncio
 from dataclasses import dataclass
-from msgpack import Packer, Unpacker
+from typing import Optional
 
 from aio_msgpack_rpc import Client
+from msgpack import Packer, Unpacker
 
 from entitykb import environ
 
@@ -11,9 +12,9 @@ from entitykb import environ
 class RPCConnection(object):
     host: str = None
     port: int = None
-    timeout: float = None
+    timeout: int = None
     retries: int = None
-    _client: Client = None
+    _client: Optional[Client] = None
 
     def __post_init__(self):
         self.host = self.host or environ.rpc_host
