@@ -1,4 +1,4 @@
-from entitykb import SearchRequest, T, Direction, F, Comparison
+from entitykb import Comparison, Direction, F, SearchRequest, T
 
 
 def test_roundtrip():

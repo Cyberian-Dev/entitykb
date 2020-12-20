@@ -1,5 +1,5 @@
 from entitykb.contrib.date import Date
-from entitykb.models import Registry, Node, Entity
+from entitykb.models import Entity, Node, Registry
 
 
 class CustomNode(Node):

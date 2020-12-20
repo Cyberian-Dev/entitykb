@@ -1,12 +1,11 @@
 import pytest
 
 from entitykb import Entity, interfaces
-from entitykb.contrib.date import DateResolver, Date
-
+from entitykb.contrib.date import Date, DateResolver
 from entitykb.pipeline import (
+    DefaultExtractor,
     TermResolver,
     WhitespaceTokenizer,
-    DefaultExtractor,
 )
 
 the_the = Entity(name="The The", label="BAND")

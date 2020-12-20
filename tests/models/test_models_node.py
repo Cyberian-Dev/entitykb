@@ -1,4 +1,4 @@
-from entitykb.models import Node, Entity
+from entitykb.models import Entity, Node
 
 
 class CustomNode(Node):

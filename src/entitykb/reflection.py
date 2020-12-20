@@ -1,7 +1,7 @@
 import functools
 import inspect
 from importlib import import_module
-from typing import Union, Iterator, Iterable, Callable
+from typing import Callable, Iterable, Iterator, Union
 
 istr = Union[Iterable[str], Iterator[str]]
 

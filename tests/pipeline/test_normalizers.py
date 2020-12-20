@@ -1,6 +1,5 @@
 from string import punctuation
 
-
 from entitykb.pipeline import LatinLowercaseNormalizer
 
 

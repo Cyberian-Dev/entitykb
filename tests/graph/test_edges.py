@@ -1,7 +1,7 @@
 from pytest import fixture
 
 from entitykb.graph.edges import EdgeIndex
-from entitykb.models import Node, Edge, Direction
+from entitykb.models import Direction, Edge, Node
 
 v0 = "VERB0"
 v1 = "VERB1"
@@ -51,9 +51,14 @@ def test_remove_start(a, b, c, index):
     assert checks() == dict(t_v0=0, t_v1=0, t_a=0, t_b=0, t_c=0, o_c=0, i_c=0)
     assert set() == index.get_verbs()
 
-    e0 = Edge(start=b, verb=v0, end=a)
+    data = {"say": "hello!"}
+    e0 = Edge(start=b, verb=v0, end=a, data=data)
     index.save(e0)
     assert e0 in index
+
+    assert index.get_data(edge=e0) == data
+    assert index.get_data(key=e0.key) == data
+    assert index[e0.key] == e0
 
     index.reindex()
     assert checks() == dict(t_v0=2, t_v1=0, t_a=1, t_b=1, t_c=0, o_c=0, i_c=0)

@@ -1,17 +1,17 @@
 from abc import abstractmethod
 from pathlib import Path
-from typing import Set, List, Iterable, Optional, Iterator, Tuple, Union
+from typing import Iterable, Iterator, List, Optional, Set, Tuple, Union
 
 from entitykb import (
-    Token,
-    Edge,
-    Node,
-    Entity,
-    ParseRequest,
-    Span,
     Doc,
+    Edge,
+    Entity,
+    Node,
+    ParseRequest,
     SearchRequest,
     SearchResponse,
+    Span,
+    Token,
     istr,
 )
 
@@ -107,7 +107,17 @@ class IGraph(object):
         prefixes: istr = None,
         labels: istr = None,
     ) -> Iterable[str]:
-        """ Iterate all keys based on keys and labels. """
+        """ Iterate all keys based on keys, terms, prefixes and labels. """
+
+    @abstractmethod
+    def iterate_nodes(
+        self,
+        keys: istr = None,
+        terms: istr = None,
+        prefixes: istr = None,
+        labels: istr = None,
+    ) -> Iterable[Node]:
+        """ Iterate all nodes based on keys, terms, prefixes and labels. """
 
     # admin
 

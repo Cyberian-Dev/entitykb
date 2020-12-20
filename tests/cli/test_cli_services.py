@@ -2,7 +2,7 @@ from io import StringIO
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from entitykb.cli import services, readers
+from entitykb.cli import readers, services
 
 
 def test_preview_mode():

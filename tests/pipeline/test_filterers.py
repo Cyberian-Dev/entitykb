@@ -1,18 +1,13 @@
 import pytest
-from entitykb import (
-    Doc,
-    DocToken,
-    Token,
-    Span,
-    Entity,
-)
+
+from entitykb import Doc, DocToken, Entity, Span, Token
 from entitykb.pipeline import (
-    Pipeline,
-    KeepLongestByOffset,
+    ExactNameOnly,
     KeepLongestByKey,
     KeepLongestByLabel,
-    ExactNameOnly,
+    KeepLongestByOffset,
     LowerNameOrExactSynonym,
+    Pipeline,
 )
 
 

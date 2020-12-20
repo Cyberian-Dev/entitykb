@@ -1,5 +1,5 @@
 from entitykb.graph.nodes import NodeIndex
-from entitykb.models import Node, Entity
+from entitykb.models import Entity, Node
 
 
 def test_node_cache(root, normalizer):
@@ -12,7 +12,7 @@ def test_node_cache(root, normalizer):
     assert node.key in index
     assert 1 == len(index)
 
-    index.remove(node.key)
+    index.remove(node)
     assert index.get(node.key) is None
     assert node not in index
     assert node.key not in index

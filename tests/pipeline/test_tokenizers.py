@@ -1,5 +1,5 @@
-from entitykb.pipeline import WhitespaceTokenizer
 from entitykb.models import Token
+from entitykb.pipeline import WhitespaceTokenizer
 
 
 def test_whitespace_tokenizer():

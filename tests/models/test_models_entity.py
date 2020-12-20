@@ -1,6 +1,7 @@
+from msgpack import packb, unpackb
+
 from entitykb.models import Entity
 from pydantic.json import pydantic_encoder
-from msgpack import packb, unpackb
 
 
 def test_entity():

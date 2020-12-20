@@ -1,7 +1,7 @@
 import json
 from importlib import import_module
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 
 from pydantic import BaseModel, Field
 

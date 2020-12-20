@@ -1,10 +1,10 @@
-from typing import Union, Any, Tuple, Optional
+from typing import Union, Any, Tuple
 from uuid import uuid4
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 
-from .funcs import camel_to_snake
 from .enums import TripleSep as TS
+from .funcs import camel_to_snake
 
 label_cache = {}
 
@@ -73,13 +73,26 @@ class Node(BaseModel):
 
 
 class Edge(BaseModel):
-    __root__: Tuple[Optional[str], ...]
+    __root__: Tuple[Any, ...]
 
-    def __init__(self, *, start=None, verb=None, end=None, __root__=None):
+    def __init__(
+        self,
+        *,
+        start=None,
+        verb=None,
+        end=None,
+        data=None,
+        __root__=None,
+    ):
         if not __root__:
             from .traverse import Verb
 
-            __root__ = (Node.to_key(start), Verb[verb], Node.to_key(end))
+            __root__ = (
+                Node.to_key(start),
+                Verb[verb],
+                Node.to_key(end),
+                data,
+            )
 
         super().__init__(__root__=__root__)
 
@@ -91,6 +104,9 @@ class Edge(BaseModel):
 
     def __getitem__(self, item):
         return self.__root__[item]
+
+    def __setitem__(self, i, value):
+        self.__root__ = self.__root__[:i] + (value,) + self.__root__[i + 1 :]
 
     def __repr__(self):
         return (
@@ -114,8 +130,7 @@ class Edge(BaseModel):
         return self[0]
 
     def set_start(self, start):
-        start = Node.to_key(start)
-        self.__root__ = (start, self.__root__[1], self.__root__[2])
+        self[0] = Node.to_key(start)
 
     @property
     def verb(self):
@@ -124,15 +139,21 @@ class Edge(BaseModel):
     def set_verb(self, verb):
         from .traverse import Verb
 
-        self.__root__ = (self.__root__[0], Verb[verb], self.__root__[2])
+        self[1] = Verb[verb]
 
     @property
     def end(self):
         return self[2]
 
     def set_end(self, end):
-        end = Node.to_key(end)
-        self.__root__ = (self.__root__[0], self.__root__[1], end)
+        self[2] = Node.to_key(end)
+
+    @property
+    def data(self):
+        return self[3]
+
+    def set_data(self, data):
+        self[3] = Node.to_key(data)
 
     def get_other(self, direction):
         return self.end if direction.is_outgoing else self.start
@@ -154,7 +175,7 @@ class Edge(BaseModel):
         return f"{TS.vbs}{self.verb}"
 
     @classmethod
-    def create(cls, line: str, ts: TS = TS.sve):
+    def create(cls, line: str, ts: TS = TS.sve, data=None):
         if ts.is_sve:
             _, start, verb, end = line.split(ts)
         elif ts.is_vse:
@@ -162,4 +183,4 @@ class Edge(BaseModel):
         else:
             _, end, verb, start = line.split(ts)
 
-        return Edge(__root__=(start, verb, end))
+        return Edge(__root__=(start, verb, end, data))

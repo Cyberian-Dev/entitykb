@@ -12,7 +12,7 @@ class EdgeIndex(object):
     def __init__(self, root: Path):
         self.dawg_path = root / "edges.dawg"
         self.cache = create_index(
-            str(root / "edges"), encoder=pydantic_encoder, decoder=Edge.create
+            str(root / "edges"), encoder=pydantic_encoder, decoder=None
         )
         self.dawg: CompletionDAWG = self._load_dawg()
 
@@ -22,6 +22,11 @@ class EdgeIndex(object):
     def __contains__(self, edge: Edge) -> bool:
         return self.cache.__contains__(edge.key)
 
+    def __getitem__(self, key) -> Edge:
+        data = self.get_data(key=key)
+        edge = Edge.create(key, data=data)
+        return edge
+
     def get_verbs(self) -> Set[str]:
         verbs = set()
         for line in self.dawg.iterkeys(TS.vbs.value):
@@ -29,11 +34,15 @@ class EdgeIndex(object):
         return verbs
 
     def save(self, edge: Edge):
-        self.cache[edge.key] = None
+        self.cache[edge.key] = edge.data
 
     def remove(self, edge: Edge) -> Optional[Edge]:
         item = self.cache.pop(edge.key, None)
         return item
+
+    def get_data(self, *, edge: Edge = None, key=None):
+        key = key or edge.key
+        return self.cache[key]
 
     def iterate(self, verbs=None, directions=None, nodes=None):
         verbs = (None,) if not verbs else verbs

@@ -1,10 +1,4 @@
-from entitykb.models import (
-    Entity,
-    DocToken,
-    Span,
-    Doc,
-    Token,
-)
+from entitykb.models import Doc, DocToken, Entity, Span, Token
 
 
 def test_entity_create():

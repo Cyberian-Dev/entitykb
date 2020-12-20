@@ -1,4 +1,4 @@
-from entitykb import Graph, Node, Edge
+from entitykb import Edge, Graph, Node
 
 
 def test_connect_remove_nodes_edges(root, normalizer):

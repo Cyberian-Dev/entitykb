@@ -1,6 +1,6 @@
 import pytest
 
-from entitykb import KB, Doc, Edge, SearchRequest, T, SearchResponse
+from entitykb import KB, Doc, Edge, SearchRequest, SearchResponse, T
 
 
 def test_parse(kb: KB):
@@ -60,7 +60,9 @@ def test_save_load_sync(root, kb: KB, apple):
         assert (kb.parse("Apple, Inc.")).spans[0].entity == apple
         assert (kb.parse("Apple,Inc.")).spans[0].entity == apple
 
-    kb.save_node(apple)
+    with kb.transact():
+        kb.save_node(apple)
+
     kb.reindex()
     check()
 

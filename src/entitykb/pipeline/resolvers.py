@@ -14,14 +14,7 @@ class TermResolver(interfaces.IResolver):
         return False
 
     def resolve(self, term: str) -> List[Entity]:
-        entities = []
-
-        for key in self.kb.graph.iterate_keys(terms=term):
-            entity = self.kb.graph.get_node(key)
-            if entity:
-                entities.append(entity)
-
-        return entities
+        return list(self.kb.graph.iterate_nodes(terms=term))
 
 
 class RegexResolver(interfaces.IResolver):
@@ -59,7 +52,6 @@ class RegexResolver(interfaces.IResolver):
 
 
 class GrammarResolver(interfaces.IResolver):
-
     grammar: Union[str, Path] = None
     parser: str = "lalr"
     start: str = "start"
@@ -68,10 +60,11 @@ class GrammarResolver(interfaces.IResolver):
         super().__init__(kb=kb)
 
         if isinstance(self.grammar, Path):
-            data = open(self.grammar, "r").read()
+            data = open(str(self.grammar), "r").read()
         else:
             data = self.grammar  # pragma: no cover
 
+        # noinspection PyTypeChecker
         self.lark = Lark(data, parser=self.parser)
 
     def resolve(self, term: str) -> List[Entity]:
@@ -84,6 +77,7 @@ class GrammarResolver(interfaces.IResolver):
         return entities
 
     def is_prefix(self, term: str) -> bool:
+        # noinspection PyBroadException
         try:
             self.lark.parse(term, start=self.start)
             is_prefix = True

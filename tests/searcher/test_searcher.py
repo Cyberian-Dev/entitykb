@@ -1,15 +1,16 @@
 from typing import List
 
 import pytest
+
 from entitykb import (
-    Entity,
-    T,
-    F,
-    Verb,
-    Trail,
-    Graph,
     DefaultSearcher,
+    Entity,
+    F,
+    Graph,
     LatinLowercaseNormalizer,
+    T,
+    Trail,
+    Verb,
 )
 
 

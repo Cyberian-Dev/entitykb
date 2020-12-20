@@ -1,5 +1,3 @@
-import sqlite3
-
 import diskcache
 from msgpack import packb, unpackb
 
@@ -14,10 +12,7 @@ class MsgPackDisk(diskcache.Disk):
         return key, True
 
     def get(self, key, raw):
-        if raw:
-            return bytes(key) if type(key) is sqlite3.Binary else key
-        else:
-            return unpackb(key, object_hook=self.decoder)
+        return key
 
     def store(self, value, read, key=diskcache.UNKNOWN):
         if not read:
