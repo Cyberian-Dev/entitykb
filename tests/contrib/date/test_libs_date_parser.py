@@ -88,3 +88,7 @@ def test_parse_incomplete():
     assert parse_date("2019 01") is None
     assert parse_date("2019-01-") is None
     assert parse_date("2019-01-0") is None
+
+
+def test_failure_cases():
+    assert parse_date("2019-13-13") is None

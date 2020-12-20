@@ -18,8 +18,11 @@ class DateResolver(GrammarResolver):
         data = tree_to_data(tree)
 
         if data:
-            date = Date(synonyms=(term,), **data)
-            entities.append(date)
+            try:
+                date = Date(synonyms=(term,), **data)
+                entities.append(date)
+            except ValueError:
+                pass
 
         return entities
 
