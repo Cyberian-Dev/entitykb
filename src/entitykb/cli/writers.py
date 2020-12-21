@@ -11,5 +11,4 @@ from .cli import cli
 def jsonl_writer(file_obj, item: Union[Node, Edge]):
     envelope = Envelope(item)
     data = json.dumps(envelope, default=pydantic_encoder)
-    file_obj.write(data)
-    file_obj.write("\n")
+    file_obj.write(f"{data}\n")
