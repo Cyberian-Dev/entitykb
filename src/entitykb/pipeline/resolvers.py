@@ -4,17 +4,17 @@ from typing import List, Union
 
 from lark import Lark, UnexpectedToken, LarkError, Tree
 
-from entitykb import Entity, interfaces
+from entitykb import Entity, interfaces, istr
 
 
 class TermResolver(interfaces.IResolver):
-    def is_prefix(self, term: str) -> bool:
-        for _ in self.kb.graph.iterate_keys(prefixes=term):
+    def is_prefix(self, term: str, labels: istr = None) -> bool:
+        for _ in self.kb.graph.iterate_keys(prefixes=term, labels=labels):
             return True
         return False
 
-    def resolve(self, term: str) -> List[Entity]:
-        return list(self.kb.graph.iterate_nodes(terms=term))
+    def resolve(self, term: str, labels: istr = None) -> List[Entity]:
+        return list(self.kb.graph.iterate_nodes(terms=term, labels=labels))
 
 
 class RegexResolver(interfaces.IResolver):
@@ -37,10 +37,10 @@ class RegexResolver(interfaces.IResolver):
         self.prefix_pattern = re.compile(prefix_str)
         self.resolve_pattern = re.compile(resolve_str)
 
-    def is_prefix(self, term: str) -> bool:
+    def is_prefix(self, term: str, labels: istr = None) -> bool:
         return bool(self.prefix_pattern.fullmatch(term))
 
-    def resolve(self, term: str) -> List[Entity]:
+    def resolve(self, term: str, labels: istr = None) -> List[Entity]:
         entities = []
         match = self.resolve_pattern.fullmatch(term)
         if match:
@@ -67,7 +67,7 @@ class GrammarResolver(interfaces.IResolver):
         # noinspection PyTypeChecker
         self.lark = Lark(data, parser=self.parser)
 
-    def resolve(self, term: str) -> List[Entity]:
+    def resolve(self, term: str, labels: istr = None) -> List[Entity]:
         try:
             tree = self.lark.parse(term, start=self.start)
             entities = self.create_entities(term, tree)
@@ -76,7 +76,7 @@ class GrammarResolver(interfaces.IResolver):
 
         return entities
 
-    def is_prefix(self, term: str) -> bool:
+    def is_prefix(self, term: str, labels: istr = None) -> bool:
         # noinspection PyBroadException
         try:
             self.lark.parse(term, start=self.start)

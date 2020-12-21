@@ -22,6 +22,7 @@ class DefaultExtractor(interfaces.IExtractor):
                     default_cls=TokenHandler,
                     doc=doc,
                     resolver=resolver,
+                    labels=labels,
                 )
                 handlers.append(handler)
         return handlers

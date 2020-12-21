@@ -240,7 +240,7 @@ class IResolver(object):
         pass
 
     @classmethod
-    def is_relevant(cls, labels: Iterable[str]):
+    def is_relevant(cls, labels: istr):
         if not bool(labels):
             return True
 
@@ -251,11 +251,11 @@ class IResolver(object):
         return bool(items)
 
     @abstractmethod
-    def resolve(self, term: str) -> List[Entity]:
+    def resolve(self, term: str, labels: istr = None) -> List[Entity]:
         """ Resolve a term into a list of Entity. """
 
     @abstractmethod
-    def is_prefix(self, term: str) -> bool:
+    def is_prefix(self, term: str, labels: istr = None) -> bool:
         """ Determine if a term is a prefix for a potential entity. """
 
 

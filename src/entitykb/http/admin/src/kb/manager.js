@@ -73,8 +73,8 @@ export class RequestManager {
         return new Entity(data);
     }
 
-    async parseDoc(text) {
-        const body = JSON.stringify({text: text});
+    async parseDoc(text, labels) {
+        const body = JSON.stringify({text: text, labels: labels});
 
         return await fetch(parseURL, {
             ...defaultParams,
@@ -96,7 +96,7 @@ export class RequestManager {
 
     async getDoc(page, thisRequest) {
         this.start(page, thisRequest);
-        let doc = await this.parseDoc(thisRequest.text);
+        let doc = await this.parseDoc(thisRequest.text, thisRequest.labels);
         this.finish();
         return doc;
     }
