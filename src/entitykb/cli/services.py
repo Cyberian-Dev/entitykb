@@ -6,22 +6,6 @@ import typer
 from entitykb import Config, KB, logger
 
 
-class PreviewKB(object):
-    def __init__(self, count=10, echo=None):
-        self.dry_run = []
-        self.count = count
-        self.echo = echo or typer.echo
-
-    def save_node(self, node):
-        if self.count > 0:
-            self.count -= 1
-            self.dry_run.append(node)
-
-    def commit(self):
-        for item in self.dry_run:
-            self.echo(item)
-
-
 def init_kb(root, exist_ok=False) -> bool:
     success = False
 
@@ -52,3 +36,11 @@ def flatten_dict(d, parent_key="", sep="."):
         else:
             items.append((new_key, v))
     return dict(items)
+
+
+def finish(operation: str, success: bool, error_code: int = None):
+    if success:
+        logger.info(f"{operation} completed successfully.")
+    else:
+        logger.warning(f"{operation} failed.")
+        raise typer.Exit(error_code or 1)

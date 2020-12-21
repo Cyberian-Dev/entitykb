@@ -1,14 +1,13 @@
 import csv
 import json
-
 from io import FileIO
 
-from entitykb import Entity, environ, Node, Edge
-from .commands import cli
+from entitykb import Entity, environ, Envelope
+from .cli import cli
 
 
-@cli.register_format("csv")
-def iterate_csv(file_obj: FileIO):
+@cli.register_reader("csv")
+def csv_reader(file_obj: FileIO):
     reader = csv.DictReader(file_obj, dialect="excel")
     for data in reader:
         synonyms = data.pop("synonyms", "")
@@ -18,13 +17,8 @@ def iterate_csv(file_obj: FileIO):
         yield entity
 
 
-@cli.register_format("jsonl")
-def iterate_jsonl(file_obj: FileIO):
+@cli.register_reader("jsonl")
+def jsonl_reader(file_obj: FileIO):
     for line in file_obj:
-        envelope = json.loads(line)
-        kind, payload = envelope["kind"], envelope["payload"]
-        if kind == "node":
-            yield Node.create(**payload)
-
-        elif kind == "edge":
-            yield Edge.create(**payload)
+        envelope = Envelope(json.loads(line))
+        yield envelope.payload

@@ -1,23 +1,6 @@
-from io import StringIO
 from pathlib import Path
-from unittest.mock import MagicMock
 
-from entitykb.cli import readers, services
-
-
-def test_preview_mode():
-    echo = MagicMock()
-    preview = services.PreviewKB(echo=echo)
-
-    file_obj = StringIO(data)
-    it = readers.iterate_csv(file_obj)
-    for entity in it:
-        preview.save_node(entity)
-
-    assert 3 == len(preview.dry_run)
-
-    preview.commit()
-    assert 3 == echo.call_count
+from entitykb.cli import services
 
 
 def test_flatten_dict():

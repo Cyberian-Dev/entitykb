@@ -25,6 +25,7 @@ from .traverse import (
 )
 from .registry import Registry
 from .search import SearchRequest, Hop, Trail, SearchResponse
+from .serialization import Envelope
 
 __all__ = (
     "Comparison",
@@ -36,6 +37,7 @@ __all__ = (
     "Edge",
     "EdgeCriteria",
     "Entity",
+    "Envelope",
     "F",
     "FieldCriteria",
     "FilterStep",
