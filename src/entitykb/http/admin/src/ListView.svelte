@@ -4,7 +4,6 @@
 
     import Pagination from "./Pagination.svelte";
     import ColumnFilter from "./ColumnFilter.svelte";
-    import AttributeFilter from "./AttributeFilter.svelte";
 
     export let schema;
     export let selectKey = null;
@@ -62,7 +61,19 @@
                          on:update={onUpdate}/>
         </th>
         <th class="four wide">
+            Attributes
+            <!--
+            Removed:
+            import AttributeFilter from "./AttributeFilter.svelte";
+
+            If user enters value that doesn't return results
+            the search will loop through entire graph causing
+            the server to spin to 100% and preventing access.
+
+            Need to consider "field index" if wanting to
+            "start" from field value.
             <AttributeFilter on:update={onUpdate}/>
+            -->
         </th>
     </tr>
     </thead>
