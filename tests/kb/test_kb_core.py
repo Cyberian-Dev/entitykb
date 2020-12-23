@@ -28,15 +28,20 @@ def test_save_entity(kb: KB, apple, apple_records):
 
     kb.reindex()
 
+    # parse functions
     assert (kb.parse("AAPL")).spans[0].entity == apple
     assert (kb.parse("Apple, Inc.")).spans[0].entity == apple
     assert (kb.parse("Apple Computers")).spans[0].text == "Apple"
     assert (kb.parse("Apple Records")).spans[0].entity == apple_records
     assert 2 == len((kb.parse("Apple")).spans)
 
-    apple2 = apple.copy(update=dict(synonyms=("Apple", "Apple Computers")))
+    # find functions
+    assert 2 == len(kb.find("apple"))
+    assert kb.find_one("apple") is None  # 2 results cause no return
+    assert kb.find_one("AAPL").name == "Apple, Inc."
 
     # should reset the terms
+    apple2 = apple.copy(update=dict(synonyms=("Apple", "Apple Computers")))
     kb.save_node(apple2)
     kb.reindex()
 

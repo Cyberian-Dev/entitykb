@@ -1,6 +1,6 @@
 import asyncio
 import os
-from typing import Optional
+from typing import Optional, List
 from msgpack import Packer, Unpacker
 
 import aio_msgpack_rpc
@@ -45,6 +45,15 @@ class HandlerKB(interfaces.IKnowledgeBase):
         request = ParseRequest(**request)
         doc = self._kb.parse(request)
         return doc.dict()
+
+    def find(self, request: dict) -> List[dict]:
+        request = ParseRequest(**request)
+        doc = self._kb.parse(request)
+        return [s.entity.dict() for s in doc.spans if s and s.entity]
+
+    def find_one(self, request: dict) -> dict:
+        entities = self.find(request=request)
+        return entities[0] if len(entities) == 1 else None
 
     # graph
 

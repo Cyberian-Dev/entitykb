@@ -1,7 +1,14 @@
 import asyncio
-from typing import Optional, Union
+from typing import Optional, Union, List
 
-from entitykb import Node, ParseRequest, Doc, SearchRequest, SearchResponse
+from entitykb import (
+    Node,
+    ParseRequest,
+    Doc,
+    SearchRequest,
+    SearchResponse,
+    Entity,
+)
 
 from .client_async import AsyncKB
 
@@ -48,6 +55,16 @@ class SyncKB(AsyncKB):
         future = super(SyncKB, self).parse(request)
         doc = run_future(future)
         return doc
+
+    def find(self, request: ParseRequest) -> List[Entity]:
+        future = super(SyncKB, self).find(request)
+        entities = run_future(future)
+        return entities
+
+    def find_one(self, request: ParseRequest) -> Entity:
+        future = super(SyncKB, self).find_one(request)
+        entity = run_future(future)
+        return entity
 
     # graph
 

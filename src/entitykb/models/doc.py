@@ -130,7 +130,7 @@ class Doc(HasTokens):
 
     @property
     def entities(self):
-        return tuple(span.entity for span in self.spans)
+        return tuple(span.entity for span in self.spans if span.entity)
 
 
 class ParseRequest(BaseModel):

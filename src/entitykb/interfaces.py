@@ -192,6 +192,14 @@ class IKnowledgeBase(object):
     def parse(self, request: ParseRequest) -> Doc:
         """ Parse text into Doc into tokens and spans of entities. """
 
+    @abstractmethod
+    def find(self, request: ParseRequest) -> List[Entity]:
+        """ Parse text into and return all found entities. """
+
+    @abstractmethod
+    def find_one(self, request: ParseRequest) -> Entity:
+        """ Parse text into and return entity, if 1 and only 1 found. """
+
     # graph
 
     @abstractmethod

@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 from entitykb import (
     Node,
@@ -7,6 +7,7 @@ from entitykb import (
     SearchRequest,
     SearchResponse,
     interfaces,
+    Entity,
 )
 
 from .connection import RPCConnection
@@ -55,6 +56,14 @@ class AsyncKB(interfaces.IKnowledgeBase):
         async with self.connection as client:
             data: dict = await client.call("parse", request.dict())
             return Doc(**data)
+
+    async def find(self, request: ParseRequest) -> List[Entity]:
+        doc = await self.parse(request=request)
+        return doc.entities
+
+    async def find_one(self, request: ParseRequest) -> Entity:
+        entities = await self.find(request=request)
+        return entities[0] if len(entities) == 1 else None
 
     async def search(
         self, request: Union[str, SearchRequest]

@@ -1,9 +1,10 @@
 from contextlib import contextmanager
-from typing import Optional, Union, Dict
+from typing import Optional, Union, Dict, List
 
 from entitykb import (
     __version__,
     Config,
+    Entity,
     Edge,
     Node,
     ParseRequest,
@@ -85,6 +86,14 @@ class KB(interfaces.IKnowledgeBase):
         assert pipeline, f"Could not find pipeline: {request.pipeline}"
         doc = pipeline(text=request.text, labels=request.labels)
         return doc
+
+    def find(self, request: Union[str, ParseRequest]) -> List[Entity]:
+        doc = self.parse(request=request)
+        return doc.entities
+
+    def find_one(self, request: Union[str, ParseRequest]) -> Optional[Entity]:
+        entities = self.find(request=request)
+        return entities[0] if len(entities) == 1 else None
 
     # graph
 

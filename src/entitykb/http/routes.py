@@ -1,6 +1,7 @@
+from typing import List
 from fastapi import APIRouter, Body, HTTPException, status
 
-from entitykb import rpc, Doc, models, Config
+from entitykb import rpc, Doc, models, Config, Entity
 
 router = APIRouter()
 connection = rpc.RPCConnection()
@@ -52,6 +53,22 @@ async def parse(request: models.ParseRequest = Body(...)) -> Doc:
     """ Parse text and return document object. """
     async with connection as client:
         data = await client.call("parse", request.dict())
+        return data
+
+
+@router.post("/find", tags=["pipeline"], response_model=List[Entity])
+async def find(request: models.ParseRequest = Body(...)) -> List[Entity]:
+    """ Parse text and return document object. """
+    async with connection as client:
+        data = await client.call("find", request.dict())
+        return data
+
+
+@router.post("/find_one", tags=["pipeline"], response_model=Entity)
+async def find_one(request: models.ParseRequest = Body(...)) -> Entity:
+    """ Parse text and return document object. """
+    async with connection as client:
+        data = await client.call("find_one", request.dict())
         return data
 
 
