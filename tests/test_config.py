@@ -58,7 +58,6 @@ def test_config_defaults():
             }
         },
         "searcher": "entitykb.DefaultSearcher",
-        "terms": "entitykb.TermsIndex",
         "tokenizer": "entitykb.WhitespaceTokenizer",
     }
 
@@ -72,7 +71,6 @@ def test_config_roundtrip():
         "modules",
         "normalizer",
         "searcher",
-        "terms",
         "tokenizer",
     }
 

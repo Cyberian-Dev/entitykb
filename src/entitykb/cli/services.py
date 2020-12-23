@@ -6,14 +6,14 @@ import typer
 from entitykb import Config, KB, logger
 
 
-def init_kb(root, exist_ok=False) -> bool:
+def init_kb(root, exist_ok=False, config=None) -> bool:
     success = False
 
     try:
         root = Config.get_root(root)
 
         os.makedirs(str(root), exist_ok=exist_ok)
-        Config.create(root=root)
+        Config.create(root=root, config=config)
 
         kb = KB(root=root)
         kb.reindex()

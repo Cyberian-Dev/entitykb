@@ -56,7 +56,6 @@ class Config(BaseModel):
     modules: List[str] = Field(default_factory=list)
     normalizer: str = "entitykb.LatinLowercaseNormalizer"
     searcher: str = "entitykb.DefaultSearcher"
-    terms: str = "entitykb.TermsIndex"
     tokenizer: str = "entitykb.WhitespaceTokenizer"
 
     pipelines: Dict[str, PipelineConfig] = Field(
@@ -78,7 +77,7 @@ class Config(BaseModel):
         return Path(self.file_path).parent
 
     @classmethod
-    def create(cls, root=None) -> "Config":
+    def create(cls, root=None, config=None) -> "Config":
         config_file_path = cls.get_file_path(root=root)
 
         data = {}
@@ -86,7 +85,7 @@ class Config(BaseModel):
             with config_file_path.open("r") as fp:
                 data = json.load(fp)
 
-        config = cls(file_path=config_file_path, **data)
+        config = config or cls(file_path=config_file_path, **data)
 
         if not config_file_path.is_file():
             config_file_path.parent.mkdir(parents=True, exist_ok=True)

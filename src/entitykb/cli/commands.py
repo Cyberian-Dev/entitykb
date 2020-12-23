@@ -83,6 +83,7 @@ def load(
     environ.mv_split = mv_split
 
     kb = KB(root=root)
+    typer.echo(f"Loading using {file_format} from {in_file}")
 
     if in_file == "-":
         file_obj = typer.open_file(in_file, mode="r")
@@ -138,6 +139,7 @@ def run_http(
     port: int = typer.Option(8000),
     rpc_host: Optional[str] = typer.Option("127.0.0.1"),
     rpc_port: int = typer.Option(3477),
+    reload: bool = typer.Option(False),
 ):
     """ Launch HTTP server using RPC KB. """
     environ.root = root
@@ -145,7 +147,7 @@ def run_http(
     environ.rpc_port = rpc_port
 
     http_app = "entitykb.http.prod:app"
-    uvicorn.run(http_app, host=host, port=port, reload=True)
+    uvicorn.run(http_app, host=host, port=port, reload=reload)
 
 
 @cli.command(name="dev")
