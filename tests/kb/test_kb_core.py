@@ -1,6 +1,6 @@
 import pytest
 
-from entitykb import KB, Doc, Edge, SearchRequest, SearchResponse, T
+from entitykb import KB, Doc, Edge, SearchResponse, T, Direction
 
 
 def test_parse(kb: KB):
@@ -93,6 +93,9 @@ def test_save_for_entity_and_edge(kb: KB, apple, google):
         "edges": 1,
     }
 
+    assert 2 == len(kb.get_edges(node_key=apple))
+    assert 1 == len(kb.get_edges(node_key=apple, direction=Direction.incoming))
+
     kb.save(Edge(start=apple, verb="POINTS_NO_WHERE", end="INVALID|THING"))
     kb.save(Edge(start=apple, verb="POINTS_NO_WHERE", end=google))
     kb.reindex()
@@ -103,7 +106,7 @@ def test_save_for_entity_and_edge(kb: KB, apple, google):
     }
 
     t = T().all_nodes(passthru=True)
-    response = kb.search(request=SearchRequest(q="a", traversal=t))
+    response = kb.search(q="a", traversal=t)
     assert 3 == len(response.nodes)
 
     kb.remove_node(apple.key)
@@ -156,40 +159,35 @@ def test_search_with_results(kb: KB, apple, google):
     kb.reindex()
 
     # default (all nodes, no filter, etc.)
-    response = kb.search(request=SearchRequest())
+    response = kb.search()
     assert [apple, google] == response.nodes
 
     # offset = 1, skips 1 node
-    response = kb.search(request=SearchRequest(offset=1))
+    response = kb.search(offset=1)
     assert [google] == response.nodes
 
     # limit = 1
-    response = kb.search(request=SearchRequest(limit=1))
+    response = kb.search(limit=1)
     assert [apple] == response.nodes
 
     # prefix
-    request = SearchRequest(q="a")
-    response = kb.search(request=request)
+    response = kb.search(q="a")
     assert [apple] == response.nodes
 
     # keys
-    request = SearchRequest(keys=["Apple, Inc.|COMPANY"])
-    response = kb.search(request=request)
+    response = kb.search(keys=["Apple, Inc.|COMPANY"])
     assert [apple] == response.nodes
 
     # keys
-    request = SearchRequest(keys=[apple.key, apple.key, "junk"])
-    response = kb.search(request=request)
+    response = kb.search(keys=[apple.key, apple.key, "junk"])
     assert [apple] == response.nodes
 
     # labels
-    request = SearchRequest(labels=["COMPANY"])
-    response = kb.search(request=request)
+    response = kb.search(labels=["COMPANY"])
     assert 2 == len(response.nodes)
 
     # keys + labels
-    request = SearchRequest(keys=["Apple, Inc.|COMPANY"], labels=["COMPANY"])
-    response = kb.search(request=request)
+    response = kb.search(keys=["Apple, Inc.|COMPANY"], labels=["COMPANY"])
     assert [apple] == response.nodes
 
     # dict
@@ -220,20 +218,16 @@ def test_search_with_results(kb: KB, apple, google):
 
 
 def test_search_no_results(kb: KB, apple):
-    request = SearchRequest(q="invalid")
-    response = kb.search(request=request)
+    response = kb.search(q="invalid")
     assert [] == response.nodes
 
-    request = SearchRequest(keys=["Apple, Inc.|COMPANY"], labels=["INVALID"])
-    response = kb.search(request=request)
+    response = kb.search(keys=["Apple, Inc.|COMPANY"], labels=["INVALID"])
     assert [] == response.nodes
 
-    request = SearchRequest(labels=["INVALID"])
-    response = kb.search(request=request)
+    response = kb.search(labels=["INVALID"])
     assert [] == response.nodes
 
-    request = SearchRequest(limit=0)
-    response = kb.search(request=request)
+    response = kb.search(limit=0)
     assert [] == response.nodes
 
 

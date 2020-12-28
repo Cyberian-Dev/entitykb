@@ -7,6 +7,7 @@ from .enums import TripleSep as TS
 from .funcs import camel_to_snake
 
 label_cache = {}
+NodeKey = Union["Node", str]
 
 
 class Node(BaseModel):
@@ -72,6 +73,13 @@ class Node(BaseModel):
         return registry.create(cls, *args, **kwargs)
 
 
+class IEdge(BaseModel):
+    start: str
+    verb: str
+    end: str
+    data: dict
+
+
 class Edge(BaseModel):
     __root__: Tuple[Any, ...]
 
@@ -113,13 +121,18 @@ class Edge(BaseModel):
             f"Edge(start='{self.start}', verb='{self.verb}', end='{self.end}')"
         )
 
-    def __rshift__(self, end: Union[Node, str]):
+    def __rshift__(self, end: NodeKey):
         self.set_end(end)
         return self
 
-    def __lshift__(self, start: Union[Node, str]):
+    def __lshift__(self, start: NodeKey):
         self.set_start(start)
         return self
+
+    def dict(self, *args, **kwargs):
+        return dict(
+            start=self.start, verb=self.verb, end=self.end, data=self.data
+        )
 
     @property
     def key(self):
@@ -175,7 +188,13 @@ class Edge(BaseModel):
         return f"{TS.vbs}{self.verb}"
 
     @classmethod
-    def create(cls, line: str, ts: TS = TS.sve, data=None):
+    def create(cls, line: Union[dict, str], ts: TS = TS.sve, data=None):
+        if isinstance(line, Edge):
+            return line
+
+        if isinstance(line, dict):
+            return Edge(**line)
+
         if ts.is_sve:
             _, start, verb, end = line.split(ts)
         elif ts.is_vse:

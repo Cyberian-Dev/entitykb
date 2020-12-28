@@ -1,15 +1,15 @@
 import asyncio
 import os
 from typing import Optional, List
-from msgpack import Packer, Unpacker
 
 import aio_msgpack_rpc
+from msgpack import Packer, Unpacker
 
-from entitykb import logger, KB, ParseRequest, SearchRequest, interfaces
+from entitykb import logger, KB, ParseRequest, SearchRequest
 from .connection import RPCConnection
 
 
-class HandlerKB(interfaces.IKnowledgeBase):
+class HandlerKB(object):
     """ EntityKB RPC Handler Server """
 
     def __init__(self, _kb):
@@ -35,7 +35,7 @@ class HandlerKB(interfaces.IKnowledgeBase):
 
     # edges
 
-    def save_edge(self, edge):
+    def save_edge(self, edge: dict):
         edge = self._kb.save_edge(edge)
         return edge.dict()
 
@@ -43,23 +43,37 @@ class HandlerKB(interfaces.IKnowledgeBase):
 
     def parse(self, request: dict) -> dict:
         request = ParseRequest(**request)
-        doc = self._kb.parse(request)
+        doc = self._kb.parse(
+            text=request.text, labels=request.labels, pipeline=request.pipeline
+        )
         return doc.dict()
 
     def find(self, request: dict) -> List[dict]:
         request = ParseRequest(**request)
-        doc = self._kb.parse(request)
+        doc = self._kb.parse(
+            text=request.text, labels=request.labels, pipeline=request.pipeline
+        )
         return [s.entity.dict() for s in doc.spans if s and s.entity]
 
     def find_one(self, request: dict) -> dict:
-        entities = self.find(request=request)
-        return entities[0] if len(entities) == 1 else None
+        request = ParseRequest(**request)
+        doc = self._kb.parse(
+            text=request.text, labels=request.labels, pipeline=request.pipeline
+        )
+        return doc.entities[0].dict() if len(doc.entities) == 1 else None
 
     # graph
 
     def search(self, request: dict) -> dict:
         request = SearchRequest(**request)
-        response = self._kb.search(request)
+        response = self._kb.search(
+            q=request.q,
+            labels=request.labels,
+            keys=request.keys,
+            traversal=request.traversal,
+            limit=request.limit,
+            offset=request.offset,
+        )
         return response.dict()
 
     # admin

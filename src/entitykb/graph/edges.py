@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Set, Optional, List, Tuple
+from typing import Set, Optional, List, Tuple, Iterable
 
 from dawg import CompletionDAWG
 from pydantic.json import pydantic_encoder
@@ -35,8 +35,9 @@ class EdgeIndex(object):
 
     def save(self, edge: Edge):
         self.cache[edge.key] = edge.data
+        return edge
 
-    def remove(self, edge: Edge) -> Optional[Edge]:
+    def remove(self, edge: Edge) -> Optional[dict]:
         item = self.cache.pop(edge.key, None)
         return item
 
@@ -44,7 +45,9 @@ class EdgeIndex(object):
         key = key or edge.key
         return self.cache[key]
 
-    def iterate(self, verbs=None, directions=None, nodes=None):
+    def iterate(
+        self, verbs=None, directions=None, nodes=None
+    ) -> Iterable[Tuple[str, Edge]]:
         verbs = (None,) if not verbs else verbs
         nodes = (None,) if nodes is None else nodes
         directions = Direction.as_tuple(directions, all_if_none=True)
@@ -98,7 +101,9 @@ class EdgeIndex(object):
         dawg = CompletionDAWG(it_keys)
         return dawg
 
-    def _do_iter(self, verb, node_key, direction):
+    def _do_iter(
+        self, verb, node_key, direction
+    ) -> Iterable[Tuple[str, Edge]]:
         ts, tokens = self._sep_split(direction, node_key, verb)
         if ts:
             prefix = ts.join(tokens)

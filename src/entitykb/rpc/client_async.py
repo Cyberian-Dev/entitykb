@@ -1,15 +1,16 @@
-from typing import Optional, Union, List
+from typing import Optional, List
 
 from entitykb import (
+    Doc,
+    Entity,
     Node,
     ParseRequest,
-    Doc,
     SearchRequest,
     SearchResponse,
+    Traversal,
     interfaces,
-    Entity,
+    istr,
 )
-
 from .connection import RPCConnection
 
 
@@ -49,27 +50,44 @@ class AsyncKB(interfaces.IKnowledgeBase):
 
     # search
 
-    async def parse(self, request: Union[str, ParseRequest]) -> Doc:
-        if isinstance(request, str):
-            request = ParseRequest(text=request)
-
+    async def parse(
+        self, text: str, labels: istr = None, pipeline: str = "default"
+    ) -> Doc:
+        request = ParseRequest(text=text, labels=labels, pipeline=pipeline)
         async with self.connection as client:
             data: dict = await client.call("parse", request.dict())
             return Doc(**data)
 
-    async def find(self, request: ParseRequest) -> List[Entity]:
-        doc = await self.parse(request=request)
+    async def find(
+        self, text: str, labels: istr = None, pipeline: str = "default"
+    ) -> List[Entity]:
+        doc = await self.parse(text=text, labels=labels, pipeline=pipeline)
         return doc.entities
 
-    async def find_one(self, request: ParseRequest) -> Entity:
-        entities = await self.find(request=request)
+    async def find_one(
+        self, text: str, labels: istr = None, pipeline: str = "default"
+    ) -> Entity:
+        entities = await self.find(text=text, labels=labels, pipeline=pipeline)
         return entities[0] if len(entities) == 1 else None
 
     async def search(
-        self, request: Union[str, SearchRequest]
+        self,
+        q: str = None,
+        labels: istr = None,
+        keys: istr = None,
+        traversal: Traversal = None,
+        limit: int = 100,
+        offset: int = 0,
     ) -> SearchResponse:
-        if isinstance(request, str):
-            request = SearchRequest(q=request)
+
+        request = SearchRequest(
+            q=q,
+            labels=labels,
+            keys=keys,
+            traversal=traversal,
+            limit=limit,
+            offset=offset,
+        )
 
         async with self.connection as client:
             data: dict = await client.call("search", request.dict())

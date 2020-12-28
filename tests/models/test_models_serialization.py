@@ -33,7 +33,7 @@ def test_serialize_edge():
     s: str = json.dumps(env_0, default=pydantic_encoder)
     d: dict = json.loads(s)
     assert d.keys() == {"kind", "payload"}
-    assert d["payload"].keys() == {"__root__"}
+    assert d["payload"].keys() == {"start", "verb", "end", "data"}
 
     env_1 = Envelope(d)
     assert env_1.kind == Kind.Edge

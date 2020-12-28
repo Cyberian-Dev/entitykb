@@ -1,4 +1,4 @@
-from entitykb.models import Entity, Node
+from entitykb.models import Entity, Node, Edge, TripleSep as TS
 
 
 class CustomNode(Node):
@@ -20,3 +20,17 @@ def test_create_node():
     assert isinstance(Node.create(), Node)
     assert isinstance(CustomNode.create(), CustomNode)
     assert Node.create(name="abc").key == "abc|ENTITY"
+
+
+def test_create_edge():
+    edge = Edge(start="a", verb="IS_A", end="b")
+    assert edge.dict() == {
+        "data": None,
+        "end": "b",
+        "start": "a",
+        "verb": "IS_A",
+    }
+
+    assert edge == Edge.create(edge.dict())
+    assert edge == Edge.create(edge.sve)
+    assert edge == Edge.create(edge.evs, ts=TS.evs)

@@ -8,7 +8,7 @@ from .funcs import (
     under_limit,
     label_filter,
 )
-from .node import Node, Edge
+from .node import Node, Edge, NodeKey, IEdge
 from .entity import Entity
 from .traverse import (
     F,
@@ -42,7 +42,9 @@ __all__ = (
     "FieldCriteria",
     "FilterStep",
     "Hop",
+    "IEdge",
     "Node",
+    "NodeKey",
     "ParseRequest",
     "Registry",
     "SearchRequest",

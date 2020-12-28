@@ -4,16 +4,18 @@ from typing import Optional, Union, Dict, List
 from entitykb import (
     __version__,
     Config,
+    Direction,
+    Doc,
     Entity,
     Edge,
     Node,
-    ParseRequest,
+    NodeKey,
     Pipeline,
     Registry,
-    SearchRequest,
     SearchResponse,
-    under_limit,
+    Traversal,
     interfaces,
+    istr,
 )
 
 
@@ -64,45 +66,78 @@ class KB(interfaces.IKnowledgeBase):
         self.graph.save_node(node)
         return node
 
-    def remove_node(self, node_key: Union[Node, str]) -> Node:
+    def remove_node(self, node_key: NodeKey) -> Node:
         node = self.graph.remove_node(node_key)
         return node
 
     # edges
 
     def save_edge(self, edge: Union[Edge, dict]):
+        edge = Edge.create(edge)
         return self.graph.save_edge(edge)
 
-    def connect(self, *, start: Node, verb: str, end: Node):
-        return self.graph.connect(start=start, verb=verb, end=end)
+    def connect(self, *, start: Node, verb: str, end: Node, data: dict = None):
+        return self.graph.connect(start=start, verb=verb, end=end, data=data)
+
+    def get_edges(
+        self,
+        node_key: NodeKey,
+        verbs: istr = None,
+        direction: Optional[Direction] = None,
+    ) -> List[Edge]:
+
+        node_key = Node.to_key(node_key)
+        edges = []
+
+        for _, edge in self.graph.iterate_edges(
+            nodes=node_key, verbs=verbs, directions=direction
+        ):
+            edges.append(edge)
+
+        return edges
 
     # pipeline
 
-    def parse(self, request: Union[str, ParseRequest]):
-        if isinstance(request, str):
-            request = ParseRequest(text=request)
-
-        pipeline = self.pipelines.get(request.pipeline)
-        assert pipeline, f"Could not find pipeline: {request.pipeline}"
-        doc = pipeline(text=request.text, labels=request.labels)
+    def parse(
+        self, text: str, labels: istr = None, pipeline: str = "default"
+    ) -> Doc:
+        pipeline = self.pipelines.get(pipeline)
+        assert pipeline, f"Could not find pipeline: {pipeline}"
+        doc = pipeline(text=text, labels=labels)
         return doc
 
-    def find(self, request: Union[str, ParseRequest]) -> List[Entity]:
-        doc = self.parse(request=request)
+    def find(
+        self, text: str, labels: istr = None, pipeline: str = "default"
+    ) -> List[Entity]:
+        doc = self.parse(text=text, labels=labels, pipeline=pipeline)
         return doc.entities
 
-    def find_one(self, request: Union[str, ParseRequest]) -> Optional[Entity]:
-        entities = self.find(request=request)
-        return entities[0] if len(entities) == 1 else None
+    def find_one(
+        self, text: str, labels: istr = None, pipeline: str = "default"
+    ) -> Optional[Entity]:
+        doc = self.parse(text=text, labels=labels, pipeline=pipeline)
+        return doc.entities[0] if len(doc.entities) == 1 else None
 
     # graph
 
-    def search(self, request: Union[str, SearchRequest]) -> SearchResponse:
-        if isinstance(request, str):
-            request = SearchRequest(q=request)
+    def search(
+        self,
+        q: str = None,
+        labels: istr = None,
+        keys: istr = None,
+        traversal: Traversal = None,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> SearchResponse:
 
-        searcher = self._create_searcher(request)
-        nodes, trails = self._get_page(request, searcher)
+        starts = self.graph.iterate_keys(prefixes=q, labels=labels, keys=keys)
+
+        searcher = self.config.create_searcher(
+            graph=self.graph, traversal=traversal, starts=starts
+        )
+
+        nodes, trails = self.do_search(searcher, limit, offset)
+
         return SearchResponse.construct(nodes=nodes, trails=trails)
 
     # admin
@@ -137,43 +172,38 @@ class KB(interfaces.IKnowledgeBase):
         schema = Registry.instance().create_schema(labels, verbs)
         return schema.dict()
 
-    # private methods
+    # search methods
 
-    def _get_starts(self, request: SearchRequest):
-        return self.graph.iterate_keys(
-            prefixes=request.q, labels=request.labels, keys=request.keys
-        )
+    def do_search(self, searcher, limit, offset, current=0):
+        trail_it = iter(searcher)
 
-    def _create_searcher(self, request: SearchRequest):
-        return self.config.create_searcher(
-            graph=self.graph,
-            traversal=request.traversal,
-            starts=self._get_starts(request),
-        )
+        # skip to offset
+        to_skip = offset - current
+        self.collect(trail_it=trail_it, count=to_skip)
 
-    def _get_page(self, request, searcher):
-        # paginate request
-        # performance tuning opportunity
-        # store search with request as key
-        # refactor to keep last item for "has_more" logic
-        index = -1
+        # collect nodes and trails
+        to_collect = limit - offset
+        nodes, trails = self.collect(trail_it=trail_it, count=to_collect)
+
+        return nodes, trails
+
+    def collect(self, trail_it, count):
         trails = []
         nodes = []
+        num = 0
 
-        for trail in searcher:
-            index += 1
-
-            if index < request.offset:
-                continue
-
-            if under_limit(items=trails, limit=request.limit):
-                node = self.get_node(trail.end)
-                if node:
-                    trails.append(trail)
-                    nodes.append(node)
-                else:
-                    index -= 1
-            else:
+        while num < count:
+            try:
+                trail = next(trail_it)
+            except StopIteration:
                 break
+
+            node = self.get_node(trail.end)
+            if node:
+                trails.append(trail)
+                nodes.append(node)
+                num += 1
+                if num >= count:
+                    break
 
         return nodes, trails

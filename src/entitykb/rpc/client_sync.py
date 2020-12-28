@@ -1,15 +1,14 @@
 import asyncio
-from typing import Optional, Union, List
+from typing import Optional, List
 
 from entitykb import (
-    Node,
-    ParseRequest,
     Doc,
-    SearchRequest,
-    SearchResponse,
     Entity,
+    Node,
+    SearchResponse,
+    Traversal,
+    istr,
 )
-
 from .client_async import AsyncKB
 
 
@@ -51,25 +50,54 @@ class SyncKB(AsyncKB):
 
     # pipeline
 
-    def parse(self, request: Union[str, ParseRequest]) -> Doc:
-        future = super(SyncKB, self).parse(request)
+    def parse(
+        self, text: str, labels: istr = None, pipeline: str = "default"
+    ) -> Doc:
+        future = super(SyncKB, self).parse(
+            text=text, labels=labels, pipeline=pipeline
+        )
         doc = run_future(future)
         return doc
 
-    def find(self, request: ParseRequest) -> List[Entity]:
-        future = super(SyncKB, self).find(request)
+    def find(
+        self, text: str, labels: istr = None, pipeline: str = "default"
+    ) -> List[Entity]:
+        future = super(SyncKB, self).find(
+            text=text, labels=labels, pipeline=pipeline
+        )
         entities = run_future(future)
         return entities
 
-    def find_one(self, request: ParseRequest) -> Entity:
-        future = super(SyncKB, self).find_one(request)
+    def find_one(
+        self, text: str, labels: istr = None, pipeline: str = "default"
+    ) -> Entity:
+        future = super(SyncKB, self).find_one(
+            text=text, labels=labels, pipeline=pipeline
+        )
         entity = run_future(future)
         return entity
 
     # graph
 
-    def search(self, request: SearchRequest) -> SearchResponse:
-        future = super(SyncKB, self).search(request)
+    def search(
+        self,
+        q: str = None,
+        labels: istr = None,
+        keys: istr = None,
+        traversal: Traversal = None,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> SearchResponse:
+
+        future = super(SyncKB, self).search(
+            q=q,
+            labels=labels,
+            keys=keys,
+            traversal=traversal,
+            limit=limit,
+            offset=offset,
+        )
+
         doc = run_future(future)
         return doc
 

@@ -39,10 +39,10 @@ async def remove_node(key: str):
 
 
 @router.post("/edges", tags=["edges"])
-async def save_edge(edge: dict = Body(...)) -> dict:
+async def save_edge(edge: models.IEdge = Body(...)) -> models.IEdge:
     """ Save edge to graph store. """
     async with connection as client:
-        return await client.call("save_edge", edge)
+        return await client.call("save_edge", edge.dict())
 
 
 # pipeline
@@ -58,7 +58,7 @@ async def parse(request: models.ParseRequest = Body(...)) -> Doc:
 
 @router.post("/find", tags=["pipeline"], response_model=List[Entity])
 async def find(request: models.ParseRequest = Body(...)) -> List[Entity]:
-    """ Parse text and return document object. """
+    """ Parse text and return found entities. """
     async with connection as client:
         data = await client.call("find", request.dict())
         return data
@@ -66,7 +66,7 @@ async def find(request: models.ParseRequest = Body(...)) -> List[Entity]:
 
 @router.post("/find_one", tags=["pipeline"], response_model=Entity)
 async def find_one(request: models.ParseRequest = Body(...)) -> Entity:
-    """ Parse text and return document object. """
+    """ Parse text and return entity, if one and only one found. """
     async with connection as client:
         data = await client.call("find_one", request.dict())
         return data

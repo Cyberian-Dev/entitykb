@@ -20,7 +20,12 @@ def test_edge():
     start = Node()
     end = Node()
     edge = Edge(start=start, end=end, verb="IS_A")
-    assert edge.dict() == dict(__root__=(start.key, "IS_A", end.key, None))
+    assert edge.dict() == {
+        "start": start.key,
+        "verb": "IS_A",
+        "end": end.key,
+        "data": None,
+    }
 
     two = start >> "IS_A" >> end
     assert two == edge
@@ -31,8 +36,18 @@ def test_edge():
     assert three.dict() == edge.dict()
 
     edge.set_verb("HAS_A")
-    assert edge.dict() == dict(__root__=(start.key, "HAS_A", end.key, None))
+    assert edge.dict() == {
+        "start": start.key,
+        "verb": "HAS_A",
+        "end": end.key,
+        "data": None,
+    }
 
     data = dict(a="b")
     edge.set_data(data)
-    assert edge.dict() == dict(__root__=(start.key, "HAS_A", end.key, data))
+    assert edge.dict() == {
+        "start": start.key,
+        "verb": "HAS_A",
+        "end": end.key,
+        "data": {"a": "b"},
+    }

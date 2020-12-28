@@ -1,17 +1,18 @@
 from abc import abstractmethod
 from pathlib import Path
-from typing import Iterable, Iterator, List, Optional, Set, Tuple, Union
+from typing import Iterable, Iterator, List, Optional, Set, Tuple
 
 from entitykb import (
+    Direction,
     Doc,
     Edge,
     Entity,
     Node,
-    ParseRequest,
-    SearchRequest,
+    NodeKey,
     SearchResponse,
     Span,
     Token,
+    Traversal,
     istr,
 )
 
@@ -66,7 +67,7 @@ class IGraph(object):
         """ Get a node using key. """
 
     @abstractmethod
-    def remove_node(self, node_key: Union[Node, str]) -> Node:
+    def remove_node(self, node_key: NodeKey) -> Node:
         """ Remove a node using the node or key. """
 
     @abstractmethod
@@ -84,7 +85,13 @@ class IGraph(object):
         """ Remove an edge from the graph. """
 
     @abstractmethod
-    def connect(self, *, start: Node, verb: str, end: Node) -> Edge:
+    def remove_edges(self, node: NodeKey) -> Edge:
+        """ Remove an edge from the graph. """
+
+    @abstractmethod
+    def connect(
+        self, *, start: Node, verb: str, end: Node, data: dict = None
+    ) -> Edge:
         """ Connect 2 nodes with a verb and return the new Edge. """
 
     @abstractmethod
@@ -183,27 +190,54 @@ class IKnowledgeBase(object):
     # edges
 
     @abstractmethod
-    def save_edge(self, edge):
+    def save_edge(self, edge: Edge):
         """ Save edge to KB. """
+
+    @abstractmethod
+    def connect(self, *, start: Node, verb: str, end: Node, data: dict = None):
+        """ Connect start to end via verb with data. """
+
+    @abstractmethod
+    def get_edges(
+        self,
+        node_key: NodeKey,
+        verbs: istr = None,
+        direction: Optional[Direction] = None,
+    ) -> List[Edge]:
+        """ Get edges for a given Node. """
 
     # pipeline
 
     @abstractmethod
-    def parse(self, request: ParseRequest) -> Doc:
+    def parse(
+        self, text: str, labels: istr = None, pipeline: str = "default"
+    ) -> Doc:
         """ Parse text into Doc into tokens and spans of entities. """
 
     @abstractmethod
-    def find(self, request: ParseRequest) -> List[Entity]:
+    def find(
+        self, text: str, labels: istr = None, pipeline: str = "default"
+    ) -> List[Entity]:
         """ Parse text into and return all found entities. """
 
     @abstractmethod
-    def find_one(self, request: ParseRequest) -> Entity:
+    def find_one(
+        self, text: str, labels: istr = None, pipeline: str = "default"
+    ) -> Optional[Entity]:
         """ Parse text into and return entity, if 1 and only 1 found. """
 
     # graph
 
     @abstractmethod
-    def search(self, request: SearchRequest) -> SearchResponse:
+    def search(
+        self,
+        q: str = None,
+        labels: istr = None,
+        keys: istr = None,
+        traversal: Traversal = None,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> SearchResponse:
         """ Suggest term auto-completes, filtered by query. """
 
     # admin

@@ -1,6 +1,6 @@
-from typing import List, Any, Tuple
+from typing import List, Any, Tuple, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 from .node import Edge, Node
 from .traverse import Traversal
@@ -8,11 +8,15 @@ from .traverse import Traversal
 
 class SearchRequest(BaseModel):
     q: str = None
-    labels: List[str] = Field(default_factory=list)
-    keys: List[str] = Field(default_factory=list)
+    labels: Optional[List[str]] = Field(default_factory=list)
+    keys: Optional[List[str]] = Field(default_factory=list)
     traversal: Traversal = Field(default_factory=Traversal)
     limit: int = 100
     offset: int = 0
+
+    @validator("traversal", pre=True, always=True)
+    def set_traversal(cls, value):
+        return Traversal() if value is None else value
 
 
 class Hop(BaseModel):

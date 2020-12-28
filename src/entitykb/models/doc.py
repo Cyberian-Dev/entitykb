@@ -135,5 +135,5 @@ class Doc(HasTokens):
 
 class ParseRequest(BaseModel):
     text: str
+    labels: Optional[List[str]] = None
     pipeline: str = "default"
-    labels: List[str] = []
