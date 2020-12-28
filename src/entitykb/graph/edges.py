@@ -12,7 +12,7 @@ class EdgeIndex(object):
     def __init__(self, root: Path):
         self.dawg_path = root / "edges.dawg"
         self.cache = create_index(
-            str(root / "edges"), encoder=pydantic_encoder, decoder=Edge.create
+            str(root / "edges"), encoder=pydantic_encoder, decoder=None
         )
         self.dawg: CompletionDAWG = self._load_dawg()
 
@@ -23,7 +23,9 @@ class EdgeIndex(object):
         return self.cache.__contains__(edge.key)
 
     def __getitem__(self, key) -> Edge:
-        return self.cache[key]
+        edge = Edge.from_line(key)
+        edge.set_data(self.get_data(key=key))
+        return edge
 
     def get_verbs(self) -> Set[str]:
         verbs = set()
@@ -32,16 +34,17 @@ class EdgeIndex(object):
         return verbs
 
     def save(self, edge: Edge):
-        self.cache[edge.key] = edge
-        return edge
+        self.cache[edge.key] = edge.data
 
     def remove(self, edge: Edge) -> Optional[Edge]:
         item = self.cache.pop(edge.key, None)
         return item
 
-    def iterate(
-        self, verbs=None, directions=None, nodes=None
-    ) -> Iterable[Tuple[str, Edge]]:
+    def get_data(self, *, edge: Edge = None, key=None):
+        key = key or edge.key
+        return self.cache[key]
+
+    def iterate(self, verbs=None, directions=None, nodes=None):
         verbs = (None,) if not verbs else verbs
         nodes = (None,) if nodes is None else nodes
         directions = Direction.as_tuple(directions, all_if_none=True)
@@ -84,6 +87,8 @@ class EdgeIndex(object):
             for sve_key in self.cache.keys():
                 yield sve_key
 
+                # creating shallow edge from key is faster than
+                # retrieval full edge from cache index
                 edge = Edge.from_line(sve_key, ts=TS.sve)
                 yield edge.vse
                 yield edge.evs
@@ -102,6 +107,7 @@ class EdgeIndex(object):
         if ts:
             prefix = ts.join(tokens)
             for line in self.dawg.iterkeys(prefix):
+                # yields a shallow edge from line str
                 edge = Edge.from_line(line, ts=ts)
                 yield edge.get_other(direction), edge
 
