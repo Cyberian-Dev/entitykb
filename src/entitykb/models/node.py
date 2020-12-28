@@ -188,13 +188,17 @@ class Edge(BaseModel):
         return f"{TS.vbs}{self.verb}"
 
     @classmethod
-    def create(cls, line: Union[dict, str], ts: TS = TS.sve, data=None):
-        if isinstance(line, Edge):
-            return line
+    def create(cls, item: Union[dict, "Edge"] = None, **data):
+        if isinstance(item, Edge):
+            return item
 
-        if isinstance(line, dict):
-            return Edge(**line)
+        if isinstance(item, dict):
+            data = {**item, **data}
 
+        return Edge(**data)
+
+    @classmethod
+    def from_line(cls, line: Union[dict, str], ts: TS = TS.sve, data=None):
         if ts.is_sve:
             _, start, verb, end = line.split(ts)
         elif ts.is_vse:

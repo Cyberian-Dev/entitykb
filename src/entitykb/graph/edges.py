@@ -12,7 +12,7 @@ class EdgeIndex(object):
     def __init__(self, root: Path):
         self.dawg_path = root / "edges.dawg"
         self.cache = create_index(
-            str(root / "edges"), encoder=pydantic_encoder, decoder=None
+            str(root / "edges"), encoder=pydantic_encoder, decoder=Edge.create
         )
         self.dawg: CompletionDAWG = self._load_dawg()
 
@@ -23,9 +23,7 @@ class EdgeIndex(object):
         return self.cache.__contains__(edge.key)
 
     def __getitem__(self, key) -> Edge:
-        data = self.get_data(key=key)
-        edge = Edge.create(key, data=data)
-        return edge
+        return self.cache[key]
 
     def get_verbs(self) -> Set[str]:
         verbs = set()
@@ -34,16 +32,12 @@ class EdgeIndex(object):
         return verbs
 
     def save(self, edge: Edge):
-        self.cache[edge.key] = edge.data
+        self.cache[edge.key] = edge
         return edge
 
-    def remove(self, edge: Edge) -> Optional[dict]:
+    def remove(self, edge: Edge) -> Optional[Edge]:
         item = self.cache.pop(edge.key, None)
         return item
-
-    def get_data(self, *, edge: Edge = None, key=None):
-        key = key or edge.key
-        return self.cache[key]
 
     def iterate(
         self, verbs=None, directions=None, nodes=None
@@ -71,7 +65,7 @@ class EdgeIndex(object):
 
     def clean(self, node_index):
         for key in self.cache.keys():
-            edge = Edge.create(key, ts=TS.sve)
+            edge = Edge.from_line(key, ts=TS.sve)
             if edge.start not in node_index:
                 self.remove(edge)
             elif edge.end not in node_index:
@@ -90,7 +84,7 @@ class EdgeIndex(object):
             for sve_key in self.cache.keys():
                 yield sve_key
 
-                edge = Edge.create(sve_key, ts=TS.sve)
+                edge = Edge.from_line(sve_key, ts=TS.sve)
                 yield edge.vse
                 yield edge.evs
                 vbs_set.add(edge.vbs)
@@ -108,7 +102,7 @@ class EdgeIndex(object):
         if ts:
             prefix = ts.join(tokens)
             for line in self.dawg.iterkeys(prefix):
-                edge = Edge.create(line, ts=ts)
+                edge = Edge.from_line(line, ts=ts)
                 yield edge.get_other(direction), edge
 
     @classmethod

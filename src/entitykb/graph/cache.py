@@ -24,7 +24,8 @@ class MsgPackDisk(diskcache.Disk):
         data = super(MsgPackDisk, self).fetch(mode, filename, value, read)
         if not read:
             if data is not None:
-                data = unpackb(data, object_hook=self.decoder)
+                data = unpackb(data)
+                data = self.decoder(**data) if self.decoder else data
         return data
 
 

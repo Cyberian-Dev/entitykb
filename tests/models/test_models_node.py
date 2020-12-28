@@ -32,5 +32,5 @@ def test_create_edge():
     }
 
     assert edge == Edge.create(edge.dict())
-    assert edge == Edge.create(edge.sve)
-    assert edge == Edge.create(edge.evs, ts=TS.evs)
+    assert edge == Edge.from_line(edge.sve)
+    assert edge == Edge.from_line(edge.evs, ts=TS.evs)

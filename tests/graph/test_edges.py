@@ -54,10 +54,8 @@ def test_remove_start(a, b, c, index):
     data = {"say": "hello!"}
     e0 = Edge(start=b, verb=v0, end=a, data=data)
     index.save(e0)
-    assert e0 in index
 
-    assert index.get_data(edge=e0) == data
-    assert index.get_data(key=e0.key) == data
+    assert e0 in index
     assert index[e0.key] == e0
 
     index.reindex()
