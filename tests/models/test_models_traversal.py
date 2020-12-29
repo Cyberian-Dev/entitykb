@@ -87,7 +87,7 @@ def test_walk_nodes():
     assert t[0] == WalkStep(
         verbs=["IS_A"],
         max_hops=1,
-        directions=(Direction.outgoing, Direction.incoming),
+        directions=[Direction.outgoing, Direction.incoming],
     )
     assert t.dict() == [
         {
@@ -100,32 +100,32 @@ def test_walk_nodes():
 
     t = T().out_nodes("IS_A")
     assert t[0] == WalkStep(
-        verbs=["IS_A"], max_hops=1, directions=Direction.outgoing
+        verbs=["IS_A"], max_hops=1, directions=[Direction.outgoing]
     )
 
     t = T().in_nodes("IS_A")
     assert t[0] == WalkStep(
-        verbs=["IS_A"], max_hops=1, directions=Direction.incoming
+        verbs=["IS_A"], max_hops=1, directions=[Direction.incoming]
     )
 
 
 def test_filter_by_field():
     t = T().include(F.label == "PERSON")
     assert t[0] == FilterStep(
-        criteria=(
+        criteria=[
             FieldCriteria(
                 field="label", compare=Comparison.exact, value="PERSON"
             )
-        )
+        ]
     )
 
     t = T().exclude(F.label == "PERSON")
     assert t[0] == FilterStep(
-        criteria=(
+        criteria=[
             FieldCriteria(
                 field="label", compare=Comparison.exact, value="PERSON"
             )
-        ),
+        ],
         exclude=True,
     )
 
@@ -133,11 +133,11 @@ def test_filter_by_field():
 def test_filter_by_edge():
     t = T().include(V.is_a >> "Apple|COMPANY")
     assert t[0] == FilterStep(
-        criteria=(
+        criteria=[
             EdgeCriteria(
                 verbs=["IS_A"],
                 directions=[Direction.outgoing],
                 keys=["Apple|COMPANY"],
             )
-        )
+        ]
     )

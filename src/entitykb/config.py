@@ -111,7 +111,7 @@ class Config(BaseModel):
 
     def info(self) -> dict:
         info = self.dict()
-        info["root"] = self.root
+        info["root"] = str(self.root)
         return info
 
     def create_normalizer(self):

@@ -1,4 +1,12 @@
-from entitykb import Comparison, Direction, F, SearchRequest, T
+from entitykb import (
+    Comparison,
+    Direction,
+    F,
+    SearchRequest,
+    T,
+    EdgeRequest,
+    Node,
+)
 
 
 def test_roundtrip():
@@ -34,3 +42,10 @@ def test_roundtrip():
     }
 
     assert SearchRequest(**data).dict() == data
+
+
+def test_edge_request():
+    node = Node()
+    # noinspection PyTypeChecker
+    request = EdgeRequest(node_key=node)
+    assert request.node_key == node.key

@@ -5,7 +5,7 @@ from typing import Optional, List
 import aio_msgpack_rpc
 from msgpack import Packer, Unpacker
 
-from entitykb import logger, KB, ParseRequest, SearchRequest
+from entitykb import logger, KB, ParseRequest, SearchRequest, EdgeRequest
 from .connection import RPCConnection
 
 
@@ -32,6 +32,27 @@ class HandlerKB(object):
     def remove_node(self, key) -> dict:
         node = self._kb.remove_node(key)
         return node.dict()
+
+    def get_neighbors(self, request: dict) -> List[dict]:
+        request = EdgeRequest(**request)
+        nodes = self._kb.get_neighbors(
+            node_key=request.node_key,
+            verb=request.verb,
+            label=request.label,
+            direction=request.direction,
+            limit=request.limit,
+        )
+        return [node.dict() for node in nodes]
+
+    def get_edges(self, request: dict) -> List[dict]:
+        request = EdgeRequest(**request)
+        edges = self._kb.get_edges(
+            node_key=request.node_key,
+            verb=request.verb,
+            direction=request.direction,
+            limit=request.limit,
+        )
+        return [edge.dict() for edge in edges]
 
     # edges
 

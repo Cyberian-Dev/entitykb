@@ -2,9 +2,12 @@ import asyncio
 from typing import Optional, List
 
 from entitykb import (
+    Direction,
     Doc,
+    Edge,
     Entity,
     Node,
+    NodeKey,
     SearchResponse,
     Traversal,
     istr,
@@ -36,17 +39,44 @@ class SyncKB(AsyncKB):
         node = run_future(future)
         return node
 
-    def remove_node(self, key) -> Node:
+    def remove_node(self, key: str) -> Node:
         future = super(SyncKB, self).remove_node(key)
         node = run_future(future)
         return node
 
+    def get_neighbors(
+        self,
+        node_key: NodeKey,
+        verb: str = None,
+        label: str = None,
+        direction: Optional[Direction] = None,
+        limit: int = 100,
+    ) -> List[Node]:
+        future = super(SyncKB, self).get_neighbors(
+            node_key, verb, label, direction, limit
+        )
+        neighbors = run_future(future)
+        return neighbors
+
     # edges
 
-    def save_edge(self, edge):
+    def save_edge(self, edge: Edge):
         future = super(SyncKB, self).save_edge(edge)
         edge = run_future(future)
         return edge
+
+    def get_edges(
+        self,
+        node_key: NodeKey,
+        verb: str = None,
+        direction: Optional[Direction] = None,
+        limit: int = 100,
+    ) -> List[Edge]:
+        future = super(SyncKB, self).get_edges(
+            node_key, verb, direction, limit
+        )
+        edges = run_future(future)
+        return edges
 
     # pipeline
 

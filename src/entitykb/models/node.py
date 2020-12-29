@@ -77,7 +77,7 @@ class IEdge(BaseModel):
     start: str
     verb: str
     end: str
-    data: dict
+    data: dict = None
 
 
 class Edge(BaseModel):

@@ -187,24 +187,30 @@ class IKnowledgeBase(object):
     def remove_node(self, key) -> Node:
         """ Remove node and relationships from KB. """
 
-    # edges
-
     @abstractmethod
-    def save_edge(self, edge: Edge):
-        """ Save edge to KB. """
-
-    @abstractmethod
-    def connect(self, *, start: Node, verb: str, end: Node, data: dict = None):
-        """ Connect start to end via verb with data. """
+    def get_neighbors(
+        self,
+        node_key: NodeKey,
+        verb: str = None,
+        label: str = None,
+        direction: Optional[Direction] = None,
+    ) -> List[Node]:
+        """ Retrieve unique neighbor nodes. """
 
     @abstractmethod
     def get_edges(
         self,
         node_key: NodeKey,
-        verbs: istr = None,
+        verb: str = None,
         direction: Optional[Direction] = None,
     ) -> List[Edge]:
         """ Get edges for a given Node. """
+
+    # edges
+
+    @abstractmethod
+    def save_edge(self, edge: Edge):
+        """ Save edge to KB. """
 
     # pipeline
 

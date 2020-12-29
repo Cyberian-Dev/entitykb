@@ -70,6 +70,52 @@ class KB(interfaces.IKnowledgeBase):
         node = self.graph.remove_node(node_key)
         return node
 
+    def get_neighbors(
+        self,
+        node_key: NodeKey,
+        verb: str = None,
+        label: str = None,
+        direction: Optional[Direction] = None,
+        limit: int = 100,
+    ) -> List[Node]:
+
+        node_key = Node.to_key(node_key)
+        seen_keys = set()
+        neighbors = []
+
+        for other_key, _ in self.graph.iterate_edges(
+            nodes=node_key, verbs=verb, directions=direction
+        ):
+            if other_key not in seen_keys:
+                seen_keys.add(other_key)
+                other_node = self.get_node(other_key)
+                if other_node and (label is None or other_node.label == label):
+                    neighbors.append(other_node)
+                    if len(neighbors) >= limit:
+                        break
+
+        return neighbors
+
+    def get_edges(
+        self,
+        node_key: NodeKey,
+        verb: str = None,
+        direction: Optional[Direction] = None,
+        limit: int = 100,
+    ) -> List[Edge]:
+
+        node_key = Node.to_key(node_key)
+        edges = []
+
+        for _, edge in self.graph.iterate_edges(
+            nodes=node_key, verbs=verb, directions=direction
+        ):
+            edges.append(edge)
+            if len(edges) >= limit:
+                break
+
+        return edges
+
     # edges
 
     def save_edge(self, edge: Union[Edge, dict]):
@@ -78,23 +124,6 @@ class KB(interfaces.IKnowledgeBase):
 
     def connect(self, *, start: Node, verb: str, end: Node, data: dict = None):
         return self.graph.connect(start=start, verb=verb, end=end, data=data)
-
-    def get_edges(
-        self,
-        node_key: NodeKey,
-        verbs: istr = None,
-        direction: Optional[Direction] = None,
-    ) -> List[Edge]:
-
-        node_key = Node.to_key(node_key)
-        edges = []
-
-        for _, edge in self.graph.iterate_edges(
-            nodes=node_key, verbs=verbs, directions=direction
-        ):
-            edges.append(edge)
-
-        return edges
 
     # pipeline
 

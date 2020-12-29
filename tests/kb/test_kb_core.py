@@ -95,6 +95,20 @@ def test_save_for_entity_and_edge(kb: KB, apple, google):
 
     assert 2 == len(kb.get_edges(node_key=apple))
     assert 1 == len(kb.get_edges(node_key=apple, direction=Direction.incoming))
+    assert 2 == len(kb.get_edges(node_key=apple, verb="IS_A"))
+    assert 1 == len(kb.get_edges(node_key=apple, verb="IS_A", limit=1))
+    assert 0 == len(kb.get_edges(node_key=apple, verb="IS_NOT"))
+
+    assert [apple] == kb.get_neighbors(apple)
+    assert [apple] == kb.get_neighbors(
+        apple, verb="IS_A", direction=Direction.outgoing
+    )
+    assert [apple] == kb.get_neighbors(
+        apple, verb="IS_A", direction=Direction.outgoing, limit=1
+    )
+    assert [] == kb.get_neighbors(
+        apple, verb="IS_NOT", direction=Direction.outgoing
+    )
 
     kb.save(Edge(start=apple, verb="POINTS_NO_WHERE", end="INVALID|THING"))
     kb.save(Edge(start=apple, verb="POINTS_NO_WHERE", end=google))

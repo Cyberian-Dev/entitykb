@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import APIRouter, Body, HTTPException, status
 
-from entitykb import rpc, Doc, models, Config, Entity
+from entitykb import rpc, Doc, models, Config, Entity, Direction
 
 router = APIRouter()
 connection = rpc.RPCConnection()
@@ -33,6 +33,38 @@ async def remove_node(key: str):
     """ Remove node and relationships from KB. """
     async with connection as client:
         return await client.call("remove_node", key)
+
+
+@router.get(
+    "/nodes/{key}/neighbors", tags=["nodes"], response_model=List[models.Node]
+)
+async def get_neighbors(
+    key: str,
+    verb: str = None,
+    label: str = None,
+    direction: Direction = None,
+    limit: int = 100,
+) -> List[models.Node]:
+    """ Return list of neighbor nodes for a given node. """
+    request = models.EdgeRequest(
+        node_key=key, verb=verb, label=label, direction=direction, limit=limit
+    )
+    async with connection as client:
+        data = await client.call("get_neighbors", request.dict())
+        return data
+
+
+@router.get("/nodes/{key}/edges", tags=["nodes"])
+async def get_edges(
+    key: str, verb: str = None, direction: Direction = None, limit: int = 100
+):
+    """ Return list of edges for a given node. """
+    request = models.EdgeRequest(
+        node_key=key, verb=verb, direction=direction, limit=limit
+    )
+    async with connection as client:
+        data = await client.call("get_edges", request.dict())
+        return data
 
 
 # edges

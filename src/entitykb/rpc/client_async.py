@@ -1,9 +1,13 @@
 from typing import Optional, List
 
 from entitykb import (
+    Direction,
     Doc,
+    Edge,
+    EdgeRequest,
     Entity,
     Node,
+    NodeKey,
     ParseRequest,
     SearchRequest,
     SearchResponse,
@@ -42,11 +46,54 @@ class AsyncKB(interfaces.IKnowledgeBase):
         async with self.connection as client:
             return await client.call("remove_node", key)
 
+    async def get_neighbors(
+        self,
+        node_key: NodeKey,
+        verb: str = None,
+        label: str = None,
+        direction: Optional[Direction] = None,
+        limit: int = 100,
+    ) -> List[Node]:
+
+        request = EdgeRequest(
+            node_key=node_key,
+            verb=verb,
+            label=label,
+            direction=direction,
+            limit=limit,
+        )
+
+        async with self.connection as client:
+            neighbors = await client.call("get_neighbors", request.dict())
+            return [Node.create(neighbor) for neighbor in neighbors]
+
+    async def get_edges(
+        self,
+        node_key: NodeKey,
+        verb: str = None,
+        direction: Optional[Direction] = None,
+        limit: int = 100,
+    ) -> List[Edge]:
+
+        request = EdgeRequest(
+            node_key=node_key,
+            verb=verb,
+            direction=direction,
+            limit=limit,
+        )
+
+        async with self.connection as client:
+            edges = await client.call("get_edges", request.dict())
+            return [Edge.create(edge) for edge in edges]
+
     # edges
 
-    async def save_edge(self, edge):
+    async def save_edge(self, edge: Edge):
         async with self.connection as client:
             return await client.call("save_edge", edge.dict())
+
+    def connect(self, *, start: Node, verb: str, end: Node, data: dict = None):
+        pass
 
     # search
 

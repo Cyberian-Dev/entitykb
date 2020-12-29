@@ -24,7 +24,7 @@ from .traverse import (
     WalkStep,
 )
 from .registry import Registry
-from .search import SearchRequest, Hop, Trail, SearchResponse
+from .search import SearchRequest, Hop, Trail, SearchResponse, EdgeRequest
 from .serialization import Envelope
 
 __all__ = (
@@ -36,6 +36,7 @@ __all__ = (
     "DocToken",
     "Edge",
     "EdgeCriteria",
+    "EdgeRequest",
     "Entity",
     "Envelope",
     "F",

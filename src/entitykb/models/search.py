@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field, validator
 
 from .node import Edge, Node
 from .traverse import Traversal
+from .enums import Direction
 
 
 class SearchRequest(BaseModel):
@@ -17,6 +18,18 @@ class SearchRequest(BaseModel):
     @validator("traversal", pre=True, always=True)
     def set_traversal(cls, value):
         return Traversal() if value is None else value
+
+
+class EdgeRequest(BaseModel):
+    node_key: str
+    verb: str = None
+    label: str = None
+    direction: Direction = None
+    limit: int = 100
+
+    @validator("node_key", pre=True)
+    def node_to_key(cls, val):
+        return Node.to_key(val)
 
 
 class Hop(BaseModel):
