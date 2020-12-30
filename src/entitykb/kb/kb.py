@@ -139,13 +139,13 @@ class KB(interfaces.IKnowledgeBase):
         self, text: str, labels: istr = None, pipeline: str = "default"
     ) -> List[Entity]:
         doc = self.parse(text=text, labels=labels, pipeline=pipeline)
-        return doc.entities
+        return [span.entity for span in doc.spans]
 
     def find_one(
         self, text: str, labels: istr = None, pipeline: str = "default"
     ) -> Optional[Entity]:
-        doc = self.parse(text=text, labels=labels, pipeline=pipeline)
-        return doc.entities[0] if len(doc.entities) == 1 else None
+        entities = self.find(text=text, labels=labels, pipeline=pipeline)
+        return entities[0] if len(entities) == 1 else None
 
     # graph
 
@@ -211,8 +211,7 @@ class KB(interfaces.IKnowledgeBase):
         self.collect(trail_it=trail_it, count=to_skip)
 
         # collect nodes and trails
-        to_collect = limit - offset
-        nodes, trails = self.collect(trail_it=trail_it, count=to_collect)
+        nodes, trails = self.collect(trail_it=trail_it, count=limit)
 
         return nodes, trails
 
