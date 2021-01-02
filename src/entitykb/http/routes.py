@@ -1,11 +1,22 @@
 from typing import List
-from fastapi import APIRouter, Body, HTTPException, status
 
-from entitykb import rpc, Doc, models, Config, Entity, Direction
+from fastapi import APIRouter, Body, security, Depends
+
+from entitykb import (
+    rpc,
+    Doc,
+    models,
+    Config,
+    Entity,
+    Direction,
+    exceptions,
+    UserToken,
+)
 
 router = APIRouter()
 connection = rpc.RPCConnection()
 config = Config.create()
+oauth2_scheme = security.OAuth2PasswordBearer(tokenUrl="token")
 
 
 # nodes
@@ -17,7 +28,7 @@ async def get_node(key: str) -> dict:
     async with connection as client:
         data = await client.call("get_node", key)
         if data is None:
-            raise HTTP404(detail=f"Key [{key}] not found.")
+            raise exceptions.HTTP404(detail=f"Key [{key}] not found.")
         return data
 
 
@@ -155,8 +166,19 @@ async def get_schema() -> dict:
         return await client.call("get_schema")
 
 
-class HTTP404(HTTPException):
-    def __init__(self, detail: str, headers: dict = None):
-        super(HTTP404, self).__init__(
-            status.HTTP_404_NOT_FOUND, detail, headers
+@router.post("/token", tags=["auth"], response_model=UserToken)
+async def login_for_access_token(
+    form_data: security.OAuth2PasswordRequestForm = Depends(),
+):
+    async with connection as client:
+        access_token = await client.call(
+            "authenticate", form_data.username, form_data.password
         )
+
+    if not access_token:
+        raise exceptions.HTTP401(
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return UserToken(access_token=access_token, token_type="bearer")

@@ -1,4 +1,4 @@
-from .users import User, StoredUser
+from .users import User, StoredUser, UserToken
 from .doc import Token, DocToken, Doc, Span, ParseRequest
 from .enums import Direction, Comparison, TripleSep, UserStatus
 from .fields import StrTupleField
@@ -63,6 +63,7 @@ __all__ = (
     "TripleSep",
     "User",
     "UserStatus",
+    "UserToken",
     "V",
     "Verb",
     "WalkStep",

@@ -29,6 +29,8 @@ install_requires = [
     "fastapi==0.61.2",
     "lark-parser==0.8.9",
     "passlib[bcrypt]==1.7.4",
+    "pyjwt==1.7.1",
+    "python-multipart==0.0.5",
     "smart-open==4.0.1",
     "tabulate==0.8.7",
     "translitcodec==0.5.2",

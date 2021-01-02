@@ -145,6 +145,7 @@ class TripleSep(str, enum.Enum):
 
 @enum.unique
 class UserStatus(str, enum.Enum):
+    invalid = "invalid"
     inactive = "inactive"
     read_only = "read_only"
     read_write = "read_write"

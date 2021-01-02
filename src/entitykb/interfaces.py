@@ -13,20 +13,24 @@ from entitykb import (
     Span,
     Token,
     Traversal,
-    User,
+    UserStatus,
     istr,
 )
 
 ALL_LABELS = object()
 
 
-class IAuth(object):
+class IUserStore(object):
     def __init__(self, root: Path):
         self.root = root
 
     @abstractmethod
-    def authenticate(self, username: str, password: str) -> Optional[User]:
-        """ Returns User if username/password match. """
+    def authenticate(self, username: str, password: str) -> Optional[str]:
+        """ Returns user's uuid if username/password match. """
+
+    @abstractmethod
+    def get_user_status(self, uuid: str) -> UserStatus:
+        """ Return user's status attached to a user's uuid. """
 
 
 class INormalizer(object):
@@ -178,7 +182,7 @@ class IKnowledgeBase(object):
     normalizer: INormalizer
     tokenizer: ITokenizer
     graph: IGraph
-    auth: IAuth
+    user_store: IUserStore
 
     @abstractmethod
     def __len__(self):
@@ -282,6 +286,14 @@ class IKnowledgeBase(object):
     @abstractmethod
     def get_schema(self) -> dict:
         """ Return schema of nodes and edges. """
+
+    @abstractmethod
+    def authenticate(self, username: str, password: str) -> str:
+        """ Check username password combo, return user's uuid if valid. """
+
+    @abstractmethod
+    def get_user_status(self, user_uuid: str) -> UserStatus:
+        """ Return user status attached to user's uuid. """
 
 
 class IResolver(object):

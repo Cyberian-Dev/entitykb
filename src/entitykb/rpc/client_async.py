@@ -14,6 +14,7 @@ from entitykb import (
     Traversal,
     interfaces,
     istr,
+    UserStatus,
 )
 from .connection import RPCConnection
 
@@ -165,3 +166,13 @@ class AsyncKB(interfaces.IKnowledgeBase):
     async def get_schema(self) -> dict:
         async with self.connection as client:
             return await client.call("get_schema")
+
+    # users
+
+    async def authenticate(self, username: str, password: str) -> str:
+        async with self.connection as client:
+            return await client.call("authenticate", username, password)
+
+    async def get_user_status(self, user_uuid: str) -> UserStatus:
+        async with self.connection as client:
+            return await client.call("get_user_status", user_uuid)

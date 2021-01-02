@@ -6,7 +6,7 @@ from .reflection import create_component, get_class_from_name, istr
 from . import logging
 from .logging import logger
 from . import exceptions
-from . import security
+from . import crypto
 from .cache import create_index
 
 from .models import (
@@ -40,6 +40,7 @@ from .models import (
     TripleSep,
     User,
     UserStatus,
+    UserToken,
     V,
     Verb,
     WalkStep,
@@ -66,7 +67,7 @@ from .pipeline import (
 )
 from .graph import Graph
 from .searcher import Searcher, DefaultSearcher
-from .auth import Auth
+from .user_store import UserStore
 from .kb import KB
 from .cli import cli
 from .rpc import AsyncKB, SyncKB
@@ -74,7 +75,6 @@ from . import contrib
 
 __all__ = (
     "AsyncKB",
-    "Auth",
     "Comparison",
     "Config",
     "Criteria",
@@ -123,6 +123,8 @@ __all__ = (
     "TripleSep",
     "User",
     "UserStatus",
+    "UserStore",
+    "UserToken",
     "V",
     "Verb",
     "WalkStep",
@@ -134,6 +136,7 @@ __all__ = (
     "contrib",
     "create_component",
     "create_index",
+    "crypto",
     "ensure_iterable",
     "environ",
     "exceptions",
@@ -145,6 +148,5 @@ __all__ = (
     "logger",
     "logging",
     "pipeline",
-    "security",
     "under_limit",
 )

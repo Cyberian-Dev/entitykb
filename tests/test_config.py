@@ -52,7 +52,6 @@ def test_environ_set_get():
 def test_config_defaults():
     config = Config()
     assert config.dict() == {
-        "auth": "entitykb.Auth",
         "graph": "entitykb.Graph",
         "modules": [],
         "normalizer": "entitykb.LatinLowercaseNormalizer",
@@ -64,8 +63,9 @@ def test_config_defaults():
             }
         },
         "searcher": "entitykb.DefaultSearcher",
-        "tokenizer": "entitykb.WhitespaceTokenizer",
         "secret_key": config.secret_key,
+        "tokenizer": "entitykb.WhitespaceTokenizer",
+        "user_store": "entitykb.UserStore",
     }
 
 
@@ -73,7 +73,6 @@ def test_config_roundtrip():
     config = Config()
     data = config.dict()
     assert set(data.keys()) == {
-        "auth",
         "graph",
         "modules",
         "normalizer",
@@ -81,6 +80,7 @@ def test_config_roundtrip():
         "searcher",
         "secret_key",
         "tokenizer",
+        "user_store",
     }
 
     roundtrip = Config(file_path="/tmp/config.json", **data)

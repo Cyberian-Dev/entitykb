@@ -14,6 +14,7 @@ from entitykb import (
     Registry,
     SearchResponse,
     Traversal,
+    UserStatus,
     interfaces,
     istr,
 )
@@ -26,7 +27,7 @@ class KB(interfaces.IKnowledgeBase):
     def __init__(self, root=None):
         self.config = Config.create(root=root)
 
-        self.auth = self.config.create_auth()
+        self.user_store = self.config.create_user_store()
 
         self.normalizer = self.config.create_normalizer()
 
@@ -202,6 +203,18 @@ class KB(interfaces.IKnowledgeBase):
         labels = sorted(self.graph.get_labels())
         schema = Registry.instance().create_schema(labels, verbs)
         return schema.dict()
+
+    # users
+
+    def authenticate(self, username: str, password: str) -> str:
+        """ Check username password combo, return user's uuid if valid. """
+        return self.user_store.authenticate(
+            username=username, password=password
+        )
+
+    def get_user_status(self, uuid: str) -> UserStatus:
+        """ Return user status attached to user's uuid. """
+        return self.user_store.get_user_status(uuid)
 
     # search methods
 

@@ -5,7 +5,14 @@ from typing import Optional, List
 import aio_msgpack_rpc
 from msgpack import Packer, Unpacker
 
-from entitykb import logger, KB, ParseRequest, SearchRequest, EdgeRequest
+from entitykb import (
+    logger,
+    KB,
+    ParseRequest,
+    SearchRequest,
+    EdgeRequest,
+    UserStatus,
+)
 from .connection import RPCConnection
 
 
@@ -120,6 +127,16 @@ class HandlerKB(object):
         data = self._kb.get_schema()
         return data
 
+    # users
+
+    def authenticate(self, username: str, password: str) -> str:
+        """ Check username password combo, return user's uuid if valid. """
+        return self._kb.authenticate(username=username, password=password)
+
+    def get_user_status(self, user_uuid: str) -> UserStatus:
+        """ Return user status attached to user's uuid. """
+        return self._kb.get_user_status(uuid=user_uuid)
+
 
 class RPCServer(object):
     def __init__(self, root: str = None, host: str = None, port: int = None):
@@ -131,8 +148,8 @@ class RPCServer(object):
             packer=Packer(use_bin_type=True, datetime=True),
             unpacker_factory=lambda: Unpacker(raw=False, timestamp=3),
         )
-        self.loop: asyncio.AbstractEventLoop = None
-        self.stream: asyncio.StreamWriter = None
+        self.loop: Optional[asyncio.AbstractEventLoop] = None
+        self.stream: Optional[asyncio.StreamWriter] = None
 
     def __call__(self, *args, **kwargs):
         return self.serve()

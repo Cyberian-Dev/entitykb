@@ -9,7 +9,7 @@ from .env import environ
 from .logging import logger
 from .models.registry import Registry
 from .reflection import create_component
-from .security import generate_secret
+from .crypto import generate_secret
 
 
 class PipelineConfig(BaseModel):
@@ -58,7 +58,7 @@ class Config(BaseModel):
     normalizer: str = "entitykb.LatinLowercaseNormalizer"
     searcher: str = "entitykb.DefaultSearcher"
     tokenizer: str = "entitykb.WhitespaceTokenizer"
-    auth: str = "entitykb.Auth"
+    user_store: str = "entitykb.UserStore"
     secret_key: str = Field(default_factory=generate_secret)
 
     pipelines: Dict[str, PipelineConfig] = Field(
@@ -118,12 +118,12 @@ class Config(BaseModel):
         info["root"] = str(self.root)
         return info
 
-    def create_auth(self):
-        from entitykb.auth import Auth
+    def create_user_store(self):
+        from entitykb.user_store import UserStore
 
         return create_component(
-            value=self.auth,
-            default_cls=Auth,
+            value=self.user_store,
+            default_cls=UserStore,
             root=self.root,
             secret_key=self.secret_key,
         )
