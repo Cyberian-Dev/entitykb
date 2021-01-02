@@ -5,6 +5,9 @@ from .reflection import create_component, get_class_from_name, istr
 
 from . import logging
 from .logging import logger
+from . import exceptions
+from . import security
+from .cache import create_index
 
 from .models import (
     Comparison,
@@ -28,12 +31,15 @@ from .models import (
     SearchRequest,
     SearchResponse,
     Step,
+    StoredUser,
     StrTupleField,
     T,
     Token,
     Trail,
     Traversal,
     TripleSep,
+    User,
+    UserStatus,
     V,
     Verb,
     WalkStep,
@@ -60,14 +66,15 @@ from .pipeline import (
 )
 from .graph import Graph
 from .searcher import Searcher, DefaultSearcher
+from .auth import Auth
 from .kb import KB
 from .cli import cli
 from .rpc import AsyncKB, SyncKB
 from . import contrib
 
 __all__ = (
-    "interfaces",
     "AsyncKB",
+    "Auth",
     "Comparison",
     "Config",
     "Criteria",
@@ -75,8 +82,6 @@ __all__ = (
     "DefaultSearcher",
     "Direction",
     "Doc",
-    "GrammarResolver",
-    "Span",
     "DocToken",
     "Edge",
     "EdgeCriteria",
@@ -87,6 +92,7 @@ __all__ = (
     "F",
     "FieldCriteria",
     "FilterStep",
+    "GrammarResolver",
     "Graph",
     "KB",
     "KeepLongestByKey",
@@ -104,7 +110,9 @@ __all__ = (
     "SearchRequest",
     "SearchResponse",
     "Searcher",
+    "Span",
     "Step",
+    "StoredUser",
     "StrTupleField",
     "SyncKB",
     "T",
@@ -113,6 +121,8 @@ __all__ = (
     "Trail",
     "Traversal",
     "TripleSep",
+    "User",
+    "UserStatus",
     "V",
     "Verb",
     "WalkStep",
@@ -123,14 +133,18 @@ __all__ = (
     "cli",
     "contrib",
     "create_component",
+    "create_index",
     "ensure_iterable",
     "environ",
+    "exceptions",
     "get_class_from_name",
+    "interfaces",
     "is_iterable",
     "istr",
     "label_filter",
     "logger",
     "logging",
     "pipeline",
+    "security",
     "under_limit",
 )

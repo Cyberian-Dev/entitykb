@@ -141,3 +141,18 @@ class TripleSep(str, enum.Enum):
     @property
     def is_vse(self):
         return self == TripleSep.vse
+
+
+@enum.unique
+class UserStatus(str, enum.Enum):
+    inactive = "inactive"
+    read_only = "read_only"
+    read_write = "read_write"
+
+    @property
+    def can_read(self):
+        return self != UserStatus.inactive
+
+    @property
+    def can_write(self):
+        return self == UserStatus.read_write

@@ -22,6 +22,7 @@ def test_init_kb(root):
         "config.json",
         "edges",
         "edges.dawg",
+        "users",
     } == set(f.name for f in root.iterdir())
 
     assert services.init_kb(root, exist_ok=False) is False

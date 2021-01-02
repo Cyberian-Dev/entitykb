@@ -2,19 +2,15 @@ from pathlib import Path
 from typing import Set, Tuple
 
 from dawg import CompletionDAWG
-from pydantic.json import pydantic_encoder
 
-from entitykb import Node, interfaces, ensure_iterable, istr
-from .cache import create_index
+from entitykb import Node, interfaces, ensure_iterable, istr, create_index
 
 
 class NodeIndex(object):
     def __init__(self, root: Path, normalizer: interfaces.INormalizer):
         self.normalizer = normalizer
         self.dawg_path = root / "nodes.dawg"
-        self.cache = create_index(
-            str(root / "nodes"), encoder=pydantic_encoder, decoder=Node.create
-        )
+        self.cache = create_index(str(root / "nodes"), decoder=Node.create)
         self.dawg: CompletionDAWG = self._load_dawg()
 
     def __len__(self) -> int:

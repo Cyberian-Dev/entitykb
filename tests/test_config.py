@@ -2,9 +2,14 @@ import os
 from pathlib import Path
 
 import pytest
-from entitykb.config import Config
+from entitykb.config import Config, generate_secret
 from entitykb.deps import EnvironError
 from entitykb.env import Environ
+
+
+def test_no_repeat():
+    assert generate_secret() != generate_secret()
+    assert len(generate_secret()) == 64
 
 
 def test_environ_defaults():
@@ -47,6 +52,7 @@ def test_environ_set_get():
 def test_config_defaults():
     config = Config()
     assert config.dict() == {
+        "auth": "entitykb.Auth",
         "graph": "entitykb.Graph",
         "modules": [],
         "normalizer": "entitykb.LatinLowercaseNormalizer",
@@ -59,6 +65,7 @@ def test_config_defaults():
         },
         "searcher": "entitykb.DefaultSearcher",
         "tokenizer": "entitykb.WhitespaceTokenizer",
+        "secret_key": config.secret_key,
     }
 
 
@@ -66,11 +73,13 @@ def test_config_roundtrip():
     config = Config()
     data = config.dict()
     assert set(data.keys()) == {
-        "pipelines",
+        "auth",
         "graph",
         "modules",
         "normalizer",
+        "pipelines",
         "searcher",
+        "secret_key",
         "tokenizer",
     }
 

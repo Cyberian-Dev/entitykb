@@ -1,5 +1,6 @@
+from .users import User, StoredUser
 from .doc import Token, DocToken, Doc, Span, ParseRequest
-from .enums import Direction, Comparison, TripleSep
+from .enums import Direction, Comparison, TripleSep, UserStatus
 from .fields import StrTupleField
 from .funcs import (
     camel_to_snake,
@@ -28,6 +29,8 @@ from .search import SearchRequest, Hop, Trail, SearchResponse, EdgeRequest
 from .serialization import Envelope
 
 __all__ = (
+    "AccessToken",
+    "AccessTokenData",
     "Comparison",
     "Criteria",
     "Direction",
@@ -51,12 +54,15 @@ __all__ = (
     "SearchRequest",
     "SearchResponse",
     "Step",
+    "StoredUser",
     "StrTupleField",
     "T",
     "Token",
     "Trail",
     "Traversal",
     "TripleSep",
+    "User",
+    "UserStatus",
     "V",
     "Verb",
     "WalkStep",

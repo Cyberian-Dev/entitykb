@@ -13,10 +13,20 @@ from entitykb import (
     Span,
     Token,
     Traversal,
+    User,
     istr,
 )
 
 ALL_LABELS = object()
+
+
+class IAuth(object):
+    def __init__(self, root: Path):
+        self.root = root
+
+    @abstractmethod
+    def authenticate(self, username: str, password: str) -> Optional[User]:
+        """ Returns User if username/password match. """
 
 
 class INormalizer(object):
@@ -168,6 +178,7 @@ class IKnowledgeBase(object):
     normalizer: INormalizer
     tokenizer: ITokenizer
     graph: IGraph
+    auth: IAuth
 
     @abstractmethod
     def __len__(self):

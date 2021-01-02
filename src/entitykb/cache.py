@@ -1,5 +1,6 @@
 import diskcache
 from msgpack import packb, unpackb
+from pydantic.json import pydantic_encoder
 
 
 class MsgPackDisk(diskcache.Disk):
@@ -36,6 +37,7 @@ class MsgPackCache(diskcache.Cache):
         self.disk.decoder = decoder
 
 
-def create_index(directory, encoder, decoder) -> diskcache.Index:
+def create_index(directory, encoder=None, decoder=None) -> diskcache.Index:
+    encoder = encoder or pydantic_encoder
     cache = MsgPackCache(directory, encoder, decoder)
     return diskcache.Index.fromcache(cache=cache)

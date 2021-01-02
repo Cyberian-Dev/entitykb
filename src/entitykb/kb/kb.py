@@ -26,6 +26,8 @@ class KB(interfaces.IKnowledgeBase):
     def __init__(self, root=None):
         self.config = Config.create(root=root)
 
+        self.auth = self.config.create_auth()
+
         self.normalizer = self.config.create_normalizer()
 
         self.tokenizer = self.config.create_tokenizer()

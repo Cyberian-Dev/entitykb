@@ -52,7 +52,7 @@ def dump(
     root: Optional[Path] = typer.Option(None),
     file_format: str = typer.Option("jsonl", "--ff"),
 ):
-    """ Dump data from KB in JSONL format. """
+    """ Dump data from KB in JSONL format """
     if out_file == "-":
         file_obj = typer.open_file(out_file, mode="w")
     else:
@@ -141,7 +141,7 @@ def run_http(
     rpc_port: int = typer.Option(3477),
     reload: bool = typer.Option(False),
 ):
-    """ Launch HTTP server using RPC KB. """
+    """ Launch HTTP server using RPC KB """
     environ.root = root
     environ.rpc_host = rpc_host
     environ.rpc_port = rpc_port
@@ -157,7 +157,7 @@ def run_dev(
     rpc_port: int = typer.Option(3477),
     http_port: int = typer.Option(8000),
 ):
-    """ Hot reloading local HTTP and RPC servers. """
+    """ Hot reloading local HTTP and RPC servers """
 
     # set environment variables
     # commit to os.environ for HTTP/RPC processes
