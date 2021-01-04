@@ -10,7 +10,7 @@ from entitykb import (
     NodeKey,
     SearchResponse,
     Traversal,
-    UserStatus,
+    User,
     istr,
 )
 from .client_async import AsyncKB
@@ -164,7 +164,7 @@ class SyncKB(AsyncKB):
         data = run_future(future)
         return data
 
-    def get_user_status(self, user_uuid: str) -> UserStatus:
-        future = super(SyncKB, self).get_user_status(user_uuid)
+    def get_user(self, token: str) -> Optional[User]:
+        future = super(SyncKB, self).get_user(token=token)
         data = run_future(future)
         return data

@@ -10,13 +10,13 @@ from entitykb import (
     Entity,
     Direction,
     exceptions,
+    User,
     UserToken,
 )
 
 router = APIRouter()
 connection = rpc.RPCConnection()
 config = Config.create()
-oauth2_scheme = security.OAuth2PasswordBearer(tokenUrl="token")
 
 
 # nodes
@@ -166,7 +166,24 @@ async def get_schema() -> dict:
         return await client.call("get_schema")
 
 
-@router.post("/token", tags=["auth"], response_model=UserToken)
+# users
+
+oauth2_scheme = security.OAuth2PasswordBearer(tokenUrl="token")
+
+
+async def get_user_by_token(token: str = Depends(oauth2_scheme)) -> User:
+    async with connection as client:
+        user = await client.call("get_user", token)
+
+    if not user:
+        raise exceptions.HTTP401(
+            detail="Invalid user token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return user
+
+
+@router.post("/token", tags=["users"], response_model=UserToken)
 async def login_for_access_token(
     form_data: security.OAuth2PasswordRequestForm = Depends(),
 ):
@@ -182,3 +199,14 @@ async def login_for_access_token(
         )
 
     return UserToken(access_token=access_token, token_type="bearer")
+
+
+@router.get("/user", tags=["users"], response_model=User)
+async def get_user(user: User = Depends(get_user_by_token)):
+    if not user:
+        raise exceptions.HTTP401(
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return user

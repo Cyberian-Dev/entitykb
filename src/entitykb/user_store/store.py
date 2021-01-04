@@ -20,20 +20,20 @@ class UserStore(interfaces.IUserStore):
         self.secret_key = secret_key
         self.cache = create_index(str(root / "users"), decoder=StoredUser)
 
-    def authenticate(self, username: str, password: str) -> str:
+    def authenticate(self, username: str, password: str) -> Optional[str]:
         """ Check username password combo, returns an access token. """
-        user: StoredUser = self.get_user(username)
+        user: StoredUser = self.find_by_username(username)
         if user is not None:
             if crypto.verify_password(password, user.hashed_password):
                 return crypto.encode_jwt_token(user.uuid, self.secret_key)
 
-    def get_user_status(self, token: str) -> UserStatus:
+    def get_user(self, token: str) -> Optional[User]:
         """ Return user status attached to user's uuid. """
         uuid = crypto.decode_jwt_token(token=token, secret_key=self.secret_key)
         user: StoredUser = self.cache.get(f"uuid={uuid}")
-        return user.status if user is not None else UserStatus.invalid
+        return User(**user.dict())
 
-    def get_user_list(self) -> List[User]:
+    def get_user_list(self) -> List[StoredUser]:
         user_list = []
         for key, user in self.cache.items():
             if key.startswith("username="):
@@ -45,7 +45,7 @@ class UserStore(interfaces.IUserStore):
         if not (isinstance(username, str) and len(username) > 0):
             raise exceptions.InvalidUsername()
 
-        if self.get_user(username) is not None:
+        if self.find_by_username(username) is not None:
             raise exceptions.DuplicateUsername()
 
         plain_password = crypto.generate_password()
@@ -60,7 +60,7 @@ class UserStore(interfaces.IUserStore):
 
     def set_status(self, username: str, status: UserStatus) -> bool:
         """ Change user's status to new value. """
-        user: StoredUser = self.get_user(username)
+        user: StoredUser = self.find_by_username(username)
         success = False
         if user and user.status != status:
             user.status = status
@@ -70,14 +70,16 @@ class UserStore(interfaces.IUserStore):
 
     def reset_password(self, username: str) -> str:
         """ Resets a user's password and returns the plain-text password. """
-        user: StoredUser = self.get_user(username)
+        user: StoredUser = self.find_by_username(username)
         if user:
             plain_password = crypto.generate_password()
             user.hashed_password = crypto.hash_password(plain_password)
-            self.cache[username] = user
+            self.store(user)
             return plain_password
+        else:
+            raise exceptions.InvalidUsername()
 
-    def get_user(self, username: str) -> Optional[StoredUser]:
+    def find_by_username(self, username: str) -> Optional[StoredUser]:
         """ Return full user account from username. """
         return self.cache.get(f"username={username}")
 

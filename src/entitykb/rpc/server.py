@@ -11,7 +11,6 @@ from entitykb import (
     ParseRequest,
     SearchRequest,
     EdgeRequest,
-    UserStatus,
 )
 from .connection import RPCConnection
 
@@ -133,9 +132,11 @@ class HandlerKB(object):
         """ Check username password combo, return user's uuid if valid. """
         return self._kb.authenticate(username=username, password=password)
 
-    def get_user_status(self, user_uuid: str) -> UserStatus:
-        """ Return user status attached to user's uuid. """
-        return self._kb.get_user_status(uuid=user_uuid)
+    def get_user(self, token: str) -> Optional[dict]:
+        """ Return user for valid token from authenticate. """
+        user = self._kb.get_user(token=token)
+        if user:
+            return user.dict()
 
 
 class RPCServer(object):

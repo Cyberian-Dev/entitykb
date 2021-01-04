@@ -79,10 +79,10 @@ def user_info(
 ):
     """ Display user information """
 
-    user = get_user_store(root).get_user(username)
+    user = get_user_store(root).find_by_username(username)
     if user:
         data = user.dict()
-        data["hashed_password"] = data["hashed_password"][:14] + "..."
+        data["hashed_password"] = data["hashed_password"][:24] + "..."
         flat = sorted(services.flatten_dict(data).items())
         output = tabulate(flat, tablefmt="pretty", colalign=("left", "right"))
         typer.echo(output)
@@ -98,8 +98,11 @@ def user_check(
     """ Check username and password combo """
 
     password = typer.prompt(f"Enter password for {username}", hide_input=True)
+    password = password.strip()
 
-    if get_user_store(root).authenticate(username, password):
+    token = get_user_store(root).authenticate(username, password)
+
+    if token:
         typer.echo("Success: Username and password combination was valid")
     else:
         typer.echo("FAIL: Username and password combination was NOT valid")

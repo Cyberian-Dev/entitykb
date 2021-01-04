@@ -1,6 +1,6 @@
 import pytest
 
-from entitykb import KB, Doc, Edge, SearchResponse, T, Direction
+from entitykb import KB, Doc, Edge, SearchResponse, T, Direction, UserStatus
 
 
 def test_parse(kb: KB):
@@ -255,3 +255,11 @@ def test_search_with_just_text(kb: KB, apple, google):
     assert [apple] == response.nodes
     assert apple == response[0]
     assert [apple] == list(response)
+
+
+def test_user_functions(kb: KB):
+    # noinspection PyUnresolvedReferences
+    pw = kb.user_store.add_user(username="one", status=UserStatus.read_only)
+
+    token = kb.authenticate("one", pw)
+    assert kb.get_user(token).username == "one"

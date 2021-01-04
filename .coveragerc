@@ -4,6 +4,7 @@ omit =
     src/entitykb/cli/*.py
     src/entitykb/http/*.py
     src/entitykb/deps/*.py
+    src/entitykb/exceptions.py
 
 [report]
 exclude_lines =

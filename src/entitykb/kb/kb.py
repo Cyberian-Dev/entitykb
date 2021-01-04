@@ -14,7 +14,7 @@ from entitykb import (
     Registry,
     SearchResponse,
     Traversal,
-    UserStatus,
+    User,
     interfaces,
     istr,
 )
@@ -206,15 +206,15 @@ class KB(interfaces.IKnowledgeBase):
 
     # users
 
-    def authenticate(self, username: str, password: str) -> str:
+    def authenticate(self, username: str, password: str) -> Optional[str]:
         """ Check username password combo, return user's uuid if valid. """
         return self.user_store.authenticate(
             username=username, password=password
         )
 
-    def get_user_status(self, uuid: str) -> UserStatus:
-        """ Return user status attached to user's uuid. """
-        return self.user_store.get_user_status(uuid)
+    def get_user(self, token: str) -> Optional[User]:
+        """ Return user for valid token from authenticate. """
+        return self.user_store.get_user(token)
 
     # search methods
 

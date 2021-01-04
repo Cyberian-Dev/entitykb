@@ -13,7 +13,7 @@ from entitykb import (
     Span,
     Token,
     Traversal,
-    UserStatus,
+    User,
     istr,
 )
 
@@ -26,11 +26,11 @@ class IUserStore(object):
 
     @abstractmethod
     def authenticate(self, username: str, password: str) -> Optional[str]:
-        """ Returns user's uuid if username/password match. """
+        """ Returns token if username/password match. """
 
     @abstractmethod
-    def get_user_status(self, uuid: str) -> UserStatus:
-        """ Return user's status attached to a user's uuid. """
+    def get_user(self, token: str) -> Optional[User]:
+        """ Return user for valid token from authenticate. """
 
 
 class INormalizer(object):
@@ -288,12 +288,12 @@ class IKnowledgeBase(object):
         """ Return schema of nodes and edges. """
 
     @abstractmethod
-    def authenticate(self, username: str, password: str) -> str:
-        """ Check username password combo, return user's uuid if valid. """
+    def authenticate(self, username: str, password: str) -> Optional[str]:
+        """ Returns token if username/password match. """
 
     @abstractmethod
-    def get_user_status(self, user_uuid: str) -> UserStatus:
-        """ Return user status attached to user's uuid. """
+    def get_user(self, token: str) -> Optional[User]:
+        """ Return user for valid token from authenticate. """
 
 
 class IResolver(object):
