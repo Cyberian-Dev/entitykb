@@ -2,7 +2,7 @@ import csv
 import json
 from io import FileIO
 
-from entitykb import Entity, environ, Envelope
+from entitykb import Entity, Envelope
 from .cli import cli
 
 
@@ -10,9 +10,6 @@ from .cli import cli
 def csv_reader(file_obj: FileIO):
     reader = csv.DictReader(file_obj, dialect="excel")
     for data in reader:
-        synonyms = data.pop("synonyms", "")
-        if synonyms:
-            data["synonyms"] = synonyms.split(environ.mv_split)
         entity = Entity.create(**data)
         yield entity
 

@@ -1,7 +1,5 @@
 from typing import Tuple, TYPE_CHECKING
 
-from entitykb import environ
-
 
 class CustomField(object):
     @classmethod
@@ -24,7 +22,7 @@ if not TYPE_CHECKING:
                 v = ()
 
             elif isinstance(v, str):
-                v = tuple(v.split(environ.mv_split))
+                v = tuple(v.split("|"))
 
             elif isinstance(v, list):
                 v = tuple(v)

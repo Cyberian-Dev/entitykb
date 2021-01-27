@@ -76,11 +76,9 @@ def load(
     file_format: str = typer.Option("jsonl", "--ff"),
     dry_run: bool = typer.Option(False, "--dry-run"),
     skip_reindex: bool = typer.Option(False, "--skip-reindex"),
-    mv_split: str = typer.Option("|"),
 ):
     """ Load data into local KB """
     t0 = time.time()
-    environ.mv_split = mv_split
 
     kb = KB(root=root)
     typer.echo(f"Loading using {file_format} from {in_file}")
