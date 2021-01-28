@@ -19,4 +19,5 @@ class Pipeline(object):
         for filterer_cls in self.filterers:
             filterer = filterer_cls(doc)
             spans = filterer.filter(spans)
+        spans = sorted(spans, key=lambda span: span.offset)
         return tuple(spans)

@@ -112,11 +112,12 @@ def load(
 @cli.command()
 def reindex(root: Optional[Path] = typer.Option(None)):
     """ Load data into local KB """
+    typer.echo(f"Reindexing {root}...")
     t0 = time.time()
     kb = KB(root=root)
     kb.reindex()
     t1 = time.time()
-    typer.echo(f"Reindexed in {t1 - t0:.2f}s")
+    typer.echo(f"Reindexed {root} in {t1 - t0:.2f}s")
 
 
 @cli.command(name="rpc")

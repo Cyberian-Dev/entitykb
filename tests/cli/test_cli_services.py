@@ -18,10 +18,8 @@ def test_init_kb(root):
     assert services.init_kb(root, exist_ok=True)
     assert {
         "nodes",
-        "nodes.dawg",
         "config.json",
         "edges",
-        "edges.dawg",
         "users",
     } == set(f.name for f in root.iterdir())
 

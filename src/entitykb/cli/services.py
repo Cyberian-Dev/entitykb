@@ -15,8 +15,7 @@ def init_kb(root, exist_ok=False, config=None) -> bool:
         os.makedirs(str(root), exist_ok=exist_ok)
         Config.create(root=root, config=config)
 
-        kb = KB(root=root)
-        kb.reindex()
+        KB(root=root)
         success = True
 
     except FileExistsError as e:
