@@ -12,7 +12,7 @@ NodeKey = Union["Node", str]
 
 class Node(BaseModel):
     key: str = Field(default_factory=lambda: str(uuid4()))
-    label: str
+    label: str = None
     data: dict = None
 
     __all_labels__ = {"NODE"}

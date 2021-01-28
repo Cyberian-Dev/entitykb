@@ -57,7 +57,6 @@ def test_schema():
             "key": {"title": "Key", "type": "string"},
             "label": {"title": "Label", "type": "string"},
         },
-        "required": ["label"],
         "title": "Node",
         "type": "object",
     }
@@ -78,7 +77,6 @@ def test_schema():
             },
             "year": {"title": "Year", "type": "integer"},
         },
-        "required": ["label"],
         "title": "Date",
         "type": "object",
     }
