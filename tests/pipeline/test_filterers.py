@@ -2,13 +2,17 @@ import pytest
 
 from entitykb import Doc, DocToken, Entity, Span, Token
 from entitykb.pipeline import (
-    ExactNameOnly,
-    KeepLongestByKey,
-    KeepLongestByLabel,
-    KeepLongestByOffset,
-    LowerNameOrExactSynonym,
+    DedupeByKeyOffset,
+    DedupeByLabelOffset,
+    DedupeByOffset,
+    KeepExactNameOnly,
+    RemoveInexactSynonyms,
     Pipeline,
 )
+
+
+def count_it(it):
+    return len(list(it))
 
 
 @pytest.fixture()
@@ -52,37 +56,33 @@ def spans(doc, tokens):
             tokens=tokens[:1],
         ),
     ]
-    assert 4 == len(spans)
+    assert 4 == count_it(spans)
     return spans
 
 
 def test_longest_by_key(spans, tokens):
-    assert 4 == len(KeepLongestByKey().filter(spans=spans, tokens=tokens))
-    assert 1 == len(KeepLongestByKey().filter(spans=spans[:1], tokens=tokens))
+    assert 4 == count_it(DedupeByKeyOffset().filter(spans=spans))
+    assert 1 == count_it(DedupeByKeyOffset().filter(spans=spans[:1]))
 
 
 def test_longest_by_label(spans, tokens):
-    assert 4 == len(KeepLongestByLabel().filter(spans=spans, tokens=tokens))
+    assert 2 == count_it(DedupeByLabelOffset().filter(spans=spans))
 
 
 def test_longest_by_offset(spans, tokens):
-    assert 4 == len(KeepLongestByOffset().filter(spans=spans, tokens=tokens))
+    assert 1 == count_it(DedupeByOffset().filter(spans=spans))
 
 
 def test_exact_name_only(spans, tokens):
-    assert 0 == len(ExactNameOnly().filter(spans=spans, tokens=tokens))
+    assert 0 == count_it(KeepExactNameOnly().filter(spans=spans))
 
 
 def test_lower_name_or_exact_synonym_only(spans, tokens):
-    assert 3 == len(
-        LowerNameOrExactSynonym().filter(spans=spans, tokens=tokens)
-    )
+    assert 3 == count_it(RemoveInexactSynonyms().filter(spans=spans))
 
 
 def test_pipeline(doc, spans, tokens):
     doc.spans = spans
     doc.tokens = tokens
-    pipeline = Pipeline(
-        filterers=[LowerNameOrExactSynonym(), KeepLongestByLabel()]
-    )
-    assert 3 == len(pipeline.filter_spans(doc))
+    pipeline = Pipeline(filterers=(RemoveInexactSynonyms, DedupeByLabelOffset))
+    assert 2 == count_it(pipeline.filter_spans(doc))

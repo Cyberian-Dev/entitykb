@@ -5,7 +5,7 @@ from pydantic.json import pydantic_encoder
 
 
 def test_entity():
-    empty = Entity(name="empty")
+    empty = Entity(name="empty", synonyms=None)
     assert empty.dict() == dict(
         name="empty",
         synonyms=tuple(),

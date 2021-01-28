@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 from .env import environ
 from .logging import logger
 from .models.registry import Registry
-from .reflection import create_component
+from .reflection import create_component, get_class_from_name
 from .crypto import generate_secret
 
 
@@ -37,7 +37,7 @@ class PipelineConfig(BaseModel):
         return Pipeline(extractor=extractor, filterers=filterers)
 
     def create_filterers(self):
-        return tuple(create_component(f) for f in self.filterers)
+        return tuple(get_class_from_name(f) for f in self.filterers)
 
     def create_extractor(self, tokenizer, resolvers):
         from entitykb.pipeline.extractors import DefaultExtractor

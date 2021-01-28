@@ -1,5 +1,5 @@
 from .users import User, StoredUser, UserToken
-from .doc import Token, DocToken, Doc, Span, ParseRequest
+from .doc import Token, DocToken, Doc, Span, SpanMatch, ParseRequest
 from .enums import Direction, Comparison, TripleSep, UserStatus
 from .fields import StrTupleField
 from .funcs import (
@@ -29,13 +29,10 @@ from .search import SearchRequest, Hop, Trail, SearchResponse, EdgeRequest
 from .serialization import Envelope
 
 __all__ = (
-    "AccessToken",
-    "AccessTokenData",
     "Comparison",
     "Criteria",
     "Direction",
     "Doc",
-    "Span",
     "DocToken",
     "Edge",
     "EdgeCriteria",
@@ -53,6 +50,8 @@ __all__ = (
     "Registry",
     "SearchRequest",
     "SearchResponse",
+    "Span",
+    "SpanMatch",
     "Step",
     "StoredUser",
     "StrTupleField",

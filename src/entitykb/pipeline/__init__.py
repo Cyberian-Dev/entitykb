@@ -1,10 +1,10 @@
 from .extractors import DefaultExtractor
 from .filterers import (
-    ExactNameOnly,
-    LowerNameOrExactSynonym,
-    KeepLongestByKey,
-    KeepLongestByLabel,
-    KeepLongestByOffset,
+    DedupeByKeyOffset,
+    DedupeByLabelOffset,
+    DedupeByOffset,
+    KeepExactNameOnly,
+    RemoveInexactSynonyms,
 )
 from .handlers import TokenHandler
 from .normalizers import LatinLowercaseNormalizer
@@ -13,16 +13,16 @@ from .resolvers import TermResolver, RegexResolver, GrammarResolver
 from .tokenizers import WhitespaceTokenizer
 
 __all__ = (
+    "DedupeByKeyOffset",
+    "DedupeByLabelOffset",
+    "DedupeByOffset",
     "DefaultExtractor",
-    "ExactNameOnly",
     "GrammarResolver",
-    "KeepLongestByKey",
-    "KeepLongestByLabel",
-    "KeepLongestByOffset",
+    "KeepExactNameOnly",
     "LatinLowercaseNormalizer",
-    "LowerNameOrExactSynonym",
     "Pipeline",
     "RegexResolver",
+    "RemoveInexactSynonyms",
     "TermResolver",
     "TokenHandler",
     "WhitespaceTokenizer",

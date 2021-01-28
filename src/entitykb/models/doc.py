@@ -1,4 +1,5 @@
 from __future__ import annotations
+import enum
 
 from typing import Tuple, Optional, Any, List
 
@@ -79,6 +80,13 @@ class DocToken(BaseModel):
         return f"{self.token} [offset: {self.offset}]"
 
 
+class SpanMatch(int, enum.Enum):
+    ExactName = 0
+    ExactSynonym = 1
+    LowercaseName = 2
+    LowercaseSynonym = 2
+
+
 class Span(HasTokens):
     entity_key: str
     tokens: Tuple[DocToken, ...]
@@ -100,27 +108,27 @@ class Span(HasTokens):
 
     @property
     def name(self):
-        return self.entity and self.entity.name
+        return (self.entity and self.entity.name) or ""
 
     @property
     def label(self):
-        return self.entity and (self.entity.label or "ENTITY")
+        return (self.entity and self.entity.label) or "ENTITY"
 
     @property
     def synonyms(self):
         return (self.entity and self.entity.synonyms) or []
 
-    @property
-    def is_exact_name_match(self):
-        return self.name == self.text
-
-    @property
-    def is_lower_name_match(self):
-        return self.name and (self.name.lower() == self.text.lower())
-
-    @property
-    def is_lower_name_or_exact_synonym_match(self):
-        return self.is_lower_name_match or (self.text in self.synonyms)
+    def match_type(self) -> SpanMatch:
+        """ Lower score indicates closer match. """
+        if self.text == self.name:
+            match = SpanMatch.ExactName
+        elif self.text in self.synonyms:
+            match = SpanMatch.ExactSynonym
+        elif self.text.lower() == self.name.lower():
+            match = SpanMatch.LowercaseName
+        else:
+            match = SpanMatch.LowercaseSynonym
+        return match
 
 
 class Doc(HasTokens):

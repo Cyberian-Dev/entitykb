@@ -168,10 +168,18 @@ class IGraph(object):
 
 
 class IFilterer(object):
-    @classmethod
-    @abstractmethod
-    def filter(cls, spans, tokens) -> List[Span]:
-        """ Filter spans based on this filterer's purpose. """
+    """
+    Abstract class that processes spans
+    """
+
+    def __init__(self, doc: Doc = None):
+        self.doc = doc
+
+    def is_keep(self, span: Span):
+        return True
+
+    def filter(self, spans: Iterator[Span]) -> Iterator[Span]:
+        return filter(self.is_keep, spans)
 
 
 class IKnowledgeBase(object):

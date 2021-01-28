@@ -14,6 +14,8 @@ class Entity(Node):
         if not data.get("label"):
             data["label"] = self.get_default_label()
         data.setdefault("key", "{name}|{label}".format(**data))
+        if data.get("synonyms", False) is None:
+            data["synonyms"] = ()
         super().__init__(**data)
 
     @property
