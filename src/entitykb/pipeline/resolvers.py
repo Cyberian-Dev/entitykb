@@ -69,12 +69,16 @@ class GrammarResolver(interfaces.IResolver):
 
     def resolve(self, term: str, labels: istr = None) -> List[Entity]:
         try:
-            tree = self.lark.parse(term, start=self.start)
+            tree = self.get_tree(term)
             entities = self.create_entities(term, tree)
         except LarkError:
             entities = []
 
         return entities
+    
+    def get_tree(self, term: str):
+        tree = self.lark.parse(term, start=self.start)
+        return tree
 
     def is_prefix(self, term: str, labels: istr = None) -> bool:
         # noinspection PyBroadException
