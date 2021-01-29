@@ -76,6 +76,7 @@ def load(
     file_format: str = typer.Option("jsonl", "--ff"),
     dry_run: bool = typer.Option(False, "--dry-run"),
     skip_reindex: bool = typer.Option(False, "--skip-reindex"),
+    is_binary: bool = typer.Option(False, "--is_binary"),
 ):
     """ Load data into local KB """
     t0 = time.time()
@@ -83,10 +84,11 @@ def load(
     kb = KB(root=root)
     typer.echo(f"Loading using {file_format} from {in_file}")
 
+    mode = "rb" if is_binary else "r"
     if in_file == "-":
-        file_obj = typer.open_file(in_file, mode="r")
+        file_obj = typer.open_file(in_file, mode=mode)
     else:
-        file_obj = smart_open.open(in_file, mode="r")
+        file_obj = smart_open.open(in_file, mode=mode)
 
     reader = cli.get_reader(file_format, file_obj=file_obj, kb=kb)
 
@@ -112,12 +114,13 @@ def load(
 @cli.command()
 def reindex(root: Optional[Path] = typer.Option(None)):
     """ Load data into local KB """
-    typer.echo(f"Reindexing {root}...")
     t0 = time.time()
     kb = KB(root=root)
+    typer.echo(f"Reindexing {kb.config.root}...")
+
     kb.reindex()
     t1 = time.time()
-    typer.echo(f"Reindexed {root} in {t1 - t0:.2f}s")
+    typer.echo(f"Reindexed {kb.config.root} in {t1 - t0:.2f}s")
 
 
 @cli.command(name="rpc")
