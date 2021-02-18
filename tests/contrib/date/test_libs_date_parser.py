@@ -42,6 +42,7 @@ def test_is_prefix():
 
 def test_is_not_prefix():
     assert resolver.is_prefix("JAN 2019") is False
+    assert resolver.is_prefix("JAN JAN JAN") is False
 
 
 def test_parse_m_d_y():

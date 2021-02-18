@@ -93,20 +93,20 @@ class SyncKB(AsyncKB):
     def find(
         self, text: str, labels: istr = None, pipeline: str = "default"
     ) -> List[Entity]:
-        future = super(SyncKB, self).find(
+        future = super(SyncKB, self).parse(
             text=text, labels=labels, pipeline=pipeline
         )
-        entities = run_future(future)
-        return entities
+        doc = run_future(future)
+        return doc.entities
 
     def find_one(
         self, text: str, labels: istr = None, pipeline: str = "default"
     ) -> Entity:
-        future = super(SyncKB, self).find_one(
+        future = super(SyncKB, self).parse(
             text=text, labels=labels, pipeline=pipeline
         )
-        entity = run_future(future)
-        return entity
+        doc = run_future(future)
+        return doc.entities[0] if len(doc.entities) == 1 else None
 
     # graph
 

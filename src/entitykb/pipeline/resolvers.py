@@ -75,7 +75,7 @@ class GrammarResolver(interfaces.IResolver):
             entities = []
 
         return entities
-    
+
     def get_tree(self, term: str):
         tree = self.lark.parse(term, start=self.start)
         return tree
