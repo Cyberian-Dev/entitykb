@@ -19,7 +19,7 @@ class DateResolver(GrammarResolver):
 
         if data:
             try:
-                date = Date(synonyms=(term,), **data)
+                date = Date(term=term, **data)
                 entities.append(date)
             except ValueError:
                 pass

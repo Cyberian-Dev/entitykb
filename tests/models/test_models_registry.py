@@ -75,6 +75,7 @@ def test_schema():
                 "title": "Synonyms",
                 "type": "array",
             },
+            "term": {"title": "Term", "type": "string"},
             "year": {"title": "Year", "type": "integer"},
         },
         "title": "Date",

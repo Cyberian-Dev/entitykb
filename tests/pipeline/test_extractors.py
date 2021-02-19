@@ -80,5 +80,9 @@ def test_extract_with_date(extractor: interfaces.IExtractor, apple):
     assert len(doc.spans) == 2
     assert doc.spans[0].entity_key == "Apple, Inc.|COMPANY"
     assert doc.spans[1].entity == Date(
-        year=1976, month=4, day=1, synonyms=("April 1, 1976",)
+        year=1976,
+        month=4,
+        day=1,
+        synonyms=(),
+        term="April 1, 1976",
     )

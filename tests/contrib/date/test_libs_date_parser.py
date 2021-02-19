@@ -8,6 +8,7 @@ def parse_date(s):
     entities = resolver.resolve(s)
     if entities:
         d: Date = entities[0]
+        assert d.term == s
         return d.as_date
 
 
