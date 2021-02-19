@@ -39,5 +39,5 @@ def check_date(date):
         label="DATE",
         synonyms=(),
         data=None,
-        term=None,
+        text=None,
     )

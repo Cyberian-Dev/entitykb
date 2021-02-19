@@ -8,7 +8,7 @@ class Date(Entity):
     year: int = None
     month: int = None
     day: int = None
-    term: str = None
+    text: str = None
 
     def __init__(self, **data: Any):
         dt = date(data["year"], data["month"], data["day"])

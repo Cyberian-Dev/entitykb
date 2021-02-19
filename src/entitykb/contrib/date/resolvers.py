@@ -19,7 +19,7 @@ class DateResolver(GrammarResolver):
 
         if data:
             try:
-                date = Date(term=term, **data)
+                date = Date(text=term, **data)
                 entities.append(date)
             except ValueError:
                 pass

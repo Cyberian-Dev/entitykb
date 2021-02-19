@@ -84,5 +84,5 @@ def test_extract_with_date(extractor: interfaces.IExtractor, apple):
         month=4,
         day=1,
         synonyms=(),
-        term="April 1, 1976",
+        text="April 1, 1976",
     )
