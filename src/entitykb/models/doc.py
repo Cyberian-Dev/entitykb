@@ -82,9 +82,9 @@ class DocToken(BaseModel):
 
 class SpanMatch(int, enum.Enum):
     ExactName = 0
-    ExactSynonym = 1
-    LowercaseName = 2
-    LowercaseSynonym = 2
+    LowercaseName = 1
+    ExactSynonym = 2
+    LowercaseSynonym = 3
 
 
 class Span(HasTokens):
@@ -122,10 +122,10 @@ class Span(HasTokens):
         """ Lower score indicates closer match. """
         if self.text == self.name:
             match = SpanMatch.ExactName
-        elif self.text in self.synonyms:
-            match = SpanMatch.ExactSynonym
         elif self.text.lower() == self.name.lower():
             match = SpanMatch.LowercaseName
+        elif self.text in self.synonyms:
+            match = SpanMatch.ExactSynonym
         else:
             match = SpanMatch.LowercaseSynonym
         return match
