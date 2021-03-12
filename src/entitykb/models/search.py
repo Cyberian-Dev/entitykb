@@ -1,4 +1,4 @@
-from typing import List, Any, Tuple, Optional
+from typing import List, Any, Tuple, Optional, Union
 
 from pydantic import BaseModel, Field, validator
 
@@ -35,7 +35,7 @@ class EdgeRequest(BaseModel):
 class Hop(BaseModel):
     start: str
     end: str
-    edges: Tuple[Edge, ...] = ()
+    edges: Tuple[Union[Edge, dict], ...] = ()
 
     def __hash__(self):
         return hash((self.start, self.end, self.edges))

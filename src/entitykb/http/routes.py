@@ -1,4 +1,5 @@
 from typing import List
+from urllib.parse import unquote
 
 from fastapi import APIRouter, Body, security, Depends
 
@@ -7,7 +8,6 @@ from entitykb import (
     Doc,
     models,
     Config,
-    Entity,
     Direction,
     exceptions,
     User,
@@ -25,6 +25,7 @@ config = Config.create()
 @router.get("/nodes/{key}", tags=["nodes"])
 async def get_node(key: str) -> dict:
     """ Parse text and return document object. """
+    key = unquote(key)
     async with connection as client:
         data = await client.call("get_node", key)
         if data is None:
@@ -99,16 +100,16 @@ async def parse(request: models.ParseRequest = Body(...)) -> Doc:
         return data
 
 
-@router.post("/find", tags=["pipeline"], response_model=List[Entity])
-async def find(request: models.ParseRequest = Body(...)) -> List[Entity]:
+@router.post("/find", tags=["pipeline"], response_model=List[dict])
+async def find(request: models.ParseRequest = Body(...)) -> List[dict]:
     """ Parse text and return found entities. """
     async with connection as client:
         data = await client.call("find", request.dict())
         return data
 
 
-@router.post("/find_one", tags=["pipeline"], response_model=Entity)
-async def find_one(request: models.ParseRequest = Body(...)) -> Entity:
+@router.post("/find_one", tags=["pipeline"], response_model=dict)
+async def find_one(request: models.ParseRequest = Body(...)) -> dict:
     """ Parse text and return entity, if one and only one found. """
     async with connection as client:
         data = await client.call("find_one", request.dict())

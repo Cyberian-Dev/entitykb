@@ -176,6 +176,7 @@ class FilterStep(Step):
     criteria: List[Any] = []
     all: bool = False
     exclude: bool = False
+    skip_limit: int = 1000
 
     @validator("criteria", pre=True, always=True)
     def ensure_criteria(cls, v):

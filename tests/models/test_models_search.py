@@ -37,6 +37,7 @@ def test_roundtrip():
                     }
                 ],
                 "exclude": False,
+                "skip_limit": 1000,
             },
         ],
     }

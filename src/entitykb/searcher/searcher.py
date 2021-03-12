@@ -10,6 +10,7 @@ from entitykb import (
     EdgeCriteria,
     Trail,
     WalkStep,
+    logger,
     under_limit,
 )
 
@@ -42,8 +43,6 @@ class WalkLayer(Layer):
     seen: Set = field(default_factory=set)
 
     def descend(self, trail: Trail):
-        children = set()
-
         if trail.end is not None:
             others_it = self.graph.iterate_edges(
                 verbs=self.step.verbs,
@@ -55,13 +54,10 @@ class WalkLayer(Layer):
                 next_trail = trail.push(end=end, edge=edge)
                 if next_trail not in self.seen:
                     self.seen.add(next_trail)
-                    children.add(next_trail)
+                    yield next_trail
 
                     if under_limit(next_trail.hops, self.step.max_hops):
                         yield from self.descend(next_trail)
-
-        # yield last, handle case of parallel rel w/ multiple verbs
-        yield from children
 
     def __iter__(self) -> Iterator[Trail]:
         for trail in self.prev:
@@ -127,9 +123,16 @@ class FilterLayer(Layer):
         return success
 
     def __iter__(self) -> Iterator[Trail]:
+        skips = 0
         for trail in self.prev:
             if self.evaluate(trail):
                 yield trail
+            elif self.step.skip_limit and (skips > self.step.skip_limit):
+                # temporary slow search prevention solution
+                logger.warn(f"Filter exceeded skip_limit: {self.step.json()}")
+                return
+            else:
+                skips += 1
 
 
 @dataclass
@@ -151,6 +154,9 @@ class Searcher(object):
 class DefaultSearcher(Searcher):
     def initialize(self) -> Layer:
         layer = StartLayer(self.graph, starts=self.starts)
+
+        if self.traversal and not isinstance(self.traversal, Traversal):
+            self.traversal = Traversal(__root__=self.traversal)
 
         for step in self.traversal or []:
             if isinstance(step, WalkStep):

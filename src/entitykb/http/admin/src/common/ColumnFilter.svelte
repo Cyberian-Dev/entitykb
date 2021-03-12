@@ -1,5 +1,5 @@
 <script>
-    import {createEventDispatcher} from 'svelte';
+    import {createEventDispatcher, onMount} from 'svelte';
     const dispatch = createEventDispatcher();
 
     export let name = null;
@@ -37,7 +37,7 @@
             <input placeholder="{display}" bind:value={value} autofocus>
         {/if}
     {:else}
-        <a class="clickable" on:click={openFilter}>
+        <a href="javascript:void(0)" class="clickable" on:click={openFilter}>
             <i class="blue filter icon"></i>
             {display}
         </a>
@@ -46,6 +46,7 @@
 
 <style>
     #column {
+        white-space: nowrap;
         vertical-align: middle;
         height: 1.5em;
     }

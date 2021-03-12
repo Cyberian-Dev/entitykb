@@ -8,8 +8,7 @@ class Environ(CheckEnviron):
         ENTITYKB_ROOT = os.path.expanduser("~/.entitykb")
         ENTITYKB_RPC_HOST = "localhost"
         ENTITYKB_RPC_PORT = 3477
-        ENTITYKB_RPC_TIMEOUT = 2
-        ENTITYKB_RPC_RETRIES = 5
+        ENTITYKB_RPC_TIMEOUT = 5
 
     def commit(self):
         # lock in any environ variables that are not set
@@ -48,14 +47,6 @@ class Environ(CheckEnviron):
     @rpc_timeout.setter
     def rpc_timeout(self, value: int):
         self["ENTITYKB_RPC_TIMEOUT"] = str(value)
-
-    @property
-    def rpc_retries(self) -> int:
-        return int(self["ENTITYKB_RPC_RETRIES"])
-
-    @rpc_retries.setter
-    def rpc_retries(self, value: int):
-        self["ENTITYKB_RPC_RETRIES"] = str(value)
 
 
 environ = Environ()

@@ -26,19 +26,23 @@ class HandlerKB(object):
 
     # nodes
 
+    @logger.timed
     def get_node(self, key: str) -> Optional[dict]:
         node = self._kb.get_node(key)
         data = None if node is None else node.dict()
         return data
 
+    @logger.timed
     def save_node(self, node) -> dict:
         node = self._kb.save_node(node)
         return node.dict()
 
+    @logger.timed
     def remove_node(self, key) -> dict:
         node = self._kb.remove_node(key)
         return node.dict()
 
+    @logger.timed
     def get_neighbors(self, request: dict) -> List[dict]:
         request = EdgeRequest(**request)
         nodes = self._kb.get_neighbors(
@@ -50,6 +54,7 @@ class HandlerKB(object):
         )
         return [node.dict() for node in nodes]
 
+    @logger.timed
     def get_edges(self, request: dict) -> List[dict]:
         request = EdgeRequest(**request)
         edges = self._kb.get_edges(
@@ -62,12 +67,14 @@ class HandlerKB(object):
 
     # edges
 
+    @logger.timed
     def save_edge(self, edge: dict):
         edge = self._kb.save_edge(edge)
         return edge.dict()
 
     # pipeline
 
+    @logger.timed
     def parse(self, request: dict) -> dict:
         request = ParseRequest(**request)
         doc = self._kb.parse(
@@ -75,6 +82,7 @@ class HandlerKB(object):
         )
         return doc.dict()
 
+    @logger.timed
     def find(self, request: dict) -> List[dict]:
         request = ParseRequest(**request)
         doc = self._kb.parse(
@@ -82,6 +90,7 @@ class HandlerKB(object):
         )
         return [s.entity.dict() for s in doc.spans if s and s.entity]
 
+    @logger.timed
     def find_one(self, request: dict) -> dict:
         request = ParseRequest(**request)
         doc = self._kb.parse(
@@ -91,6 +100,7 @@ class HandlerKB(object):
 
     # graph
 
+    @logger.timed
     def search(self, request: dict) -> dict:
         request = SearchRequest(**request)
         response = self._kb.search(
@@ -108,30 +118,37 @@ class HandlerKB(object):
     def transact(self):
         pass
 
+    @logger.timed
     def reload(self):
         self._kb.reload()
 
+    @logger.timed
     def reindex(self):
         self._kb.reindex()
 
+    @logger.timed
     def clear(self) -> bool:
         success = self._kb.clear()
         return success
 
+    @logger.timed
     def info(self) -> dict:
         data = self._kb.info()
         return data
 
+    @logger.timed
     def get_schema(self) -> dict:
         data = self._kb.get_schema()
         return data
 
     # users
 
+    @logger.timed
     def authenticate(self, username: str, password: str) -> str:
         """ Check username password combo, return user's uuid if valid. """
         return self._kb.authenticate(username=username, password=password)
 
+    @logger.timed
     def get_user(self, token: str) -> Optional[dict]:
         """ Return user for valid token from authenticate. """
         user = self._kb.get_user(token=token)
