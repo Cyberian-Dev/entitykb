@@ -139,7 +139,7 @@ class AsyncKB(interfaces.IKnowledgeBase):
 
         async with self.connection as client:
             data: dict = await client.call("search", request.dict())
-            return SearchResponse(**data)
+            return SearchResponse(**data) if data else None
 
     # admin
 

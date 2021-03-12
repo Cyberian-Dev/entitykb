@@ -36,6 +36,7 @@ def test_create_filter_step_only():
             {"field": "number", "compare": "gte", "type": "field", "value": 3}
         ],
         "exclude": False,
+        "skip_limit": 1000,
     }
 
 

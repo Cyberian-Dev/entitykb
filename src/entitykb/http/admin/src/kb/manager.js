@@ -1,12 +1,15 @@
-import _ from 'underscore';
 import {Entity, Neighbor} from "./nodes";
 import {Comparison, FieldCriteria, SearchRequest, Traversal} from "./query";
 
 const baseURL = window.location.origin;
-const parseURL = baseURL + "/parse";
-const searchURL = baseURL + "/search";
+
+const findOneURL = baseURL + "/find_one";
 const getNodeURL = baseURL + "/nodes/";
+const searchURL = baseURL + "/search";
 const getSchemaURL = baseURL + "/meta/schema";
+const parseURL = baseURL + "/parse";
+const saveNodeURL = baseURL + "/nodes";
+
 
 const defaultParams = {
     mode: 'cors',
@@ -22,88 +25,71 @@ const defaultParams = {
 
 export class RequestManager {
 
-    constructor() {
-        this.isClear = true;
-        this.lastPage = null;
-        this.lastRequest = {};
-    }
-
-    isAvailable(page, nextRequest) {
-        const isChanged = (page !== this.lastPage) || (!_.isEqual(nextRequest, this.lastRequest));
-        return this.isClear && isChanged
-    }
-
-    start(page, thisRequest) {
-        this.isClear = false;
-        this.lastPage = page;
-        this.lastRequest = {...thisRequest};
-    }
-
-    finish() {
-        this.isClear = true;
-    }
-
     async getSchema() {
         return await fetch(getSchemaURL, {
             ...defaultParams,
             method: "GET",
         })
             .then(response => {
+                if (!response.ok) {
+                    return Promise.reject(response);
+                }
                 return response.json()
             })
             .catch(async response => {
                 console.log(response);
-                return {}
+                return {labels: [], verbs: []}
             });
     }
 
-    async getEntity(key) {
-        const data = await fetch(getNodeURL + key, {
-            ...defaultParams,
-            method: "GET",
-        })
-            .then(response => {
-                return response.json()
-            })
-            .catch(async response => {
-                console.log(response);
-                return {}
-            });
+    async findOne(key) {
+        const words = key.split("|");
+        const text = words[0];
+        const label = words[1];
 
-        return new Entity(data);
-    }
+        const body = JSON.stringify({text: text, labels: [label]});
 
-    async parseDoc(text, labels) {
-        const body = JSON.stringify({text: text, labels: labels});
-
-        return await fetch(parseURL, {
+        const data = await fetch(findOneURL, {
             ...defaultParams,
             method: "POST",
             body: body,
         })
             .then(response => {
+                if (!response.ok) {
+                    return Promise.reject(response);
+                }
                 return response.json()
             })
             .catch(async response => {
                 console.log(response);
-                return {
-                    text: text,
-                    spans: [],
-                    tokens: []
-                }
+                return null;
             });
+
+        return data ? new Entity(data) : null;
     }
 
-    async getDoc(page, thisRequest) {
-        this.start(page, thisRequest);
-        let doc = await this.parseDoc(thisRequest.text, thisRequest.labels);
-        this.finish();
-        return doc;
+    async getNode(key) {
+        // double encoding required to send correctly.
+        key = encodeURIComponent(encodeURIComponent(key));
+        const data = await fetch(getNodeURL + key, {
+            ...defaultParams,
+            method: "GET",
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return Promise.reject(response);
+                }
+                return response.json()
+            })
+            .catch(async response => {
+                console.log(response);
+                return null;
+            });
+
+        return data ? new Entity(data) : null;
     }
 
-    async getNeighbors(page, thisRequest) {
-        this.start(page, thisRequest);
-
+    async getNeighbors(thisRequest) {
         let traversal = new Traversal();
         traversal.walk(thisRequest.verb, thisRequest.direction);
 
@@ -119,37 +105,28 @@ export class RequestManager {
 
 
         let keys = thisRequest.key ? [thisRequest.key] : [];
-        const request = new SearchRequest(null, null, keys, traversal, page);
+        const request = new SearchRequest(null, null, keys, traversal, thisRequest.page);
         const response = await this.doSearch(request);
 
-        let nodes = new Map(response.nodes.map(node => [node.key, node]));
-        let neighbors = response.trails.map(trail => new Neighbor(trail, nodes.get(trail.end)));
-
-        this.finish();
-        return neighbors;
+        if (response) {
+            let nodes = new Map(response.nodes.map(node => [node.key, node]));
+            return response.trails.map(trail => new Neighbor(trail, nodes.get(trail.end)));
+        } else {
+            return false;
+        }
     }
 
-    async getEntities(page, thisRequest) {
-        this.start(page, thisRequest);
-
+    async getEntities(thisRequest) {
         let traversal = new Traversal();
-
-        let labels = thisRequest.label ? [thisRequest.label] : [];
-        let keys = thisRequest.key ? [thisRequest.key] : [];
-
-        if (Boolean(thisRequest.attribute)) {
-            const criteria = new FieldCriteria(
-                thisRequest.attribute.name, Comparison.icontains, thisRequest.attribute.value
-            );
-            traversal.include([criteria]);
-        }
-
-        const request = new SearchRequest(thisRequest.name, labels, keys, traversal, page);
+        const request = new SearchRequest(
+            thisRequest.q, thisRequest.labels, [], traversal, thisRequest.page
+        );
         const response = await this.doSearch(request);
-        const entities = response.nodes.map(data => new Entity(data));
-
-        this.finish();
-        return entities;
+        if (response && response.nodes) {
+            return response.nodes.map(data => new Entity(data));
+        } else {
+            return [];
+        }
     }
 
     async doSearch(request) {
@@ -161,6 +138,9 @@ export class RequestManager {
             body: body,
         })
             .then(response => {
+                if (!response.ok) {
+                    return Promise.reject(response);
+                }
                 return response.json()
             })
             .catch(async response => {
@@ -168,4 +148,49 @@ export class RequestManager {
                 return {nodes: [], trails: []};
             });
     }
+
+    async parseDoc(thisRequest) {
+        const body = JSON.stringify(thisRequest);
+
+        return await fetch(parseURL, {
+            ...defaultParams,
+            method: "POST",
+            body: body,
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return Promise.reject(response);
+                }
+                return response.json()
+            })
+            .catch(async response => {
+                console.log(response);
+                return {
+                    text: thisRequest.text,
+                    spans: [],
+                    tokens: []
+                }
+            });
+    }
+
+    async saveEntity(entity) {
+        const body = JSON.stringify(entity.body);
+
+        return await fetch(saveNodeURL, {
+            ...defaultParams,
+            method: "POST",
+            body: body,
+        }).then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                return false;
+            }
+        }).catch(async response => {
+            console.log(response);
+            return false;
+        });
+    }
 }
+
+export const manager = new RequestManager();

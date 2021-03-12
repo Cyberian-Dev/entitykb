@@ -1,25 +1,60 @@
-function isAttribute(fieldName) {
-    return !["key", "name", "label"].includes(fieldName);
-}
-
 export class Entity {
 
     constructor(data) {
-        this.key = null;
-        this.label = null;
-        this.name = null;
-        this.attributes = {};
+        this._data = data;
+    }
 
-        for (const [key, value] of Object.entries(data || {})) {
-            if (isAttribute(key)) {
+    get key() {
+        return this._data["key"];
+    }
+
+    set key(value) {
+        this._data["key"] = value;
+    }
+
+    get label() {
+        return this._data["label"];
+    }
+
+    set label(value) {
+        this._data["label"] = value;
+    }
+
+    get name() {
+        return this._data["name"];
+    }
+
+    set name(value) {
+        this._data["name"] = value;
+    }
+
+    get attributes() {
+        const attributes = {};
+
+        for (const [key, value] of  Object.entries(this._data || {})) {
+            if (!["key", "name", "label"].includes(key)) {
                 if (value === '' || value === null || value === undefined) continue;
                 if (value instanceof Array && value.length === 0) continue;
-                this.attributes[key] = value;
-            } else {
-                this[key] = value;
+                attributes[key] = value;
             }
         }
+
+        return Object.entries(attributes).sort();
     }
+
+    get body() {
+        const body = {};
+
+        for (const [key, value] of  Object.entries(this._data || {})) {
+            if (value === '' || value === null || value === undefined) continue;
+            if (value instanceof Array && value.length === 0) continue;
+            body[key] = value;
+        }
+
+        return body;
+    }
+
+
 }
 
 export class Neighbor {

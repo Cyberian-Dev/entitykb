@@ -37,6 +37,7 @@ clean-build:
 	rm -fr dist/
 	rm -fr .eggs/
 	find . -name '*.egg-info' -exec rm -fr {} +
+	find . -name '*.DS_Store' -exec rm -fr {} +
 
 clean-pyc:
 	find . -name '*.pyc' -exec rm -f {} +

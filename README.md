@@ -1,13 +1,6 @@
-<p align="center">
-  <a href="https://www.entitykb.org">
-    <img src="https://www.entitykb.org/img/logo.png" alt="EntityKB">
-  </a>
-  <br/>
-  <em>
-    EntityKB is a Python toolkit for the rapid development of custom
-    knowledge bases.
-  </em>
-</p>
+<h1>💡 EntityKB</h1>
+
+Python toolkit for the rapid development of custom knowledge bases.
 
 ---
 

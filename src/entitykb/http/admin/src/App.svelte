@@ -1,74 +1,57 @@
 <script>
-    import {onMount} from 'svelte';
+    import {onMount} from "svelte";
+    import {SvelteToast} from "@zerodevx/svelte-toast";
 
-    import {RequestManager} from "./kb/manager";
+    import Router from 'svelte-spa-router';
+    import routes from './routes';
+    import AuthMain from "./auth/AuthMain.svelte";
 
-    import Menu from "./Menu.svelte";
-    import Bottom from "./Bottom.svelte";
-    import ListView from "./ListView.svelte";
-    import DetailView from "./DetailView.svelte";
-    import ParseView from "./ParseView.svelte";
-
-    let choice = "graph";
-    let selectKey = null;
-    let schema = null;
-    const manager = new RequestManager();
+    import {initToken} from "./auth/token";
+    import {myToken} from "./auth/token";
+    import {Schema} from "./kb/schema";
+    import TopMenu from "./common/TopMenu.svelte";
+    import BottomMenu from "./common/BottomMenu.svelte";
 
     onMount(async () => {
-        schema = await manager.getSchema();
+        await Schema.instance().load();
+        await initToken();
     });
 
+    let token = null;
 
-    const updateKey = () => {
-        if (selectKey !== null) {
-            choice = "detail"
-        } else {
-            choice = "graph";
-        }
-    };
+    myToken.subscribe(
+            newToken => {
+                token = newToken;
+            }
+    );
 
-    const updateChoice = () => {
-        if (choice !== "detail") {
-            selectKey = null;
-        }
-    };
-
-    $: updateKey(selectKey);
-    $: updateChoice(choice);
+    const options = {
+        theme: {
+            '--toastWidth': '20rem',
+            '--toastHeight': '5rem'
+        },
+        duration: 1500
+    }
 </script>
 
-<main>
-    <Menu bind:choice={choice} />
+{#if token}
+    <TopMenu/>
 
-    {#if (choice === "graph")}
-    <div id="content">
-        <ListView bind:selectKey={selectKey} schema={schema} />
+    <div id="appContainer">
+        <Router {routes}/>
     </div>
-    {:else if (choice === "detail")}
-    <div id="content">
-        <DetailView bind:selectKey={selectKey} schema={schema} />
-    </div>
-    {:else if (choice === "parse")}
-        <div id="content">
-            <ParseView bind:selectKey={selectKey} />
-        </div>
-    {:else if (choice === "api")}
-        <iframe title="Swagger API" src="/docs"></iframe>
-    {:else if (choice === "docs")}
-        <iframe title="Docs" src="https://www.entitykb.org/"></iframe>
-    {/if}
 
-    <Bottom />
-</main>
+    <BottomMenu/>
+{:else}
+    <AuthMain/>
+{/if}
+
+<SvelteToast {options}/>
 
 <style>
-    iframe {
-        width: 100%;
-        height: calc(85vh);
-        border: 0;
-    }
-    #content {
-        padding: 1em;
-        margin: 1em 3em 5em 3em;
+    #appContainer {
+        margin-left: 2em;
+        margin-right: 2em;
+        padding-bottom: 5em;
     }
 </style>

@@ -1,8 +1,16 @@
-iframe.svelte-jbahxs{width:100%;height:calc(85vh);border:0}#content.svelte-jbahxs{padding:1em;margin:1em 3em 5em 3em}
-#column.svelte-1f5zqhf{vertical-align:middle;height:1.5em}.icon.svelte-1f5zqhf{width:1em}
+ul.svelte-ivwmun{position:fixed;margin:0;padding:0;list-style-type:none;z-index:9999;pointer-events:none;top:var(--toastContainerTop,1.5rem);right:var(--toastContainerRight,2rem);bottom:var(--toastContainerBottom,auto);left:var(--toastContainerLeft,auto)}
+._toastItem.svelte-vfz6wa{width:var(--toastWidth,16rem);height:var(--toastHeight,3.5rem);margin:var(--toastMargin,0 0 0.5rem 0);background:var(--toastBackground,rgba(66,66,66,0.9));color:var(--toastColor,#FFF);box-shadow:0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06);border-radius:0.125rem;position:relative;display:flex;flex-direction:row;align-items:center;will-change:transform,opacity;-webkit-tap-highlight-color:transparent}._toastMsg.svelte-vfz6wa{font:var(--toastFont);flex:1 1 0%;padding:0 0.5rem}._toastBtn.svelte-vfz6wa{width:2rem;height:100%;font:1rem sans-serif;display:flex;align-items:center;justify-content:center;cursor:pointer;outline:none;pointer-events:auto}._toastBar.svelte-vfz6wa{display:block;-webkit-appearance:none;-moz-appearance:none;appearance:none;border:none;position:absolute;bottom:0;width:100%;height:6px;background:transparent}._toastBar.svelte-vfz6wa::-webkit-progress-bar{background:transparent}._toastBar.svelte-vfz6wa::-webkit-progress-value{background:var(--toastProgressBackground,rgba(33,150,243,0.75))}._toastBar.svelte-vfz6wa::-moz-progress-bar{background:var(--toastProgressBackground,rgba(33,150,243,0.75))}
+#appContainer.svelte-12xy2y4{margin-left:2em;margin-right:2em;padding-bottom:5em}
+div#authContainer.svelte-1vnwc89{height:calc(100vh);background-color:#e0e0e0}div#authContent.svelte-1vnwc89{padding-top:1.5em;height:30em}.image.svelte-1vnwc89{margin-top:-100px}.column.svelte-1vnwc89{max-width:450px}
+h2.svelte-174srti{padding-bottom:1em}
+.ui.label.svelte-1x3vb5m.svelte-1x3vb5m{width:8em;text-align:left}.array.svelte-1x3vb5m.svelte-1x3vb5m{padding-top:.2em;padding-left:0.5em;min-width:25.8em}div.item.svelte-1x3vb5m.svelte-1x3vb5m{width:100%;text-align:left}div.view.svelte-1x3vb5m.svelte-1x3vb5m{padding:.5em}div.view.svelte-1x3vb5m.svelte-1x3vb5m:hover{background-color:#FFFFAA;cursor:pointer}.trash.icon.svelte-1x3vb5m.svelte-1x3vb5m{color:#DDCCCC;float:right;padding-left:1em;padding-right:1em}.trash.icon.svelte-1x3vb5m.svelte-1x3vb5m:hover{color:red;font-weight:bold}div.edit.svelte-1x3vb5m input.svelte-1x3vb5m{width:100% !important;padding:.45em !important}div.add.svelte-1x3vb5m.svelte-1x3vb5m{color:#AAAAAA;padding:.5em;font-style:italic}div.add.svelte-1x3vb5m.svelte-1x3vb5m:hover{background-color:#CCEEDD;cursor:pointer;color:#333333}.plus.icon.svelte-1x3vb5m.svelte-1x3vb5m{color:#99CC99;float:right;padding-left:1em;padding-right:1em}.plus.icon.svelte-1x3vb5m.svelte-1x3vb5m:hover{color:#66FF66;font-weight:bold}
+#column.svelte-1xmvxjb{white-space:nowrap;vertical-align:middle;height:1.5em}.icon.svelte-1xmvxjb{width:1em}
+h2.svelte-ofyadh.svelte-ofyadh{padding-bottom:1em}div#buttons.svelte-ofyadh.svelte-ofyadh{padding-top:2em}.column.svelte-ofyadh.svelte-ofyadh{max-width:600px !important}div#formContainer.svelte-ofyadh.svelte-ofyadh{padding-top:3em}span#cancel.svelte-ofyadh a.svelte-ofyadh{color:#9999CC;margin-left:3em}
+.ui.label.svelte-1fkd6hd{width:8em;text-align:left}.icon.svelte-1fkd6hd{width:1.1em}span.readonly.svelte-1fkd6hd{padding-top:.4em;padding-left:1em;font-weight:bold;color:#666666}
+div#pagination.svelte-oqtjm1{white-space:nowrap !important;font-weight:bold;color:#999999}
+.ui.label.svelte-vpehuf{width:8em;text-align:left}
+iframe.svelte-2gd2b0{width:100%;height:calc(85vh);border:0}
+h2.svelte-1q6tlf6{min-height:2em}.no-rels.svelte-1q6tlf6{text-align:center !important;font-style:italic}
 .field_name.svelte-1ulg1cd{font-weight:bold;color:#444444;background-color:#DDD5DD}
-div.top.menu.svelte-1no5vn6{border:0;font-size:1.4em}
-.menu.svelte-947s4u .item.svelte-947s4u{width:2em}
-.token_offset.svelte-105u2j2{font-weight:bold;color:#444444;background-color:#DDD5DD}
 
 /*# sourceMappingURL=bundle.css.map */

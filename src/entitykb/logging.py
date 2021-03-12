@@ -1,4 +1,7 @@
 import logging.config
+import time
+from functools import wraps
+
 
 LOGGING_CONFIG = {
     "version": 1,
@@ -23,3 +26,18 @@ LOGGING_CONFIG = {
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("entitykb")
 logger.setLevel("INFO")
+
+
+def timed(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = f(*args, **kwargs)
+        lapse = time.time() - start
+        logger.info(f"{f.__qualname__}: {lapse:.4f}")
+        return result
+
+    return wrapper
+
+
+logger.timed = timed
