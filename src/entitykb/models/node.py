@@ -168,7 +168,7 @@ class Edge(BaseModel):
     def set_data(self, data):
         self[3] = Node.to_key(data)
 
-    def get_other(self, direction):
+    def get_other(self, direction) -> str:
         return self.end if direction.is_outgoing else self.start
 
     @property
@@ -207,3 +207,11 @@ class Edge(BaseModel):
             _, end, verb, start = line.split(ts)
 
         return Edge(__root__=(start, verb, end, data))
+
+
+class Neighbor(BaseModel):
+    key: str
+    verb: str
+    direction: str
+    edge: dict
+    node: dict = None

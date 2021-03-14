@@ -9,7 +9,7 @@ from .funcs import (
     under_limit,
     label_filter,
 )
-from .node import Node, Edge, NodeKey, IEdge
+from .node import Node, Edge, NodeKey, IEdge, Neighbor
 from .entity import Entity
 from .traverse import (
     F,
@@ -25,18 +25,26 @@ from .traverse import (
     WalkStep,
 )
 from .registry import Registry
-from .search import SearchRequest, Hop, Trail, SearchResponse, EdgeRequest
+from .search import (
+    CountRequest,
+    Hop,
+    NeighborRequest,
+    NeighborResponse,
+    SearchRequest,
+    SearchResponse,
+    Trail,
+)
 from .serialization import Envelope
 
 __all__ = (
     "Comparison",
     "Criteria",
+    "CountRequest",
     "Direction",
     "Doc",
     "DocToken",
     "Edge",
     "EdgeCriteria",
-    "EdgeRequest",
     "Entity",
     "Envelope",
     "F",
@@ -44,6 +52,9 @@ __all__ = (
     "FilterStep",
     "Hop",
     "IEdge",
+    "Neighbor",
+    "NeighborRequest",
+    "NeighborResponse",
     "Node",
     "NodeKey",
     "ParseRequest",

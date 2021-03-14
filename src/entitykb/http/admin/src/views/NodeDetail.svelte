@@ -1,5 +1,4 @@
 <script>
-    import {onMount} from 'svelte';
     import {push, pop} from "svelte-spa-router";
     import {toastFail} from "../common/toast";
 
@@ -12,16 +11,17 @@
     let schema = Schema.instance();
     let entity = null;
     let neighbors = [];
+    let total_count = null;
     let isDynamic = false;
 
     let labelOptions = [];
     let verbOptions = [];
-    const directions = ["Incoming", "Outgoing"];
+    const directions = ["incoming", "outgoing"];
 
     const nextRequest = {
-        key: '',
-        direction: '',
+        node_key: '',
         verb: '',
+        direction: null,
         name: '',
         label: '',
         page: 0,
@@ -35,7 +35,7 @@
         }
 
         if (entity) {
-            nextRequest["key"] = entity.key;
+            nextRequest["node_key"] = entity.key;
             await loadNeighbors();
             document.title = `Detail: ${entity.name} [${entity.label}]`;
         } else {
@@ -46,8 +46,17 @@
 
     const loadNeighbors = async () => {
         neighbors = null;
-        if (nextRequest.key) {
-            neighbors = await manager.getNeighbors(nextRequest);
+        if (nextRequest.node_key) {
+            const response = await manager.getNeighbors(nextRequest);
+            if (response !== null) {
+                neighbors = response.neighbors;
+                total_count = response.total;
+            } else {
+                neighbors = [];
+                total_count = null;
+            }
+
+            console.log(neighbors);
         }
     };
 
@@ -139,6 +148,7 @@
                         {#if neighbors}
                         <Pagination page={nextRequest.page}
                                     page_count={neighbors.length}
+                                    total_count={total_count}
                                     on:doPageChange={doPageChange}
                         />
                         {/if}
@@ -160,9 +170,9 @@
                                       options={schema.verbs}
                                       on:update={onUpdate}/>
                     </th>
-                    <th class="three wide" nowrap="nowrap">
-                        <ColumnFilter name="name" display="Name"
-                                      on:update={onUpdate}/>
+                    <th class="three wide" nowrap="nowrap">Name
+<!--                        <ColumnFilter name="name" display="Name"-->
+<!--                                      on:update={onUpdate}/>-->
                     </th>
                     <th class="two wide">
                         <ColumnFilter name="label" display="Label"
@@ -189,8 +199,8 @@
                     <tr on:click={openRow(neighbor.key)}>
                         <td>{neighbor.direction}</td>
                         <td>{neighbor.verb}</td>
-                        <td>{neighbor.name}</td>
-                        <td>{neighbor.label}</td>
+                        <td>{neighbor.node.name}</td>
+                        <td>{neighbor.node.label}</td>
                     </tr>
                     {/each}
                 {/if}

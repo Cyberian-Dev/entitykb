@@ -5,6 +5,8 @@ const baseURL = window.location.origin;
 
 const findOneURL = baseURL + "/find_one";
 const getNodeURL = baseURL + "/nodes/";
+const getNeighborsURL = baseURL + "/nodes/neighbors";
+const getNodeCountURL = baseURL + "/nodes/count";
 const searchURL = baseURL + "/search";
 const getSchemaURL = baseURL + "/meta/schema";
 const parseURL = baseURL + "/parse";
@@ -88,8 +90,33 @@ export class RequestManager {
 
         return data ? new Entity(data) : null;
     }
-
     async getNeighbors(thisRequest) {
+        thisRequest["direction"] = thisRequest["direction"] || null;
+        thisRequest["offset"] = thisRequest["page"] * 10;
+        thisRequest["limit"] = 10;
+        console.log(thisRequest);
+
+        const body = JSON.stringify(thisRequest);
+
+        // noinspection DuplicatedCode
+        return await fetch(getNeighborsURL, {
+            ...defaultParams,
+            method: "POST",
+            body: body,
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return Promise.reject(response);
+                }
+                return response.json()
+            })
+            .catch(async response => {
+                console.log(await response.text());
+                return null;
+            });
+    }
+
+    async getNeighbors_old(thisRequest) {
         let traversal = new Traversal();
         traversal.walk(thisRequest.verb, thisRequest.direction);
 
@@ -127,6 +154,28 @@ export class RequestManager {
         } else {
             return [];
         }
+    }
+    async getTotalCount(thisRequest) {
+        const body = JSON.stringify({
+            term: thisRequest.q || null,
+            labels: thisRequest.labels || [],
+        });
+
+        return await fetch(getNodeCountURL, {
+            ...defaultParams,
+            method: "POST",
+            body: body,
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return Promise.reject(response);
+                }
+                return response.json()
+            })
+            .catch(async response => {
+                console.log(await response.text());
+                return null;
+            });
     }
 
     async doSearch(request) {

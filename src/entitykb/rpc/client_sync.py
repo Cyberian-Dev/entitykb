@@ -49,15 +49,21 @@ class SyncKB(AsyncKB):
         self,
         node_key: NodeKey,
         verb: str = None,
-        label: str = None,
         direction: Optional[Direction] = None,
-        limit: int = 100,
+        label: str = None,
+        offset: int = 0,
+        limit: int = 10,
     ) -> List[Node]:
         future = super(SyncKB, self).get_neighbors(
-            node_key, verb, label, direction, limit
+            node_key, verb, direction, label, offset, limit
         )
         neighbors = run_future(future)
         return neighbors
+
+    async def count_nodes(self, term=None, labels: istr = None):
+        future = super(SyncKB, self).count_nodes(term, labels)
+        count = run_future(future)
+        return count
 
     # edges
 

@@ -4,7 +4,7 @@ from entitykb import (
     F,
     SearchRequest,
     T,
-    EdgeRequest,
+    NeighborRequest,
     Node,
 )
 
@@ -48,5 +48,5 @@ def test_roundtrip():
 def test_edge_request():
     node = Node()
     # noinspection PyTypeChecker
-    request = EdgeRequest(node_key=node)
+    request = NeighborRequest(node_key=node)
     assert request.node_key == node.key

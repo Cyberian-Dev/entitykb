@@ -7,6 +7,7 @@ from entitykb import (
     Node,
     Edge,
     Direction,
+    Neighbor,
     TripleSep as TS,
     ensure_iterable,
     create_index,
@@ -56,7 +57,46 @@ class EdgeIndex(object):
             for direction in ensure_iterable(directions):
                 for node in ensure_iterable(nodes):
                     node_key = Node.to_key(node)
-                    yield from self._do_iter(verb, node_key, direction)
+                    it = self._iterate_ts_line(direction, node_key, verb)
+                    for ts, line in it:
+                        edge = Edge.from_line(line, ts=ts)
+                        yield edge.get_other(direction), edge
+
+    def get_neighbors(
+        self,
+        node_key,
+        verb: str = None,
+        direction: Optional[Direction] = None,
+        label: str = None,
+        offset: int = 0,
+        limit: int = 10,
+    ) -> Tuple[List[Neighbor], int]:
+
+        neighbors = []
+        count = 0
+
+        directions = Direction.as_tuple(direction, all_if_none=True)
+        for direction in directions:
+            it = self._iterate_ts_line(direction, node_key, verb)
+            for ts, line in it:
+                if label and not line.endswith(f"|{label}"):
+                    continue
+
+                count += 1
+                if count <= offset:
+                    continue
+
+                if count < (offset + limit):
+                    edge = Edge.from_line(line, ts=ts)
+                    neighbor = Neighbor(
+                        key=edge.get_other(direction),
+                        verb=edge.verb,
+                        direction=direction.value,
+                        edge=edge,
+                    )
+                    neighbors.append(neighbor)
+
+        return neighbors, count
 
     def reload(self):
         self.dawg = self._load_dawg()
@@ -103,16 +143,15 @@ class EdgeIndex(object):
         dawg = CompletionDAWG(it_keys)
         return dawg
 
-    def _do_iter(
-        self, verb, node_key, direction
-    ) -> Iterable[Tuple[str, Edge]]:
+    def _iterate_ts_line(
+        self, direction, node_key, verb
+    ) -> Iterable[Tuple[TS, str]]:
         ts, tokens = self._sep_split(direction, node_key, verb)
+
         if ts:
             prefix = ts.join(tokens)
             for line in self.dawg.iterkeys(prefix):
-                # yields a shallow edge from line str
-                edge = Edge.from_line(line, ts=ts)
-                yield edge.get_other(direction), edge
+                yield ts, line
 
     @classmethod
     def _sep_split(cls, direction, node_key, verb) -> Tuple[TS, List[str]]:

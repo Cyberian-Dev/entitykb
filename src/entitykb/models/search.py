@@ -2,7 +2,7 @@ from typing import List, Any, Tuple, Optional, Union
 
 from pydantic import BaseModel, Field, validator
 
-from .node import Edge, Node
+from .node import Edge, Node, Neighbor
 from .traverse import Traversal
 from .enums import Direction
 
@@ -20,16 +20,24 @@ class SearchRequest(BaseModel):
         return Traversal() if value is None else value
 
 
-class EdgeRequest(BaseModel):
+class NeighborRequest(BaseModel):
     node_key: str
     verb: str = None
-    label: str = None
     direction: Direction = None
+    label: str = None
+    offset: int = 0
     limit: int = 100
 
     @validator("node_key", pre=True)
     def node_to_key(cls, val):
         return Node.to_key(val)
+
+
+class NeighborResponse(BaseModel):
+    neighbors: List[Neighbor]
+    offset: int
+    limit: int
+    total: int
 
 
 class Hop(BaseModel):
@@ -101,3 +109,8 @@ class SearchResponse(BaseModel):
 
     def __iter__(self):
         yield from self.nodes
+
+
+class CountRequest(BaseModel):
+    term: str = None
+    labels: List[str] = []

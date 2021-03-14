@@ -8,6 +8,7 @@ from entitykb import (
     Doc,
     Entity,
     Edge,
+    NeighborResponse,
     Node,
     NodeKey,
     Pipeline,
@@ -77,27 +78,31 @@ class KB(interfaces.IKnowledgeBase):
         self,
         node_key: NodeKey,
         verb: str = None,
-        label: str = None,
         direction: Optional[Direction] = None,
-        limit: int = 100,
-    ) -> List[Node]:
+        label: str = None,
+        offset: int = 0,
+        limit: int = 10,
+    ) -> NeighborResponse:
 
         node_key = Node.to_key(node_key)
-        seen_keys = set()
-        neighbors = []
+        neighbors, total_count = self.graph.get_neighbors(
+            node_key=node_key,
+            verb=verb,
+            direction=direction,
+            label=label,
+            offset=offset,
+            limit=limit,
+        )
 
-        for other_key, _ in self.graph.iterate_edges(
-            nodes=node_key, verbs=verb, directions=direction
-        ):
-            if other_key not in seen_keys:
-                seen_keys.add(other_key)
-                other_node = self.get_node(other_key)
-                if other_node and (label is None or other_node.label == label):
-                    neighbors.append(other_node)
-                    if len(neighbors) >= limit:
-                        break
+        for neighbor in neighbors:
+            neighbor.node = self.get_node(neighbor.key)
 
-        return neighbors
+        return NeighborResponse(
+            neighbors=neighbors,
+            offset=offset,
+            limit=limit,
+            total=total_count,
+        )
 
     def get_edges(
         self,
@@ -118,6 +123,9 @@ class KB(interfaces.IKnowledgeBase):
                 break
 
         return edges
+
+    def count_nodes(self, term=None, labels: istr = None) -> int:
+        return self.graph.count_nodes(term=term, labels=labels)
 
     # edges
 

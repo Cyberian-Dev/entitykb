@@ -5,6 +5,7 @@
     export let page = 0;
     export let page_size = 10;
     export let page_count = 0;
+    export let total_count = null;
 
     let page_min = 0;
     let page_max = 0;
@@ -15,7 +16,7 @@
         page_min = (page * page_size) + 1;
         page_max = (page * page_size) + page_count;
         has_prev = page > 0;
-        has_next = page_count === page_size;
+        has_next = page_max < total_count;
     };
 
     function firstPage() {
@@ -49,6 +50,9 @@
 
     {#if page_max}
         {page_min} - {page_max}
+        {#if total_count !== null}
+            of {total_count}
+        {/if}
     {/if}
 
     &nbsp;

@@ -47,20 +47,15 @@ async def remove_node(key: str):
         return await client.call("remove_node", key)
 
 
-@router.get(
-    "/nodes/{key}/neighbors", tags=["nodes"], response_model=List[models.Node]
+@router.post(
+    "/nodes/neighbors",
+    tags=["nodes"],
+    response_model=models.NeighborResponse,
 )
 async def get_neighbors(
-    key: str,
-    verb: str = None,
-    label: str = None,
-    direction: Direction = None,
-    limit: int = 100,
+    request: models.NeighborRequest,
 ) -> List[models.Node]:
     """ Return list of neighbor nodes for a given node. """
-    request = models.EdgeRequest(
-        node_key=key, verb=verb, label=label, direction=direction, limit=limit
-    )
     async with connection as client:
         data = await client.call("get_neighbors", request.dict())
         return data
@@ -71,12 +66,19 @@ async def get_edges(
     key: str, verb: str = None, direction: Direction = None, limit: int = 100
 ):
     """ Return list of edges for a given node. """
-    request = models.EdgeRequest(
+    request = models.NeighborRequest(
         node_key=key, verb=verb, direction=direction, limit=limit
     )
     async with connection as client:
         data = await client.call("get_edges", request.dict())
         return data
+
+
+@router.post("/nodes/count", tags=["nodes"])
+async def count_nodes(request: models.CountRequest) -> int:
+    async with connection as client:
+        count = await client.call("count_nodes", request.dict())
+        return count
 
 
 # edges
