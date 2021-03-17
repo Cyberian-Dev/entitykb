@@ -1,7 +1,7 @@
 import os
 import time
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 import smart_open
 import typer
@@ -77,6 +77,8 @@ def load(
     dry_run: bool = typer.Option(False, "--dry-run"),
     skip_reindex: bool = typer.Option(False, "--skip-reindex"),
     is_binary: bool = typer.Option(False, "--is_binary"),
+    flags: Optional[List[str]] = typer.Option(None, "--flag"),
+    is_transaction: bool = typer.Option(False, "--tx"),
 ):
     """ Load data into local KB """
     t0 = time.time()
@@ -90,11 +92,14 @@ def load(
     else:
         file_obj = smart_open.open(in_file, mode=mode)
 
-    reader = cli.get_reader(file_format, file_obj=file_obj, kb=kb)
+    reader = cli.get_reader(
+        file_format=file_format, file_obj=file_obj, kb=kb, flags=flags
+    )
 
     count = 0
+    transact = kb.transact if is_transaction else services.noop_context
     with typer.progressbar(reader) as progress:
-        with kb.transact():
+        with transact():
             for obj in progress:
                 count += 1
 

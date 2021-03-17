@@ -75,10 +75,10 @@
 <table class="ui compact selectable celled striped table top aligned">
     <thead class="full-width">
     <tr>
-        <th class="two wide">Name</th>
-        <th class="two wide">Label</th>
-        <th class="two wide">Key</th>
-        <th class="four wide">Attributes</th>
+        <th class="three wide">Name</th>
+        <th class="three wide">Label</th>
+        <th class="three wide">Key</th>
+        <th class="seven wide">Attributes</th>
     </tr>
     </thead>
     <tbody>

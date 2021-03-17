@@ -31,7 +31,7 @@
         dispatch("doPageChange", page + 1);
     }
 
-    $: update_nums(page, page_size, page_count);
+    $: update_nums(page, page_size, page_count, total_count);
 </script>
 <div id="pagination">
     <button class="circular ui icon button"
@@ -49,9 +49,9 @@
     &nbsp;
 
     {#if page_max}
-        {page_min} - {page_max}
+        {page_min.toLocaleString()} - {page_max.toLocaleString()}
         {#if total_count !== null}
-            of {total_count}
+            of {total_count.toLocaleString()}
         {/if}
     {/if}
 

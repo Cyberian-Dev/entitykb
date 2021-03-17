@@ -3812,8 +3812,10 @@ var app = (function () {
 
     // (51:4) {#if page_max}
     function create_if_block$3(ctx) {
+    	let t0_value = /*page_min*/ ctx[1].toLocaleString() + "";
     	let t0;
     	let t1;
+    	let t2_value = /*page_max*/ ctx[2].toLocaleString() + "";
     	let t2;
     	let t3;
     	let if_block_anchor;
@@ -3821,9 +3823,9 @@ var app = (function () {
 
     	const block = {
     		c: function create() {
-    			t0 = text(/*page_min*/ ctx[1]);
+    			t0 = text(t0_value);
     			t1 = text(" - ");
-    			t2 = text(/*page_max*/ ctx[2]);
+    			t2 = text(t2_value);
     			t3 = space();
     			if (if_block) if_block.c();
     			if_block_anchor = empty();
@@ -3837,8 +3839,8 @@ var app = (function () {
     			insert_dev(target, if_block_anchor, anchor);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*page_min*/ 2) set_data_dev(t0, /*page_min*/ ctx[1]);
-    			if (dirty & /*page_max*/ 4) set_data_dev(t2, /*page_max*/ ctx[2]);
+    			if (dirty & /*page_min*/ 2 && t0_value !== (t0_value = /*page_min*/ ctx[1].toLocaleString() + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*page_max*/ 4 && t2_value !== (t2_value = /*page_max*/ ctx[2].toLocaleString() + "")) set_data_dev(t2, t2_value);
 
     			if (/*total_count*/ ctx[0] !== null) {
     				if (if_block) {
@@ -3877,19 +3879,20 @@ var app = (function () {
     // (53:8) {#if total_count !== null}
     function create_if_block_1$1(ctx) {
     	let t0;
+    	let t1_value = /*total_count*/ ctx[0].toLocaleString() + "";
     	let t1;
 
     	const block = {
     		c: function create() {
     			t0 = text("of ");
-    			t1 = text(/*total_count*/ ctx[0]);
+    			t1 = text(t1_value);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, t0, anchor);
     			insert_dev(target, t1, anchor);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*total_count*/ 1) set_data_dev(t1, /*total_count*/ ctx[0]);
+    			if (dirty & /*total_count*/ 1 && t1_value !== (t1_value = /*total_count*/ ctx[0].toLocaleString() + "")) set_data_dev(t1, t1_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(t0);
@@ -3937,23 +3940,23 @@ var app = (function () {
     			button2 = element("button");
     			i2 = element("i");
     			attr_dev(i0, "class", "angle double left icon");
-    			add_location(i0, file$4, 39, 8, 968);
+    			add_location(i0, file$4, 39, 8, 981);
     			attr_dev(button0, "class", "circular ui icon button");
     			toggle_class(button0, "disabled", !/*has_prev*/ ctx[3]);
-    			add_location(button0, file$4, 36, 4, 847);
+    			add_location(button0, file$4, 36, 4, 860);
     			attr_dev(i1, "class", "angle left icon");
-    			add_location(i1, file$4, 45, 8, 1150);
+    			add_location(i1, file$4, 45, 8, 1163);
     			attr_dev(button1, "class", "circular ui icon button");
     			toggle_class(button1, "disabled", !/*has_prev*/ ctx[3]);
-    			add_location(button1, file$4, 42, 4, 1026);
+    			add_location(button1, file$4, 42, 4, 1039);
     			attr_dev(i2, "class", "angle right icon");
-    			add_location(i2, file$4, 62, 8, 1485);
+    			add_location(i2, file$4, 62, 8, 1549);
     			attr_dev(button2, "class", "circular ui icon button");
     			toggle_class(button2, "disabled", !/*has_next*/ ctx[4]);
-    			add_location(button2, file$4, 59, 4, 1365);
+    			add_location(button2, file$4, 59, 4, 1429);
     			attr_dev(div, "id", "pagination");
     			attr_dev(div, "class", "svelte-oqtjm1");
-    			add_location(div, file$4, 35, 0, 821);
+    			add_location(div, file$4, 35, 0, 834);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -4107,7 +4110,7 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*page, page_size, page_count*/ 1792) {
+    		if ($$self.$$.dirty & /*page, page_size, page_count, total_count*/ 1793) {
     			 update_nums();
     		}
     	};
@@ -9530,8 +9533,8 @@ var app = (function () {
     			td.textContent = "No records found.";
     			attr_dev(td, "colspan", "4");
     			attr_dev(td, "class", "ui center aligned");
-    			add_location(td, file$e, 86, 12, 2317);
-    			add_location(tr, file$e, 85, 8, 2300);
+    			add_location(td, file$e, 86, 12, 2324);
+    			add_location(tr, file$e, 85, 8, 2307);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tr, anchor);
@@ -9684,7 +9687,7 @@ var app = (function () {
     		c: function create() {
     			t = text(t_value);
     			br = element("br");
-    			add_location(br, file$e, 104, 46, 3117);
+    			add_location(br, file$e, 104, 46, 3124);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, t, anchor);
@@ -9722,7 +9725,7 @@ var app = (function () {
     			i = element("i");
     			t0 = text(t0_value);
     			t1 = text(" more...");
-    			add_location(i, file$e, 107, 40, 3266);
+    			add_location(i, file$e, 107, 40, 3273);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, i, anchor);
@@ -9778,11 +9781,11 @@ var app = (function () {
     			if_block.c();
     			t3 = space();
     			attr_dev(td0, "class", "four wide field_name svelte-1ulg1cd");
-    			add_location(td0, file$e, 100, 28, 2841);
+    			add_location(td0, file$e, 100, 28, 2848);
     			attr_dev(td1, "class", "twelve wide");
-    			add_location(td1, file$e, 101, 28, 2915);
+    			add_location(td1, file$e, 101, 28, 2922);
     			attr_dev(tr, "class", "top aligned");
-    			add_location(tr, file$e, 99, 24, 2788);
+    			add_location(tr, file$e, 99, 24, 2795);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tr, anchor);
@@ -9874,13 +9877,13 @@ var app = (function () {
     			}
 
     			t6 = space();
-    			add_location(td0, file$e, 93, 12, 2523);
-    			add_location(td1, file$e, 94, 12, 2558);
-    			add_location(td2, file$e, 95, 12, 2594);
+    			add_location(td0, file$e, 93, 12, 2530);
+    			add_location(td1, file$e, 94, 12, 2565);
+    			add_location(td2, file$e, 95, 12, 2601);
     			attr_dev(table, "class", "ui compact celled table top aligned");
-    			add_location(table, file$e, 97, 16, 2649);
-    			add_location(td3, file$e, 96, 12, 2628);
-    			add_location(tr, file$e, 92, 8, 2475);
+    			add_location(table, file$e, 97, 16, 2656);
+    			add_location(td3, file$e, 96, 12, 2635);
+    			add_location(tr, file$e, 92, 8, 2482);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tr, anchor);
@@ -10077,18 +10080,18 @@ var app = (function () {
     			add_location(div3, file$e, 65, 4, 1700);
     			attr_dev(div4, "class", "ui stackable sixteen column grid");
     			add_location(div4, file$e, 50, 0, 1266);
-    			attr_dev(th0, "class", "two wide");
+    			attr_dev(th0, "class", "three wide");
     			add_location(th0, file$e, 77, 8, 2070);
-    			attr_dev(th1, "class", "two wide");
-    			add_location(th1, file$e, 78, 8, 2109);
-    			attr_dev(th2, "class", "two wide");
-    			add_location(th2, file$e, 79, 8, 2149);
-    			attr_dev(th3, "class", "four wide");
-    			add_location(th3, file$e, 80, 8, 2187);
+    			attr_dev(th1, "class", "three wide");
+    			add_location(th1, file$e, 78, 8, 2111);
+    			attr_dev(th2, "class", "three wide");
+    			add_location(th2, file$e, 79, 8, 2153);
+    			attr_dev(th3, "class", "seven wide");
+    			add_location(th3, file$e, 80, 8, 2193);
     			add_location(tr, file$e, 76, 4, 2057);
     			attr_dev(thead, "class", "full-width");
     			add_location(thead, file$e, 75, 4, 2026);
-    			add_location(tbody, file$e, 83, 4, 2252);
+    			add_location(tbody, file$e, 83, 4, 2259);
     			attr_dev(table, "class", "ui compact selectable celled striped table top aligned");
     			add_location(table, file$e, 74, 0, 1951);
     		},
