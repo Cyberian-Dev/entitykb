@@ -10,7 +10,7 @@ from entitykb import (
     KB,
     ParseRequest,
     SearchRequest,
-    EdgeRequest,
+    NeighborRequest,
 )
 from .connection import RPCConnection
 
@@ -43,20 +43,13 @@ class HandlerKB(object):
         return node.dict()
 
     @logger.timed
-    def get_neighbors(self, request: dict) -> List[dict]:
-        request = EdgeRequest(**request)
-        nodes = self._kb.get_neighbors(
-            node_key=request.node_key,
-            verb=request.verb,
-            label=request.label,
-            direction=request.direction,
-            limit=request.limit,
-        )
-        return [node.dict() for node in nodes]
+    def get_neighbors(self, request: dict) -> dict:
+        response = self._kb.get_neighbors(**request)
+        return response.dict()
 
     @logger.timed
     def get_edges(self, request: dict) -> List[dict]:
-        request = EdgeRequest(**request)
+        request = NeighborRequest(**request)
         edges = self._kb.get_edges(
             node_key=request.node_key,
             verb=request.verb,
@@ -64,6 +57,10 @@ class HandlerKB(object):
             limit=request.limit,
         )
         return [edge.dict() for edge in edges]
+
+    @logger.timed
+    def count_nodes(self, request: dict) -> int:
+        return self._kb.count_nodes(**request)
 
     # edges
 

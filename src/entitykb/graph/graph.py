@@ -1,8 +1,8 @@
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterable, Set, Optional, Tuple
+from typing import Iterable, Set, Optional, Tuple, List
 
-from entitykb import Node, NodeKey, Edge, interfaces, istr
+from entitykb import Node, NodeKey, Edge, Direction, Neighbor, interfaces, istr
 from . import EdgeIndex, NodeIndex
 
 
@@ -33,6 +33,9 @@ class Graph(interfaces.IGraph):
     def get_labels(self) -> Set[str]:
         return self.nodes.get_labels()
 
+    def count_nodes(self, term=None, labels: istr = None):
+        return self.nodes.count(term=term, labels=labels)
+
     def save_edge(self, edge: Edge):
         return self.edges.save(edge)
 
@@ -56,6 +59,24 @@ class Graph(interfaces.IGraph):
 
     def get_verbs(self) -> Set[str]:
         return self.edges.get_verbs()
+
+    def get_neighbors(
+        self,
+        node_key,
+        verb: str = None,
+        direction: Optional[Direction] = None,
+        label: str = None,
+        offset: int = 0,
+        limit: int = 10,
+    ) -> Tuple[List[Neighbor], int]:
+        return self.edges.get_neighbors(
+            node_key=node_key,
+            verb=verb,
+            direction=direction,
+            label=label,
+            offset=offset,
+            limit=limit,
+        )
 
     def iterate_edges(
         self, verbs=None, directions=None, nodes=None

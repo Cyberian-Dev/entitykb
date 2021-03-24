@@ -1,6 +1,9 @@
-import typer
 from inspect import getfullargspec
 from io import FileIO
+from typing import List
+
+import typer
+
 from entitykb import KB
 
 
@@ -10,16 +13,17 @@ class CustomTyper(typer.Typer):
         self.writer_registry = {}
         super().__init__(add_completion=add_completion, **kwargs)
 
-    def get_reader(self, file_format: str, file_obj: FileIO, kb: KB):
+    def get_reader(
+        self, file_format, file_obj: FileIO, kb: KB, flags: List[str] = None
+    ):
         reader = self.reader_registry[file_format]
         spec = getfullargspec(reader)
 
-        if len(spec.args) == 1:
-            yield from reader(file_obj)
-        elif len(spec.args) == 2:
-            yield from reader(file_obj, kb)
-        else:
-            raise RuntimeError(f"Invalid function: {reader} {spec.args}")
+        assert 1 <= len(spec.args) <= 3, f"Invalid reader function: {reader}"
+        args = [file_obj, kb, flags]
+        args = args[: len(spec.args)]
+
+        yield from reader(*args)
 
     def register_reader(self, file_format: str):
         def decorator_register(func):

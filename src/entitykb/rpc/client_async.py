@@ -4,7 +4,7 @@ from entitykb import (
     Direction,
     Doc,
     Edge,
-    EdgeRequest,
+    NeighborRequest,
     Entity,
     Node,
     NodeKey,
@@ -51,16 +51,18 @@ class AsyncKB(interfaces.IKnowledgeBase):
         self,
         node_key: NodeKey,
         verb: str = None,
-        label: str = None,
         direction: Optional[Direction] = None,
-        limit: int = 100,
+        label: str = None,
+        offset: int = 0,
+        limit: int = 10,
     ) -> List[Node]:
 
-        request = EdgeRequest(
+        request = NeighborRequest(
             node_key=node_key,
             verb=verb,
-            label=label,
             direction=direction,
+            label=label,
+            offset=offset,
             limit=limit,
         )
 
@@ -76,7 +78,7 @@ class AsyncKB(interfaces.IKnowledgeBase):
         limit: int = 100,
     ) -> List[Edge]:
 
-        request = EdgeRequest(
+        request = NeighborRequest(
             node_key=node_key,
             verb=verb,
             direction=direction,
@@ -86,6 +88,10 @@ class AsyncKB(interfaces.IKnowledgeBase):
         async with self.connection as client:
             edges = await client.call("get_edges", request.dict())
             return [Edge.create(edge) for edge in edges]
+
+    async def count_nodes(self, term=None, labels: istr = None):
+        async with self.connection as client:
+            return await client.call("count_nodes", term, labels)
 
     # edges
 

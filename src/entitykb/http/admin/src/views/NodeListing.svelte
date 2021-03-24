@@ -16,6 +16,7 @@
         page: 0
     };
     let entities = [];
+    let total_count = null;
     let schema = Schema.instance();
 
     onMount(() => {
@@ -24,6 +25,7 @@
 
     const refreshData = async () => {
         entities = await manager.getEntities(nextRequest);
+        total_count = await manager.getTotalCount(nextRequest);
     };
 
     const onUpdate = async (event) => {
@@ -64,6 +66,7 @@
     <div class="four wide column">
         <Pagination page={nextRequest.page}
                     page_count={entities.length}
+                    total_count={total_count}
                     on:doPageChange={doPageChange}
         />
     </div>
@@ -72,13 +75,20 @@
 <table class="ui compact selectable celled striped table top aligned">
     <thead class="full-width">
     <tr>
-        <th class="two wide">Name</th>
-        <th class="two wide">Label</th>
-        <th class="two wide">Key</th>
-        <th class="four wide">Attributes</th>
+        <th class="three wide">Name</th>
+        <th class="three wide">Label</th>
+        <th class="three wide">Key</th>
+        <th class="seven wide">Attributes</th>
     </tr>
     </thead>
     <tbody>
+    {#if entities.length === 0}
+        <tr>
+            <td colspan="4" class="ui center aligned">
+                No records found.
+            </td>
+        </tr>
+    {/if}
     {#each entities as entity}
         <tr on:click={openRow(entity.key)}>
             <td>{entity.name}</td>

@@ -1,9 +1,15 @@
+from contextlib import contextmanager
 import collections
 import os
 
 import typer
 
 from entitykb import Config, KB, logger
+
+
+@contextmanager
+def noop_context():
+    yield
 
 
 def init_kb(root, exist_ok=False, config=None) -> bool:

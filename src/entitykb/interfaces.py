@@ -7,6 +7,8 @@ from entitykb import (
     Doc,
     Edge,
     Entity,
+    Neighbor,
+    NeighborResponse,
     Node,
     NodeKey,
     SearchResponse,
@@ -88,6 +90,10 @@ class IGraph(object):
     def get_labels(self) -> Set[str]:
         """ Get all labels in graph. """
 
+    @abstractmethod
+    def count_nodes(self, term=None, labels: istr = None) -> int:
+        """ Get counts of nodes for term and labels. """
+
     # edges
 
     @abstractmethod
@@ -111,6 +117,18 @@ class IGraph(object):
     @abstractmethod
     def get_verbs(self) -> Set[str]:
         """ Get all the verbs in graph. """
+
+    @abstractmethod
+    def get_neighbors(
+        self,
+        node_key,
+        verb: str = None,
+        direction: Optional[Direction] = None,
+        label: str = None,
+        offset: int = 0,
+        limit: int = 10,
+    ) -> Tuple[List[Neighbor], int]:
+        """ Get neighbors of a given node. """
 
     # iterate
 
@@ -215,9 +233,11 @@ class IKnowledgeBase(object):
         self,
         node_key: NodeKey,
         verb: str = None,
-        label: str = None,
         direction: Optional[Direction] = None,
-    ) -> List[Node]:
+        label: str = None,
+        offset: int = 0,
+        limit: int = 10,
+    ) -> NeighborResponse:
         """ Retrieve unique neighbor nodes. """
 
     @abstractmethod
@@ -228,6 +248,10 @@ class IKnowledgeBase(object):
         direction: Optional[Direction] = None,
     ) -> List[Edge]:
         """ Get edges for a given Node. """
+
+    @abstractmethod
+    def count_nodes(self, term=None, labels: istr = None):
+        """ Get counts of nodes for term and labels. """
 
     # edges
 

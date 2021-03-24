@@ -1,3 +1,4 @@
+from functools import lru_cache
 from pathlib import Path
 from typing import Set, Tuple
 
@@ -12,6 +13,7 @@ class NodeIndex(object):
         self.dawg_path = root / "nodes.dawg"
         self.cache = create_index(str(root / "nodes"), decoder=Node.create)
         self.dawg: CompletionDAWG = self._load_dawg()
+        self.label_counts: dict = self._get_label_counts()
 
     def __len__(self) -> int:
         return len(self.cache)
@@ -35,21 +37,43 @@ class NodeIndex(object):
         return removed
 
     def get_labels(self) -> Set[str]:
-        labels = set()
-        for line in self.dawg.iterkeys(self._lbl):
-            labels.add(line[1:])
-        return labels
+        return set(self.label_counts.keys())
 
     def reload(self):
         self.dawg = self._load_dawg()
+        self.label_counts = self._get_label_counts()
+        self._get_term_label_count.cache_clear()
 
     def reindex(self):
         self.dawg = self._create_dawg()
         self.dawg.save(self.dawg_path)
+        self.label_counts = self._get_label_counts()
+        self._get_term_label_count.cache_clear()
 
     def clear(self):
         self.cache.clear()
         self.reindex()
+
+    def count(self, term=None, labels: istr = None) -> int:
+        if not labels and not term:
+            count = len(self)
+        else:
+            labels = ensure_iterable(labels)
+
+            if term is None:
+                count = sum(self.label_counts.get(lbl, 0) for lbl in labels)
+
+            else:
+                norm = self.normalizer(term) if term else None
+                count = 0
+
+                if labels:
+                    for label in labels:
+                        count += self._get_term_label_count(norm, label)
+                else:
+                    count += self._get_term_label_count(norm, None)
+
+        return count
 
     # terms
 
@@ -165,3 +189,19 @@ class NodeIndex(object):
             tokens = ["", label, key or ""]
 
         return sep, tokens
+
+    def _get_label_counts(self):
+        counts = {}
+        for line in self.dawg.iterkeys(self._lbl):
+            label = line[1:]
+            prefix = self._lky.join(["", label, ""])
+            count = sum(1 for _ in self.dawg.iterkeys(prefix))
+            counts[label] = count
+        return counts
+
+    @lru_cache(maxsize=1000)
+    def _get_term_label_count(self, norm, label):
+        sep, tokens = self._get_sep_tokens(norm=norm, label=label, key=None)
+        prefix = sep.join(tokens)
+        it = self.dawg.iterkeys(prefix)
+        return len({i.split(sep)[-1] for i in it})
