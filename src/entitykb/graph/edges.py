@@ -166,4 +166,6 @@ class EdgeIndex(object):
             sep = sep or TS.vse
             tokens.append(verb)
 
+        tokens.append("")
+
         return sep, tokens
