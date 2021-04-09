@@ -5174,11 +5174,11 @@ var app = (function () {
     	let t2;
     	let t3;
     	let td2;
-    	let t4_value = /*neighbor*/ ctx[16].node.name + "";
+    	let t4_value = (/*neighbor*/ ctx[16].node && /*neighbor*/ ctx[16].node.name) + "";
     	let t4;
     	let t5;
     	let td3;
-    	let t6_value = /*neighbor*/ ctx[16].node.label + "";
+    	let t6_value = (/*neighbor*/ ctx[16].node && /*neighbor*/ ctx[16].node.label) + "";
     	let t6;
     	let t7;
     	let mounted;
@@ -5202,7 +5202,7 @@ var app = (function () {
     			add_location(td0, file$5, 199, 24, 7145);
     			add_location(td1, file$5, 200, 24, 7199);
     			add_location(td2, file$5, 201, 24, 7248);
-    			add_location(td3, file$5, 202, 24, 7302);
+    			add_location(td3, file$5, 202, 24, 7319);
     			add_location(tr, file$5, 198, 20, 7083);
     		},
     		m: function mount(target, anchor) {
@@ -5239,8 +5239,8 @@ var app = (function () {
     			ctx = new_ctx;
     			if (dirty & /*neighbors*/ 2 && t0_value !== (t0_value = /*neighbor*/ ctx[16].direction + "")) set_data_dev(t0, t0_value);
     			if (dirty & /*neighbors*/ 2 && t2_value !== (t2_value = /*neighbor*/ ctx[16].verb + "")) set_data_dev(t2, t2_value);
-    			if (dirty & /*neighbors*/ 2 && t4_value !== (t4_value = /*neighbor*/ ctx[16].node.name + "")) set_data_dev(t4, t4_value);
-    			if (dirty & /*neighbors*/ 2 && t6_value !== (t6_value = /*neighbor*/ ctx[16].node.label + "")) set_data_dev(t6, t6_value);
+    			if (dirty & /*neighbors*/ 2 && t4_value !== (t4_value = (/*neighbor*/ ctx[16].node && /*neighbor*/ ctx[16].node.name) + "")) set_data_dev(t4, t4_value);
+    			if (dirty & /*neighbors*/ 2 && t6_value !== (t6_value = (/*neighbor*/ ctx[16].node && /*neighbor*/ ctx[16].node.label) + "")) set_data_dev(t6, t6_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(tr);
