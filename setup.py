@@ -31,7 +31,7 @@ install_requires = [
     "passlib[bcrypt]==1.7.4",
     "pyjwt==1.7.1",
     "python-multipart==0.0.5",
-    "smart-open==4.0.1",
+    "smart-open>=3.0.0",
     "tabulate==0.8.7",
     "translitcodec==0.5.2",
     "typer==0.3.2",

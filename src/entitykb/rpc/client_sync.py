@@ -16,17 +16,6 @@ from entitykb import (
 from .client_async import AsyncKB
 
 
-def run_future(future):
-    try:
-        loop = asyncio.get_event_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-    result = loop.run_until_complete(future)
-    return result
-
-
 class SyncKB(AsyncKB):
     """ EntityKB RPC Client """
 
@@ -37,17 +26,17 @@ class SyncKB(AsyncKB):
 
     def get_node(self, key: str) -> Optional[Node]:
         future = super(SyncKB, self).get_node(key)
-        node = run_future(future)
+        node = asyncio.run(future)
         return node
 
     def save_node(self, node: Node) -> Node:
         future = super(SyncKB, self).save_node(node)
-        node = run_future(future)
+        node = asyncio.run(future)
         return node
 
     def remove_node(self, key: str) -> Node:
         future = super(SyncKB, self).remove_node(key)
-        node = run_future(future)
+        node = asyncio.run(future)
         return node
 
     def get_neighbors(
@@ -62,19 +51,19 @@ class SyncKB(AsyncKB):
         future = super(SyncKB, self).get_neighbors(
             node_key, verb, direction, label, offset, limit
         )
-        neighbors = run_future(future)
+        neighbors = asyncio.run(future)
         return neighbors
 
     async def count_nodes(self, term=None, labels: istr = None):
         future = super(SyncKB, self).count_nodes(term, labels)
-        count = run_future(future)
+        count = asyncio.run(future)
         return count
 
     # edges
 
     def save_edge(self, edge: Edge):
         future = super(SyncKB, self).save_edge(edge)
-        edge = run_future(future)
+        edge = asyncio.run(future)
         return edge
 
     def get_edges(
@@ -87,7 +76,7 @@ class SyncKB(AsyncKB):
         future = super(SyncKB, self).get_edges(
             node_key, verb, direction, limit
         )
-        edges = run_future(future)
+        edges = asyncio.run(future)
         return edges
 
     # pipeline
@@ -98,7 +87,7 @@ class SyncKB(AsyncKB):
         future = super(SyncKB, self).parse(
             text=text, labels=labels, pipeline=pipeline
         )
-        doc = run_future(future)
+        doc = asyncio.run(future)
         return doc
 
     def find(
@@ -107,7 +96,7 @@ class SyncKB(AsyncKB):
         future = super(SyncKB, self).parse(
             text=text, labels=labels, pipeline=pipeline
         )
-        doc = run_future(future)
+        doc = asyncio.run(future)
         return doc.entities
 
     def find_one(
@@ -116,7 +105,7 @@ class SyncKB(AsyncKB):
         future = super(SyncKB, self).parse(
             text=text, labels=labels, pipeline=pipeline
         )
-        doc = run_future(future)
+        doc = asyncio.run(future)
         return doc.entities[0] if len(doc.entities) == 1 else None
 
     # graph
@@ -140,42 +129,42 @@ class SyncKB(AsyncKB):
             offset=offset,
         )
 
-        doc = run_future(future)
+        doc = asyncio.run(future)
         return doc
 
     # admin
 
     def reindex(self):
         future = super(SyncKB, self).reindex()
-        success = run_future(future)
+        success = asyncio.run(future)
         return success
 
     def clear(self) -> bool:
         future = super(SyncKB, self).clear()
-        success = run_future(future)
+        success = asyncio.run(future)
         return success
 
     def reload(self) -> bool:
         future = super(SyncKB, self).reload()
-        success = run_future(future)
+        success = asyncio.run(future)
         return success
 
     def info(self) -> dict:
         future = super(SyncKB, self).info()
-        data = run_future(future)
+        data = asyncio.run(future)
         return data
 
     def get_schema(self) -> dict:
         future = super(SyncKB, self).get_schema()
-        data = run_future(future)
+        data = asyncio.run(future)
         return data
 
     def authenticate(self, username: str, password: str) -> str:
         future = super(SyncKB, self).authenticate(username, password)
-        data = run_future(future)
+        data = asyncio.run(future)
         return data
 
     def get_user(self, token: str) -> Optional[User]:
         future = super(SyncKB, self).get_user(token=token)
-        data = run_future(future)
+        data = asyncio.run(future)
         return data

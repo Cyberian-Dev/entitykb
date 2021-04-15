@@ -32,7 +32,12 @@ class MsgPackDisk(diskcache.Disk):
 
 class MsgPackCache(diskcache.Cache):
     def __init__(self, directory, encoder, decoder, **kwargs):
-        super().__init__(directory=directory, disk=MsgPackDisk, **kwargs)
+        super().__init__(
+            directory=directory,
+            disk=MsgPackDisk,
+            eviction_policy="none",
+            **kwargs
+        )
         self.disk.encoder = encoder
         self.disk.decoder = decoder
 

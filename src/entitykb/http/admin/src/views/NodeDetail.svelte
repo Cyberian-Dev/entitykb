@@ -199,8 +199,8 @@
                     <tr on:click={openRow(neighbor.key)}>
                         <td>{neighbor.direction}</td>
                         <td>{neighbor.verb}</td>
-                        <td>{neighbor.node && neighbor.node.name}</td>
-                        <td>{neighbor.node && neighbor.node.label}</td>
+                        <td>{(neighbor.node && neighbor.node.name) || neighbor.key}</td>
+                        <td>{(neighbor.node && neighbor.node.label) || neighbor.key}</td>
                     </tr>
                     {/each}
                 {/if}

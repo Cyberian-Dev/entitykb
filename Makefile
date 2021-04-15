@@ -19,6 +19,9 @@ update:
 tox: clean
 	tox
 
+wheel:
+	python setup.py bdist_wheel
+
 docs-live:
 	PIPENV_IGNORE_VIRTUALENVS=1 pipenv run mkdocs serve --dev-addr 127.0.0.1:8009
 

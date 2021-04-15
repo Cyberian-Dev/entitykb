@@ -32,6 +32,8 @@ def get_class_from_name(full_name: str):
     module_name, class_name = full_name.rsplit(".", 1)
     module = import_module(module_name)
     klass = getattr(module, class_name, None)
+    if klass is None:
+        raise KeyError(f"Failed to create class ({full_name})")
     return klass
 
 
