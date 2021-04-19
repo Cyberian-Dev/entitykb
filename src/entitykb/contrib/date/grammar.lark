@@ -1,10 +1,10 @@
 // rules
 
 start:              MONTH_NAME NUM2 COMMA? YEAR
-               |    NUM2 MONTH_NAME YEAR
-               |    YEAR MONTH_NAME NUM2
-               |    NUM2 MONTH_NAME NUM2
-               |    MONTH_NAME NUM2 NUM2
+               |    NUM2 SEP? MONTH_NAME SEP? YEAR
+               |    YEAR SEP? MONTH_NAME SEP? NUM2
+               |    NUM2 SEP? MONTH_NAME SEP? NUM2
+               |    MONTH_NAME NUM2 COMMA? NUM2
                |    NUM2 SEP NUM2 SEP YEAR
                |    YEAR SEP NUM2 SEP NUM2
                |    NUM2 SEP NUM2 SEP NUM2

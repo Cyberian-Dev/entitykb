@@ -130,17 +130,6 @@ class ProxyKB(interfaces.IKnowledgeBase):
         offset: int = 0,
     ) -> dict:
 
-        print(
-            dict(
-                q=q,
-                labels=labels,
-                keys=keys,
-                traversal=traversal,
-                limit=limit,
-                offset=offset,
-            )
-        )
-
         with pyro.Proxy(self.url) as proxy:
             response = proxy.search(
                 q=q,

@@ -197,4 +197,3 @@ def launch(root: str = None, host: str = None, port: int = None):
     logger.info(f"Python Path :\n{python_path}")
 
     serve({ServerKB: "kb"}, use_ns=False, host=host, port=port, verbose=False)
-

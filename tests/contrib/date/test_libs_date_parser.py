@@ -54,6 +54,7 @@ def test_parse_m_d_y():
     assert parse_date("SEPTEMBER 15 2019") == date(2019, 9, 15)
     assert parse_date("09/15/2019") == date(2019, 9, 15)
     assert parse_date("09/15/19") == date(2019, 9, 15)
+    assert parse_date("2019-JAN-01") == date(2019, 1, 1)
 
     # MDY > DMY
     assert parse_date("12/11/2019") == date(2019, 12, 11)

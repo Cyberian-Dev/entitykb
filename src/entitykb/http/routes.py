@@ -109,7 +109,6 @@ async def find_one(request: models.ParseRequest = Body(...)) -> dict:
 @router.post("/search", tags=["graph"], response_model=models.SearchResponse)
 async def search(request: models.SearchRequest = Body(...)):
     """ Parse text and return document object. """
-    print(request.dict())
     return kb.search(
         request.q,
         request.labels,
