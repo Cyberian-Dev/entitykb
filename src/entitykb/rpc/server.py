@@ -114,7 +114,7 @@ class ServerKB(object):
     @logger.timed
     def find_one(
         self, text: str, labels: istr = None, pipeline: str = None
-    ) -> List[dict]:
+    ) -> dict:
         entity = self._kb.find_one(text=text, labels=labels, pipeline=pipeline)
         return entity and entity.dict()
 
