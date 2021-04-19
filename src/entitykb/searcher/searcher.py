@@ -155,8 +155,7 @@ class DefaultSearcher(Searcher):
     def initialize(self) -> Layer:
         layer = StartLayer(self.graph, starts=self.starts)
 
-        if self.traversal and not isinstance(self.traversal, Traversal):
-            self.traversal = Traversal(__root__=self.traversal)
+        self.traversal = Traversal.create(self.traversal)
 
         for step in self.traversal or []:
             if isinstance(step, WalkStep):

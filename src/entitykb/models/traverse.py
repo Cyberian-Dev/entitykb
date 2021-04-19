@@ -273,6 +273,22 @@ class Traversal(BaseModel):
         self.append(walk)
         return self
 
+    @classmethod
+    def create(cls, traversal):
+        if isinstance(traversal, Traversal):
+            return traversal
+
+        if isinstance(traversal, dict):
+            return Traversal(**traversal)
+
+        if isinstance(traversal, list):
+            return Traversal(__root__=traversal)
+
+        if traversal is None:
+            return Traversal()
+
+        raise ValueError(f"Invalid Traversal: {traversal}")
+
 
 T = Traversal
 

@@ -1,4 +1,3 @@
-import asyncio
 from typing import Optional, List
 
 from entitykb import (
@@ -10,33 +9,29 @@ from entitykb import (
     NodeKey,
     SearchResponse,
     Traversal,
-    User,
     istr,
 )
-from .client_async import AsyncKB
+from .client_proxy import ProxyKB
 
 
-class SyncKB(AsyncKB):
+class SyncKB(ProxyKB):
     """ EntityKB RPC Client """
-
-    def __len__(self):
-        pass
 
     # nodes
 
     def get_node(self, key: str) -> Optional[Node]:
-        future = super(SyncKB, self).get_node(key)
-        node = asyncio.run(future)
+        node = super(SyncKB, self).get_node(key)
+        node = Node.create(node) if node else None
         return node
 
     def save_node(self, node: Node) -> Node:
-        future = super(SyncKB, self).save_node(node)
-        node = asyncio.run(future)
+        node = super(SyncKB, self).save_node(node)
+        node = Node.create(node) if node else None
         return node
 
     def remove_node(self, key: str) -> Node:
-        future = super(SyncKB, self).remove_node(key)
-        node = asyncio.run(future)
+        node = super(SyncKB, self).remove_node(key)
+        node = Node.create(node) if node else None
         return node
 
     def get_neighbors(
@@ -48,23 +43,25 @@ class SyncKB(AsyncKB):
         offset: int = 0,
         limit: int = 10,
     ) -> List[Node]:
-        future = super(SyncKB, self).get_neighbors(
-            node_key, verb, direction, label, offset, limit
+        neighbors = super(SyncKB, self).get_neighbors(
+            node_key=node_key,
+            verb=verb,
+            direction=direction,
+            label=label,
+            offset=offset,
+            limit=limit,
         )
-        neighbors = asyncio.run(future)
-        return neighbors
-
-    async def count_nodes(self, term=None, labels: istr = None):
-        future = super(SyncKB, self).count_nodes(term, labels)
-        count = asyncio.run(future)
-        return count
+        return [Node.create(neighbor) for neighbor in neighbors]
 
     # edges
 
-    def save_edge(self, edge: Edge):
-        future = super(SyncKB, self).save_edge(edge)
-        edge = asyncio.run(future)
-        return edge
+    def save_edge(self, edge: Edge) -> Edge:
+        edge = super(SyncKB, self).save_edge(edge)
+        return Edge.create(edge) if edge else None
+
+    def connect(self, start: Node, verb: str, end: Node, data: dict = None):
+        edge = super(SyncKB, self).connect(start, verb, end, data)
+        return Edge.create(edge) if edge else None
 
     def get_edges(
         self,
@@ -73,40 +70,37 @@ class SyncKB(AsyncKB):
         direction: Optional[Direction] = None,
         limit: int = 100,
     ) -> List[Edge]:
-        future = super(SyncKB, self).get_edges(
-            node_key, verb, direction, limit
+        edges = super(SyncKB, self).get_edges(
+            node_key=node_key, verb=verb, direction=direction, limit=limit
         )
-        edges = asyncio.run(future)
-        return edges
+        return [Edge.create(edge) for edge in edges]
 
     # pipeline
 
     def parse(
         self, text: str, labels: istr = None, pipeline: str = "default"
     ) -> Doc:
-        future = super(SyncKB, self).parse(
-            text=text, labels=labels, pipeline=pipeline
+        data = super(SyncKB, self).parse(
+            text, labels=labels, pipeline=pipeline
         )
-        doc = asyncio.run(future)
-        return doc
+        return Doc(**data)
 
     def find(
         self, text: str, labels: istr = None, pipeline: str = "default"
     ) -> List[Entity]:
-        future = super(SyncKB, self).parse(
-            text=text, labels=labels, pipeline=pipeline
+        entities = super(SyncKB, self).find(
+            text, labels=labels, pipeline=pipeline
         )
-        doc = asyncio.run(future)
-        return doc.entities
+        return [Entity.create(**entity) for entity in entities]
 
     def find_one(
         self, text: str, labels: istr = None, pipeline: str = "default"
-    ) -> Entity:
-        future = super(SyncKB, self).parse(
-            text=text, labels=labels, pipeline=pipeline
+    ) -> Optional[Entity]:
+        entity = super(SyncKB, self).find_one(
+            text, labels=labels, pipeline=pipeline
         )
-        doc = asyncio.run(future)
-        return doc.entities[0] if len(doc.entities) == 1 else None
+        entity = Entity.create(**entity) if entity else None
+        return entity
 
     # graph
 
@@ -119,8 +113,7 @@ class SyncKB(AsyncKB):
         limit: int = 100,
         offset: int = 0,
     ) -> SearchResponse:
-
-        future = super(SyncKB, self).search(
+        response = super(SyncKB, self).search(
             q=q,
             labels=labels,
             keys=keys,
@@ -128,43 +121,4 @@ class SyncKB(AsyncKB):
             limit=limit,
             offset=offset,
         )
-
-        doc = asyncio.run(future)
-        return doc
-
-    # admin
-
-    def reindex(self):
-        future = super(SyncKB, self).reindex()
-        success = asyncio.run(future)
-        return success
-
-    def clear(self) -> bool:
-        future = super(SyncKB, self).clear()
-        success = asyncio.run(future)
-        return success
-
-    def reload(self) -> bool:
-        future = super(SyncKB, self).reload()
-        success = asyncio.run(future)
-        return success
-
-    def info(self) -> dict:
-        future = super(SyncKB, self).info()
-        data = asyncio.run(future)
-        return data
-
-    def get_schema(self) -> dict:
-        future = super(SyncKB, self).get_schema()
-        data = asyncio.run(future)
-        return data
-
-    def authenticate(self, username: str, password: str) -> str:
-        future = super(SyncKB, self).authenticate(username, password)
-        data = asyncio.run(future)
-        return data
-
-    def get_user(self, token: str) -> Optional[User]:
-        future = super(SyncKB, self).get_user(token=token)
-        data = asyncio.run(future)
-        return data
+        return SearchResponse(**response)
