@@ -22,6 +22,7 @@ def get_long_description():
 
 
 install_requires = [
+    "aiofiles>=0.6.0",
     "DAWG>=0.8.0",
     "Pyro5>=5.12",
     "diskcache>=5.1.0",
