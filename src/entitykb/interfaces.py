@@ -372,9 +372,11 @@ class IExtractor(object):
         self,
         tokenizer: ITokenizer,
         resolvers: Tuple[IResolver, ...],
+        kb: IKnowledgeBase,
     ):
         self.tokenizer = tokenizer
         self.resolvers = resolvers
+        self.kb = kb
 
     def __call__(self, text: str, labels: istr = None) -> Doc:
         return self.extract_doc(text, labels)

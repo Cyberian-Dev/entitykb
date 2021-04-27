@@ -6,6 +6,7 @@ from entitykb import (
     Doc,
     Edge,
     Entity,
+    NeighborResponse,
     Node,
     NodeKey,
     SearchResponse,
@@ -44,7 +45,7 @@ class AsyncKB(interfaces.IKnowledgeBase):
         label: str = None,
         offset: int = 0,
         limit: int = 10,
-    ) -> List[Node]:
+    ) -> NeighborResponse:
 
         return await self.loop.run_in_executor(
             None,

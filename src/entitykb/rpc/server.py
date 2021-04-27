@@ -1,14 +1,14 @@
 import sys
 import textwrap
-from Pyro5.api import expose, behavior, serve
 from typing import Optional, List
+
+from Pyro5.api import expose, behavior, serve
 
 from entitykb import (
     Direction,
     KB,
     Node,
     NodeKey,
-    SearchResponse,
     Traversal,
     environ,
     istr,
@@ -129,7 +129,7 @@ class ServerKB(object):
         traversal: Traversal = None,
         limit: int = 100,
         offset: int = 0,
-    ) -> SearchResponse:
+    ) -> dict:
         response = self._kb.search(
             q=q,
             labels=labels,

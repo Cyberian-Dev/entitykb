@@ -32,7 +32,13 @@ def timed(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         start = time.time()
-        result = f(*args, **kwargs)
+
+        try:
+            result = f(*args, **kwargs)
+        except Exception as e:
+            logger.exception(e)
+            raise e
+
         lapse = time.time() - start
         logger.info(f"{f.__qualname__}: {lapse:.4f}")
         return result

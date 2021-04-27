@@ -56,9 +56,9 @@ class ProxyKB(interfaces.IKnowledgeBase):
         label: str = None,
         offset: int = 0,
         limit: int = 10,
-    ) -> List[dict]:
+    ) -> dict:
         with pyro.Proxy(self.url) as proxy:
-            neighbors = proxy.get_neighbors(
+            neighbor_response = proxy.get_neighbors(
                 node_key=node_key,
                 verb=verb,
                 direction=direction,
@@ -66,7 +66,7 @@ class ProxyKB(interfaces.IKnowledgeBase):
                 offset=offset,
                 limit=limit,
             )
-            return neighbors
+            return neighbor_response
 
     def count_nodes(self, term=None, labels: istr = None) -> int:
         with pyro.Proxy(self.url) as proxy:

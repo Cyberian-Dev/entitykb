@@ -28,7 +28,7 @@ install_requires = [
     "diskcache>=5.1.0",
     "fastapi>=0.61.2",
     "lark-parser>=0.8.9",
-    "msgpack>=0.5.2",
+    "msgpack>=1.0.2",
     "passlib[bcrypt]>=1.7.0",
     "pyjwt==1.7.1",
     "python-multipart==0.0.5",

@@ -39,6 +39,12 @@ class NeighborResponse(BaseModel):
     limit: int
     total: int
 
+    def __init__(self, **data: Any):
+        neighbors = data.pop("neighbors", [])
+        neighbors = [Neighbor.create(item) for item in neighbors]
+        data["neighbors"] = neighbors
+        super().__init__(**data)
+
 
 class Hop(BaseModel):
     start: str

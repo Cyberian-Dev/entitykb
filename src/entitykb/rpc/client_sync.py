@@ -5,6 +5,7 @@ from entitykb import (
     Doc,
     Edge,
     Entity,
+    NeighborResponse,
     Node,
     NodeKey,
     SearchResponse,
@@ -42,8 +43,8 @@ class SyncKB(ProxyKB):
         label: str = None,
         offset: int = 0,
         limit: int = 10,
-    ) -> List[Node]:
-        neighbors = super(SyncKB, self).get_neighbors(
+    ) -> NeighborResponse:
+        neighbor_response = super(SyncKB, self).get_neighbors(
             node_key=node_key,
             verb=verb,
             direction=direction,
@@ -51,7 +52,8 @@ class SyncKB(ProxyKB):
             offset=offset,
             limit=limit,
         )
-        return [Node.create(neighbor) for neighbor in neighbors]
+
+        return NeighborResponse(**neighbor_response)
 
     # edges
 
