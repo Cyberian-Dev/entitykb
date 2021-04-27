@@ -32,7 +32,9 @@ def tree_to_data(tree: Tree):
 
     process_nums(data, nums)
 
-    if data.keys() == {"year", "month", "day"}:
+    is_ok = {"year", "month"}.issubset(data)
+
+    if is_ok:
         return data
 
 
@@ -45,7 +47,7 @@ def extract_data(tree):
             data["month"] = month_names.get(token.value[:3].lower())
         elif token.type == "NUM2":
             nums.append(int(token.value))
-        elif token.type not in {"SEP", "COMMA"}:
+        elif token.type not in {"SEP", "COMMA", "WS"}:
             data[token.type.lower()] = int(token.value)
     return data, nums
 
@@ -56,7 +58,7 @@ def process_nums(data, nums):
             data["year"] = fix_year(num)
         elif num > 12 and "day" not in data:
             data["day"] = num
-        elif num > 0 and "month" not in data:
+        elif 12 >= num >= 1 and "month" not in data:
             data["month"] = num
         elif num > 0 and "day" not in data:
             data["day"] = num
