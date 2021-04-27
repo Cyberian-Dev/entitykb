@@ -4,8 +4,7 @@ from urllib.parse import unquote
 from fastapi import APIRouter, Body, security, Depends
 
 from entitykb import (
-    rpc,
-    Doc,
+    ProxyKB,
     models,
     Config,
     Direction,
@@ -15,36 +14,31 @@ from entitykb import (
 )
 
 router = APIRouter()
-connection = rpc.RPCConnection()
 config = Config.create()
+kb = ProxyKB()
 
 
 # nodes
 
 
 @router.get("/nodes/{key}", tags=["nodes"])
-async def get_node(key: str) -> dict:
+def get_node(key: str) -> dict:
     """ Parse text and return document object. """
     key = unquote(key)
-    async with connection as client:
-        data = await client.call("get_node", key)
-        if data is None:
-            raise exceptions.HTTP404(detail=f"Key [{key}] not found.")
-        return data
+    return kb.get_node(key)
 
 
 @router.post("/nodes", tags=["nodes"])
 async def save_node(node: dict = Body(...)) -> dict:
     """ Saves nodes to graph and terms to index. """
-    async with connection as client:
-        return await client.call("save_node", node)
+    return kb.save_node(node)
 
 
 @router.delete("/nodes/{key}/", tags=["nodes"])
 async def remove_node(key: str):
     """ Remove node and relationships from KB. """
-    async with connection as client:
-        return await client.call("remove_node", key)
+    key = unquote(key)
+    return kb.remove_node(key)
 
 
 @router.post(
@@ -54,68 +48,59 @@ async def remove_node(key: str):
 )
 async def get_neighbors(
     request: models.NeighborRequest,
-) -> List[models.Node]:
+) -> List[dict]:
     """ Return list of neighbor nodes for a given node. """
-    async with connection as client:
-        data = await client.call("get_neighbors", request.dict())
-        return data
+    return kb.get_neighbors(
+        request.node_key,
+        request.verb,
+        request.direction,
+        request.label,
+        request.offset,
+        request.limit,
+    )
 
 
 @router.get("/nodes/{key}/edges", tags=["nodes"])
 async def get_edges(
     key: str, verb: str = None, direction: Direction = None, limit: int = 100
-):
-    """ Return list of edges for a given node. """
-    request = models.NeighborRequest(
-        node_key=key, verb=verb, direction=direction, limit=limit
-    )
-    async with connection as client:
-        data = await client.call("get_edges", request.dict())
-        return data
+) -> List[dict]:
+    key = unquote(key)
+    return kb.get_edges(key, verb, direction, limit)
 
 
 @router.post("/nodes/count", tags=["nodes"])
 async def count_nodes(request: models.CountRequest) -> int:
-    async with connection as client:
-        count = await client.call("count_nodes", request.dict())
-        return count
+    return kb.count_nodes(request.term, request.labels)
 
 
 # edges
 
 
 @router.post("/edges", tags=["edges"])
-async def save_edge(edge: models.IEdge = Body(...)) -> models.IEdge:
+async def save_edge(edge: models.IEdge = Body(...)) -> dict:
     """ Save edge to graph store. """
-    async with connection as client:
-        return await client.call("save_edge", edge.dict())
+    return kb.save_edge(edge.dict())
 
 
 # pipeline
 
 
-@router.post("/parse", tags=["pipeline"], response_model=Doc)
-async def parse(request: models.ParseRequest = Body(...)) -> Doc:
+@router.post("/parse", tags=["pipeline"])
+async def parse(request: models.ParseRequest = Body(...)) -> dict:
     """ Parse text and return document object. """
-    async with connection as client:
-        data = await client.call("parse", request.dict())
-        return data
+    return kb.parse(request.text, request.labels, request.pipeline)
 
 
 @router.post("/find", tags=["pipeline"], response_model=List[dict])
 async def find(request: models.ParseRequest = Body(...)) -> List[dict]:
     """ Parse text and return found entities. """
-    async with connection as client:
-        data = await client.call("find", request.dict())
-        return data
+    return kb.find(request.text, request.labels, request.pipeline)
 
 
 @router.post("/find_one", tags=["pipeline"], response_model=dict)
 async def find_one(request: models.ParseRequest = Body(...)) -> dict:
     """ Parse text and return entity, if one and only one found. """
-    async with connection as client:
-        data = await client.call("find_one", request.dict())
-        return data
+    return kb.find_one(request.text, request.labels, request.pipeline)
 
 
 # graph
@@ -124,49 +109,34 @@ async def find_one(request: models.ParseRequest = Body(...)) -> dict:
 @router.post("/search", tags=["graph"], response_model=models.SearchResponse)
 async def search(request: models.SearchRequest = Body(...)):
     """ Parse text and return document object. """
-    async with connection as client:
-        data = await client.call("search", request.dict())
-        return data
+    return kb.search(
+        request.q,
+        request.labels,
+        request.keys,
+        request.traversal,
+        request.limit,
+        request.offset,
+    )
 
 
 # admin
 
 
-@router.post("/admin/commit", tags=["admin"])
-async def commit() -> bool:
-    """ Commit KB to disk. """
-    async with connection as client:
-        return await client.call("commit")
-
-
-@router.post("/admin/clear", tags=["admin"])
-async def clear() -> bool:
-    """ Clear KB of all data. """
-    async with connection as client:
-        return await client.call("clear")
-
-
 @router.post("/admin/reload", tags=["admin"])
 async def reload() -> bool:
     """ Reload KB from disk. """
-    async with connection as client:
-        return await client.call("reload")
-
-
-# meta
+    return kb.reload()
 
 
 @router.get("/meta/info", tags=["meta"])
 async def info() -> dict:
     """ Return KB's state and meta info. """
-    async with connection as client:
-        return await client.call("info")
+    return kb.info()
 
 
 @router.get("/meta/schema", tags=["meta"])
 async def get_schema() -> dict:
-    async with connection as client:
-        return await client.call("get_schema")
+    return kb.get_schema()
 
 
 # users
@@ -175,14 +145,14 @@ oauth2_scheme = security.OAuth2PasswordBearer(tokenUrl="token")
 
 
 async def get_user_by_token(token: str = Depends(oauth2_scheme)) -> User:
-    async with connection as client:
-        user = await client.call("get_user", token)
+    user = kb.get_user(token)
 
     if not user:
         raise exceptions.HTTP401(
             detail="Invalid user token",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
     return user
 
 
@@ -190,10 +160,7 @@ async def get_user_by_token(token: str = Depends(oauth2_scheme)) -> User:
 async def login_for_access_token(
     form_data: security.OAuth2PasswordRequestForm = Depends(),
 ):
-    async with connection as client:
-        access_token = await client.call(
-            "authenticate", form_data.username, form_data.password
-        )
+    access_token = kb.authenticate(form_data.username, form_data.password)
 
     if not access_token:
         raise exceptions.HTTP401(
@@ -206,10 +173,4 @@ async def login_for_access_token(
 
 @router.get("/user", tags=["users"], response_model=User)
 async def get_user(user: User = Depends(get_user_by_token)):
-    if not user:
-        raise exceptions.HTTP401(
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
     return user

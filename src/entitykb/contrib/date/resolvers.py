@@ -45,7 +45,7 @@ def extract_data(tree):
             data["month"] = month_names.get(token.value[:3].lower())
         elif token.type == "NUM2":
             nums.append(int(token.value))
-        elif token.type != "SEP":
+        elif token.type not in {"SEP", "COMMA"}:
             data[token.type.lower()] = int(token.value)
     return data, nums
 

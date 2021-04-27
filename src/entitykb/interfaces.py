@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from pathlib import Path
-from typing import Iterable, Iterator, List, Optional, Set, Tuple
+from typing import Iterable, Iterator, List, Optional, Set, Tuple, Union
 
 from entitykb import (
     Direction,
@@ -221,7 +221,7 @@ class IKnowledgeBase(object):
         """ Retrieve node using key from KB. """
 
     @abstractmethod
-    def save_node(self, node: Node) -> Node:
+    def save_node(self, node: Union[dict, Node]) -> Node:
         """ Save node to KB. """
 
     @abstractmethod
@@ -246,6 +246,7 @@ class IKnowledgeBase(object):
         node_key: NodeKey,
         verb: str = None,
         direction: Optional[Direction] = None,
+        limit: int = 100,
     ) -> List[Edge]:
         """ Get edges for a given Node. """
 
@@ -256,8 +257,12 @@ class IKnowledgeBase(object):
     # edges
 
     @abstractmethod
-    def save_edge(self, edge: Edge):
+    def save_edge(self, edge: Union[dict, Edge]):
         """ Save edge to KB. """
+
+    @abstractmethod
+    def connect(self, *, start: Node, verb: str, end: Node, data: dict = None):
+        """ Connect two nodes into an Edge. """
 
     # pipeline
 
@@ -367,9 +372,11 @@ class IExtractor(object):
         self,
         tokenizer: ITokenizer,
         resolvers: Tuple[IResolver, ...],
+        kb: IKnowledgeBase,
     ):
         self.tokenizer = tokenizer
         self.resolvers = resolvers
+        self.kb = kb
 
     def __call__(self, text: str, labels: istr = None) -> Doc:
         return self.extract_doc(text, labels)

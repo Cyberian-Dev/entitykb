@@ -73,7 +73,7 @@ from .searcher import Searcher, DefaultSearcher
 from .user_store import UserStore
 from .kb import KB
 from .cli import cli
-from .rpc import AsyncKB, SyncKB
+from .rpc import AsyncKB, SyncKB, ProxyKB
 from . import contrib
 
 __all__ = (
@@ -109,6 +109,7 @@ __all__ = (
     "ParseRequest",
     "Pipeline",
     "PipelineConfig",
+    "ProxyKB",
     "RegexResolver",
     "Registry",
     "RemoveInexactSynonyms",

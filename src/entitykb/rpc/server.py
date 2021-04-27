@@ -1,28 +1,28 @@
-import asyncio
-import os
+import sys
+import textwrap
 from typing import Optional, List
 
-import aio_msgpack_rpc
-from msgpack import Packer, Unpacker
+from Pyro5.api import expose, behavior, serve
 
 from entitykb import (
-    logger,
+    Direction,
     KB,
-    ParseRequest,
-    SearchRequest,
-    NeighborRequest,
+    Node,
+    NodeKey,
+    Traversal,
+    environ,
+    istr,
+    logger,
 )
-from .connection import RPCConnection
 
 
-class HandlerKB(object):
+@expose
+@behavior(instance_mode="single")
+class ServerKB(object):
     """ EntityKB RPC Handler Server """
 
-    def __init__(self, _kb):
-        self._kb: KB = _kb
-
-    def __len__(self):
-        raise NotImplementedError
+    def __init__(self):
+        self._kb: KB = KB()
 
     # nodes
 
@@ -43,24 +43,44 @@ class HandlerKB(object):
         return node.dict()
 
     @logger.timed
-    def get_neighbors(self, request: dict) -> dict:
-        response = self._kb.get_neighbors(**request)
+    def get_neighbors(
+        self,
+        node_key: NodeKey,
+        verb: str = None,
+        direction: Optional[Direction] = None,
+        label: str = None,
+        offset: int = 0,
+        limit: int = 10,
+    ) -> dict:
+        response = self._kb.get_neighbors(
+            node_key=node_key,
+            verb=verb,
+            direction=direction,
+            label=label,
+            offset=offset,
+            limit=limit,
+        )
         return response.dict()
 
     @logger.timed
-    def get_edges(self, request: dict) -> List[dict]:
-        request = NeighborRequest(**request)
+    def get_edges(
+        self,
+        node_key: NodeKey,
+        verb: str = None,
+        direction: Optional[Direction] = None,
+        limit: int = 100,
+    ) -> List[dict]:
         edges = self._kb.get_edges(
-            node_key=request.node_key,
-            verb=request.verb,
-            direction=request.direction,
-            limit=request.limit,
+            node_key=node_key,
+            verb=verb,
+            direction=direction,
+            limit=limit,
         )
         return [edge.dict() for edge in edges]
 
     @logger.timed
-    def count_nodes(self, request: dict) -> int:
-        return self._kb.count_nodes(**request)
+    def count_nodes(self, term=None, labels: istr = None) -> int:
+        return self._kb.count_nodes(term=term, labels=labels)
 
     # edges
 
@@ -69,49 +89,60 @@ class HandlerKB(object):
         edge = self._kb.save_edge(edge)
         return edge.dict()
 
+    @logger.timed
+    def connect(self, *, start: Node, verb: str, end: Node, data: dict = None):
+        edge = self._kb.connect(start=start, verb=verb, end=end, data=data)
+        return edge.dict()
+
     # pipeline
 
     @logger.timed
-    def parse(self, request: dict) -> dict:
-        request = ParseRequest(**request)
-        doc = self._kb.parse(
-            text=request.text, labels=request.labels, pipeline=request.pipeline
-        )
-        return doc.dict()
+    def parse(
+        self, text: str, labels: istr = None, pipeline: str = None
+    ) -> dict:
+        doc = self._kb.parse(text=text, labels=labels, pipeline=pipeline)
+        data = doc.dict()
+        return data
 
     @logger.timed
-    def find(self, request: dict) -> List[dict]:
-        request = ParseRequest(**request)
-        doc = self._kb.parse(
-            text=request.text, labels=request.labels, pipeline=request.pipeline
-        )
-        return [s.entity.dict() for s in doc.spans if s and s.entity]
+    def find(
+        self, text: str, labels: istr = None, pipeline: str = None
+    ) -> List[dict]:
+        entities = self._kb.find(text=text, labels=labels, pipeline=pipeline)
+        return [entity.dict() for entity in entities]
 
     @logger.timed
-    def find_one(self, request: dict) -> dict:
-        request = ParseRequest(**request)
-        doc = self._kb.parse(
-            text=request.text, labels=request.labels, pipeline=request.pipeline
-        )
-        return doc.entities[0].dict() if len(doc.entities) == 1 else None
+    def find_one(
+        self, text: str, labels: istr = None, pipeline: str = None
+    ) -> dict:
+        entity = self._kb.find_one(text=text, labels=labels, pipeline=pipeline)
+        return entity and entity.dict()
 
     # graph
 
     @logger.timed
-    def search(self, request: dict) -> dict:
-        request = SearchRequest(**request)
+    def search(
+        self,
+        q: str = None,
+        labels: istr = None,
+        keys: istr = None,
+        traversal: Traversal = None,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> dict:
         response = self._kb.search(
-            q=request.q,
-            labels=request.labels,
-            keys=request.keys,
-            traversal=request.traversal,
-            limit=request.limit,
-            offset=request.offset,
+            q=q,
+            labels=labels,
+            keys=keys,
+            traversal=traversal,
+            limit=limit,
+            offset=offset,
         )
         return response.dict()
 
     # admin
 
+    @logger.timed
     def transact(self):
         pass
 
@@ -153,50 +184,16 @@ class HandlerKB(object):
             return user.dict()
 
 
-class RPCServer(object):
-    def __init__(self, root: str = None, host: str = None, port: int = None):
-        self.connection = RPCConnection(host=host, port=port)
-        self.kb = KB(root=root)
-        self.handler = HandlerKB(self.kb)
-        self.rpc_server = aio_msgpack_rpc.Server(
-            handler=self.handler,
-            packer=Packer(use_bin_type=True, datetime=True),
-            unpacker_factory=lambda: Unpacker(raw=False, timestamp=3),
-        )
-        self.loop: Optional[asyncio.AbstractEventLoop] = None
-        self.stream: Optional[asyncio.StreamWriter] = None
-
-    def __call__(self, *args, **kwargs):
-        return self.serve()
-
-    def serve(self):
-        self.loop = asyncio.get_event_loop()
-
-        logger.info(f"Process ID: {os.getpid()}")
-        logger.info(f"EntityKB Root: {self.kb.config.root}")
-        logger.info(f"RPC Server LAUNCHED {self.connection}")
-
-        future = asyncio.start_server(
-            self.rpc_server,
-            self.connection.host,
-            self.connection.port,
-            loop=self.loop,
-        )
-        self.stream = self.loop.run_until_complete(future)
-        self.loop.run_forever()
-
-    def close(self):
-        logger.info(
-            f"RPC Server EXITING {self.connection} for {self.kb.config}"
-        )
-        if self.stream:
-            self.stream.close()
-            self.loop.run_until_complete(self.stream.wait_closed())
-
-
 def launch(root: str = None, host: str = None, port: int = None):
-    server = RPCServer(root=root, host=host, port=port)
-    try:
-        server.serve()
-    except KeyboardInterrupt:
-        server.close()
+    host = host or environ.rpc_host
+    port = port or environ.rpc_port
+    if root:
+        environ.root = root
+
+    python_path = textwrap.indent("\n".join(filter(None, sys.path)), " " * 12)
+
+    logger.info(f"Launching RPC: {host}:{port}")
+    logger.info(f"KB Root Path : {environ.root}")
+    logger.info(f"Python Path :\n{python_path}")
+
+    serve({ServerKB: "kb"}, use_ns=False, host=host, port=port, verbose=False)

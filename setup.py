@@ -22,21 +22,22 @@ def get_long_description():
 
 
 install_requires = [
-    "aiofiles==0.6.0",
-    "aio-msgpack-rpc==0.2.0",
-    "DAWG==0.8.0",
-    "diskcache==5.1.0",
-    "fastapi==0.61.2",
-    "lark-parser==0.8.9",
-    "passlib[bcrypt]==1.7.4",
+    "aiofiles>=0.6.0",
+    "DAWG>=0.8.0",
+    "Pyro5>=5.12",
+    "diskcache>=5.1.0",
+    "fastapi>=0.61.2",
+    "lark-parser>=0.8.9",
+    "msgpack>=1.0.2",
+    "passlib[bcrypt]>=1.7.0",
     "pyjwt==1.7.1",
     "python-multipart==0.0.5",
     "smart-open>=3.0.0",
-    "tabulate==0.8.7",
-    "translitcodec==0.5.2",
-    "typer==0.3.2",
-    "ujson==4.0.1",
-    "uvicorn==0.12.2",
+    "tabulate>=0.8.0",
+    "translitcodec>=0.5.2",
+    "typer>=0.3.2",
+    "ujson>=4.0.1",
+    "uvicorn>=0.12.2",
 ]
 
 if sys.version_info[:2] == (3, 6):

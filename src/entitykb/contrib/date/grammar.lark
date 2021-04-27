@@ -1,13 +1,14 @@
 // rules
 
-start:              MONTH_NAME SEP* NUM2 SEP* YEAR
-               |    NUM2 SEP* MONTH_NAME SEP* YEAR
-               |    YEAR SEP* MONTH_NAME SEP* NUM2
-               |    NUM2 SEP* MONTH_NAME SEP* NUM2
-               |    MONTH_NAME SEP* NUM2 SEP* NUM2
-               |    NUM2 SEP* NUM2 SEP* YEAR
-               |    YEAR SEP* NUM2 SEP* NUM2
-               |    NUM2 SEP* NUM2 SEP* NUM2
+start:              MONTH_NAME NUM2 COMMA? YEAR
+               |    NUM2 SEP? MONTH_NAME SEP? YEAR
+               |    YEAR SEP? MONTH_NAME SEP? NUM2
+               |    NUM2 SEP? MONTH_NAME SEP? NUM2
+               |    MONTH_NAME NUM2 COMMA? NUM2
+               |    NUM2 SEP NUM2 SEP YEAR
+               |    YEAR SEP NUM2 SEP NUM2
+               |    NUM2 SEP NUM2 SEP NUM2
+               |    YEAR NUM2 NUM2
 
 // tokens
 
@@ -32,11 +33,17 @@ YEAR:               /1[7-9][0-9][0-9]/
 NUM2:               /[0-9][0-9]/
             |       /[0-9]/
 
-SEP:                "-"
-            |       " "
-            |       "/"
-            |       ","
-            |       "st"
+SUFFIX:             "st"
             |       "rd"
             |       "th"
-            |       ","
+
+COMMA:              ","
+
+SEP:                "/"
+            |       "\\"
+            |       "-"
+
+
+%import common.WS
+%ignore WS
+%ignore SUFFIX

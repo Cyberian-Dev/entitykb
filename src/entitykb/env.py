@@ -6,7 +6,7 @@ from .deps import CheckEnviron
 class Environ(CheckEnviron):
     class DEFAULTS:
         ENTITYKB_ROOT = os.path.expanduser("~/.entitykb")
-        ENTITYKB_RPC_HOST = "localhost"
+        ENTITYKB_RPC_HOST = "0.0.0.0"
         ENTITYKB_RPC_PORT = 3477
         ENTITYKB_RPC_TIMEOUT = 5
 

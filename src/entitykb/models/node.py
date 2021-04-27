@@ -215,3 +215,17 @@ class Neighbor(BaseModel):
     direction: str
     edge: dict
     node: dict = None
+
+    @classmethod
+    def create(cls, item, **data):
+        if isinstance(item, Neighbor):
+            neighbor = item
+        else:
+            if isinstance(item, dict):
+                data = {**item, **data}
+            neighbor = Neighbor(**data)
+
+        if isinstance(neighbor.node, dict):
+            neighbor.node = Node.create(neighbor.node)
+
+        return neighbor

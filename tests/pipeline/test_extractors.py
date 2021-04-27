@@ -21,7 +21,9 @@ def extractor(kb, apple, google, amazon, microsoft):
     kb.reindex()
 
     resolvers = (resolver, DateResolver(kb=kb))
-    extractor = DefaultExtractor(tokenizer=tokenizer, resolvers=resolvers)
+    extractor = DefaultExtractor(
+        tokenizer=tokenizer, resolvers=resolvers, kb=kb
+    )
     return extractor
 
 

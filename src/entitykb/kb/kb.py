@@ -52,7 +52,7 @@ class KB(interfaces.IKnowledgeBase):
     def __iter__(self):
         yield from self.graph
 
-    def save(self, item):
+    def save(self, item: Union[Node, Edge]):
         if isinstance(item, Node):
             return self.save_node(item)
         elif isinstance(item, Edge):
@@ -150,7 +150,7 @@ class KB(interfaces.IKnowledgeBase):
         self, text: str, labels: istr = None, pipeline: str = "default"
     ) -> List[Entity]:
         doc = self.parse(text=text, labels=labels, pipeline=pipeline)
-        return [span.entity for span in doc.spans]
+        return [span.entity for span in doc.spans if span and span.entity]
 
     def find_one(
         self, text: str, labels: istr = None, pipeline: str = "default"

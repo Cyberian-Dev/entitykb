@@ -42,8 +42,8 @@ def test_is_prefix():
 
 
 def test_is_not_prefix():
-    assert resolver.is_prefix("JAN 2019") is False
     assert resolver.is_prefix("JAN JAN JAN") is False
+    assert resolver.is_prefix("00 4") is False
 
 
 def test_parse_m_d_y():
@@ -54,6 +54,7 @@ def test_parse_m_d_y():
     assert parse_date("SEPTEMBER 15 2019") == date(2019, 9, 15)
     assert parse_date("09/15/2019") == date(2019, 9, 15)
     assert parse_date("09/15/19") == date(2019, 9, 15)
+    assert parse_date("2019-JAN-01") == date(2019, 1, 1)
 
     # MDY > DMY
     assert parse_date("12/11/2019") == date(2019, 12, 11)
@@ -77,6 +78,7 @@ def test_parse_d_m_y():
     # DMY wins when D > 12
     assert parse_date("15/09/2019") == date(2019, 9, 15)
     assert parse_date("15/09/19") == date(2019, 9, 15)
+    assert parse_date("15\\09\\19") == date(2019, 9, 15)
 
 
 def test_parse_y_m_d():
@@ -94,3 +96,4 @@ def test_parse_incomplete():
 
 def test_failure_cases():
     assert parse_date("2019-13-13") is None
+    assert parse_date("00 4-5") is None

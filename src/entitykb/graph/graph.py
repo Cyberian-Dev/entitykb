@@ -50,7 +50,7 @@ class Graph(interfaces.IGraph):
             count += 1
         return count
 
-    def connect(self, *, start: Node, verb: str, end: Node, data: dict = None):
+    def connect(self, start: Node, verb: str, end: Node, data: dict = None):
         self.save_node(start)
         self.save_node(end)
         edge = Edge(start=start, verb=verb, end=end, data=data)

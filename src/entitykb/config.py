@@ -30,7 +30,7 @@ class PipelineConfig(BaseModel):
         )
 
         extractor = self.create_extractor(
-            tokenizer=kb.tokenizer, resolvers=resolvers
+            tokenizer=kb.tokenizer, resolvers=resolvers, kb=kb
         )
 
         filterers = self.create_filterers()
@@ -39,7 +39,7 @@ class PipelineConfig(BaseModel):
     def create_filterers(self):
         return tuple(get_class_from_name(f) for f in self.filterers)
 
-    def create_extractor(self, tokenizer, resolvers):
+    def create_extractor(self, tokenizer, resolvers, kb):
         from entitykb.pipeline.extractors import DefaultExtractor
 
         return create_component(
@@ -47,6 +47,7 @@ class PipelineConfig(BaseModel):
             default_cls=DefaultExtractor,
             tokenizer=tokenizer,
             resolvers=resolvers,
+            kb=kb,
         )
 
 
