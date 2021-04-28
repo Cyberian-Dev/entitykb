@@ -6,6 +6,8 @@ import NodeEdit from "./views/NodeEdit.svelte";
 import ParseView from "./views/ParseView.svelte";
 import NodeListing from "./views/NodeListing.svelte";
 
+import POCView from "./poc/POCView.svelte";
+
 export default {
     // documentation
     '/api': wrap({
@@ -22,6 +24,8 @@ export default {
 
     '/edit/:key': NodeEdit,
     '/add/': NodeEdit,
+
+    '/poc/': POCView,
 
     '*': NodeListing,
 }
