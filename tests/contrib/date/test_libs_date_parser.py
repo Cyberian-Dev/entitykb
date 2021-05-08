@@ -4,11 +4,18 @@ from entitykb.contrib.date import DateResolver, Date
 resolver = DateResolver()
 
 
-def parse_date(s):
+def parse_ent(s) -> Date:
     entities = resolver.resolve(s)
     if entities:
+        # noinspection PyTypeChecker
         d: Date = entities[0]
         assert d.text == s
+        return d
+
+
+def parse_date(s) -> date:
+    d = parse_ent(s)
+    if d:
         return d.as_date
 
 
@@ -91,9 +98,14 @@ def test_parse_incomplete():
     assert parse_date("2019 01") is None
     assert parse_date("2019 01") is None
     assert parse_date("2019-01-") is None
-    assert parse_date("2019-01-0") is None
+    assert parse_date("2019-01-0") == date(2019, 1, 1)
 
 
 def test_failure_cases():
     assert parse_date("2019-13-13") is None
     assert parse_date("00 4-5") is None
+
+
+def test_no_day_of_month():
+    assert parse_ent("September 2011").name == "2011-09"
+    assert parse_ent("JAN 2020").name == "2020-01"
