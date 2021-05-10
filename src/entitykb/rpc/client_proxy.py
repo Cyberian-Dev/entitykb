@@ -110,7 +110,8 @@ class ProxyKB(interfaces.IKnowledgeBase):
         self, text: str, labels: istr = None, pipeline: str = "default"
     ) -> List[dict]:
         doc = self.parse(text, labels=labels, pipeline=pipeline)
-        return (doc or {}).get("entities", [])
+        spans = (doc or {}).get("spans", [])
+        return [span.get("entity") for span in spans]
 
     def find_one(
         self, text: str, labels: istr = None, pipeline: str = "default"
