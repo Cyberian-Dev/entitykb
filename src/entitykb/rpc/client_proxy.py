@@ -147,6 +147,10 @@ class ProxyKB(interfaces.IKnowledgeBase):
         with pyro.Proxy(self.url) as proxy:
             return proxy.transact()
 
+    def reload(self) -> bool:
+        with pyro.Proxy(self.url) as proxy:
+            return proxy.reload()
+
     def reindex(self):
         with pyro.Proxy(self.url) as proxy:
             return proxy.reindex()
@@ -154,10 +158,6 @@ class ProxyKB(interfaces.IKnowledgeBase):
     def clear(self) -> bool:
         with pyro.Proxy(self.url) as proxy:
             return proxy.clear()
-
-    def reload(self) -> bool:
-        with pyro.Proxy(self.url) as proxy:
-            return proxy.reload()
 
     def info(self) -> dict:
         with pyro.Proxy(self.url) as proxy:

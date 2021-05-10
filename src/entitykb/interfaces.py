@@ -241,16 +241,6 @@ class IKnowledgeBase(object):
         """ Retrieve unique neighbor nodes. """
 
     @abstractmethod
-    def get_edges(
-        self,
-        node_key: NodeKey,
-        verb: str = None,
-        direction: Optional[Direction] = None,
-        limit: int = 100,
-    ) -> List[Edge]:
-        """ Get edges for a given Node. """
-
-    @abstractmethod
     def count_nodes(self, term=None, labels: istr = None):
         """ Get counts of nodes for term and labels. """
 
@@ -263,6 +253,16 @@ class IKnowledgeBase(object):
     @abstractmethod
     def connect(self, *, start: Node, verb: str, end: Node, data: dict = None):
         """ Connect two nodes into an Edge. """
+
+    @abstractmethod
+    def get_edges(
+        self,
+        node_key: NodeKey,
+        verb: str = None,
+        direction: Optional[Direction] = None,
+        limit: int = 100,
+    ) -> List[Edge]:
+        """ Get edges for a given Node. """
 
     # pipeline
 

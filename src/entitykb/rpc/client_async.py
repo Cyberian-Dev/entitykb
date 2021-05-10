@@ -20,7 +20,7 @@ from .client_sync import SyncKB
 
 class AsyncKB(interfaces.IKnowledgeBase):
     def __init__(self, *, host=None, port=None, timeout=None):
-        self.kb = SyncKB(host=host, port=port, timeout=timeout)
+        self.sync = SyncKB(host=host, port=port, timeout=timeout)
         self.loop = asyncio.get_event_loop()
 
     def __len__(self):
@@ -29,13 +29,15 @@ class AsyncKB(interfaces.IKnowledgeBase):
     # nodes
 
     async def get_node(self, key: str) -> Optional[Node]:
-        return await self.loop.run_in_executor(None, self.kb.get_node, key)
+        return await self.loop.run_in_executor(None, self.sync.get_node, key)
 
     async def save_node(self, node: Node) -> Node:
-        return await self.loop.run_in_executor(None, self.kb.save_node, node)
+        return await self.loop.run_in_executor(None, self.sync.save_node, node)
 
     async def remove_node(self, key) -> Node:
-        return await self.loop.run_in_executor(None, self.kb.remove_node, key)
+        return await self.loop.run_in_executor(
+            None, self.sync.remove_node, key
+        )
 
     async def get_neighbors(
         self,
@@ -49,7 +51,7 @@ class AsyncKB(interfaces.IKnowledgeBase):
 
         return await self.loop.run_in_executor(
             None,
-            self.kb.get_neighbors,
+            self.sync.get_neighbors,
             node_key,
             verb,
             direction,
@@ -68,7 +70,7 @@ class AsyncKB(interfaces.IKnowledgeBase):
 
         return await self.loop.run_in_executor(
             None,
-            self.kb.get_edges,
+            self.sync.get_edges,
             node_key,
             verb,
             direction,
@@ -78,7 +80,7 @@ class AsyncKB(interfaces.IKnowledgeBase):
     async def count_nodes(self, term=None, labels: istr = None):
         return await self.loop.run_in_executor(
             None,
-            self.kb.count_nodes,
+            self.sync.count_nodes,
             term,
             labels,
         )
@@ -88,7 +90,7 @@ class AsyncKB(interfaces.IKnowledgeBase):
     async def save_edge(self, edge: Edge):
         return await self.loop.run_in_executor(
             None,
-            self.kb.save_edge,
+            self.sync.save_edge,
             edge,
         )
 
@@ -97,7 +99,7 @@ class AsyncKB(interfaces.IKnowledgeBase):
     ):
         return await self.loop.run_in_executor(
             None,
-            self.kb.connect,
+            self.sync.connect,
             start,
             verb,
             end,
@@ -111,7 +113,7 @@ class AsyncKB(interfaces.IKnowledgeBase):
     ) -> Doc:
         return await self.loop.run_in_executor(
             None,
-            self.kb.parse,
+            self.sync.parse,
             text,
             labels,
             pipeline,
@@ -122,7 +124,7 @@ class AsyncKB(interfaces.IKnowledgeBase):
     ) -> List[Entity]:
         return await self.loop.run_in_executor(
             None,
-            self.kb.find,
+            self.sync.find,
             text,
             labels,
             pipeline,
@@ -133,7 +135,7 @@ class AsyncKB(interfaces.IKnowledgeBase):
     ) -> Entity:
         return await self.loop.run_in_executor(
             None,
-            self.kb.find_one,
+            self.sync.find_one,
             text,
             labels,
             pipeline,
@@ -150,7 +152,7 @@ class AsyncKB(interfaces.IKnowledgeBase):
     ) -> SearchResponse:
         return await self.loop.run_in_executor(
             None,
-            self.kb.search,
+            self.sync.search,
             q,
             labels,
             keys,
@@ -164,37 +166,37 @@ class AsyncKB(interfaces.IKnowledgeBase):
     async def transact(self):
         return await self.loop.run_in_executor(
             None,
-            self.kb.transact,
+            self.sync.transact,
         )
 
     async def reload(self):
         return await self.loop.run_in_executor(
             None,
-            self.kb.reload,
+            self.sync.reload,
         )
 
     async def reindex(self):
         return await self.loop.run_in_executor(
             None,
-            self.kb.reindex,
+            self.sync.reindex,
         )
 
     async def clear(self) -> bool:
         return await self.loop.run_in_executor(
             None,
-            self.kb.clear,
+            self.sync.clear,
         )
 
     async def info(self) -> dict:
         return await self.loop.run_in_executor(
             None,
-            self.kb.info,
+            self.sync.info,
         )
 
     async def get_schema(self) -> dict:
         return await self.loop.run_in_executor(
             None,
-            self.kb.get_schema,
+            self.sync.get_schema,
         )
 
     # users
@@ -202,7 +204,7 @@ class AsyncKB(interfaces.IKnowledgeBase):
     async def authenticate(self, username: str, password: str) -> str:
         return await self.loop.run_in_executor(
             None,
-            self.kb.authenticate,
+            self.sync.authenticate,
             username,
             password,
         )
@@ -210,6 +212,6 @@ class AsyncKB(interfaces.IKnowledgeBase):
     async def get_user(self, token: str) -> Optional[User]:
         return await self.loop.run_in_executor(
             None,
-            self.kb.get_user,
+            self.sync.get_user,
             token,
         )
