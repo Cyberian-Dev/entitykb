@@ -18,6 +18,7 @@ from entitykb import (
     User,
     interfaces,
     istr,
+    logger,
 )
 
 
@@ -141,9 +142,11 @@ class KB(interfaces.IKnowledgeBase):
     def parse(
         self, text: str, labels: istr = None, pipeline: str = "default"
     ) -> Doc:
-        pipeline = self.pipelines.get(pipeline)
-        assert pipeline, f"Could not find pipeline: {pipeline}"
-        doc = pipeline(text=text, labels=labels)
+        pipeline_obj = self.pipelines.get(pipeline)
+        if pipeline_obj is None:
+            logger.warn(f"Failed to find pipeline: {pipeline}")
+            pipeline_obj = self.pipelines.get("default")
+        doc = pipeline_obj(text=text, labels=labels)
         return doc
 
     def find(

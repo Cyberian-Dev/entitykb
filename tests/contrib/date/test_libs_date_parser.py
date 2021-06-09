@@ -109,3 +109,8 @@ def test_failure_cases():
 def test_no_day_of_month():
     assert parse_ent("September 2011").name == "2011-09"
     assert parse_ent("JAN 2020").name == "2020-01"
+
+
+def test_seps():
+    assert parse_date("DEC-01-2020") == date(2020, 12, 1)
+

@@ -5,6 +5,7 @@ start:              MONTH_NAME WS NUM2 (COMMA|WS)+ YEAR
                |    YEAR (WS|SEP)* MONTH_NAME (WS|SEP)* NUM2
                |    NUM2 (WS|SEP)* MONTH_NAME (WS|SEP)* NUM2
                |    MONTH_NAME WS NUM2 (COMMA|WS)+ NUM2
+               |    MONTH_NAME SEP NUM2 SEP YEAR
                |    NUM2 SEP NUM2 SEP YEAR
                |    YEAR SEP NUM2 SEP NUM2
                |    NUM2 SEP NUM2 SEP NUM2

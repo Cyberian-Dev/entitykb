@@ -8,7 +8,7 @@ def test_get_words():
 
 
 def test_generate_password():
-    assert 3 == crypto.generate_password().count("-")
+    assert crypto.generate_password().count("-") >= 3
     assert len(crypto.generate_password()) > 15
 
 
