@@ -47,6 +47,12 @@ def test_is_prefix():
     assert resolver.is_prefix("01/02") is True
     assert resolver.is_prefix("01/") is True
 
+    assert resolver.is_prefix("DEC-01-2020") is True
+    assert resolver.is_prefix("DEC-01-") is True
+    assert resolver.is_prefix("DEC-01") is True
+    assert resolver.is_prefix("DEC-") is True
+    assert resolver.is_prefix("DEC") is True
+
 
 def test_is_not_prefix():
     assert resolver.is_prefix("JAN JAN JAN") is False
